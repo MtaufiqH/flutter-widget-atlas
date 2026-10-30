@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Interactive reference to 39 Flutter widgets with live demos, adjustable properties and matching Flutter code.">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Flutter Widget Atlas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* layout concept: left rail of widget names, one long reference column; each entry = short notes, a live stage with controls, and the Flutter code that matches the current settings */
+:root{
+ --bg:#f5f6fb;--surface:#ffffff;--fg:#14182b;--muted:#586079;--line:#dde1ee;--accent:#0a64f0;--accent-ink:#ffffff;--accent-soft:#e2edff;
+ --c1:#2f6bff;--c1s:#dbe6ff;--c1t:#1a3fb0;
+ --c2:#0fa3a3;--c2s:#d3f2f0;--c2t:#075f5f;
+ --c3:#e0961a;--c3s:#fbecd0;--c3t:#7a4d00;
+ --c4:#d9476a;--c4s:#fbdbe3;--c4t:#9c1538;
+ --grid:#e8ebf6;--code-bg:#0f1530;--code-fg:#dbe3ff;--danger:#c8283f;--ok:#16794a;
+ --f-display:'Bricolage Grotesque',system-ui,sans-serif;--f-body:'Onest',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+ --bg:#0d1020;--surface:#151a30;--fg:#e8ebf7;--muted:#9aa2bf;--line:#2a3150;--accent:#6aa2ff;--accent-ink:#0d1020;--accent-soft:#1c2a52;
+ --c1:#6d95ff;--c1s:#1d2b5c;--c1t:#b3c8ff;
+ --c2:#3cc6c6;--c2s:#123a3b;--c2t:#98e6e6;
+ --c3:#f0b247;--c3s:#433010;--c3t:#f6d38e;
+ --c4:#f07a97;--c4s:#47182a;--c4t:#f8b0c2;
+ --grid:#1b2140;--code-bg:#090c1c;--code-fg:#cdd6ff;--danger:#ff6b81;--ok:#3ec886;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0d1020;--surface:#151a30;--fg:#e8ebf7;--muted:#9aa2bf;--line:#2a3150;--accent:#6aa2ff;--accent-ink:#0d1020;--accent-soft:#1c2a52;
+ --c1:#6d95ff;--c1s:#1d2b5c;--c1t:#b3c8ff;
+ --c2:#3cc6c6;--c2s:#123a3b;--c2t:#98e6e6;
+ --c3:#f0b247;--c3s:#433010;--c3t:#f6d38e;
+ --c4:#f07a97;--c4s:#47182a;--c4t:#f8b0c2;
+ --grid:#1b2140;--code-bg:#090c1c;--code-fg:#cdd6ff;--danger:#ff6b81;--ok:#3ec886;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font-family:inherit}
+.top,.shell{max-width:1240px;margin:0 auto}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.025em;margin:0;text-wrap:balance}
+.lead{max-width:64ch;color:var(--muted);font-size:17px;margin:14px 0 20px}
+.sr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#q{flex:1 1 280px;max-width:420px;font-size:15px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#count{font:12px var(--f-mono);color:var(--muted)}
+.shell{margin-top:36px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:start}
+#nav{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;padding-right:8px;font-size:13.5px}
+.nh{font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:20px 0 8px}
+.ng:first-child .nh{margin-top:0}
+#nav a{display:block;padding:3px 0;color:var(--fg);text-decoration:none}
+#nav a:hover{color:var(--accent)}
+.cs>h2{font:700 1.9rem/1.1 var(--f-display);letter-spacing:-.015em;margin:0;padding-top:8px}
+.cs>.ci{color:var(--muted);margin:6px 0 18px}
+.cs+.cs{margin-top:44px}
+.w{padding:26px 0 30px;border-top:1px solid var(--line);scroll-margin-top:16px}
+.w>header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.wt{display:flex;flex-direction:column;gap:6px;min-width:0}
+.cat{align-self:flex-start;font:500 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--accent)}
+.w h3{font:700 1.5rem/1.15 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lnk{font:500 13px var(--f-mono);color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:6px}
+.lnk:hover{background:var(--accent-soft);color:var(--accent)}
+.blurb{max-width:68ch;color:var(--muted);margin:10px 0 0}
+.demo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;margin-top:18px}
+.left,.right{min-width:0}
+.stage{position:relative;height:260px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px;min-height:20px}
+.ctl{display:grid;gap:9px;margin-bottom:12px}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:12px;font:12.5px var(--f-mono);color:var(--muted);cursor:pointer}
+.cv{display:flex;align-items:center;gap:8px;min-width:0}
+.cv select{font:12.5px var(--f-mono);padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);max-width:100%}
+.cv input[type=range]{accent-color:var(--accent);width:120px}
+.cv input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.cv output{min-width:34px;text-align:right;color:var(--fg)}
+.code{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:12px 14px;font:12.5px/1.55 var(--f-mono);overflow-x:auto;white-space:pre}
+.code i{font-style:normal}
+.code .cm{color:#7d8ab8}.code .st{color:#9fe3b3}.code .cl{color:#8fc3ff}.code .pr{color:#ffd68f}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:16px;font-size:14px}
+.facts b{display:block;font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.facts p{margin:6px 0 0}
+#none{max-width:1240px;margin:24px auto 0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#totop{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;gap:6px;height:46px;min-width:46px;padding:0 16px 0 12px;border-radius:999px;border:1px solid var(--line);background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-body);cursor:pointer;box-shadow:0 6px 18px rgba(20,30,80,.32);z-index:30;transition:transform .15s}
+#totop:hover{transform:translateY(-2px)}
+@media (max-width:480px){#totop{padding:0;width:46px}#totop span{display:none}}
+
+/* demo parts */
+.fill{position:absolute;inset:0;padding:12px;display:flex}
+.fill.sc{overflow:auto}
+.fb{display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:600;font-size:13px;flex:none;box-sizing:border-box;text-align:center}
+.fb.a{background:var(--c1s);border:1.5px solid var(--c1);color:var(--c1t)}
+.fb.b{background:var(--c2s);border:1.5px solid var(--c2);color:var(--c2t)}
+.fb.c{background:var(--c3s);border:1.5px solid var(--c3);color:var(--c3t)}
+.fb.d{background:var(--c4s);border:1.5px solid var(--c4);color:var(--c4t)}
+.slot{outline:1px dashed var(--c3);outline-offset:-1px;border-radius:6px;margin:0 3px;display:flex;align-items:center;min-width:0}
+.spacer{height:2px;align-self:center;margin:0 4px;background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 8px)}
+.chip{display:inline-flex;align-items:center;padding:6px 12px;border-radius:8px;font:600 13px var(--f-body);border:1px solid;flex:none}
+.chip.c0{background:var(--c1s);border-color:var(--c1);color:var(--c1t)}
+.chip.c1{background:var(--c2s);border-color:var(--c2);color:var(--c2t)}
+.chip.c2{background:var(--c3s);border-color:var(--c3);color:var(--c3t)}
+.chip.c3{background:var(--c4s);border-color:var(--c4);color:var(--c4t)}
+.cap{font-size:12px;color:var(--muted);margin-top:6px}
+.scr{position:absolute;inset:0;overflow-y:auto}
+.li{height:44px;display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--line);font-size:14px}
+.li span{font:500 12px var(--f-mono);color:var(--muted);min-width:34px}
+.sepr{height:10px;background:linear-gradient(var(--c3),var(--c3)) center/100% 2px no-repeat}
+.ovf{position:absolute;left:0;right:0;bottom:0;height:20px;background:repeating-linear-gradient(-45deg,#f0c000 0 10px,#1b1b1b 10px 20px);display:flex;align-items:center;justify-content:center}
+.ovf span{background:#d3262f;color:#fff;font:600 10px var(--f-mono);padding:1px 6px;border-radius:2px}
+.pg{position:absolute;left:0;right:0;top:14px;height:190px;display:flex;overflow-x:auto;scrollbar-width:none}
+.pp{padding:0 6px;scroll-snap-align:center;height:100%}
+.dots{position:absolute;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:width .15s}
+.dot.on{background:var(--accent);width:20px;border-radius:4px}
+.sa{background:var(--c1);color:var(--accent-ink);display:flex;align-items:flex-end;padding:0 16px 12px;overflow:hidden}
+.sa b{font:700 24px var(--f-display)}
+.sa-anchor{position:sticky;top:0;height:0;z-index:3}
+.sa-anchor .sa{position:absolute;left:0;right:0;top:0}
+.lt{display:flex;align-items:center;padding:10px 14px;font-size:14px}
+.trow{display:flex;align-items:center;gap:12px;font-size:14px}
+.cbx{width:22px;height:22px;border:2px solid var(--muted);border-radius:4px;background:transparent;padding:0;cursor:pointer;position:relative;flex:none}
+.cbx.on,.cbx.mid{background:var(--accent);border-color:var(--accent)}
+.cbx.on:after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid var(--accent-ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.cbx.mid:after{content:'';position:absolute;left:3px;top:8px;width:12px;height:2px;background:var(--accent-ink)}
+.sw{width:44px;height:26px;border-radius:13px;background:var(--line);border:2px solid var(--muted);position:relative;cursor:pointer;padding:0;flex:none}
+.sw i{position:absolute;top:4px;left:4px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:all .15s}
+.sw.on{background:var(--accent);border-color:var(--accent)}
+.sw.on i{left:20px;top:3px;width:16px;height:16px;background:var(--accent-ink)}
+.rdo{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--fg);font:14px var(--f-body);cursor:pointer;padding:0}
+.rdo i{width:20px;height:20px;border:2px solid var(--muted);border-radius:50%;position:relative}
+.rdo.on i{border-color:var(--accent)}
+.rdo.on i:after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--accent)}
+.btn{font:600 14px var(--f-body);display:inline-flex;align-items:center;gap:8px;justify-content:center;border-radius:999px;padding:10px 22px;cursor:pointer;border:1px solid transparent;background:none;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.k-Filled{background:var(--accent);color:var(--accent-ink)}
+.k-Elevated{background:var(--surface);box-shadow:0 1px 4px rgba(20,30,80,.28);border-color:var(--line)}
+.k-Outlined{border-color:var(--muted)}
+.k-Text{padding:10px 12px}
+.k-Icon{width:44px;height:44px;padding:0;color:var(--fg)}
+.k-Icon:hover:not(:disabled){background:var(--accent-soft)}
+.btm{position:absolute;left:50%;bottom:14px;transform:translateX(-50%)}
+.tf{position:relative;display:block;width:260px}
+.tf input,.tf textarea{width:100%;font:15px var(--f-body);color:var(--fg);background:var(--surface);border:1px solid var(--muted);border-radius:6px;padding:15px 12px;outline:none;resize:none;display:block}
+.tf.pf input,.tf.pf textarea{padding-left:42px}
+.tf input:focus,.tf textarea:focus{border:2px solid var(--accent);padding:14px 11px}
+.tf.pf input:focus,.tf.pf textarea:focus{padding-left:41px}
+.tf.err input,.tf.err textarea{border-color:var(--danger)}
+.tfi{position:absolute;left:12px;top:15px;color:var(--muted);display:flex;pointer-events:none}
+.fl{position:absolute;left:12px;top:15px;color:var(--muted);pointer-events:none;background:var(--surface);padding:0 4px;transform-origin:left top;transition:transform .15s,color .15s;font-size:15px;line-height:1.2}
+.tf.pf .fl{left:38px}
+.tf input:focus ~ .fl,.tf input:not(:placeholder-shown) ~ .fl,.tf textarea:focus ~ .fl,.tf textarea:not(:placeholder-shown) ~ .fl{transform:translate(-4px,-24px) scale(.8);color:var(--accent)}
+.tf.pf input:focus ~ .fl,.tf.pf input:not(:placeholder-shown) ~ .fl,.tf.pf textarea:focus ~ .fl,.tf.pf textarea:not(:placeholder-shown) ~ .fl{transform:translate(-30px,-24px) scale(.8)}
+.tf.err .fl{color:var(--danger)}
+.tfm{width:260px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:-4px;padding:0 12px;min-height:16px}
+.erm{color:var(--danger)}
+.dd{font:15px var(--f-body);padding:10px 14px;border-radius:8px;border:1px solid var(--muted);background:var(--surface);color:var(--fg)}
+.phone{position:absolute;left:50%;top:10px;bottom:10px;width:220px;margin-left:-110px;border:3px solid var(--fg);border-radius:20px;overflow:hidden;background:var(--surface)}
+.pscr{position:relative;height:100%;display:flex;flex-direction:column}
+.abar{height:46px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 14px;background:var(--c1);color:var(--accent-ink);font:600 16px var(--f-display)}
+.ib{background:none;border:0;color:inherit;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.ib:hover{background:rgba(127,127,127,.25)}
+.pbody{flex:1;padding:16px;display:flex;flex-direction:column;gap:10px}
+.ln{height:10px;border-radius:5px;background:var(--line)}
+.fab{position:absolute;width:44px;height:44px;border-radius:14px;background:var(--c3s);color:var(--c3t);border:1px solid var(--c3);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.25);padding:0;z-index:2}
+.snack{position:absolute;left:10px;right:10px;background:var(--fg);color:var(--bg);border-radius:6px;padding:10px 12px;font-size:13px;z-index:3}
+.bnav{height:56px;display:flex;border-top:1px solid var(--line);background:var(--surface);position:absolute;left:0;right:0;bottom:0}
+.bn{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:500 11px var(--f-body);color:var(--muted);cursor:pointer}
+.bn.on{color:var(--c1)}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:5}
+.drw{position:absolute;left:0;top:0;bottom:0;width:150px;background:var(--surface);z-index:6;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs.scr2{overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:12px 16px;font:600 14px var(--f-body);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.gdz{position:absolute;left:0;right:0;top:0;height:200px}
+.log{position:absolute;left:12px;right:12px;bottom:10px;margin:0;font:12px/1.5 var(--f-mono);color:var(--muted);height:90px;overflow:hidden;white-space:pre}
+.ink{position:relative;overflow:hidden;cursor:pointer;user-select:none}
+.inkc{position:relative;z-index:1;padding:28px 40px;font:600 15px var(--f-body);color:var(--c1t)}
+.rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.4;animation:rip .6s ease-out forwards;z-index:0}
+@keyframes rip{from{transform:scale(0);opacity:.45}to{transform:scale(1);opacity:0}}
+.dm{position:relative;height:44px;border-radius:8px;overflow:hidden;flex:none}
+.dmb{position:absolute;inset:0;display:flex}
+.bl,.br{flex:1;display:flex;align-items:center;gap:6px;padding:0 14px;color:#fff;font:600 13px var(--f-body)}
+.bl{background:var(--ok)}
+.br{background:var(--danger);justify-content:flex-end}
+.dmf{position:relative;height:100%;display:flex;align-items:center;padding:0 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;touch-action:pan-y;cursor:grab;user-select:none;font-size:14px}
+.dr{cursor:grab;user-select:none}
+.ghost{box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.tgt{flex:1;border:2px dashed var(--muted);border-radius:12px;padding:12px;font-size:13px;transition:background .15s,border-color .15s}
+.tgt.hot{background:var(--accent-soft);border-color:var(--accent)}
+.nvp{position:absolute;left:50%;top:14px;margin-left:-120px;width:240px;height:190px;border:2px solid var(--fg);border-radius:12px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.nvbody{padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.nvbody .btn{padding:8px 14px;font-size:13px}
+.nvs{position:absolute;left:12px;right:12px;bottom:12px;font-size:13px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+.sbox{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.sbox.sp{background:var(--c1s)}
+.sbox.sq{background:var(--surface)}
+.spin{width:32px;height:32px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:900px){
+ .shell{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:24px}
+ #nav{position:fixed;top:0;bottom:0;left:0;width:min(320px,86vw);max-height:none;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));font-size:15px;z-index:50;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;box-shadow:0 0 30px rgba(0,0,0,.25)}
+ #nav.open{transform:none;visibility:visible}
+ #nav a{padding:8px 0}
+ .navhead{display:flex!important}
+ #burger{display:flex!important}
+}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
+.navhead{display:none;align-items:center;justify-content:space-between;font:700 18px var(--f-display);margin-bottom:4px}
+.navhead button{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.navhead button:hover{background:var(--accent-soft)}
+#burger{display:none;position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 13px var(--f-body);cursor:pointer;box-shadow:0 6px 18px rgba(20,30,80,.28);z-index:30}
+@media (max-width:720px){
+ .demo{grid-template-columns:minmax(0,1fr)}
+ .facts{grid-template-columns:minmax(0,1fr);gap:12px}
+}
+@media (prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+</head>
+<body>
+<div class="top">
+ <p class="eyebrow" id="eyebrow">Interactive reference</p>
+ <h1>Flutter Widget Atlas</h1>
+ <p class="lead">Every widget here has a live stage you can poke, controls that change its properties, and the Flutter code that matches whatever you set. The stages imitate Flutter's layout rules in the browser, so a pixel here or there may differ from a real device. The code is real Flutter.</p>
+ <div class="sr"><input id="q" type="search" placeholder="Search widgets, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span></div>
+</div>
+<div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
+<div id="scrim" hidden></div>
+<button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button>
+<button id="totop" type="button" hidden aria-label="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg><span>Top</span></button>
+<p id="none" hidden>No widget matches that search. Try a word like "scroll", "animation" or "button".</p>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r)=>(r||document).querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const W=[];
+const def=o=>W.push(o);
+const AX={start:'flex-start',end:'flex-end',center:'center',spaceBetween:'space-between',spaceAround:'space-around',spaceEvenly:'space-evenly',stretch:'stretch'};
+const AL={topLeft:['flex-start','flex-start'],topCenter:['center','flex-start'],topRight:['flex-end','flex-start'],centerLeft:['flex-start','center'],center:['center','center'],centerRight:['flex-end','center'],bottomLeft:['flex-start','flex-end'],bottomCenter:['center','flex-end'],bottomRight:['flex-end','flex-end']};
+const box=(t,c,st)=>`<div class="fb ${c}" style="${st||''}">${t}</div>`;
+const IC={favorite:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',star:'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',menu:'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',chevron:'M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',check:'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'};
+const ic=(n,sz,col)=>`<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="${col||'currentColor'}" aria-hidden="true" style="flex:none"><path d="${IC[n]}"/></svg>`;
+const PIC='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="#bfe3ff"/><circle cx="230" cy="40" r="22" fill="#ffd166"/><path d="M0 150L80 60l60 60 60-50 100 80z" fill="#2a9d8f"/><rect x="2" y="2" width="296" height="146" fill="none" stroke="#d9476a" stroke-width="4"/></svg>');
+const bounce=t=>{const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+.75;if(t<2.5/d)return n*(t-=2.25/d)*t+.9375;return n*(t-=2.625/d)*t+.984375};
+const elastic=t=>t===0||t===1?t:Math.pow(2,-10*t)*Math.sin((t-.1)*(2*Math.PI)/.4)+1;
+const anim=(el,kf,o)=>el.animate?el.animate(kf,o):null;
+const lin=f=>'linear('+Array.from({length:41},(_,i)=>f(i/40).toFixed(3)).join(',')+')';
+function hl(src){
+ return esc(src).replace(/(\/\/.*$)|('(?:[^'\\\n]|\\.)*')|\b([A-Z][A-Za-z0-9_]*)\b|\b([a-z][A-Za-z0-9]*)(?=:)/gm,(m,c,s,k,p)=>c?`<i class="cm">${c}</i>`:s?`<i class="st">${s}</i>`:k?`<i class="cl">${k}</i>`:`<i class="pr">${p}</i>`);
+}
+const CATS=['Layout','Scrolling','Display','Input','Structure','Gestures','Animation','Navigation & state'];
+const CINTRO={'Layout':'Place, size and align widgets.','Scrolling':'Lists, grids and pages that move.','Display':'Text, images and decoration.','Input':'Buttons, fields and controls.','Structure':'The skeleton of a Material screen.','Gestures':'Taps, drags and swipes.','Animation':'Implicit animation widgets.','Navigation & state':'Routes, rebuilds and async data.'};
+
+function mount(d){
+ const a=document.createElement('article');a.className='w';a.id=d.id;
+ a.innerHTML=`<header><div class="wt"><span class="cat">${esc(d.cat)}</span><h3>${esc(d.name)}</h3></div><a class="lnk" href="#${d.id}" aria-label="Link to ${esc(d.name)}">#</a></header><p class="blurb">${esc(d.blurb)}</p><div class="demo"><div class="left"><div class="stage" style="height:${d.h||260}px"></div><div class="hint"></div></div><div class="right"><div class="ctl"></div><pre class="code" tabindex="0"></pre></div></div><div class="facts"><div><b>Use it for</b><p>${esc(d.use)}</p></div><div><b>Watch out</b><p>${esc(d.watch)}</p></div></div>`;
+ const g=$('.stage',a),code=$('.code',a),ctl=$('.ctl',a);
+ d.s={};d.st={};d.el=a;d.g=g;d.hintEl=$('.hint',a);
+ function draw(){
+  let r;
+  try{r=d.render(d.s,d.st,g,d)||{}}catch(e){console.error(d.id,e);r={code:'// demo error: '+e.message}}
+  code.innerHTML=hl(r.code||'');
+  if(r.hint!=null)d.hintEl.textContent=r.hint;
+  if(d.after){try{d.after(g,d.st,d.s,draw,d)}catch(e){console.error(d.id,e)}}
+ }
+ d.draw=draw;
+ (d.ctl||[]).forEach(c=>{
+  d.s[c.k]=c.v;
+  const row=document.createElement('label');row.className='cr';
+  let inp;
+  if(c.t==='sel')inp=`<select>${c.o.map(o=>`<option${o===c.v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(c.t==='rng')inp=`<input type="range" min="${c.min}" max="${c.max}" step="${c.step||1}" value="${c.v}"><output>${c.v}</output>`;
+  else inp=`<input type="checkbox"${c.v?' checked':''}>`;
+  row.innerHTML=`<span>${esc(c.l)}</span><span class="cv">${inp}</span>`;
+  const el=$('select,input',row);
+  el.addEventListener(c.t==='rng'?'input':'change',()=>{
+   d.s[c.k]=c.t==='chk'?el.checked:c.t==='rng'?+el.value:el.value;
+   const o=$('output',row);if(o)o.textContent=el.value;
+   draw();
+  });
+  ctl.appendChild(row);
+ });
+ g.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&d.act&&g.contains(t)){d.act(t.dataset.a,d.st,d.s,t,e);draw()}});
+ return a;
+}
+
+/* ================= LAYOUT ================= */
+def({cat:'Layout',id:'row-column',name:'Row & Column',tags:'flex axis vertical horizontal main cross alignment',
+blurb:'The two workhorses of Flutter layout. Column stacks children vertically and Row lays them out horizontally. Each has a main axis (the direction it lays out) and a cross axis (the other one), and two alignment properties control both.',
+use:'Any time two or more widgets sit next to each other or one above the other.',
+watch:'CrossAxisAlignment.stretch throws a BoxConstraints error when the parent gives unbounded size on the cross axis.',
+ctl:[{k:'dir',l:'Widget',t:'sel',o:['Column','Row'],v:'Column'},{k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','end','center','spaceBetween','spaceAround','spaceEvenly'],v:'start'},{k:'ca',l:'crossAxisAlignment',t:'sel',o:['start','center','end','stretch'],v:'start'}],
+render(s,st,g){
+ const col=s.dir==='Column',sz=[[64,38],[96,50],[76,62]],cl=['a','b','c'];
+ g.innerHTML=`<div class="fill" style="flex-direction:${col?'column':'row'};justify-content:${AX[s.ma]};align-items:${AX[s.ca]}">`+sz.map((z,i)=>box('ABC'[i],cl[i],s.ca==='stretch'?(col?`height:${z[1]}px`:`width:${z[0]}px`):`width:${z[0]}px;height:${z[1]}px`)).join('')+'</div>';
+ return {code:`${s.dir}(\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  crossAxisAlignment: CrossAxisAlignment.${s.ca},\n  children: [A(), B(), C()],\n)`,hint:col?'Main axis runs top to bottom, cross axis runs left to right.':'Main axis runs left to right, cross axis runs top to bottom.'};
+}});
+
+def({cat:'Layout',id:'expanded',name:'Expanded & Flexible',tags:'flex spacer flexible fill remaining space',
+blurb:'Expanded makes a child fill the space left over along the main axis of a Row, Column or Flex. When several children are flexible, the free space is split in proportion to their flex values. Flexible is the looser cousin: the child may be smaller than its share.',
+use:'Letting one child take whatever room is left, or splitting width in a ratio such as 1 : 2.',
+watch:'Expanded must be a direct child of Row, Column or Flex. Inside a scroll view that runs in the same direction there is no bounded space, and Flutter throws.',
+ctl:[{k:'bk',l:'Widget around B',t:'sel',o:['Expanded','Flexible','SizedBox'],v:'Expanded'},{k:'bf',l:'B flex',t:'rng',min:1,max:4,v:1},{k:'cf',l:'C flex',t:'rng',min:1,max:4,v:2},{k:'sp',l:'Spacer after A',t:'chk',v:false}],
+render(s,st,g){
+ const slot=(f,inner)=>`<div class="slot" style="flex:${f} 1 0">${inner}</div>`;
+ const B=s.bk==='SizedBox'?box('B','b','width:90px;height:64px;margin:0 3px'):slot(s.bf,box('B','b',`height:64px;width:${s.bk==='Expanded'?'100%':'58px'}`));
+ const C=slot(s.cf,box('C','c','height:64px;width:100%'));
+ g.innerHTML=`<div class="fill" style="align-items:center">${box('A','a','width:56px;height:64px;margin:0 3px')}${s.sp?'<div class="spacer" style="flex:1 1 0"></div>':''}${B}${C}</div>`;
+ const wrap=s.bk==='SizedBox'?'SizedBox(width: 90, child: B())':`${s.bk}(flex: ${s.bf}, child: B())`;
+ return {code:`Row(\n  children: [\n    A(),\n${s.sp?'    Spacer(),\n':''}    ${wrap},\n    Expanded(flex: ${s.cf}, child: C()),\n  ],\n)`,
+  hint:s.bk==='Flexible'?'Flexible keeps B at its own size. The dashed outline is the share it was offered.':s.bk==='Expanded'?'Expanded forces B to fill its whole share. Free space is divided by the flex ratio.':'A fixed SizedBox takes its width first. The flexible children share what remains.'};
+}});
+
+def({cat:'Layout',id:'stack-positioned',name:'Stack & Positioned',tags:'overlay absolute layer badge',
+blurb:'Stack paints its children on top of each other. Wrap a child in Positioned to pin it by distance from the Stack\'s edges. Children without Positioned follow the Stack\'s alignment.',
+use:'Badges, captions over images, floating buttons and any other overlap.',
+watch:'Positioned only works as a direct child of Stack. Anything outside the Stack\'s bounds is clipped unless clipBehavior is Clip.none.',
+ctl:[{k:'pos',l:'Positioned at',t:'sel',o:['topLeft','topRight','bottomLeft','bottomRight','fill'],v:'topRight'},{k:'off',l:'offset',t:'rng',min:-20,max:40,v:12},{k:'al',l:'Stack alignment',t:'sel',o:['topStart','center'],v:'topStart'},{k:'clip',l:'clipBehavior hardEdge',t:'chk',v:true}],
+render(s,st,g){
+ const o=s.off;
+ const P={topLeft:`left:${o}px;top:${o}px`,topRight:`right:${o}px;top:${o}px`,bottomLeft:`left:${o}px;bottom:${o}px`,bottomRight:`right:${o}px;bottom:${o}px`,fill:`inset:${o}px`}[s.pos];
+ const L={topLeft:`top: ${o},\n      left: ${o},`,topRight:`top: ${o},\n      right: ${o},`,bottomLeft:`bottom: ${o},\n      left: ${o},`,bottomRight:`bottom: ${o},\n      right: ${o},`,fill:`top: ${o}, left: ${o},\n      right: ${o}, bottom: ${o},`}[s.pos];
+ const un=s.al==='center'?'left:50%;top:50%;transform:translate(-50%,-50%)':'left:0;top:0';
+ g.innerHTML=`<div style="position:absolute;inset:34px 44px;border:1.5px dashed var(--c3);${s.clip?'overflow:hidden':''}"><div class="fb a" style="position:absolute;inset:0;border-radius:0;opacity:.55">Stack</div><div class="fb c" style="position:absolute;${un};width:96px;height:34px">no Positioned</div><div class="fb d" style="position:absolute;${P};${s.pos==='fill'?'':'width:76px;height:30px'}">Positioned</div></div>`;
+ return {code:`Stack(\n  alignment: ${s.al==='center'?'Alignment.center':'AlignmentDirectional.topStart'},\n  clipBehavior: ${s.clip?'Clip.hardEdge':'Clip.none'},\n  children: [\n    Container(color: Colors.blue),\n    Positioned(\n      ${L}\n      child: Badge(),\n    ),\n  ],\n)`,
+  hint:'Set two opposite edges (left and right) and Positioned stretches the child between them.'};
+}});
+
+def({cat:'Layout',id:'align-center',name:'Align & Center',tags:'alignment position',
+blurb:'Align places its child at a point inside itself, expressed as an Alignment from the top-left corner (-1, -1) to the bottom-right (1, 1). Center is simply Align with Alignment.center.',
+use:'Pushing one child to a corner or edge of the space it is given.',
+watch:'Align expands to fill its parent when the parent is bounded. Give it widthFactor or heightFactor if you want it to wrap its child instead.',
+ctl:[{k:'al',l:'alignment',t:'sel',o:Object.keys(AL),v:'bottomRight'},{k:'sz',l:'child size',t:'rng',min:30,max:110,v:70}],
+render(s,st,g){
+ const a=AL[s.al];
+ g.innerHTML=`<div class="fill" style="padding:24px"><div style="flex:1;display:flex;justify-content:${a[0]};align-items:${a[1]};border:1.5px dashed var(--c3);border-radius:8px;padding:6px">${box('child','a',`width:${s.sz}px;height:${Math.round(s.sz*.6)}px`)}</div></div>`;
+ return {code:`Align(\n  alignment: Alignment.${s.al},\n  child: Child(),\n)`,hint:s.al==='center'?'Align(alignment: Alignment.center) is exactly what Center does.':'The dashed box is the Align widget. It fills the space and positions the child inside it.'};
+}});
+
+def({cat:'Layout',id:'padding',name:'Padding',tags:'spacing inset margin edgeinsets',
+blurb:'Padding insets its child by an EdgeInsets value. It is the lightweight way to add space around a widget without reaching for Container.',
+use:'Space around a single child. For space between siblings, prefer SizedBox or the spacing argument of Row and Column.',
+watch:'Flutter has no margin property on widgets. Margin is either Padding outside the widget or Container(margin: ...).',
+ctl:[{k:'h',l:'horizontal',t:'rng',min:0,max:48,v:24},{k:'v',l:'vertical',t:'rng',min:0,max:48,v:16}],
+render(s,st,g){
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="padding:${s.v}px ${s.h}px;background:var(--c3s);outline:1.5px dashed var(--c3)">${box('Child','a','width:120px;height:56px')}</div></div>`;
+ const e=s.h===s.v?`EdgeInsets.all(${s.h})`:`EdgeInsets.symmetric(horizontal: ${s.h}, vertical: ${s.v})`;
+ return {code:`Padding(\n  padding: ${e},\n  child: Child(),\n)`,hint:'The tinted area is the padding. The child keeps its own size.'};
+}});
+
+def({cat:'Layout',id:'sized-box',name:'SizedBox & ConstrainedBox',tags:'size width height constraints spacing gap',
+blurb:'SizedBox forces its child to an exact size (tight constraints). ConstrainedBox only sets limits, so the child can be anything inside them. SizedBox with no child is the standard way to make a gap.',
+use:'Fixed-size boxes, gaps between widgets, and capping how large a child may grow.',
+watch:'A child inside SizedBox cannot choose its own size. Container(width: 220) inside SizedBox(width: 140) still ends up 140 wide.',
+ctl:[{k:'k',l:'Widget',t:'sel',o:['SizedBox','ConstrainedBox (max)','SizedBox.expand'],v:'SizedBox'},{k:'w',l:'width',t:'rng',min:40,max:260,v:140},{k:'h',l:'height',t:'rng',min:20,max:180,v:80}],
+render(s,st,g){
+ let w=s.w,h=s.h,code;
+ if(s.k==='ConstrainedBox (max)'){w=Math.min(220,s.w);h=Math.min(140,s.h);code=`ConstrainedBox(\n  constraints: BoxConstraints(\n    maxWidth: ${s.w},\n    maxHeight: ${s.h},\n  ),\n  child: Container(width: 220, height: 140), // wants 220 x 140\n)`}
+ else if(s.k==='SizedBox.expand'){w=null;code='SizedBox.expand(\n  child: Child(), // fills all available space\n)'}
+ else code=`SizedBox(\n  width: ${s.w},\n  height: ${s.h},\n  child: Child(), // forced to exactly ${s.w} x ${s.h}\n)`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:${w===null?'0':'12px'}">${box(w===null?'fills the stage':`${w} × ${h}`,'b',w===null?'width:100%;height:100%;border-radius:0':`width:${w}px;height:${h}px`)}</div>`;
+ return {code,hint:s.k==='ConstrainedBox (max)'?'The child asks for 220 × 140 and is capped at your maximums. Make the limits larger and it stops growing at 220 × 140.':''};
+}});
+
+def({cat:'Layout',id:'container',name:'Container',tags:'decoration box shadow border gradient',
+blurb:'Container is a convenience widget that combines sizing, padding, margin, alignment and painting (color, border, radius, shadow, gradient) in one place.',
+use:'A styled box. If you only need one of those jobs, a dedicated widget (Padding, SizedBox, DecoratedBox) is lighter.',
+watch:'You cannot set both color and decoration. Put the color inside BoxDecoration instead.',
+ctl:[{k:'w',l:'width',t:'rng',min:90,max:260,v:170},{k:'r',l:'radius',t:'rng',min:0,max:60,v:16},{k:'p',l:'padding',t:'rng',min:0,max:32,v:12},{k:'b',l:'border',t:'chk',v:true},{k:'sh',l:'boxShadow',t:'chk',v:true},{k:'gr',l:'gradient',t:'chk',v:false},{k:'al',l:'alignment',t:'sel',o:['topLeft','center','bottomRight'],v:'center'}],
+render(s,st,g){
+ const a=AL[s.al];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${s.w}px;height:120px;padding:${s.p}px;display:flex;justify-content:${a[0]};align-items:${a[1]};border-radius:${s.r}px;background:${s.gr?'linear-gradient(135deg,var(--c1),var(--c4))':'var(--c1s)'};${s.b?'border:3px solid var(--c1);':''}${s.sh?'box-shadow:0 8px 18px rgba(20,30,80,.28);':''}color:${s.gr?'#fff':'var(--c1t)'};font-weight:600;font-size:14px">Hello</div></div>`;
+ const d=[s.gr?'gradient: LinearGradient(colors: [Colors.blue, Colors.pink]),':'color: Colors.blue.shade100,',`borderRadius: BorderRadius.circular(${s.r}),`];
+ if(s.b)d.push('border: Border.all(width: 3, color: Colors.blue),');
+ if(s.sh)d.push('boxShadow: [BoxShadow(blurRadius: 18, offset: Offset(0, 8))],');
+ return {code:`Container(\n  width: ${s.w}, height: 120,\n  padding: EdgeInsets.all(${s.p}),\n  alignment: Alignment.${s.al},\n  decoration: BoxDecoration(\n${d.map(x=>'    '+x).join('\n')}\n  ),\n  child: Text('Hello'),\n)`,hint:''};
+}});
+
+def({cat:'Layout',id:'rotated-box',name:'RotatedBox & Transform',tags:'rotate quarterturns transform angle',
+blurb:'RotatedBox turns its child in quarter turns and changes the layout, so neighbours make room. Transform.rotate rotates by any angle but only at paint time: the layout slot stays exactly where it was.',
+use:'RotatedBox for vertical labels and sideways text. Transform.rotate for decorative tilts and animations.',
+watch:'Transform.rotate does not move or resize anything around it, so a rotated child can overlap its neighbours.',
+ctl:[{k:'m',l:'Widget',t:'sel',o:['RotatedBox','Transform.rotate'],v:'RotatedBox'},{k:'deg',l:'angle (degrees)',t:'rng',min:0,max:270,step:15,v:90}],
+render(s,st,g){
+ const rb=s.m==='RotatedBox',q=Math.round(s.deg/90)%4,odd=rb&&q%2===1;
+ const inner=rb?`position:absolute;left:50%;top:50%;width:110px;height:40px;transform:translate(-50%,-50%) rotate(${q*90}deg)`:`width:110px;height:40px;transform:rotate(${s.deg}deg)`;
+ const wrap=rb?`position:relative;width:${odd?40:110}px;height:${odd?110:40}px`:'width:110px;height:40px';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:10px">${box('A','a','width:50px;height:50px')}<div style="${wrap};outline:1.5px dashed var(--c3);outline-offset:2px;flex:none;display:flex;align-items:center;justify-content:center">${box('child','b',inner)}</div>${box('B','c','width:50px;height:50px')}</div>`;
+ return {code:rb?`RotatedBox(\n  quarterTurns: ${q}, // ${q*90} degrees clockwise\n  child: Text('child'),\n)`:`Transform.rotate(\n  angle: ${s.deg} * math.pi / 180,\n  child: Text('child'),\n)`,
+  hint:rb?'RotatedBox snaps to quarter turns. Its dashed layout box changes shape, so A and B move.':'The dashed layout box never changes. A and B stay put no matter the angle.'};
+}});
+
+def({cat:'Layout',id:'wrap',name:'Wrap',tags:'chips flow tags runs spacing',
+blurb:'Wrap lays children out in a line like Row or Column, but starts a new run when it runs out of space instead of overflowing.',
+use:'Tag lists, chips and filter buttons whose count and width vary.',
+watch:'Wrap has no scrolling. A Wrap with many runs can still overflow vertically, so put it in a scroll view if the list can be long.',
+ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},{k:'sp',l:'spacing',t:'rng',min:0,max:24,v:8},{k:'rsp',l:'runSpacing',t:'rng',min:0,max:24,v:8},{k:'al',l:'alignment',t:'sel',o:['start','center','end','spaceBetween'],v:'start'}],
+render(s,st,g){
+ const tags=['Flutter','Dart','Widget','State','Row','Column','Stack','Wrap','Animation','Hot reload','Sliver'],v=s.dir==='vertical';
+ g.innerHTML=`<div class="fill"><div style="display:flex;flex-wrap:wrap;flex-direction:${v?'column':'row'};gap:${v?s.sp+'px '+s.rsp+'px':s.rsp+'px '+s.sp+'px'};justify-content:${AX[s.al]};align-content:flex-start;width:100%;height:100%">${tags.map((t,i)=>`<span class="chip c${i%4}">${t}</span>`).join('')}</div></div>`;
+ return {code:`Wrap(\n  direction: Axis.${s.dir},\n  spacing: ${s.sp},\n  runSpacing: ${s.rsp},\n  alignment: WrapAlignment.${s.al},\n  children: [for (final t in tags) Chip(label: Text(t))],\n)`,hint:'spacing is the gap between children in a run. runSpacing is the gap between runs.'};
+}});
+
+def({cat:'Layout',id:'aspect-ratio',name:'AspectRatio',tags:'ratio 16:9 video',
+blurb:'AspectRatio sizes its child to a fixed width-to-height ratio. It takes the widest size the parent allows, derives the height, and shrinks the whole box if that height does not fit.',
+use:'Video players, thumbnails and cards that must keep their proportions at any width.',
+watch:'With unbounded constraints in both directions it has nothing to base the ratio on and throws.',
+ctl:[{k:'r',l:'aspectRatio',t:'sel',o:['1/1','4/3','16/9','21/9','9/16'],v:'16/9'},{k:'w',l:'parent width',t:'rng',min:120,max:320,v:240}],
+render(s,st,g){
+ const p=s.r.split('/').map(Number),q=p[0]/p[1],mw=+s.w,mh=220;let w=mw,h=w/q;if(h>mh){h=mh;w=h*q}
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${mw}px;height:${mh}px;outline:1px dashed var(--line);display:flex;align-items:center;justify-content:center">${box(`${s.r.replace('/',' : ')}  ·  ${Math.round(w)} × ${Math.round(h)}`,'d',`width:${w}px;height:${h}px`)}</div></div>`;
+ return {code:`AspectRatio(\n  aspectRatio: ${p[0]} / ${p[1]},\n  child: Container(color: Colors.teal),\n)`,hint:h>=mh-.5?'The tall ratio would exceed the available height, so the box shrinks to keep its shape.':'Width comes from the parent. Height follows from the ratio.'};
+}});
+
+def({cat:'Layout',id:'fitted-box',name:'FittedBox',tags:'boxfit scale fit shrink cover contain',
+blurb:'FittedBox scales and positions its child inside itself using a BoxFit. The child here wants to be 260 × 50, but the box is only 200 × 100.',
+use:'Shrinking text or an icon to fit a fixed slot, and cropping content to cover an area.',
+watch:'FittedBox does not clip by default. Without a clip the scaled child can paint outside its box.',
+ctl:[{k:'fit',l:'fit',t:'sel',o:['contain','cover','fill','fitWidth','fitHeight','scaleDown','none'],v:'contain'},{k:'clip',l:'clipBehavior hardEdge',t:'chk',v:true}],
+render(s,st,g){
+ const W0=200,H0=100,w=260,h=50,a=W0/w,b=H0/h;
+ const sc={contain:[Math.min(a,b),Math.min(a,b)],cover:[Math.max(a,b),Math.max(a,b)],fill:[a,b],fitWidth:[a,a],fitHeight:[b,b],scaleDown:[Math.min(1,a,b),Math.min(1,a,b)],none:[1,1]}[s.fit];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:${W0}px;height:${H0}px;border:1.5px dashed var(--c3);${s.clip?'overflow:hidden':''}"><div class="fb a" style="position:absolute;left:50%;top:50%;width:${w}px;height:${h}px;border-radius:8px;transform:translate(-50%,-50%) scale(${sc[0]},${sc[1]})">child 260 × 50</div></div></div>`;
+ return {code:`FittedBox(\n  fit: BoxFit.${s.fit},\n  clipBehavior: Clip.${s.clip?'hardEdge':'none'},\n  child: SizedBox(width: 260, height: 50, child: Child()),\n)`,hint:{contain:'Scales uniformly until the whole child fits.',cover:'Scales uniformly until the box is covered. The overflow is cropped.',fill:'Stretches each axis separately, so the child is distorted.',fitWidth:'Matches the box width and may overflow vertically.',fitHeight:'Matches the box height and may overflow horizontally.',scaleDown:'Like contain, but never scales up.',none:'No scaling. The child keeps 260 × 50 and overflows.'}[s.fit]};
+}});
+
+def({cat:'Layout',id:'layout-builder',name:'LayoutBuilder & MediaQuery',tags:'responsive breakpoint constraints adaptive screen size',
+blurb:'LayoutBuilder hands you the constraints of its parent, so a widget can change shape based on the room it is actually given. MediaQuery reports the size of the whole screen instead.',
+use:'Responsive layouts. LayoutBuilder for components, MediaQuery for page-level decisions such as phone or tablet.',
+watch:'MediaQuery.sizeOf(context) is the screen, not your parent. Inside a narrow side panel on a wide screen it gives the wrong answer.',
+ctl:[{k:'w',l:'available width',t:'rng',min:140,max:440,step:10,v:380},{k:'bp',l:'breakpoint',t:'rng',min:200,max:400,step:10,v:300}],
+render(s,st,g){
+ const wide=s.w>=s.bp,t=['a','b','c'].map((c,i)=>box('Tile '+(i+1),c,wide?'flex:1;height:64px':'height:40px')).join('');
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${s.w}px;max-width:100%;outline:1.5px dashed var(--c3);outline-offset:3px;padding:6px;display:flex;flex-direction:${wide?'row':'column'};gap:6px">${t}</div></div>`;
+ return {code:`LayoutBuilder(\n  builder: (context, constraints) {\n    final wide = constraints.maxWidth >= ${s.bp};\n    return wide ? Row(children: tiles) : Column(children: tiles);\n  },\n)`,hint:`constraints.maxWidth = ${s.w}, so the layout is ${wide?'wide (Row)':'narrow (Column)'}.`};
+}});
+
+/* ================= SCROLLING ================= */
+def({cat:'Scrolling',id:'list-view',name:'ListView',tags:'builder separated children lazy scroll list virtualization',h:300,
+blurb:'ListView scrolls its children along one axis. The plain constructor builds every child immediately. ListView.builder creates items on demand as they scroll into view, and ListView.separated does the same while inserting a separator between items.',
+use:'Anything that scrolls. Use builder or separated for long or unknown-length lists.',
+watch:'shrinkWrap: true forces Flutter to measure every child, which removes most of the lazy-loading benefit. Prefer slivers when mixing a list with other scrolling content.',
+ctl:[{k:'kind',l:'Constructor',t:'sel',o:['children','builder','separated'],v:'builder'},{k:'n',l:'itemCount',t:'rng',min:10,max:5000,step:10,v:1000}],
+render(s,st,g){
+ g.innerHTML='<div class="scr"><div class="in"></div></div>';
+ const n=+s.n;
+ const code={children:`ListView(\n  children: List.generate(${n}, (i) => ListTile(title: Text('Item $i'))),\n) // all ${n} built up front`,builder:`ListView.builder(\n  itemCount: ${n},\n  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n)`,separated:`ListView.separated(\n  itemCount: ${n},\n  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n  separatorBuilder: (context, i) => const Divider(),\n)`}[s.kind];
+ return {code,hint:''};
+},
+after(g,st,s,draw,d){
+ const sc=g.querySelector('.scr'),inn=g.querySelector('.in');
+ const n=+s.n,sep=s.kind==='separated',row=sep?54:44,lazy=s.kind!=='children';
+ const item=i=>`<div class="li"><span>${i}</span>Item ${i}</div>`+(sep&&i<n-1?'<div class="sepr"></div>':'');
+ const paint=()=>{
+  const top=sc.scrollTop,view=sc.clientHeight;st.top=top;
+  let a=0,b=n-1;
+  if(lazy){a=Math.max(0,Math.floor((top-250)/row));b=Math.min(n-1,Math.ceil((top+view+250)/row))}
+  let h='';for(let i=a;i<=b;i++)h+=item(i);
+  inn.style.paddingTop=a*row+'px';inn.style.paddingBottom=Math.max(0,n-1-b)*row+'px';
+  inn.innerHTML=h;
+  d.hintEl.textContent=lazy?`itemBuilder ran for ${b-a+1} of ${n} items (indices ${a} to ${b}). Scroll to watch the window move. The rest are never built.`:`All ${n} children were built up front, including the ones nobody scrolls to.`;
+ };
+ const keep=st.top||0;paint();sc.scrollTop=keep;paint();
+ if(lazy)sc.addEventListener('scroll',paint,{passive:true});
+}});
+
+def({cat:'Scrolling',id:'grid-view',name:'GridView',tags:'grid count extent columns spacing aspect',
+blurb:'GridView arranges children in a scrollable 2D grid. GridView.count fixes the number of columns. GridView.extent fixes the maximum tile width and works out the number of columns itself.',
+use:'Photo galleries, dashboards and product lists.',
+watch:'childAspectRatio is width divided by height. A value of 0.75 makes tiles taller than they are wide.',
+ctl:[{k:'kind',l:'Constructor',t:'sel',o:['GridView.count','GridView.extent'],v:'GridView.count'},{k:'n',l:'crossAxisCount',t:'rng',min:1,max:6,v:3},{k:'mx',l:'maxCrossAxisExtent',t:'rng',min:60,max:200,step:10,v:110},{k:'ms',l:'mainAxisSpacing',t:'rng',min:0,max:20,v:8},{k:'cs',l:'crossAxisSpacing',t:'rng',min:0,max:20,v:8},{k:'ar',l:'childAspectRatio',t:'sel',o:['0.75','1','1.5'],v:'1'}],
+render(s,st,g){
+ const ext=s.kind==='GridView.extent',avail=g.clientWidth-24,cs=+s.cs,ms=+s.ms;
+ const cols=ext?Math.max(1,Math.ceil(avail/(+s.mx+cs))):+s.n;
+ g.innerHTML=`<div class="fill sc" style="display:block"><div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:${ms}px ${cs}px">${Array.from({length:18},(_,i)=>`<div class="fb ${'abcd'[i%4]}" style="aspect-ratio:${s.ar};border-radius:8px;width:auto">${i+1}</div>`).join('')}</div></div>`;
+ const delegate=ext?`maxCrossAxisExtent: ${s.mx}`:`crossAxisCount: ${s.n}`;
+ return {code:`${s.kind}(\n  ${ext?'maxCrossAxisExtent':'crossAxisCount'}: ${ext?s.mx:s.n},\n  mainAxisSpacing: ${ms},\n  crossAxisSpacing: ${cs},\n  childAspectRatio: ${s.ar},\n  children: tiles,\n)`,hint:`Resolved to ${cols} column${cols>1?'s':''}.`+(ext?' Columns = ceil(width / (maxExtent + spacing)).':'')};
+}});
+
+def({cat:'Scrolling',id:'scroll-view',name:'SingleChildScrollView',tags:'overflow stripes yellow black bottom overflowed scroll column',
+blurb:'SingleChildScrollView makes one child scrollable. It is the fix for the yellow-and-black "BOTTOM OVERFLOWED" stripes when a Column holds more content than fits on screen.',
+use:'A short form or settings page whose content just slightly exceeds the screen.',
+watch:'It builds the whole child at once. For long or growing content use ListView.builder instead.',
+ctl:[{k:'sc',l:'wrap in SingleChildScrollView',t:'chk',v:false},{k:'n',l:'items',t:'rng',min:4,max:14,v:9}],
+render(s,st,g){
+ const n=+s.n,H=236,need=n*44,over=Math.max(0,need-H);
+ const items=Array.from({length:n},(_,i)=>box('Item '+(i+1),'abcd'[i%4],'height:38px;margin-bottom:6px;flex:none;width:100%')).join('');
+ g.innerHTML=`<div class="fill" style="padding:12px"><div style="position:relative;flex:1;overflow:${s.sc?'auto':'hidden'};display:flex;flex-direction:column">${items}${!s.sc&&over>0?`<div class="ovf"><span>BOTTOM OVERFLOWED BY ${over} PIXELS</span></div>`:''}</div></div>`;
+ return {code:s.sc?`SingleChildScrollView(\n  child: Column(\n    children: [/* ${n} items */],\n  ),\n)`:`Column(\n  children: [/* ${n} items */],\n)`,hint:s.sc?'The Column keeps its full height and the scroll view moves it.':over>0?'Flutter paints the stripes in debug mode when a Column is taller than its parent.':'Everything fits, so there is nothing to scroll. Add more items to trigger the overflow.'};
+}});
+
+def({cat:'Scrolling',id:'page-view',name:'PageView',tags:'carousel swipe pagecontroller viewportfraction onboarding',
+blurb:'PageView shows one page at a time and lets the user swipe between them. A viewportFraction below 1 makes neighbouring pages peek in, which gives the familiar carousel look.',
+use:'Onboarding screens, image carousels and tabbed content.',
+watch:'Create the PageController once in initState and dispose it. Making a new one inside build resets the page on every rebuild.',
+ctl:[{k:'vf',l:'viewportFraction',t:'sel',o:['1.0','0.85','0.7'],v:'0.85'},{k:'snap',l:'pageSnapping',t:'chk',v:true}],
+render(s,st,g){
+ const vf=+s.vf,pad=(1-vf)/2*100;
+ g.innerHTML=`<div class="pg" style="scroll-snap-type:${s.snap?'x mandatory':'none'}"><span style="flex:0 0 ${pad}%"></span>${[0,1,2,3,4].map(i=>`<div class="pp" style="flex:0 0 ${vf*100}%"><div class="fb ${'abcd'[i%4]}" style="height:100%;width:100%;font-size:18px">Page ${i+1}</div></div>`).join('')}<span style="flex:0 0 ${pad}%"></span></div><div class="dots">${[0,1,2,3,4].map(()=>'<i class="dot"></i>').join('')}</div>`;
+ return {code:`PageView(\n  controller: PageController(viewportFraction: ${vf}),\n  pageSnapping: ${s.snap},\n  children: [/* 5 pages */],\n)`,hint:'Swipe or scroll sideways. The dots follow the current page.'};
+},
+after(g){
+ const sc=g.querySelector('.pg'),dots=[...g.querySelectorAll('.dot')],first=sc.querySelector('.pp');
+ const upd=()=>{const w=first.getBoundingClientRect().width||1,i=Math.round(sc.scrollLeft/w);dots.forEach((d,k)=>d.classList.toggle('on',k===i))};
+ sc.addEventListener('scroll',upd,{passive:true});upd();
+}});
+
+def({cat:'Scrolling',id:'slivers',name:'CustomScrollView & Slivers',tags:'sliverappbar sliverlist collapsing header pinned floating',
+blurb:'A CustomScrollView lets several scrollable pieces, called slivers, share one scroll position. SliverAppBar is the classic example: a header that collapses as you scroll and can stay pinned at the top.',
+use:'Collapsing headers, and screens that mix lists, grids and headers in one scroll.',
+watch:'Everything inside CustomScrollView.slivers must be a sliver. Wrap normal widgets in SliverToBoxAdapter.',
+ctl:[{k:'pin',l:'pinned',t:'chk',v:true},{k:'ex',l:'expandedHeight',t:'rng',min:100,max:200,step:10,v:150}],
+render(s,st,g){
+ const ex=+s.ex,rows=Array.from({length:30},(_,i)=>`<div class="li"><span>${i+1}</span>Item ${i+1}</div>`).join('');
+ const bar=s.pin?`<div class="sa-anchor"><div class="sa" style="height:${ex}px"><b>Collapsing title</b></div></div><div style="height:${ex}px"></div>`:`<div class="sa" style="height:${ex}px;position:relative"><b>Collapsing title</b></div>`;
+ g.innerHTML=`<div class="scr">${bar}${rows}</div>`;
+ return {code:`CustomScrollView(\n  slivers: [\n    SliverAppBar(\n      pinned: ${s.pin},\n      expandedHeight: ${ex},\n      title: Text('Collapsing title'),\n    ),\n    SliverList.builder(\n      itemCount: 30,\n      itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n    ),\n  ],\n)`,hint:s.pin?'Pinned: the bar shrinks to toolbar height and stays at the top.':'Not pinned: the bar scrolls away with the content.'};
+},
+after(g,st,s){
+ if(!s.pin)return;
+ const sc=g.querySelector('.scr'),bar=g.querySelector('.sa'),ex=+s.ex,t=bar.querySelector('b');
+ const upd=()=>{const h=Math.max(48,ex-sc.scrollTop);bar.style.height=h+'px';t.style.fontSize=(15+(h-48)/(ex-48||1)*9)+'px'};
+ sc.addEventListener('scroll',upd,{passive:true});upd();
+}});
+/* ================= DISPLAY ================= */
+def({cat:'Display',id:'text',name:'Text',tags:'font style overflow ellipsis maxlines textstyle typography',h:280,
+blurb:'Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of properties.',
+use:'Every label, paragraph and heading.',
+watch:'overflow only matters when text cannot wrap: with no maxLines the text just wraps and you will never see an ellipsis.',
+ctl:[{k:'fs',l:'fontSize',t:'rng',min:12,max:32,v:18},{k:'fw',l:'fontWeight',t:'sel',o:['w300','w400','w600','w800'],v:'w400'},{k:'it',l:'italic',t:'chk',v:false},{k:'ls',l:'letterSpacing',t:'rng',min:-1,max:6,step:.5,v:0},{k:'ta',l:'textAlign',t:'sel',o:['left','center','right','justify'],v:'left'},{k:'ml',l:'maxLines',t:'sel',o:['null','1','2','3'],v:'2'},{k:'ov',l:'overflow',t:'sel',o:['clip','ellipsis','fade','visible'],v:'ellipsis'}],
+render(s,st,g){
+ const n=s.ml==='null'?0:+s.ml,lh=1.35;
+ let css=`width:236px;font-size:${s.fs}px;font-weight:${s.fw.slice(1)};font-style:${s.it?'italic':'normal'};letter-spacing:${s.ls}px;text-align:${s.ta};line-height:${lh};`;
+ if(n){
+  const h=`calc(${n}*${lh}em)`;
+  if(s.ov==='ellipsis')css+=`display:-webkit-box;-webkit-line-clamp:${n};-webkit-box-orient:vertical;overflow:hidden;`;
+  else if(s.ov==='clip')css+=`max-height:${h};overflow:hidden;`;
+  else if(s.ov==='fade')css+=`max-height:${h};overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 1em),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 1em),transparent);`;
+  else css+=`height:${h};overflow:visible;`;
+ }
+ g.innerHTML=`<div class="fill sc"><div style="margin:auto"><div style="${css}outline:1px dashed var(--c3);outline-offset:3px">Flutter draws every pixel itself, so a Text widget is really a small layout engine for glyphs that wraps, aligns and truncates for you.</div></div></div>`;
+ const sty=[`fontSize: ${s.fs}`];
+ if(s.fw!=='w400')sty.push(`fontWeight: FontWeight.${s.fw}`);
+ if(s.it)sty.push('fontStyle: FontStyle.italic');
+ if(+s.ls)sty.push(`letterSpacing: ${s.ls}`);
+ const args=[`'Flutter draws every pixel itself...'`];
+ if(n)args.push(`maxLines: ${n}`,`overflow: TextOverflow.${s.ov}`);
+ if(s.ta!=='left')args.push(`textAlign: TextAlign.${s.ta}`);
+ args.push(`style: TextStyle(${sty.join(', ')})`);
+ return {code:`Text(\n${args.map(a=>'  '+a+',').join('\n')}\n)`,hint:n?'The dashed outline is the box the Text was given.':'No maxLines, so the text wraps freely and overflow has no effect.'};
+}});
+
+def({cat:'Display',id:'image',name:'Image & BoxFit',tags:'picture photo network asset fit cover contain',
+blurb:'Image shows a picture from the network, an asset, a file or memory. When the image and the box it lives in have different shapes, BoxFit decides how the picture is scaled and cropped.',
+use:'Photos, avatars and artwork. Use cover to fill a box and contain to show the whole picture.',
+watch:'Image.network shows nothing while loading and on error unless you provide loadingBuilder and errorBuilder.',
+ctl:[{k:'fit',l:'fit',t:'sel',o:['fill','contain','cover','fitWidth','fitHeight','none','scaleDown'],v:'cover'}],
+render(s,st,g){
+ const f=s.fit,css={fill:'width:100%;height:100%;object-fit:fill',contain:'width:100%;height:100%;object-fit:contain',cover:'width:100%;height:100%;object-fit:cover',fitWidth:'width:100%;height:auto',fitHeight:'height:100%;width:auto',none:'width:300px;height:150px;max-width:none',scaleDown:'width:100%;height:100%;object-fit:scale-down'}[f];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:200px;height:140px;border:1.5px solid var(--c3);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--c3s)"><img alt="Sample landscape" src="${PIC}" style="display:block;${css}"></div></div>`;
+ return {code:`Image.network(\n  'https://example.com/photo.jpg',\n  width: 200, height: 140,\n  fit: BoxFit.${f},\n)`,hint:'The picture is 300 × 150 and the box is 200 × 140. The coloured border is part of the picture so you can see what gets cropped or stretched.'};
+}});
+
+def({cat:'Display',id:'icon-avatar',name:'Icon & CircleAvatar',tags:'icons material avatar profile picture initials',
+blurb:'Icon draws a glyph from an icon font at a given size and colour. CircleAvatar is a circle with a background colour and a child such as initials or an image.',
+use:'Toolbar glyphs, list leading widgets and user avatars.',
+watch:'Icon sizes are logical pixels, and the default is 24. Color is optional and falls back to the ambient IconTheme.',
+ctl:[{k:'ic',l:'Icons.',t:'sel',o:['favorite','star','home','person'],v:'favorite'},{k:'sz',l:'size',t:'rng',min:16,max:64,v:36},{k:'col',l:'color',t:'sel',o:['blue','teal','red','amber'],v:'blue'},{k:'rad',l:'radius',t:'rng',min:16,max:48,v:30}],
+render(s,st,g){
+ const C={blue:['var(--c1)','var(--c1s)','var(--c1t)'],teal:['var(--c2)','var(--c2s)','var(--c2t)'],red:['var(--c4)','var(--c4s)','var(--c4t)'],amber:['var(--c3)','var(--c3s)','var(--c3t)']}[s.col];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:36px"><div style="text-align:center">${ic(s.ic,+s.sz,C[0])}<div class="cap">Icon</div></div><div style="text-align:center"><div class="fb" style="width:${s.rad*2}px;height:${s.rad*2}px;border-radius:50%;background:${C[1]};color:${C[2]};font-size:${Math.round(s.rad*.6)}px;margin:0 auto">AB</div><div class="cap">CircleAvatar</div></div></div>`;
+ return {code:`Icon(Icons.${s.ic}, size: ${s.sz}, color: Colors.${s.col}),\n\nCircleAvatar(\n  radius: ${s.rad},\n  backgroundColor: Colors.${s.col}.shade100,\n  child: Text('AB'),\n)`,hint:'CircleAvatar radius is half the diameter.'};
+}});
+
+def({cat:'Display',id:'card-list-tile',name:'Card & ListTile',tags:'material elevation shape divider leading trailing subtitle',
+blurb:'Card is a Material surface with rounded corners and a shadow. ListTile is a ready-made row with leading, title, subtitle and trailing slots, so you rarely have to build a list row by hand.',
+use:'Grouped content, settings rows and list items.',
+watch:'Card has a default margin of 4. ListTile needs a bounded width, so it cannot sit directly in an unconstrained Row.',
+ctl:[{k:'el',l:'elevation',t:'rng',min:0,max:12,v:4},{k:'r',l:'corner radius',t:'rng',min:0,max:28,v:12},{k:'ld',l:'leading',t:'chk',v:true},{k:'tr',l:'trailing',t:'chk',v:true},{k:'dv',l:'Divider between',t:'chk',v:true}],
+render(s,st,g){
+ const tile=(t,sub)=>`<div class="lt">${s.ld?`<div class="fb a" style="width:36px;height:36px;border-radius:50%;margin-right:12px">${t[0]}</div>`:''}<div style="flex:1;min-width:0"><div style="font-weight:600">${t}</div><div class="cap" style="margin:0">${sub}</div></div>${s.tr?ic('chevron',22,'var(--muted)'):''}</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:280px;background:var(--surface);border-radius:${s.r}px;box-shadow:0 ${s.el}px ${s.el*2.2}px rgba(20,30,80,${(.1+s.el*.012).toFixed(3)});border:1px solid var(--line);overflow:hidden">${tile('Wi-Fi','Connected')}${s.dv?'<div style="height:1px;background:var(--line)"></div>':''}${tile('Bluetooth','Off')}</div></div>`;
+ return {code:`Card(\n  elevation: ${s.el},\n  shape: RoundedRectangleBorder(\n    borderRadius: BorderRadius.circular(${s.r}),\n  ),\n  child: Column(children: [\n    ListTile(\n${s.ld?"      leading: CircleAvatar(child: Text('W')),\n":''}      title: Text('Wi-Fi'),\n      subtitle: Text('Connected'),\n${s.tr?'      trailing: Icon(Icons.chevron_right),\n':''}    ),\n${s.dv?'    Divider(height: 1),\n':''}    ListTile(title: Text('Bluetooth'), subtitle: Text('Off')),\n  ]),\n)`,hint:''};
+}});
+
+def({cat:'Display',id:'opacity',name:'Opacity',tags:'transparent alpha fade withopacity',
+blurb:'The Opacity widget makes its whole subtree translucent as a single layer. Giving each shape its own alpha colour behaves differently where shapes overlap.',
+use:'Fading one widget or a group of widgets. For a fade that changes over time use AnimatedOpacity or FadeTransition.',
+watch:'Opacity forces an extra compositing layer, so avoid it on large or animating subtrees. Colors with alpha are cheaper when you only need a translucent fill.',
+ctl:[{k:'op',l:'opacity',t:'rng',min:0,max:1,step:.05,v:.5},{k:'m',l:'Approach',t:'sel',o:['Opacity (whole group)','Color alpha (each shape)'],v:'Opacity (whole group)'}],
+render(s,st,g){
+ const shapes=o=>`<div class="fb a" style="position:absolute;left:0;top:0;width:110px;height:110px;border-radius:50%;background:var(--c1);border-color:var(--c1);opacity:${o}"></div><div class="fb d" style="position:absolute;left:62px;top:0;width:110px;height:110px;border-radius:50%;background:var(--c4);border-color:var(--c4);opacity:${o}"></div>`;
+ const grp=s.m.startsWith('Opacity');
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:172px;height:110px;${grp?`opacity:${s.op}`:''}">${shapes(grp?1:s.op)}</div></div>`;
+ return {code:grp?`Opacity(\n  opacity: ${s.op},\n  child: Stack(children: [BlueCircle(), RedCircle()]),\n)`:`Stack(children: [\n  Container(color: Colors.blue.withValues(alpha: ${s.op})),\n  Container(color: Colors.red.withValues(alpha: ${s.op})),\n])`,hint:grp?'The group fades as one picture, so the red circle fully hides the blue one where they meet.':'Each circle is translucent on its own, so you can see one through the other in the overlap.'};
+}});
+
+def({cat:'Display',id:'clip',name:'ClipRRect, ClipOval & ClipPath',tags:'clip rounded corners circle shape mask borderradius',
+blurb:'The Clip widgets cut their child to a shape: rounded rectangle, oval or any custom path. The dashed line shows the child\'s original rectangle.',
+use:'Rounded images and avatars, and any non-rectangular shape.',
+watch:'Clipping costs more than a plain BoxDecoration. If you only need rounded corners on a coloured box, use Container with borderRadius instead.',
+ctl:[{k:'sh',l:'Widget',t:'sel',o:['ClipRRect','ClipOval','ClipPath (triangle)'],v:'ClipRRect'},{k:'r',l:'borderRadius',t:'rng',min:0,max:70,v:24}],
+render(s,st,g){
+ const css=s.sh==='ClipRRect'?`border-radius:${s.r}px;overflow:hidden`:s.sh==='ClipOval'?'border-radius:50%;overflow:hidden':'clip-path:polygon(50% 0,100% 100%,0 100%)';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:190px;height:140px;outline:1px dashed var(--c3);outline-offset:2px"><img alt="Clipped sample" src="${PIC}" style="display:block;width:100%;height:100%;object-fit:cover;${css}"></div></div>`;
+ const w={ClipRRect:`ClipRRect(\n  borderRadius: BorderRadius.circular(${s.r}),\n  child: Image.network(url),\n)`,ClipOval:'ClipOval(\n  child: Image.network(url),\n)','ClipPath (triangle)':'ClipPath(\n  clipper: TriangleClipper(), // a CustomClipper<Path>\n  child: Image.network(url),\n)'};
+ return {code:w[s.sh],hint:s.sh==='ClipRRect'?'':s.sh==='ClipOval'?'On a non-square child, ClipOval gives an ellipse. Use a square for a circle.':'ClipPath needs a CustomClipper that returns a Path.'};
+}});
+
+/* ================= INPUT ================= */
+def({cat:'Input',id:'buttons',name:'Buttons',tags:'elevatedbutton filledbutton outlinedbutton textbutton iconbutton onpressed disabled',
+blurb:'Material 3 has several button styles with different emphasis: FilledButton and ElevatedButton for primary actions, OutlinedButton and TextButton for secondary ones, and IconButton for a single glyph.',
+use:'Any tap target that triggers an action.',
+watch:'A button is disabled when onPressed is null. There is no separate enabled flag.',
+ctl:[{k:'kind',l:'Widget',t:'sel',o:['FilledButton','ElevatedButton','OutlinedButton','TextButton','IconButton'],v:'FilledButton'},{k:'en',l:'onPressed set',t:'chk',v:true},{k:'icn',l:'.icon variant',t:'chk',v:false}],
+render(s,st,g){
+ const k=s.kind.replace('Button',''),isI=s.kind==='IconButton',dis=s.en?'':' disabled';
+ const inner=isI?ic('favorite',22):(s.icn?ic('add',18)+' ':'')+'Save';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;flex-direction:column;gap:18px"><button class="btn k-${isI?'Icon':k}"${dis} data-a="press">${inner}</button><div class="cap" style="margin:0">onPressed fired ${st.n||0} time${(st.n||0)===1?'':'s'}</div></div>`;
+ const cb=s.en?'() {}':'null';
+ const code=isI?`IconButton(\n  onPressed: ${cb},\n  icon: Icon(Icons.favorite),\n)`:s.icn?`${s.kind}.icon(\n  onPressed: ${cb},\n  icon: Icon(Icons.add),\n  label: Text('Save'),\n)`:`${s.kind}(\n  onPressed: ${cb},\n  child: Text('Save'),\n)`;
+ return {code,hint:s.en?'Press the button.':'onPressed is null, so the button is disabled and ignores taps.'};
+},
+act(a,st){if(a==='press')st.n=(st.n||0)+1}});
+
+def({cat:'Input',id:'text-field',name:'TextField',tags:'input form textformfield decoration inputdecoration label hint obscure password error',h:300,
+blurb:'TextField takes typed input. The InputDecoration object controls how it looks: label or hint, icons, helper and error text, and the character counter.',
+use:'Any single-value text entry. Use TextFormField when it lives in a Form with validation.',
+watch:'Create the TextEditingController in initState and dispose it. Creating it inside build wipes the text on every rebuild.',
+ctl:[{k:'lab',l:'Placeholder',t:'sel',o:['labelText','hintText'],v:'labelText'},{k:'ob',l:'obscureText',t:'chk',v:false},{k:'ml',l:'maxLines',t:'sel',o:['1','3'],v:'1'},{k:'er',l:'errorText',t:'chk',v:false},{k:'pf',l:'prefixIcon',t:'chk',v:true},{k:'mx',l:'maxLength: 20',t:'chk',v:false}],
+render(s,st,g){
+ const v=st.v||'',multi=s.ml==='3',attr=`id="tfi" ${s.mx?'maxlength="20"':''} placeholder="${s.lab==='hintText'?'you@example.com':' '}"`;
+ const input=multi?`<textarea ${attr} rows="3">${esc(v)}</textarea>`:`<input ${attr} type="${s.ob?'password':'text'}" value="${esc(v)}" autocomplete="off">`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:10px"><label class="tf${s.er?' err':''}${s.pf?' pf':''}${multi?' multi':''}">${s.pf?`<span class="tfi">${ic('person',20)}</span>`:''}${input}${s.lab==='labelText'?'<span class="fl">Email</span>':''}</label><div class="tfm"><span class="erm">${s.er?'Enter a valid email':''}</span><span class="cnt">${s.mx?v.length+'/20':''}</span></div><div class="cap" style="margin:0">onChanged: <b class="ech">"${esc(v)}"</b></div></div>`;
+ const d=[];
+ d.push(s.lab==='labelText'?"labelText: 'Email',":"hintText: 'you@example.com',");
+ if(s.pf)d.push('prefixIcon: Icon(Icons.person),');
+ if(s.er)d.push("errorText: 'Enter a valid email',");
+ d.push('border: OutlineInputBorder(),');
+ const a=[];if(s.ob)a.push('obscureText: true,');if(multi)a.push('maxLines: 3,');if(s.mx)a.push('maxLength: 20,');a.push('onChanged: (value) => setState(() => text = value),','decoration: InputDecoration(');
+ return {code:`TextField(\n${a.map(x=>'  '+x).join('\n')}\n${d.map(x=>'    '+x).join('\n')}\n  ),\n)`,hint:'Type in the field. The text is kept when you change the options.'};
+},
+after(g,st,s){
+ const i=g.querySelector('#tfi'),e=g.querySelector('.ech'),c=g.querySelector('.cnt');
+ i.addEventListener('input',()=>{st.v=i.value;e.textContent='"'+i.value+'"';if(s.mx)c.textContent=i.value.length+'/20'});
+}});
+
+def({cat:'Input',id:'toggles',name:'Checkbox, Switch & Radio',tags:'checkbox switch radio tristate radiogroup selection',
+blurb:'Three ways to pick a value. Checkbox is on or off (or null when tristate). Switch is an instant on/off setting. Radio chooses exactly one option from a group.',
+use:'Checkbox for lists of independent choices, Switch for settings, Radio for one-of-many.',
+watch:'None of them keeps its own state. They only report changes through onChanged, and you update the value with setState.',
+ctl:[{k:'tri',l:'Checkbox tristate',t:'chk',v:false}],
+render(s,st,g){
+ if(st.cb===undefined){st.cb=true;st.sw=false;st.rd='Medium'}
+ if(!s.tri&&st.cb===null)st.cb=false;
+ const cbs=st.cb===null?' mid':st.cb?' on':'';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;gap:16px;padding:20px 28px"><div class="trow"><button class="cbx${cbs}" data-a="cb" role="checkbox" aria-checked="${st.cb===null?'mixed':st.cb}" aria-label="Checkbox"></button><span>Checkbox: ${st.cb===null?'null':st.cb}</span></div><div class="trow"><button class="sw${st.sw?' on':''}" data-a="sw" role="switch" aria-checked="${st.sw}" aria-label="Switch"><i></i></button><span>Switch: ${st.sw}</span></div><div class="trow" style="gap:18px;flex-wrap:wrap">${['Small','Medium','Large'].map(o=>`<button class="rdo${st.rd===o?' on':''}" data-a="rd:${o}" role="radio" aria-checked="${st.rd===o}"><i></i>${o}</button>`).join('')}</div></div>`;
+ return {code:`Checkbox(\n  value: ${st.cb},\n  tristate: ${!!s.tri},\n  onChanged: (v) => setState(() => checked = v),\n),\nSwitch(\n  value: ${st.sw},\n  onChanged: (v) => setState(() => enabled = v),\n),\nRadioGroup<String>(\n  groupValue: '${st.rd}',\n  onChanged: (v) => setState(() => size = v!),\n  child: Column(children: [\n    Radio<String>(value: 'Small'),\n    Radio<String>(value: 'Medium'),\n    Radio<String>(value: 'Large'),\n  ]),\n)`,hint:'Tap each control. With tristate on, the checkbox cycles false, true, null.'};
+},
+act(a,st,s){
+ if(a==='cb')st.cb=s.tri?(st.cb===false?true:st.cb===true?null:false):!st.cb;
+ else if(a==='sw')st.sw=!st.sw;
+ else if(a.startsWith('rd:'))st.rd=a.slice(3);
+}});
+
+def({cat:'Input',id:'slider',name:'Slider',tags:'range value divisions label',
+blurb:'Slider lets the user pick a number from a continuous range, or from discrete steps when divisions is set.',
+use:'Volume, brightness, price filters and any numeric setting.',
+watch:'Slider keeps no value of its own. If you do not update value inside onChanged, the thumb will not move.',
+ctl:[{k:'mx',l:'max',t:'sel',o:['1','10','100'],v:'100'},{k:'dv',l:'divisions',t:'sel',o:['none','5','10'],v:'none'}],
+render(s,st,g){
+ const mx=+s.mx,div=s.dv==='none'?0:+s.dv,step=div?mx/div:mx/200;
+ let v=st.v===undefined?mx*.4:Math.min(st.v,mx);if(div)v=Math.round(v/step)*step;st.v=v;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:16px;padding:20px 28px"><input id="sl" type="range" min="0" max="${mx}" step="${step}" value="${v}" style="width:100%"><div style="font:600 22px var(--f-display)"><span id="slv">${+v.toFixed(2)}</span></div></div>`;
+ return {code:`Slider(\n  value: ${+v.toFixed(2)},\n  min: 0,\n  max: ${mx},\n${div?`  divisions: ${div},\n`:''}  label: value.round().toString(),\n  onChanged: (v) => setState(() => value = v),\n)`,hint:div?`With divisions: ${div} the thumb snaps to ${div+1} positions.`:'Without divisions the slider is continuous.'};
+},
+after(g,st,s,draw){
+ const i=g.querySelector('#sl'),o=g.querySelector('#slv');
+ i.addEventListener('input',()=>{st.v=+i.value;o.textContent=+(+i.value).toFixed(2)});
+ i.addEventListener('change',()=>draw());
+}});
+
+def({cat:'Input',id:'dropdown',name:'DropdownButton',tags:'select menu picker dropdownmenu items',
+blurb:'DropdownButton shows the current choice and opens a menu of items. DropdownMenu is the newer Material 3 widget with search and a text field.',
+use:'Choosing one value from a short list.',
+watch:'The value must match exactly one item, or Flutter asserts. Set it to null to show the hint.',
+ctl:[{k:'exp',l:'isExpanded',t:'chk',v:false}],
+render(s,st,g){
+ if(!st.v)st.v='Dart';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px 28px"><select id="dd" class="dd" style="${s.exp?'width:100%':''}">${['Flutter','Dart','Widgets','Slivers'].map(o=>`<option${o===st.v?' selected':''}>${o}</option>`).join('')}</select><div class="cap" style="margin:0">onChanged received <b>"${st.v}"</b></div></div>`;
+ return {code:`DropdownButton<String>(\n  value: '${st.v}',\n  isExpanded: ${!!s.exp},\n  items: [\n    for (final o in options)\n      DropdownMenuItem(value: o, child: Text(o)),\n  ],\n  onChanged: (v) => setState(() => choice = v!),\n)`,hint:s.exp?'isExpanded stretches the button to the full width of its parent.':'By default the button is only as wide as its widest item.'};
+},
+after(g,st,s,draw){g.querySelector('#dd').addEventListener('change',e=>{st.v=e.target.value;draw()})}});
+
+/* ================= STRUCTURE ================= */
+def({cat:'Structure',id:'scaffold',name:'Scaffold',tags:'appbar drawer fab floatingactionbutton bottomnavigationbar snackbar material page',h:340,
+blurb:'Scaffold is the skeleton of a Material screen. It positions an app bar, a body, a drawer, a floating action button and a bottom navigation bar, and hosts SnackBars.',
+use:'Almost every full screen in a Material app.',
+watch:'Use one Scaffold per screen. Nested Scaffolds work but each one adds its own app bar and safe-area handling.',
+ctl:[{k:'ab',l:'appBar',t:'chk',v:true},{k:'dw',l:'drawer',t:'chk',v:true},{k:'fab',l:'floatingActionButton',t:'chk',v:true},{k:'loc',l:'FAB location',t:'sel',o:['endFloat','centerFloat'],v:'endFloat'},{k:'nav',l:'bottomNavigationBar',t:'chk',v:true}],
+render(s,st,g){
+ if(st.t===undefined)st.t=0;
+ const T=['Home','Search','Profile'],I=['home','star','person'];
+ g.innerHTML=`<div class="phone"><div class="pscr">${s.ab?`<div class="abar">${s.dw?`<button class="ib" data-a="dw" aria-label="Open drawer">${ic('menu',20)}</button>`:''}<span>${T[st.t]}</span></div>`:''}<div class="pbody"><div class="ln" style="width:70%"></div><div class="ln" style="width:90%"></div><div class="ln" style="width:55%"></div><div class="ln" style="width:80%"></div></div>${s.fab?`<button class="fab" data-a="fab" aria-label="Add" style="bottom:${s.nav?68:16}px;${s.loc==='centerFloat'?'left:50%;margin-left:-22px':'right:14px'}">${ic('add',22)}</button>`:''}${st.snack?`<div class="snack" style="bottom:${s.nav?64:10}px">Item added</div>`:''}${s.nav?`<div class="bnav">${T.map((t,i)=>`<button class="bn${st.t===i?' on':''}" data-a="nav:${i}">${ic(I[i],20)}<span>${t}</span></button>`).join('')}</div>`:''}${st.open&&s.dw?`<div class="scrim" data-a="dwx"></div><div class="drw"><b>Drawer</b><span>Inbox</span><span>Sent</span><span>Trash</span></div>`:''}</div></div>`;
+ const a=[];
+ if(s.ab)a.push("appBar: AppBar(title: Text('"+T[st.t]+"')),");
+ if(s.dw)a.push('drawer: Drawer(child: ListView(...)),');
+ a.push('body: Center(child: Text(\'Body\')),');
+ if(s.fab){a.push('floatingActionButton: FloatingActionButton(','  onPressed: () => showSnackBar(),','  child: Icon(Icons.add),','),');a.push('floatingActionButtonLocation:','    FloatingActionButtonLocation.'+s.loc+',')}
+ if(s.nav)a.push('bottomNavigationBar: BottomNavigationBar(','  currentIndex: '+st.t+',','  items: [/* Home, Search, Profile */],','),');
+ return {code:`Scaffold(\n${a.map(x=>'  '+x).join('\n')}\n)`,hint:'Open the drawer, switch tabs and press the floating button to see a SnackBar.'};
+},
+act(a,st){
+ if(a==='dw')st.open=true;else if(a==='dwx')st.open=false;
+ else if(a.startsWith('nav:'))st.t=+a.slice(4);
+ else if(a==='fab'){st.snack=true;clearTimeout(st.tm);st.tm=setTimeout(()=>{st.snack=false;this.draw&&this.draw()},1800)}
+}});
+
+def({cat:'Structure',id:'tab-bar',name:'TabBar & TabBarView',tags:'tabs defaulttabcontroller scrollable indicator',
+blurb:'TabBar shows a row of tabs and TabBarView shows the content for the selected tab. A DefaultTabController connects the two and holds the selected index.',
+use:'Switching between a few sibling views of equal importance.',
+watch:'The number of tabs in TabBar and children in TabBarView must match the controller length, or Flutter throws.',
+ctl:[{k:'n',l:'tabs',t:'sel',o:['2','3','5'],v:'3'},{k:'sc',l:'isScrollable',t:'chk',v:false}],
+render(s,st,g){
+ const n=+s.n,names=['Chats','Status','Calls','Photos','Files'].slice(0,n);
+ if(st.t===undefined||st.t>=n)st.t=0;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;padding:12px"><div class="tabs${s.sc?' scr2':''}">${names.map((t,i)=>`<button class="tab${st.t===i?' on':''}" data-a="tab:${i}" role="tab" aria-selected="${st.t===i}" style="${s.sc?'':'flex:1'}">${t}</button>`).join('')}</div><div class="tbody fb ${'abcd'[st.t%4]}" style="flex:1;margin-top:10px;font-size:16px;border-radius:8px">${names[st.t]} content</div></div>`;
+ return {code:`DefaultTabController(\n  length: ${n},\n  child: Scaffold(\n    appBar: AppBar(\n      bottom: TabBar(\n        isScrollable: ${s.sc},\n        tabs: [${names.map(t=>`Tab(text: '${t}')`).join(', ')}],\n      ),\n    ),\n    body: TabBarView(children: [/* ${n} pages */]),\n  ),\n)`,hint:s.sc?'Scrollable tabs keep their natural width and can scroll sideways.':'Fixed tabs share the full width equally.'};
+},
+act(a,st){if(a.startsWith('tab:'))st.t=+a.slice(4)}});
+/* ================= GESTURES ================= */
+def({cat:'Gestures',id:'gestures',name:'GestureDetector',tags:'tap doubletap longpress pan drag gesture recognizer',h:300,
+blurb:'GestureDetector wraps any widget and reports taps, double taps, long presses and drags. It has no visual effect of its own.',
+use:'Custom touch handling on widgets that are not buttons.',
+watch:'GestureDetector gives no ripple or hover feedback. For tappable Material surfaces use InkWell. Gesture detectors compete: a pan and a tap on the same widget are arbitrated by Flutter.',
+render(s,st,g){
+ g.innerHTML='<div class="gdz"><div class="fb a gd" style="left:40px;top:30px;width:120px;height:84px;position:absolute;touch-action:none;cursor:grab;user-select:none;flex-direction:column">Try me<span style="font-weight:400;font-size:11px">tap, double tap,<br>hold, drag</span></div></div><pre class="log">no gesture yet</pre>';
+ return {code:`GestureDetector(\n  onTap: () => log('onTap'),\n  onDoubleTap: () => log('onDoubleTap'),\n  onLongPress: () => log('onLongPress'),\n  onPanUpdate: (d) =>\n      setState(() => offset += d.delta),\n  child: Container(width: 120, height: 84),\n)`,hint:'Interact with the box. The log shows the callbacks Flutter would fire.'};
+},
+after(g,st){
+ const zone=g.querySelector('.gdz'),b=g.querySelector('.gd'),log=g.querySelector('.log');
+ let X=40,Y=30,dn=null,timer=null,last=0,pu=0;const lines=[];
+ const say=t=>{if(t.startsWith('onPanUpdate')&&lines[0]&&lines[0].startsWith('onPanUpdate'))lines[0]=t;else lines.unshift(t);lines.length=Math.min(lines.length,5);log.textContent=lines.join('\n')};
+ b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);dn={x:e.clientX,y:e.clientY,ox:X,oy:Y,moved:false,long:false};pu=0;clearTimeout(timer);timer=setTimeout(()=>{if(dn&&!dn.moved){dn.long=true;say('onLongPress')}},500);b.style.cursor='grabbing'});
+ b.addEventListener('pointermove',e=>{
+  if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;
+  if(!dn.moved&&Math.hypot(dx,dy)>6){dn.moved=true;clearTimeout(timer);say('onPanStart')}
+  if(dn.moved){const r=zone.getBoundingClientRect();X=Math.max(0,Math.min(r.width-b.offsetWidth,dn.ox+dx));Y=Math.max(0,Math.min(r.height-b.offsetHeight,dn.oy+dy));b.style.left=X+'px';b.style.top=Y+'px';pu++;say('onPanUpdate x'+pu)}
+ });
+ const up=()=>{if(!dn)return;clearTimeout(timer);if(dn.moved)say('onPanEnd');else if(!dn.long){const n=Date.now();if(n-last<300){say('onDoubleTap');last=0}else{say('onTap');last=n}}dn=null;b.style.cursor='grab'};
+ b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
+}});
+
+def({cat:'Gestures',id:'ink-well',name:'InkWell',tags:'ripple splash material tap feedback inkresponse',
+blurb:'InkWell adds the Material ripple to a tappable area. The ripple is painted on the nearest Material ancestor, underneath the child.',
+use:'Tappable cards, list rows and custom buttons that should feel like Material.',
+watch:'If a child paints an opaque background (for example Container(color: ...)), it covers the ripple and the effect disappears. Turn on the switch below to see it.',
+ctl:[{k:'col',l:'splashColor',t:'sel',o:['blue','teal','amber'],v:'blue'},{k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},{k:'bug',l:'child paints a color',t:'chk',v:false}],
+render(s,st,g){
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div class="ink" style="border-radius:${s.r}px;background:var(--c1s);border:1px solid var(--c1)"><div class="inkc" style="${s.bug?'background:var(--c1s);':''}">Tap or click me</div></div></div>`;
+ return {code:`Material(\n  color: Colors.blue.shade50,\n  borderRadius: BorderRadius.circular(${s.r}),\n  child: InkWell(\n    onTap: () {},\n    borderRadius: BorderRadius.circular(${s.r}),\n    splashColor: Colors.${s.col}.withOpacity(0.4),\n    child: Padding(\n      padding: EdgeInsets.all(24),\n${s.bug?'      // BUG: this color hides the ripple\n      child: ColoredBox(color: Colors.blue.shade50,\n          child: Text(\'Tap me\')),\n':"      child: Text('Tap me'),\n"}    ),\n  ),\n)`,hint:s.bug?'The child paints an opaque color on top of the ripple, so nothing shows.':'Press and hold inside the box.'};
+},
+after(g,st,s){
+ const el=g.querySelector('.ink'),C={blue:'var(--c1)',teal:'var(--c2)',amber:'var(--c3)'}[s.col];
+ el.addEventListener('pointerdown',e=>{
+  const r=el.getBoundingClientRect(),sz=Math.max(r.width,r.height)*2.2,sp=document.createElement('span');
+  sp.className='rip';sp.style.cssText=`left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px;width:${sz}px;height:${sz}px;background:${C}`;
+  el.insertBefore(sp,el.firstChild);sp.addEventListener('animationend',()=>sp.remove());
+ });
+}});
+
+def({cat:'Gestures',id:'dismissible',name:'Dismissible',tags:'swipe delete archive list remove key swipe to dismiss',h:290,
+blurb:'Dismissible lets the user swipe a list item away. You provide background widgets that appear while swiping, and onDismissed removes the item from your data.',
+use:'Swipe to delete or archive in lists.',
+watch:'Every Dismissible needs a unique key, and onDismissed must actually remove the item from the list. Otherwise Flutter throws a "dismissed widget is still part of the tree" error.',
+ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','startToEnd','endToStart'],v:'horizontal'},{k:'th',l:'dismissThreshold',t:'sel',o:['0.3','0.4','0.6'],v:'0.4'}],
+render(s,st,g){
+ if(!st.items)st.items=['Inbox zero','Buy milk','Call Dana','Book flights'];
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:8px;padding:14px">${st.items.length?st.items.map(i=>`<div class="dm" data-i="${esc(i)}"><div class="dmb"><div class="bl">${ic('check',20)} Archive</div><div class="br">Delete ${ic('delete',20)}</div></div><div class="dmf">${esc(i)}</div></div>`).join(''):'<div class="cap" style="margin:auto">All dismissed.</div>'}<button class="btn k-Text rst" data-a="reset" style="align-self:flex-start">Reset list</button></div>`;
+ return {code:`Dismissible(\n  key: ValueKey(item),\n  direction: DismissDirection.${s.dir},\n  dismissThresholds: {\n    DismissDirection.horizontal: ${s.th},\n  },\n  background: ArchiveBackground(),\n  secondaryBackground: DeleteBackground(),\n  onDismissed: (direction) =>\n      setState(() => items.remove(item)),\n  child: ListTile(title: Text(item)),\n)`,hint:'Drag a row sideways and release past the threshold. ('+st.items.length+' left)'};
+},
+act(a,st){if(a==='reset')st.items=['Inbox zero','Buy milk','Call Dana','Book flights']},
+after(g,st,s,draw){
+ g.querySelectorAll('.dm').forEach(row=>{
+  const fg=row.querySelector('.dmf');let x0=null,dx=0;
+  fg.addEventListener('pointerdown',e=>{fg.setPointerCapture(e.pointerId);x0=e.clientX;dx=0;fg.style.transition='none'});
+  fg.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;if(s.dir==='startToEnd')dx=Math.max(0,dx);if(s.dir==='endToStart')dx=Math.min(0,dx);fg.style.transform=`translateX(${dx}px)`});
+  const end=()=>{
+   if(x0===null)return;x0=null;const W=row.clientWidth;fg.style.transition='transform .2s ease-out';
+   if(Math.abs(dx)>W*(+s.th)){fg.style.transform=`translateX(${dx>0?W:-W}px)`;const k=row.dataset.i;setTimeout(()=>{st.items=st.items.filter(i=>i!==k);draw()},200)}
+   else fg.style.transform='translateX(0)';
+   dx=0;
+  };
+  fg.addEventListener('pointerup',end);fg.addEventListener('pointercancel',end);
+ });
+}});
+
+def({cat:'Gestures',id:'draggable',name:'Draggable & DragTarget',tags:'drag drop dragtarget longpressdraggable feedback',h:290,
+blurb:'Draggable lets the user pick up a widget and carry it. A DragTarget accepts the dropped data. While dragging, the original shows childWhenDragging and a copy follows the finger as feedback.',
+use:'Reordering, sorting into buckets and drag-and-drop interfaces.',
+watch:'Use LongPressDraggable inside scrollable areas so dragging does not fight with scrolling. For reordering a list, ReorderableListView is simpler.',
+render(s,st,g){
+ if(!st.src){st.src=['Apple','Pear','Plum','Fig'];st.acc=[]}
+ g.innerHTML=`<div class="fill" style="gap:14px;padding:14px"><div style="display:flex;flex-direction:column;gap:8px;width:110px;flex:none">${st.src.map(k=>`<div class="dr fb ${'abcd'[k.length%4]}" data-k="${k}" style="height:40px">${k}</div>`).join('')}${st.src.length?'':'<div class="cap" style="margin:auto 0">Empty</div>'}</div><div class="tgt"><b>DragTarget</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${st.acc.map(k=>`<span class="chip c${k.length%4}">${k}</span>`).join('')||'<span class="cap" style="margin:0">Drop here</span>'}</div></div></div><button class="btn k-Text" data-a="reset" style="position:absolute;left:8px;bottom:6px">Reset</button>`;
+ return {code:`Draggable<String>(\n  data: 'Apple',\n  feedback: Material(child: Chip(label: Text('Apple'))),\n  childWhenDragging: Opacity(opacity: 0.3, child: chip),\n  child: chip,\n),\n\nDragTarget<String>(\n  onAcceptWithDetails: (d) =>\n      setState(() => accepted.add(d.data)),\n  builder: (context, candidate, rejected) =>\n      Container(...),\n)`,hint:'Drag a fruit onto the target. The target highlights while you hover over it. ('+st.acc.length+' accepted)'};
+},
+act(a,st){if(a==='reset'){st.src=['Apple','Pear','Plum','Fig'];st.acc=[]}},
+after(g,st,s,draw){
+ const tgt=g.querySelector('.tgt');
+ g.querySelectorAll('.dr').forEach(el=>{
+  el.style.touchAction='none';
+  el.addEventListener('pointerdown',e=>{
+   e.preventDefault();
+   const gr=g.getBoundingClientRect(),er=el.getBoundingClientRect(),ox=e.clientX-er.left,oy=e.clientY-er.top;
+   const ghost=el.cloneNode(true);ghost.classList.add('ghost');ghost.style.cssText=`position:absolute;left:${er.left-gr.left}px;top:${er.top-gr.top}px;width:${er.width}px;pointer-events:none;z-index:9`;
+   g.appendChild(ghost);el.style.opacity='.3';
+   const over=ev=>{const t=tgt.getBoundingClientRect();return ev.clientX>t.left&&ev.clientX<t.right&&ev.clientY>t.top&&ev.clientY<t.bottom};
+   const mv=ev=>{ghost.style.left=ev.clientX-gr.left-ox+'px';ghost.style.top=ev.clientY-gr.top-oy+'px';tgt.classList.toggle('hot',over(ev))};
+   const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);ghost.remove();el.style.opacity='';tgt.classList.remove('hot');if(over(ev)){const k=el.dataset.k;st.src=st.src.filter(x=>x!==k);st.acc.push(k);draw()}};
+   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+  });
+ });
+}});
+
+/* ================= ANIMATION ================= */
+def({cat:'Animation',id:'animated-container',name:'AnimatedContainer',tags:'implicit animation duration curve tween transition',
+blurb:'AnimatedContainer is an implicit animation widget. Change any of its properties in setState and it animates from the old value to the new one over the given duration and curve, with no AnimationController.',
+use:'Simple property animations: size, colour, radius, padding and alignment.',
+watch:'It only animates when a property changes between builds. Building it once with final values shows no animation.',
+ctl:[{k:'du',l:'duration (ms)',t:'rng',min:100,max:2000,step:100,v:800},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','easeOutCubic','bounceOut','elasticOut'],v:'bounceOut'}],
+render(s,st,g){
+ if(!st.box){g.innerHTML='<div class="fill" style="align-items:center;justify-content:center"><div class="fb a" id="acb" style="width:100px;height:100px;border-radius:8px"></div></div><button class="btn k-Filled btm" data-a="go">Toggle state</button>';st.box=g.querySelector('#acb')}
+ const CV={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',easeOutCubic:'cubic-bezier(.215,.61,.355,1)',bounceOut:lin(bounce),elasticOut:lin(elastic)};
+ const b=st.box,on=!!st.on;
+ b.style.transition=`all ${s.du}ms ${CV[s.cv]}`;
+ b.style.width=on?'240px':'100px';b.style.height=on?'64px':'100px';b.style.borderRadius=on?'32px':'8px';
+ b.style.background=on?'var(--c4s)':'var(--c1s)';b.style.borderColor=on?'var(--c4)':'var(--c1)';b.style.color=on?'var(--c4t)':'var(--c1t)';
+ b.textContent=on?'selected':'idle';
+ return {code:`AnimatedContainer(\n  duration: Duration(milliseconds: ${s.du}),\n  curve: Curves.${s.cv},\n  width: ${on?240:100},\n  height: ${on?64:100},\n  decoration: BoxDecoration(\n    color: ${on?'Colors.pink.shade50':'Colors.blue.shade50'},\n    borderRadius: BorderRadius.circular(${on?32:8}),\n  ),\n)`,hint:'Press the button. Size, colour and radius all animate together using the chosen curve.'};
+},
+act(a,st){if(a==='go')st.on=!st.on}});
+
+def({cat:'Animation',id:'animated-switcher',name:'AnimatedSwitcher',tags:'transition crossfade key valuekey fade scale slide',
+blurb:'AnimatedSwitcher animates between an old child and a new one whenever the child changes. You choose the transition with transitionBuilder.',
+use:'Swapping content such as a counter, an icon or a loading and loaded state.',
+watch:'The new child must be distinguishable from the old one, usually by giving it a different Key such as ValueKey(count). Same type and same key means no animation.',
+ctl:[{k:'tr',l:'transition',t:'sel',o:['FadeTransition','ScaleTransition','SlideTransition'],v:'ScaleTransition'},{k:'du',l:'duration (ms)',t:'rng',min:100,max:1000,step:50,v:400},{k:'key',l:'child has a new Key',t:'chk',v:true}],
+render(s,st,g){
+ const mk=n=>{const e=document.createElement('div');e.className='fb b';e.style.cssText='position:absolute;inset:0;font-size:36px;border-radius:12px';e.textContent=n;return e};
+ if(!st.host){st.n=0;g.innerHTML='<div class="fill" style="align-items:center;justify-content:center"><div id="swh" style="position:relative;width:120px;height:90px"></div></div><button class="btn k-Filled btm" data-a="inc">Increment</button>';st.host=g.querySelector('#swh');st.cur=mk(0);st.host.appendChild(st.cur);st.shown=0}
+ if(st.shown!==st.n){
+  if(!s.key){st.cur.textContent=st.n}
+  else{
+   const old=st.cur,nw=mk(st.n),d=+s.du;st.host.appendChild(nw);
+   const K={FadeTransition:[[{opacity:0},{opacity:1}],[{opacity:1},{opacity:0}]],ScaleTransition:[[{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1}],[{transform:'scale(1)',opacity:1},{transform:'scale(0)',opacity:0}]],SlideTransition:[[{transform:'translateX(80px)',opacity:0},{transform:'translateX(0)',opacity:1}],[{transform:'translateX(0)',opacity:1},{transform:'translateX(-80px)',opacity:0}]]}[s.tr];
+   anim(nw,K[0],{duration:d,easing:'ease-out'});
+   const oa=anim(old,K[1],{duration:d,easing:'ease-in',fill:'forwards'});
+   if(oa)oa.onfinish=()=>old.remove();else old.remove();
+   st.cur=nw;
+  }
+  st.shown=st.n;
+ }
+ return {code:`AnimatedSwitcher(\n  duration: Duration(milliseconds: ${s.du}),\n  transitionBuilder: (child, animation) =>\n      ${s.tr}(${s.tr==='SlideTransition'?'position: offsetTween.animate(animation)':s.tr==='ScaleTransition'?'scale: animation':'opacity: animation'}, child: child),\n  child: Text(\n    '${st.n}',\n${s.key?`    key: ValueKey(${st.n}),\n`:''}  ),\n)`,hint:s.key?'Each press swaps in a new keyed child, so the switcher animates old out and new in.':'Without a new Key the switcher sees the same widget and updates in place. No animation runs.'};
+},
+act(a,st){if(a==='inc')st.n++}});
+
+/* ================= NAVIGATION & STATE ================= */
+const PAGES=['Home','Details','Settings','Profile','Help'];
+def({cat:'Navigation & state',id:'navigator',name:'Navigator',tags:'push pop route materialpageroute stack routes screens go_router',h:290,
+blurb:'Navigator manages a stack of routes (screens). push puts a new screen on top, pop removes the top one, and the screen underneath is shown again.',
+use:'Moving between screens. For deep links and URL-based routing most apps layer go_router or the Router API on top.',
+watch:'Never call Navigator.push straight from build. Use callbacks such as onPressed, and check that the context is still mounted after an await.',
+render(s,st,g){
+ if(!st.stack)st.stack=['Home'];
+ const top=st.stack[st.stack.length-1],deep=st.stack.length>1;
+ g.innerHTML=`<div class="nvp"><div class="abar">${deep?`<button class="ib" data-a="pop" aria-label="Back">${ic('back',20)}</button>`:''}<span>${top}</span></div><div class="nvbody"><button class="btn k-Filled" data-a="push">push</button><button class="btn k-Outlined" data-a="rep">pushReplacement</button><button class="btn k-Text" data-a="pop"${deep?'':' disabled'}>pop</button><button class="btn k-Text" data-a="root"${deep?'':' disabled'}>popUntil(first)</button></div></div><div class="nvs">Stack: ${st.stack.map(p=>`<span class="chip c${PAGES.indexOf(p)%4}">${p}</span>`).join(' › ')}</div>`;
+ if(st.anim){anim(g.querySelector('.nvp'),st.anim==='push'?[{transform:'translateX(40px)',opacity:0},{transform:'none',opacity:1}]:[{transform:'translateX(-40px)',opacity:0},{transform:'none',opacity:1}],{duration:260,easing:'ease-out'});st.anim=null}
+ return {code:`// push a new screen\nNavigator.push(\n  context,\n  MaterialPageRoute(builder: (_) => ${PAGES[st.stack.length%PAGES.length]}Page()),\n);\n\nNavigator.pop(context);\nNavigator.pushReplacement(context, route);\nNavigator.popUntil(context, (r) => r.isFirst);`,hint:'The stack grows with push and shrinks with pop. The top route is the visible screen.'};
+},
+act(a,st){
+ if(a==='push'){st.stack.push(PAGES[st.stack.length%PAGES.length]);st.anim='push'}
+ else if(a==='pop'&&st.stack.length>1){st.stack.pop();st.anim='pop'}
+ else if(a==='rep'){const t=st.stack.length-1;st.stack[t]=PAGES[(PAGES.indexOf(st.stack[t])+1)%PAGES.length];st.anim='push'}
+ else if(a==='root'){st.stack=[st.stack[0]];st.anim='pop'}
+}});
+
+def({cat:'Navigation & state',id:'stateful',name:'StatelessWidget vs StatefulWidget',tags:'setstate rebuild const build state lifecycle',h:280,
+blurb:'A StatelessWidget is described entirely by its constructor arguments. A StatefulWidget has a State object that lives on between rebuilds, and calling setState schedules a new build. Parents rebuilding rebuild their children too, unless the child is const.',
+use:'StatefulWidget for anything that changes on screen by itself: counters, form input, animations.',
+watch:'setState rebuilds the whole build method of that State. Keep it low in the tree, and mark children const where you can so they are skipped.',
+ctl:[{k:'cs',l:'child is const',t:'chk',v:true}],
+render(s,st,g){
+ if(st.n===undefined){st.n=0;st.pb=1;st.cb=1}
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;gap:12px;padding:18px"><div class="sbox sp"><b>Parent (StatefulWidget)</b><div class="cap" style="margin:2px 0 8px">count = ${st.n} &nbsp;·&nbsp; build() ran ${st.pb} time${st.pb===1?'':'s'}</div><button class="btn k-Filled" data-a="inc">setState: count++</button> <button class="btn k-Text" data-a="rst">Reset</button><div class="sbox sq" style="margin-top:10px"><b>Child (StatelessWidget)</b><div class="cap" style="margin:2px 0 0">build() ran ${st.cb} time${st.cb===1?'':'s'}</div></div></div></div>`;
+ return {code:`class _ParentState extends State<Parent> {\n  int count = 0;\n\n  @override\n  Widget build(BuildContext context) {\n    return Column(children: [\n      Text('count = $count'),\n      ElevatedButton(\n        onPressed: () => setState(() => count++),\n        child: Text('setState'),\n      ),\n      ${s.cs?'const ':''}ChildWidget(),\n    ]);\n  }\n}`,hint:s.cs?'The const child is the same instance every time, so Flutter skips rebuilding it.':'A new ChildWidget is created on every build, so it rebuilds each time the parent does.'};
+},
+act(a,st,s){
+ if(a==='inc'){st.n++;st.pb++;if(!s.cs)st.cb++}
+ else if(a==='rst'){st.n=0;st.pb=1;st.cb=1}
+}});
+
+def({cat:'Navigation & state',id:'future-builder',name:'FutureBuilder',tags:'async future snapshot connectionstate loading error await http',h:280,
+blurb:'FutureBuilder rebuilds when a Future moves from pending to completed. Its builder receives an AsyncSnapshot that tells you the connection state, the data and any error.',
+use:'Showing a spinner, then data or an error, for a single async call.',
+watch:'Never create the Future inside build. Every rebuild would restart the request. Create it once in initState and store it in a field.',
+ctl:[{k:'dl',l:'delay (ms)',t:'rng',min:300,max:2500,step:100,v:1200},{k:'fail',l:'future throws',t:'chk',v:false}],
+render(s,st,g){
+ const ph=st.ph||'idle';
+ const body=ph==='waiting'?'<div class="spin" role="status" aria-label="Loading"></div><div class="cap" style="margin:0">ConnectionState.waiting</div>':ph==='done'?'<div style="font:600 20px var(--f-display);color:var(--ok)">Loaded 3 items</div><div class="cap" style="margin:0">hasData = true</div>':ph==='error'?'<div style="font:600 20px var(--f-display);color:var(--danger)">Something went wrong</div><div class="cap" style="margin:0">hasError = true</div>':'<div class="cap" style="margin:0">ConnectionState.none: nothing started yet</div>';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px">${body}<button class="btn k-Filled" data-a="load"${ph==='waiting'?' disabled':''}>${ph==='idle'?'Start request':'Run again'}</button></div>`;
+ return {code:`late final Future<List<Item>> _future = fetchItems();\n\nFutureBuilder<List<Item>>(\n  future: _future, // created once, not in build\n  builder: (context, snapshot) {\n    if (snapshot.connectionState == ConnectionState.waiting) {\n      return CircularProgressIndicator();\n    }\n    if (snapshot.hasError) {\n      return Text('Something went wrong');\n    }\n    return Text('Loaded \${snapshot.data!.length} items');\n  },\n)`,hint:'The simulated request takes '+s.dl+' ms'+(s.fail?' and then fails.':'.')};
+},
+act(a,st,s){
+ if(a!=='load')return;
+ st.ph='waiting';clearTimeout(st.tm);
+ st.tm=setTimeout(()=>{st.ph=s.fail?'error':'done';this.draw()},+s.dl);
+}});
+
+/* ================= BOOTSTRAP ================= */
+const main=$('#main'),nav=$('#nav');
+nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>'+CATS.map(c=>`<div class="ng"><div class="nh">${esc(c)}</div>${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div>`).join('');
+CATS.forEach(c=>{
+ const sec=document.createElement('section');sec.className='cs';
+ sec.innerHTML=`<h2>${esc(c)}</h2><p class="ci">${esc(CINTRO[c])}</p>`;
+ W.filter(d=>d.cat===c).forEach(d=>sec.appendChild(mount(d)));
+ main.appendChild(sec);
+});
+W.forEach(d=>d.draw());
+$('#eyebrow').textContent='Interactive reference  ·  '+W.length+' widgets  ·  '+CATS.length+' categories';
+$('#count').textContent=W.length+' widgets';
+
+$('#q').addEventListener('input',e=>{
+ const q=e.target.value.trim().toLowerCase();let n=0;
+ W.forEach(d=>{
+  const hit=!q||(d.name+' '+d.cat+' '+d.blurb+' '+(d.tags||'')).toLowerCase().includes(q);
+  d.el.hidden=!hit;if(hit)n++;
+  const l=nav.querySelector('[data-id="'+d.id+'"]');if(l)l.hidden=!hit;
+ });
+ main.querySelectorAll('.cs').forEach(s=>{s.hidden=!s.querySelector('.w:not([hidden])')});
+ $('#none').hidden=n>0;
+ $('#count').textContent=q?n+' of '+W.length+' widgets':W.length+' widgets';
+});
+
+const burger=$('#burger'),scrim=$('#scrim');
+const setMenu=o=>{nav.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));if(o)$('#navx').focus()};
+burger.addEventListener('click',()=>setMenu(true));
+$('#navx').addEventListener('click',()=>{setMenu(false);burger.focus()});
+scrim.addEventListener('click',()=>setMenu(false));
+nav.addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open')){setMenu(false);burger.focus()}});
+if(window.matchMedia){const mq=window.matchMedia('(min-width:901px)');if(mq.addEventListener)mq.addEventListener('change',e=>{if(e.matches)setMenu(false)})}
+
+const tb=$('#totop');
+const showTop=()=>{tb.hidden=(window.scrollY||document.documentElement.scrollTop||0)<500};
+window.addEventListener('scroll',showTop,{passive:true});showTop();
+tb.addEventListener('click',()=>{
+ const calm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ window.scrollTo({top:0,behavior:calm?'auto':'smooth'});
+});
+
+const h=location.hash.slice(1);
+if(h){const t=document.getElementById(h);if(t)setTimeout(()=>t.scrollIntoView(),50)}
+})();
+</script>
+</body>
+</html>
