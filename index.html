@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 49 Flutter widgets with live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 57 Flutter widgets with live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1218,6 +1218,148 @@ const META={
 'tooltip':{p:['message|String|required|The text shown.','preferBelow|bool|true|Show below the child when there is room.','waitDuration|Duration|0|Delay before a hover shows the tooltip.','showDuration|Duration|1.5s|How long it stays after a long press.','triggerMode|TooltipTriggerMode|longPress|Choose tap or long press for touch devices.'],r:['buttons','icon-avatar','gestures']},
 'interactive-viewer':{p:['minScale, maxScale|double|0.8 / 2.5|Zoom limits.','panEnabled, scaleEnabled|bool|true|Turn dragging or zooming off.','boundaryMargin|EdgeInsets|zero|How far content can be dragged off the edge.','transformationController|TransformationController?|null|Read, set or reset the current matrix.','constrained|bool|true|false lets the child be bigger than the viewer.'],r:['gestures','image','fitted-box']}
 };
+
+/* ================= NEW IN v3 ================= */
+def({cat:'Layout',id:'flex',name:'Flex',tags:'row column direction axis spacing verticaldirection reverse base',
+blurb:'Flex is the widget that Row and Column are built on. Row is Flex(direction: Axis.horizontal) and Column is Flex(direction: Axis.vertical). Use Flex directly when the direction is only known at runtime.',
+use:'A layout that switches between horizontal and vertical, for example by screen width or orientation.',
+watch:'Flex needs a direction. Expanded and Flexible only work as children of a Flex, and the same rule applies to Row and Column.',
+ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},{k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','center','end','spaceBetween','spaceEvenly'],v:'start'},{k:'sp',l:'spacing',t:'rng',min:0,max:30,v:8},{k:'rev',l:'reverse order',t:'chk',v:false}],
+render(s,st,g){
+ const v=s.dir==='vertical',items=[['A','a',60,40],['B','b',80,56],['C','c',64,48]];
+ g.innerHTML=`<div class="fill" style="flex-direction:${v?'column':'row'}${s.rev?'-reverse':''};justify-content:${AX[s.ma]};align-items:flex-start;gap:${s.sp}px">${items.map(i=>box(i[0],i[1],`width:${i[2]}px;height:${i[3]}px`)).join('')}</div>`;
+ return {code:`Flex(\n  direction: Axis.${s.dir},\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  spacing: ${s.sp},\n${s.rev?`  ${v?'verticalDirection: VerticalDirection.up':'textDirection: TextDirection.rtl'},\n`:''}  children: [A(), B(), C()],\n)`,hint:`Same as ${v?'Column':'Row'}(...). Flex just lets you pick the direction yourself.`};
+}});
+
+def({cat:'Layout',id:'limited-box',name:'LimitedBox',tags:'unbounded max infinite listview limit size',h:250,
+blurb:'LimitedBox caps the size of its child, but only when the parent gives unbounded space on that axis. When the parent is bounded, LimitedBox does nothing.',
+use:'A default size for a child that would otherwise want infinite space, for example inside a ListView or a scroll view.',
+watch:'Do not use it as a general max size. For that, use ConstrainedBox, which always applies its limits.',
+ctl:[{k:'p',l:'parent',t:'sel',o:['bounded (SizedBox 200 x 110)','unbounded (scroll view)'],v:'unbounded (scroll view)'},{k:'mw',l:'maxWidth',t:'rng',min:60,max:240,step:10,v:140},{k:'mh',l:'maxHeight',t:'rng',min:30,max:150,step:10,v:70}],
+render(s,st,g){
+ const ub=s.p.startsWith('unbounded');
+ const w=ub?s.mw:200,h=ub?s.mh:110;
+ g.innerHTML=`<div style="position:absolute;left:16px;top:10px;font:11px var(--f-mono);color:var(--muted)">${ub?'parent gives infinite space':'parent is 200 × 110'}</div><div style="position:absolute;left:16px;top:34px;width:${ub?'calc(100% - 32px)':'200px'};height:${ub?'calc(100% - 50px)':'110px'};border:1.5px dashed var(--c3);${ub?'border-style:dotted;':''}"><div class="fb a" style="width:${w}px;height:${h}px;max-width:100%;max-height:100%">${w} × ${h}</div></div>`;
+ return {code:`${ub?'SingleChildScrollView(\n  scrollDirection: Axis.horizontal,\n  child: ':'SizedBox(\n  width: 200, height: 110,\n  child: '}LimitedBox(\n    maxWidth: ${s.mw},\n    maxHeight: ${s.mh},\n    child: Container(color: Colors.blue), // wants all the space\n  ),\n)`,hint:ub?'No limit comes from the parent, so LimitedBox steps in and caps the child.':'The parent already bounds the child, so LimitedBox is ignored and the child fills the parent.'};
+}});
+
+def({cat:'Layout',id:'constraints-transform-box',name:'ConstraintsTransformBox',tags:'constraints transform unconstrained width height overflow modify',h:240,
+blurb:'ConstraintsTransformBox changes the constraints it receives before they reach its child. Its named constructors remove the limit on one axis or both, which UnconstrainedBox does for both axes at once.',
+use:'Letting a child grow past its parent on one axis only, for example a long label that may be wider than its slot but must keep the slot\'s height.',
+watch:'Like UnconstrainedBox, it reports a debug overflow warning when the child no longer fits. Add a ClipRect or a scroll view if that is not what you want.',
+ctl:[{k:'m',l:'constructor',t:'sel',o:['(none)','widthUnconstrained','heightUnconstrained','unconstrained'],v:'widthUnconstrained'}],
+render(s,st,g){
+ const PW=150,PH=90,cw=230,ch=130,wu=s.m==='widthUnconstrained'||s.m==='unconstrained',hu=s.m==='heightUnconstrained'||s.m==='unconstrained';
+ const w=wu?cw:PW,h=hu?ch:PH,over=(w>PW)||(h>PH);
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:${PW}px;height:${PH}px;border:1.5px solid var(--c3);background:var(--c3s)"><div class="fb a" style="position:absolute;left:${(PW-w)/2-1.5}px;top:${(PH-h)/2-1.5}px;width:${w}px;height:${h}px;opacity:.9">child wants ${cw} × ${ch}<br>gets ${w} × ${h}</div>${over?'<div class="ovf"><span>OVERFLOWED</span></div>':''}</div></div>`;
+ const wrap=s.m==='(none)'?'// no wrapper: the tight parent forces 150 x 90':`ConstraintsTransformBox(\n    constraintsTransform: ConstraintsTransformBox.${s.m},\n    child: Container(width: ${cw}, height: ${ch}),\n  )`;
+ return {code:s.m==='(none)'?`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: Container(width: ${cw}, height: ${ch}), // clamped to ${PW} x ${PH}\n)`:`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: ${wrap},\n)`,hint:{'(none)':'Without it the parent\'s tight constraints win.','widthUnconstrained':'Width is free, height is still limited to 90.','heightUnconstrained':'Height is free, width is still limited to 150.','unconstrained':'Both limits are removed, like UnconstrainedBox.'}[s.m]};
+}});
+
+def({cat:'Layout',id:'fractional-translation',name:'FractionalTranslation',tags:'offset shift move translate fraction slide transform hit test',
+blurb:'FractionalTranslation moves its child by a fraction of the child\'s own size, painted after layout. An offset of (1, 0) shifts the child one full child-width to the right.',
+use:'Nudging or sliding something by a proportion of its own size without knowing the pixel size, for example off-screen entry animations.',
+watch:'Layout is not affected, so neighbours do not move. By default taps follow the shifted child (transformHitTests: true).',
+ctl:[{k:'dx',l:'dx',t:'rng',min:-1.5,max:1.5,step:.1,v:.5},{k:'dy',l:'dy',t:'rng',min:-1.5,max:1.5,step:.1,v:.3}],
+render(s,st,g){
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:90px;height:60px;border:1.5px dashed var(--c3)"><div class="fb a" style="position:absolute;inset:0;width:90px;height:60px;transform:translate(${s.dx*100}%,${s.dy*100}%);border-radius:6px">child</div></div></div>`;
+ return {code:`FractionalTranslation(\n  translation: Offset(${s.dx}, ${s.dy}),\n  child: Child(), // 90 x 60\n)`,hint:`Shifted by ${Math.round(s.dx*90)} px across and ${Math.round(s.dy*60)} px down. The dashed box is where layout still thinks the child is.`};
+}});
+
+/* ---- Display ---- */
+def({cat:'Display',id:'colored-box',name:'ColoredBox',tags:'color background fill container cheap solid',h:230,
+blurb:'ColoredBox paints a solid colour behind its child and does nothing else: no padding, border, radius or size of its own. It is the lightest way to fill an area.',
+use:'A plain coloured background. Add Padding or SizedBox around it when you also need spacing or a size.',
+watch:'With no child it expands to fill the parent, and with a child it matches the child\'s size. If you later need a radius or border, switch to DecoratedBox or Container.',
+ctl:[{k:'c',l:'color',t:'sel',o:['blue','teal','orange','pink'],v:'teal'},{k:'ch',l:'has a child',t:'chk',v:true}],
+render(s,st,g){
+ const col={blue:['c1s','c1'],teal:['c2s','c2'],orange:['c3s','c3'],pink:['c4s','c4']}[s.c];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:210px;height:130px;outline:1.5px dashed var(--c3);outline-offset:2px;display:flex;align-items:center;justify-content:center"><div style="background:var(--${col[0]});${s.ch?'padding:14px 18px;':'width:100%;height:100%;'}font-weight:600;color:var(--fg)">${s.ch?'Text child':''}</div></div></div>`;
+ return {code:`ColoredBox(\n  color: Colors.${s.c==='orange'?'orange':s.c==='pink'?'pink':s.c==='teal'?'teal':'blue'}.shade100,\n${s.ch?"  child: Padding(\n    padding: EdgeInsets.all(14),\n    child: Text('Text child'),\n  ),\n":''})`,hint:s.ch?'The box wraps its child. The padding comes from a separate Padding widget.':'With no child ColoredBox fills the dashed parent.'};
+}});
+
+def({cat:'Display',id:'text-rich',name:'Text.rich & RichText',tags:'textspan span style bold italic link underline inline paragraph widgetspan textscaler',h:230,
+blurb:'Text.rich shows one paragraph made of several TextSpan pieces, each with its own style. RichText does the same job at a lower level, and it needs you to supply the base style and text scaling yourself.',
+use:'Mixed styles inside one paragraph: a bold word, a coloured link, a smaller footnote. Text.rich is the usual way to write it.',
+watch:'RichText does not read DefaultTextStyle and defaults to no text scaling. Text.rich handles both, so the user\'s system font size is respected.',
+ctl:[{k:'w',l:'widget',t:'sel',o:['Text.rich','RichText'],v:'Text.rich'},{k:'b',l:'bold word',t:'chk',v:true},{k:'col',l:'coloured word',t:'chk',v:true},{k:'ul',l:'underlined link',t:'chk',v:true},{k:'sc',l:'system text scale',t:'rng',min:1,max:2,step:.25,v:1.5}],
+render(s,st,g){
+ const rt=s.w==='RichText',sc=rt?1:s.sc;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><p style="margin:0;max-width:300px;font:400 ${16*sc}px/1.4 var(--f-body);color:var(--fg)">Flutter is <span style="${s.b?'font-weight:700;':''}">fast</span>, <span style="${s.col?'color:var(--c4);':''}">expressive</span> and <span style="${s.ul?'color:var(--accent);text-decoration:underline;':''}">open source</span>.</p></div>`;
+ const sp=(t,style)=>style?`      TextSpan(\n        text: '${t}',\n        style: TextStyle(${style}),\n      ),\n`:`      TextSpan(text: '${t}'),\n`;
+ const inner=`    children: [\n${sp('fast',s.b?'fontWeight: FontWeight.bold':'')}${sp('expressive',s.col?'color: Colors.pink':'')}${sp('open source',s.ul?'color: Colors.blue, decoration: TextDecoration.underline':'')}    ],`;
+ const code=rt?`RichText(\n  textScaler: TextScaler.noScaling, // the default\n  text: TextSpan(\n    style: TextStyle(color: Colors.black, fontSize: 16), // set it yourself\n    text: 'Flutter is ',\n${inner.replace(/^/gm,'  ')}\n  ),\n)`:`Text.rich(\n  TextSpan(\n    text: 'Flutter is ',\n${inner.replace(/^/gm,'  ')}\n  ),\n)`;
+ return {code,hint:rt?'RichText ignores the scale slider, so large-text users would see small text.':`Text.rich follows the system text scale (${s.sc}×).`};
+}});
+
+def({cat:'Display',id:'custom-paint',name:'CustomPaint',tags:'canvas painter custompainter draw path paint drawcircle drawline freehand shapes wave',h:280,
+blurb:'CustomPaint gives you a Canvas to draw on. You write a CustomPainter, and its paint method receives the Canvas and the widget\'s Size. Anything Flutter cannot do with widgets, such as charts, gauges and drawing pads, can be painted.',
+use:'Charts, progress rings, custom shapes, signatures and games.',
+watch:'Return true from shouldRepaint only when the painter\'s data changed, otherwise it repaints every frame. A CustomPaint with no child and no size is 0 × 0, so give it a size.',
+ctl:[{k:'m',l:'painter',t:'sel',o:['Shapes','Wave','Freehand (draw here)'],v:'Shapes'},{k:'sw',l:'strokeWidth',t:'rng',min:1,max:12,v:4},{k:'cl',l:'color',t:'sel',o:['blue','pink','teal'],v:'blue'},{k:'am',l:'wave amplitude',t:'rng',min:5,max:60,v:30},{k:'fl',l:'fill shapes',t:'chk',v:true}],
+render(s,st,g){
+ const col={blue:'var(--c1)',pink:'var(--c4)',teal:'var(--c2)'}[s.cl],fillc={blue:'var(--c1s)',pink:'var(--c4s)',teal:'var(--c2s)'}[s.cl];
+ const free=s.m.startsWith('Freehand');
+ if(st.mode!==s.m){
+  st.mode=s.m;
+  g.innerHTML=`<svg id="cpv" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:${free?'crosshair':'default'}"><g id="cpg"></g><path id="cpp" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>${free?'<button class="btn k-Outlined btm" data-a="clear" type="button" style="padding:6px 16px">Clear</button>':''}`;
+  if(free){
+   const svg=g.querySelector('#cpv');
+   const pt=e=>{const m=svg.getScreenCTM&&svg.getScreenCTM();if(m&&svg.createSVGPoint){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(m.inverse());return [q.x,q.y]}const r=svg.getBoundingClientRect();return [(e.clientX-r.left)/r.width*300,(e.clientY-r.top)/r.height*200]};
+   let down=false;
+   svg.addEventListener('pointerdown',e=>{down=true;try{svg.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);st.d=(st.d||'')+`M${p[0].toFixed(1)} ${p[1].toFixed(1)}L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;g.querySelector('#cpp').setAttribute('d',st.d)});
+   svg.addEventListener('pointermove',e=>{if(!down)return;const p=pt(e);st.d+=`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;g.querySelector('#cpp').setAttribute('d',st.d)});
+   const up=()=>{down=false};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  }
+ }
+ const grp=g.querySelector('#cpg'),path=g.querySelector('#cpp');
+ let code;
+ path.setAttribute('stroke',col);path.setAttribute('stroke-width',s.sw);
+ if(s.m==='Shapes'){
+  grp.innerHTML=`<circle cx="95" cy="100" r="50" fill="${s.fl?fillc:'none'}" stroke="${col}" stroke-width="${s.sw}"/><rect x="170" y="55" width="100" height="80" rx="8" fill="${s.fl?fillc:'none'}" stroke="${col}" stroke-width="${s.sw}"/><line x1="30" y1="170" x2="270" y2="170" stroke="${col}" stroke-width="${s.sw}" stroke-linecap="round"/>`;
+  path.setAttribute('d','');
+  code=`class ShapesPainter extends CustomPainter {\n  @override\n  void paint(Canvas canvas, Size size) {\n    final paint = Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..style = PaintingStyle.${s.fl?'fill':'stroke'};\n    canvas.drawCircle(Offset(95, 100), 50, paint);\n    canvas.drawRRect(\n      RRect.fromLTRBR(170, 55, 270, 135, Radius.circular(8)),\n      paint,\n    );\n    canvas.drawLine(Offset(30, 170), Offset(270, 170), paint);\n  }\n\n  @override\n  bool shouldRepaint(ShapesPainter old) => false;\n}`;
+ }else if(!free){
+  let d='M0 100';for(let x=0;x<=300;x+=4)d+=`L${x} ${(100+s.am*Math.sin(x/300*Math.PI*4)).toFixed(1)}`;
+  grp.innerHTML=`<line x1="0" y1="100" x2="300" y2="100" stroke="var(--line)" stroke-dasharray="4 4"/>`;
+  path.setAttribute('d',d);
+  code=`class WavePainter extends CustomPainter {\n  WavePainter(this.amplitude);\n  final double amplitude;\n\n  @override\n  void paint(Canvas canvas, Size size) {\n    final path = Path()..moveTo(0, size.height / 2);\n    for (double x = 0; x <= size.width; x += 4) {\n      path.lineTo(x,\n        size.height / 2 + amplitude * sin(x / size.width * 4 * pi));\n    }\n    canvas.drawPath(path, Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..style = PaintingStyle.stroke);\n  }\n\n  @override\n  bool shouldRepaint(WavePainter old) =>\n      old.amplitude != amplitude; // amplitude = ${s.am}\n}`;
+ }else{
+  grp.innerHTML='';path.setAttribute('d',st.d||'');
+  code=`class DrawingPainter extends CustomPainter {\n  DrawingPainter(this.points);\n  final List<Offset> points; // filled in onPanUpdate\n\n  @override\n  void paint(Canvas canvas, Size size) {\n    final path = Path()..moveTo(points.first.dx, points.first.dy);\n    for (final p in points.skip(1)) {\n      path.lineTo(p.dx, p.dy);\n    }\n    canvas.drawPath(path, Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..strokeCap = StrokeCap.round\n      ..style = PaintingStyle.stroke);\n  }\n\n  @override\n  bool shouldRepaint(DrawingPainter old) => true;\n}`;
+ }
+ return {code:code+`\n\nCustomPaint(\n  size: Size(300, 200),\n  painter: ${s.m==='Shapes'?'ShapesPainter()':s.m==='Wave'?`WavePainter(${s.am})`:'DrawingPainter(points)'},\n)`,hint:free?'Drag across the stage to draw.':s.m==='Wave'?'The painter repaints because the amplitude changed.':'Everything here is drawn with Canvas calls inside paint().'};
+},
+act(a,st){if(a==='clear')st.d=''}});
+
+/* ---- Animation ---- */
+def({cat:'Animation',id:'animated-fractionally-sized-box',name:'AnimatedFractionallySizedBox',tags:'animate percent width factor height factor alignment implicit progress bar',h:240,
+blurb:'AnimatedFractionallySizedBox is FractionallySizedBox with an implicit animation. When widthFactor, heightFactor or alignment change, the child glides to the new size or position.',
+use:'Progress bars, expanding panels and sheets that open to a percentage of the screen.',
+watch:'Like all implicit animations it only runs when a value changes between builds. It also needs a bounded parent, the same as FractionallySizedBox.',
+ctl:[{k:'du',l:'duration (ms)',t:'rng',min:100,max:2000,step:100,v:700},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','easeOutCubic','bounceOut','elasticOut'],v:'easeOutCubic'}],
+render(s,st,g){
+ if(!st.box){g.innerHTML='<div class="fill" style="align-items:center;justify-content:center;padding-bottom:50px"><div style="position:relative;width:280px;max-width:100%;height:130px;border:1.5px dashed var(--c3)"><div class="fb a" id="afb" style="position:absolute;left:0;top:0;width:30%;height:40%"></div></div></div><button class="btn k-Filled btm" data-a="go" type="button">Toggle state</button>';st.box=g.querySelector('#afb')}
+ const on=!!st.on,b=st.box;
+ b.style.transition=`all ${s.du}ms ${CV2[s.cv]}`;
+ b.style.width=on?'90%':'30%';b.style.height=on?'80%':'40%';b.style.left=on?'10%':'0';b.style.top=on?'20%':'0';
+ b.textContent=on?'90% × 80%':'30% × 40%';
+ return {code:`AnimatedFractionallySizedBox(\n  duration: Duration(milliseconds: ${s.du}),\n  curve: Curves.${s.cv},\n  alignment: Alignment.${on?'bottomRight':'topLeft'},\n  widthFactor: ${on?0.9:0.3},\n  heightFactor: ${on?0.8:0.4},\n  child: Box(),\n)`,hint:'Press Toggle state to animate the factors and the alignment together.'};
+},
+act(a,st){if(a==='go')st.on=!st.on}});
+
+/* ---- props and related for the new widgets, plus cross links ---- */
+Object.assign(META,{
+'flex':{p:['direction|Axis|required|Axis.horizontal behaves like Row, Axis.vertical like Column.','mainAxisAlignment|MainAxisAlignment|start|How children are placed along the main axis.','crossAxisAlignment|CrossAxisAlignment|center|How children line up across the main axis.','spacing|double|0|Gap between children (Flutter 3.27 and later).','verticalDirection, textDirection|enum|down / ltr|Reverse the order of children.'],r:['row-column','expanded','layout-builder']},
+'limited-box':{p:['maxWidth|double|infinity|Width cap, used only when the incoming maxWidth is unbounded.','maxHeight|double|infinity|Height cap, used only when the incoming maxHeight is unbounded.','child|Widget?|null|The widget being limited.'],r:['sized-box','constraints','scroll-view']},
+'constraints-transform-box':{p:['constraintsTransform|BoxConstraints Function(BoxConstraints)|required|The function that rewrites the incoming constraints.','ConstraintsTransformBox.widthUnconstrained|static function|-|Ready-made transform that removes the width limit only.','ConstraintsTransformBox.heightUnconstrained|static function|-|Removes the height limit only.','ConstraintsTransformBox.unconstrained|static function|-|Removes both limits.','alignment|AlignmentGeometry|center|Where the child sits when it differs from the parent size.','clipBehavior|Clip|none|Set hardEdge to clip any overflow.'],r:['overflow-box','constraints','sized-box']},
+'fractional-translation':{p:['translation|Offset|required|Shift as a fraction of the child\'s size. Offset(1, 0) moves one child-width right.','transformHitTests|bool|true|Whether taps follow the moved child.','child|Widget?|null|The widget being shifted.'],r:['implicit-animations','rotated-box','stack-positioned']},
+'colored-box':{p:['color|Color|required|The fill colour.','child|Widget?|null|With a child it sizes to it. Without one it fills the parent.'],r:['container','decorated-box','padding']},
+'text-rich':{p:['Text.rich(textSpan)|InlineSpan|required|The tree of spans to show.','TextSpan.text|String?|null|Text of this span.','TextSpan.children|List<InlineSpan>?|null|Child spans that inherit the parent\'s style.','TextSpan.style|TextStyle?|null|Style for this span and its children.','TextSpan.recognizer|GestureRecognizer?|null|Makes a span tappable, for example a TapGestureRecognizer for links.','WidgetSpan|InlineSpan|-|Puts a real widget, such as an icon, in the text line.','RichText.textScaler|TextScaler|noScaling|Text.rich takes this from MediaQuery. RichText does not.'],r:['text','container','gestures']},
+'custom-paint':{p:['painter|CustomPainter?|null|Paints behind the child.','foregroundPainter|CustomPainter?|null|Paints on top of the child.','size|Size|zero|Canvas size when there is no child.','child|Widget?|null|If present, CustomPaint takes its size.','CustomPainter.paint(canvas, size)|void|required|Your drawing code.','CustomPainter.shouldRepaint(old)|bool|required|Return true only when the data changed.'],r:['clip','decorated-box','gestures','interactive-viewer']},
+'animated-fractionally-sized-box':{p:['duration|Duration|required|Length of the animation.','curve|Curve|linear|Easing.','widthFactor, heightFactor|double?|null|Target fractions of the parent.','alignment|AlignmentGeometry|center|Target alignment.'],r:['fractionally-sized-box','implicit-animations','animated-container']}
+});
+[['text','text-rich'],['container','colored-box'],['row-column','flex'],['sized-box','limited-box'],['overflow-box','constraints-transform-box'],['fractionally-sized-box','animated-fractionally-sized-box'],['clip','custom-paint'],['implicit-animations','fractional-translation'],['implicit-animations','animated-fractionally-sized-box'],['decorated-box','colored-box']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
