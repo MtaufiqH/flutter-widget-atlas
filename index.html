@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 64 Flutter widgets and common errors, with live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 64 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -231,6 +231,32 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .refs{margin-top:10px}
 .erb{border:1.5px solid var(--danger);background:rgba(200,40,63,.1);color:var(--danger);font:500 11.5px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere}
 .okb{border:1.5px solid var(--ok);background:rgba(22,121,74,.1);color:var(--ok);font:500 11.5px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere}
+
+.startlink{font-weight:600;color:var(--accent)!important;margin-bottom:6px}
+.stepchip{align-self:flex-start;margin-top:4px;font:500 11.5px var(--f-mono);color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.stepchip:hover{color:var(--accent);border-color:var(--accent)}
+.nstep{display:flex;flex-direction:column;gap:4px;margin-top:22px;padding:14px 18px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--fg);text-decoration:none;font:700 17px var(--f-display)}
+.nstep small{font:500 11px var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.nstep:hover{background:var(--accent);color:var(--accent-ink)}
+.nstep:hover small{color:var(--accent-ink)}
+.startpg>h2{font:700 1.9rem/1.1 var(--f-display);letter-spacing:-.015em;margin:0;padding-top:8px}
+.startpg>.ci{color:var(--muted);margin:6px 0 18px;max-width:62ch}
+.prog{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pbar{flex:1 1 220px;max-width:360px;height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+#ptxt{font:500 12.5px var(--f-mono);color:var(--muted)}
+.pact{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0 8px}
+.pact .btn{text-decoration:none}
+.stg{margin-top:22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px}
+.stg h3{display:flex;align-items:center;gap:10px;margin:0;font:700 1.15rem var(--f-display)}
+.gn{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font:700 13px var(--f-mono)}
+.gi{margin:4px 0 10px 36px;color:var(--muted);font-size:14px}
+.stp{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.stp input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:none}
+.stp .sn{font:500 12px var(--f-mono);color:var(--muted);min-width:20px;margin-top:3px}
+.stp a{font-weight:600;color:var(--fg);text-decoration:none}
+.stp a:hover{color:var(--accent)}
+.stp small{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
 
 @media (max-width:900px){
  .shell{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:24px}
@@ -1529,11 +1555,75 @@ const REFS={
 REFS['err-overflow']='widgets:Row,Flexible';REFS['err-unbounded']='widgets:ListView,Expanded';REFS['err-parentdata']='widgets:ParentDataWidget,Expanded';REFS['err-inputwidth']='material:TextField;widgets:Expanded';
 const ERRDOC='https://docs.flutter.dev/testing/common-errors';
 
+/* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
+const RECAT={};
+const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
+put('Basics','row-column container scaffold stateful');
+put('Layout','constraints expanded stack-positioned align-center sized-box rotated-box wrap aspect-ratio fitted-box fractionally-sized-box intrinsic overflow-box indexed-stack flex limited-box constraints-transform-box fractional-translation');
+put('Styling','padding layout-builder');
+put('Text','text text-rich');
+put('Assets, images, and icons','image icon-avatar');
+put('Painting and effects','opacity clip clip-rect decorated-box colored-box custom-paint backdrop-filter shader-mask color-filtered');
+put('Interaction models','gestures ink-well dismissible draggable interactive-viewer tooltip navigator');
+put('Animation and motion','animated-container animated-switcher implicit-animations animated-fractionally-sized-box');
+put('Async','future-builder');
+put('Material','card-list-tile tab-bar');
+W.forEach(d=>{if(RECAT[d.id])d.cat=RECAT[d.id]});
+CATS.length=0;
+['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
+Object.assign(CINTRO,{
+ 'Basics':'Widgets to know before building your first Flutter app.',
+ 'Layout':'Arrange other widgets in rows, columns, stacks and other layouts, and learn how sizes are decided.',
+ 'Scrolling':'Scroll many widgets as the children of a parent.',
+ 'Text':'Display and style text.',
+ 'Input':'Take input from the user: buttons, fields and selection controls.',
+ 'Interaction models':'Respond to touch, drag and swipe events, and move users between screens.',
+ 'Styling':'Add padding and respond to the size of the screen.',
+ 'Painting and effects':'Apply visual effects to children: opacity, clipping, blur, gradients and custom drawing.',
+ 'Animation and motion':'Bring animations to your app.',
+ 'Assets, images, and icons':'Display images and show icons.',
+ 'Async':'Widgets that work with asynchronous data.',
+ 'Material':'Ready-made widgets that follow the Material 3 design system.'
+});
+
+const PATH=[
+ {t:'Build your first screen',i:'The four widgets you will use in almost every screen.',s:[
+  ['text','Put words on screen and style them.'],
+  ['container','Make a box with a size, colour, padding and border.'],
+  ['row-column','Place widgets side by side or one above the other.'],
+  ['padding','Give widgets some breathing room.']]},
+ {t:'Control the layout',i:'How Flutter decides the size and position of everything.',s:[
+  ['constraints','The one rule behind every layout. Read this before the rest of the stage.'],
+  ['expanded','Share the free space in a Row or Column.'],
+  ['stack-positioned','Overlap widgets, such as a badge on an icon.'],
+  ['align-center','Put a child in a corner or in the middle.']]},
+ {t:'Show lists of things',i:'Most apps are lists of something.',s:[
+  ['list-view','Scroll long lists efficiently with ListView.builder.'],
+  ['image','Show pictures and control how they fit.'],
+  ['card-list-tile','The standard Material rows and cards for list items.']]},
+ {t:'Make it interactive',i:'Respond to the user and keep changing data.',s:[
+  ['buttons','Trigger actions with the Material buttons.'],
+  ['stateful','Keep data that changes and rebuild with setState.'],
+  ['text-field','Take typed input.'],
+  ['gestures','React to taps, long presses and drags on anything.']]},
+ {t:'Build real screens',i:'Put the pieces into screens that connect.',s:[
+  ['scaffold','The skeleton of a Material screen: app bar, body and floating button.'],
+  ['navigator','Move between screens.'],
+  ['future-builder','Show data that arrives later, for example from the network.']]},
+ {t:'Add polish',i:'Small touches that make an app feel finished.',s:[
+  ['animated-container','Animate size, colour and shape with no controller.'],
+  ['decorated-box','Rounded corners, shadows and gradients.']]},
+ {t:'When things break',i:'The red-screen errors every beginner meets, and how to fix them.',s:[
+  ['err-overflow','Content too wide for its Row or Column.'],
+  ['err-unbounded','A list inside a Column with no height.'],
+  ['err-parentdata','Expanded or Positioned in the wrong parent.']]}
+];
+
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
 const main=$('#main'),nav=$('#nav');
 const ORD=CATS.flatMap(c=>W.filter(d=>d.cat===c));
-nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>'+CATS.map(c=>`<div class="ng"><div class="nh">${esc(c)}</div>${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div>`).join('');
+nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+CATS.map(c=>`<div class="ng"><div class="nh">${esc(c)}</div>${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div>`).join('');
 const secs={};
 CATS.forEach(c=>{
  const sec=document.createElement('section');sec.className='cs';sec.hidden=true;
@@ -1547,21 +1637,49 @@ ORD.forEach((d,i)=>{
  bar.innerHTML=(p?`<a class="pv" href="#${p.id}"><small>Previous</small>${esc(p.name)}</a>`:'<span></span>')+(n?`<a class="nx" href="#${n.id}"><small>Next</small>${esc(n.name)}</a>`:'<span></span>');
  d.el.appendChild(bar);
 });
+
+const STEPS=PATH.flatMap(g=>g.s.map(x=>x[0]));
+STEPS.forEach((id,i)=>{
+ const d=W.find(x=>x.id===id);if(!d)return;
+ $('.wt',d.el).insertAdjacentHTML('beforeend',`<a class="stepchip" href="#start">Learning path · step ${i+1} of ${STEPS.length}</a>`);
+ const nx=W.find(x=>x.id===STEPS[i+1]);
+ if(nx)$('.pnx',d.el).insertAdjacentHTML('beforebegin',`<a class="nstep" href="#${nx.id}"><small>Next step in the learning path</small><span>${esc(nx.name)} <span aria-hidden="true">&rarr;</span></span></a>`);
+});
+const doneSet=(()=>{try{return new Set(JSON.parse(localStorage.getItem('atlas-done')||'[]'))}catch(_){return new Set()}})();
+const saveDone=()=>{try{localStorage.setItem('atlas-done',JSON.stringify([...doneSet]))}catch(_){}};
+const START=document.createElement('section');START.id='start';START.className='startpg';START.hidden=true;
+let sn=0;
+START.innerHTML=`<h2>Start here</h2><p class="ci">A suggested order for learning Flutter layout and UI. Tick a step when you finish it. Your progress stays in this browser.</p><div class="prog"><div class="pbar"><i id="pfill"></i></div><span id="ptxt"></span></div><div class="pact"><a class="btn k-Filled" id="pgo" href="#"></a><button class="btn k-Outlined" id="preset" type="button">Reset progress</button></div>`+PATH.map((g,gi)=>`<div class="stg"><h3><span class="gn">${gi+1}</span>${esc(g.t)}</h3><p class="gi">${esc(g.i)}</p>${g.s.map(([id,why])=>{const d=W.find(x=>x.id===id);if(!d)return '';sn++;return `<div class="stp"><input type="checkbox" data-s="${id}" aria-label="Mark ${esc(d.name)} as done"${doneSet.has(id)?' checked':''}><span class="sn">${sn}</span><div><a href="#${id}">${esc(d.name)}</a><small>${esc(why)}</small></div></div>`}).join('')}</div>`).join('');
+main.insertBefore(START,main.firstChild);
+function updateProgress(){
+ const n=STEPS.filter(i=>doneSet.has(i)).length;
+ $('#pfill').style.width=(n/STEPS.length*100)+'%';
+ $('#ptxt').textContent=n+' of '+STEPS.length+' steps done';
+ const nextId=STEPS.find(i=>!doneSet.has(i)),go=$('#pgo');
+ if(nextId){const d=W.find(x=>x.id===nextId);go.href='#'+nextId;go.textContent=(n?'Continue: ':'Start with ')+d.name;go.hidden=false}
+ else{go.hidden=true;$('#ptxt').textContent+='. You finished the path. Browse the list on the left for more.'}
+}
+START.addEventListener('change',e=>{const c=e.target.closest('input[data-s]');if(!c)return;if(c.checked)doneSet.add(c.dataset.s);else doneSet.delete(c.dataset.s);saveDone();updateProgress()});
+$('#preset').addEventListener('click',()=>{doneSet.clear();saveDone();START.querySelectorAll('input[data-s]').forEach(c=>{c.checked=false});updateProgress()});
+updateProgress();
 $('#eyebrow').textContent='Interactive reference  ·  '+W.length+' widgets  ·  '+CATS.length+' categories';
 $('#count').textContent=W.length+' widgets';
 
 let cur=null;
 function show(id,user){
- const d=W.find(x=>x.id===id)||ORD[0];
+ const d=W.find(x=>x.id===id)||null,isStart=!d;
  W.forEach(x=>{x.el.hidden=x!==d});
- CATS.forEach(c=>{secs[c].hidden=c!==d.cat});
- nav.querySelectorAll('a').forEach(a=>{if(a.dataset.id===d.id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+ CATS.forEach(c=>{secs[c].hidden=!d||c!==d.cat});
+ START.hidden=!isStart;
+ const key=isStart?'start':d.id;
+ nav.querySelectorAll('a').forEach(a=>{if(a.dataset.id===key)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
  const act=nav.querySelector('[aria-current]');
  if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
- cur=d;d.draw();
- document.title=d.name+' \u00b7 Flutter Widget Atlas';
- const bt=$('#barT');if(bt)bt.textContent=d.name;
- if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell');const bar=$('#bar'),bh=bar&&bar.offsetHeight||0;window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12-bh))}
+ cur=d;if(d)d.draw();
+ const name=isStart?'Start here':d.name;
+ document.title=name+' · Flutter Widget Atlas';
+ const bt=$('#barT');if(bt)bt.textContent=name;
+ if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell'),bar=$('#bar'),bh=bar&&bar.offsetHeight||0;window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12-bh))}
 }
 window.addEventListener('hashchange',()=>show(location.hash.slice(1),true));
 
@@ -1573,12 +1691,12 @@ $('#q').addEventListener('input',e=>{
   if(hit)n++;
   const l=nav.querySelector('[data-id="'+d.id+'"]');if(l)l.hidden=!hit;
  });
- nav.querySelectorAll('.ng').forEach(gp=>{gp.hidden=!gp.querySelector('a:not([hidden])')});
+ nav.querySelectorAll('.ng').forEach(gp=>{gp.hidden=gp.classList.contains('ngs')?!!q:!gp.querySelector('a:not([hidden])')});
  $('#none').hidden=n>0;
  $('#count').textContent=q?n+' of '+W.length+' widgets':W.length+' widgets';
 });
 $('#q').addEventListener('keydown',e=>{
- if(e.key==='Enter'){const f=nav.querySelector('a:not([hidden])[data-id]');if(f){e.preventDefault();location.hash=f.dataset.id;e.target.blur()}}
+ if(e.key==='Enter'){const f=nav.querySelector('a:not([hidden])[data-id]:not(.startlink)');if(f){e.preventDefault();location.hash=f.dataset.id;e.target.blur()}}
 });
 
 document.addEventListener('keydown',e=>{
