@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 57 Flutter widgets with live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 64 Flutter widgets and common errors, with live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -227,6 +227,11 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .pnx .nx{text-align:right;margin-left:auto}
 .pnx>span{flex:1 1 0}
 
+.ext:after{content:"\00a0\2197";font-size:.85em;opacity:.7}
+.refs{margin-top:10px}
+.erb{border:1.5px solid var(--danger);background:rgba(200,40,63,.1);color:var(--danger);font:500 11.5px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere}
+.okb{border:1.5px solid var(--ok);background:rgba(22,121,74,.1);color:var(--ok);font:500 11.5px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere}
+
 @media (max-width:900px){
  .shell{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:24px}
  #nav{position:fixed;top:0;bottom:0;left:0;width:min(320px,86vw);max-height:none;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));font-size:15px;z-index:50;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;box-shadow:0 0 30px rgba(0,0,0,.25)}
@@ -299,9 +304,18 @@ function relHTML(d){
  const links=m.r.map(id=>W.find(x=>x.id===id)).filter(Boolean).map(x=>`<a href="#${x.id}">${esc(x.name)}</a>`).join('');
  return links?`<div class="rel"><b>Related</b>${links}</div>`:'';
 }
+function refsHTML(d){
+ const spec=REFS[d.id];if(!spec)return '';
+ let first='';
+ const api=spec.split(';').filter(Boolean).flatMap(p=>{const i=p.indexOf(':'),lib=p.slice(0,i);return p.slice(i+1).split(',').map(n=>{if(!first)first=n;return `<a class="ext" target="_blank" rel="noopener" href="https://api.flutter.dev/flutter/${lib}/${n}-class.html">${n}</a>`})}).join('');
+ const err=d.cat==='Common errors'?`<a class="ext" target="_blank" rel="noopener" href="${ERRDOC}">Common errors guide</a>`:'';
+ const vid=`<a class="ext" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent('flutter widget of the week '+first)}">Widget of the Week videos</a>`;
+ const dp='<a class="ext" target="_blank" rel="noopener" href="https://dartpad.dev/">Try in DartPad</a>';
+ return `<div class="rel refs"><b>Docs</b>${api}${err}${vid}${dp}</div>`;
+}
 function mount(d){
  const a=document.createElement('article');a.className='w';a.id=d.id;
- a.innerHTML=`<header><div class="wt"><span class="cat">${esc(d.cat)}</span><h3>${esc(d.name)}</h3></div><a class="lnk" href="#${d.id}" aria-label="Link to ${esc(d.name)}">#</a></header><p class="blurb">${esc(d.blurb)}</p><div class="demo"><div class="left"><div class="stage" style="height:${d.h||260}px"></div><div class="hint"></div></div><div class="right"><div class="ctl"></div><div class="cw"><button class="cp" type="button" aria-label="Copy code">Copy</button><pre class="code" tabindex="0"></pre></div></div></div><div class="facts"><div><b>Use it for</b><p>${esc(d.use)}</p></div><div><b>Watch out</b><p>${esc(d.watch)}</p></div></div>${propsHTML(d)}${relHTML(d)}`;
+ a.innerHTML=`<header><div class="wt"><span class="cat">${esc(d.cat)}</span><h3>${esc(d.name)}</h3></div><a class="lnk" href="#${d.id}" aria-label="Link to ${esc(d.name)}">#</a></header><p class="blurb">${esc(d.blurb)}</p><div class="demo"><div class="left"><div class="stage" style="height:${d.h||260}px"></div><div class="hint"></div></div><div class="right"><div class="ctl"></div><div class="cw"><button class="cp" type="button" aria-label="Copy code">Copy</button><pre class="code" tabindex="0"></pre></div></div></div><div class="facts"><div><b>Use it for</b><p>${esc(d.use)}</p></div><div><b>Watch out</b><p>${esc(d.watch)}</p></div></div>${propsHTML(d)}${relHTML(d)}${refsHTML(d)}`;
  const g=$('.stage',a),code=$('.code',a),ctl=$('.ctl',a);
  const cp=$('.cp',a);
  cp.addEventListener('click',()=>{
@@ -1372,6 +1386,148 @@ Object.assign(META,{
 'animated-fractionally-sized-box':{p:['duration|Duration|required|Length of the animation.','curve|Curve|linear|Easing.','widthFactor, heightFactor|double?|null|Target fractions of the parent.','alignment|AlignmentGeometry|center|Target alignment.'],r:['fractionally-sized-box','implicit-animations','animated-container']}
 });
 [['text','text-rich'],['container','colored-box'],['row-column','flex'],['sized-box','limited-box'],['overflow-box','constraints-transform-box'],['fractionally-sized-box','animated-fractionally-sized-box'],['clip','custom-paint'],['implicit-animations','fractional-translation'],['implicit-animations','animated-fractionally-sized-box'],['decorated-box','colored-box']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+
+/* ================= v4: EFFECTS, COMMON ERRORS, REFERENCE LINKS ================= */
+CATS.push('Common errors');
+CINTRO['Common errors']='The red-screen messages every Flutter developer meets, each with a broken and a fixed version. Messages and fixes follow the official Common Flutter errors page.';
+
+const PAL={sunset:['#ff9a3c','#ff3d77','#7b2ff7'],ocean:['#00c6ff','#0072ff','#5b2bd9'],lime:['#d4fc79','#3ec886','#0a8f6a']};
+const palCss=(k,t)=>{const c=PAL[k];return t==='LinearGradient'?`linear-gradient(90deg,${c.join(',')})`:t==='RadialGradient'?`radial-gradient(circle,${c.join(',')})`:`conic-gradient(from 0deg,${c.join(',')},${c[0]})`};
+const star=encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="'+IC.star+'"/></svg>');
+
+def({cat:'Display',id:'backdrop-filter',name:'BackdropFilter',tags:'blur frosted glass imagefilter effect background sigma',h:250,
+blurb:'BackdropFilter applies an image filter, usually a blur, to everything painted behind it. The child is drawn on top of the filtered area, which gives the frosted-glass look.',
+use:'Frosted panels, blurred dialog backgrounds and glass-style navigation bars.',
+watch:'It filters everything behind it across the whole canvas, not just the area under its child. Wrap it in ClipRect, or ClipRRect for rounded corners, to limit the effect. It is also expensive, so use it sparingly.',
+ctl:[{k:'sg',l:'sigma (blur)',t:'rng',min:0,max:20,v:6},{k:'tint',l:'white tint on child',t:'chk',v:true}],
+render(s,st,g){
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:270px;max-width:100%;height:170px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,var(--c1) 0 25%,var(--c4) 25% 50%,var(--c3) 50% 75%,var(--c2) 75%)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 42px var(--f-display);color:#fff;letter-spacing:.08em">FLUTTER</div><div style="position:absolute;left:34px;right:34px;top:36px;bottom:36px;border-radius:12px;backdrop-filter:blur(${s.sg}px);-webkit-backdrop-filter:blur(${s.sg}px);background:rgba(255,255,255,${s.tint?.25:0});border:1px solid rgba(255,255,255,.55)"></div></div></div>`;
+ return {code:`import 'dart:ui';\n\nStack(\n  children: [\n    Background(),\n    ClipRRect(\n      borderRadius: BorderRadius.circular(12),\n      child: BackdropFilter(\n        filter: ImageFilter.blur(sigmaX: ${s.sg}, sigmaY: ${s.sg}),\n        child: Container(\n          color: Colors.white${s.tint?'.withValues(alpha: 0.25)':'.withValues(alpha: 0)'},\n        ),\n      ),\n    ),\n  ],\n)`,hint:'The browser blur is an approximation of Flutter\'s Gaussian sigma. Raise it and the letters behind the panel dissolve.'};
+}});
+
+def({cat:'Display',id:'shader-mask',name:'ShaderMask',tags:'gradient text mask shader blendmode srcin createshader gradient text icon',h:230,
+blurb:'ShaderMask paints its child, then covers it with a shader, for example a gradient, using a blend mode. With BlendMode.srcIn the gradient fills only the shape of the child, so text and icons get gradient colour.',
+use:'Gradient text and icons, fade-out edges on a scroll view, and shimmer loading effects.',
+watch:'With srcIn the child\'s own colour is discarded and only its shape (alpha) is kept, so make the child white or opaque. shaderCallback receives the child\'s bounds, so the gradient follows the child\'s size.',
+ctl:[{k:'t',l:'shader',t:'sel',o:['LinearGradient','RadialGradient','SweepGradient'],v:'LinearGradient'},{k:'p',l:'colours',t:'sel',o:['sunset','ocean','lime'],v:'sunset'},{k:'c',l:'child',t:'sel',o:['Text','Icon'],v:'Text'}],
+render(s,st,g){
+ const bg=palCss(s.p,s.t);
+ const child=s.c==='Text'?`<div style="font:800 64px/1 var(--f-display);letter-spacing:-.02em;background:${bg};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">Flutter</div>`:`<div style="width:120px;height:120px;background:${bg};-webkit-mask:url('data:image/svg+xml;utf8,${star}') center/contain no-repeat;mask:url('data:image/svg+xml;utf8,${star}') center/contain no-repeat"></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center">${child}</div>`;
+ const cols=PAL[s.p].map((h,i)=>['Colors.orange','Colors.pink','Colors.purple'][i]);
+ const ocean=['Colors.cyan','Colors.blue','Colors.deepPurple'],lime=['Colors.lime','Colors.green','Colors.teal'];
+ const cl=({sunset:['Colors.orange','Colors.pink','Colors.purple'],ocean,lime})[s.p].join(', ');
+ return {code:`ShaderMask(\n  blendMode: BlendMode.srcIn,\n  shaderCallback: (Rect bounds) => ${s.t}(\n    colors: [${cl}],\n  ).createShader(bounds),\n  child: ${s.c==='Text'?"Text(\n    'Flutter',\n    style: TextStyle(\n      fontSize: 64,\n      fontWeight: FontWeight.w800,\n      color: Colors.white, // required: srcIn keeps only its shape\n    ),\n  )":'Icon(Icons.star, size: 120, color: Colors.white)'},\n)`,hint:'The child is white in code. The gradient replaces its colour and keeps only its outline.'};
+}});
+
+def({cat:'Display',id:'color-filtered',name:'ColorFiltered',tags:'filter grayscale sepia invert tint matrix colorfilter blendmode image effect',h:250,
+blurb:'ColorFiltered applies a colour filter to its child as a whole. A filter either blends one colour over the child with a BlendMode, or remaps every pixel with a 4 × 5 colour matrix.',
+use:'Greyscale for disabled images, sepia and invert effects, and tinting icons or photos.',
+watch:'It forces an offscreen layer, so avoid animating it over large areas. For a single image, the Image widget\'s own color and colorBlendMode parameters are cheaper.',
+ctl:[{k:'f',l:'filter',t:'sel',o:['none','grayscale (matrix)','sepia (matrix)','invert (matrix)','tint (mode)'],v:'grayscale (matrix)'}],
+render(s,st,g){
+ const css={none:'none','grayscale (matrix)':'grayscale(1)','sepia (matrix)':'sepia(1)','invert (matrix)':'invert(1)','tint (mode)':'none'}[s.f];
+ const tint=s.f==='tint (mode)'?'<div style="position:absolute;inset:0;background:#e0457b;mix-blend-mode:multiply"></div>':'';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:240px;max-width:100%;height:130px;overflow:hidden;border-radius:10px;filter:${css}"><img alt="Filtered sample" draggable="false" src="${PIC}" style="display:block;width:100%;height:100%;object-fit:cover">${tint}</div></div>`;
+ const M={'grayscale (matrix)':'0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0,      0,      0,      1, 0,','sepia (matrix)':'0.393, 0.769, 0.189, 0, 0,\n    0.349, 0.686, 0.168, 0, 0,\n    0.272, 0.534, 0.131, 0, 0,\n    0,     0,     0,     1, 0,','invert (matrix)':'-1,  0,  0, 0, 255,\n     0, -1,  0, 0, 255,\n     0,  0, -1, 0, 255,\n     0,  0,  0, 1, 0,'};
+ const f=s.f==='none'?'// no filter':s.f==='tint (mode)'?'ColorFilter.mode(Colors.pink, BlendMode.modulate)':`ColorFilter.matrix(<double>[\n    ${M[s.f]}\n  ])`;
+ return {code:s.f==='none'?'Image.network(url) // no ColorFiltered':`ColorFiltered(\n  colorFilter: ${f},\n  child: Image.network(url),\n)`,hint:'The browser uses its own filters to preview the same effect, so the exact tones can differ slightly from Flutter.'};
+}});
+
+/* ---------- Common errors ---------- */
+const errb=t=>`<div class="erb">${esc(t)}</div>`;
+const okb=t=>`<div class="okb">${esc(t)}</div>`;
+const longTxt='This is a long message that does not fit on a single line of the row.';
+
+def({cat:'Common errors',id:'err-overflow',name:'A RenderFlex overflowed',tags:'error red screen yellow black stripes overflow row column text too long expanded flexible',h:250,
+blurb:'A Row or Column has a child that is wider (or taller) than the space left. In the official example a Column holding a long Text tries to be as wide as its text, which is more than its parent Row can give it.',
+use:'Seen whenever text or a fixed-size child is put in a Row or Column without telling Flutter how it may shrink.',
+watch:'Expanded is the same as Flexible with flex 1.0 and fit tight. Expanded makes the child take its share. Flexible lets it be smaller, so use it with TextOverflow.ellipsis if you want one line.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken','Fixed: Expanded (wraps)','Fixed: Flexible + ellipsis'],v:'Broken'},{k:'n',l:'text length',t:'rng',min:12,max:68,v:68}],
+render(s,st,g){
+ const t=longTxt.slice(0,s.n),br=s.m==='Broken',el=s.m.includes('ellipsis');
+ const span=br?`<span style="white-space:nowrap">${esc(t)}</span>`:el?`<span style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t)}</span>`:`<span style="flex:1;min-width:0">${esc(t)}</span>`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px"><div class="rowx" style="position:relative;display:flex;align-items:center;gap:8px;width:min(300px,100%);padding:10px;border:1.5px solid var(--c3);border-radius:6px;background:var(--surface);font-size:14px">${ic('star',26,'var(--c3)')}${span}<div class="ovf" style="display:none"><span>RIGHT OVERFLOWED</span></div></div><div class="emsg-wrap" style="width:min(300px,100%)">${br?errb('A RenderFlex overflowed by 0 pixels on the right.'):okb('No error. The text now fits the space the Row can offer.')}</div></div>`;
+ const row=el?"Row(\n  children: [\n    Icon(Icons.star),\n    SizedBox(width: 8),\n    Flexible(\n      child: Text(\n        message,\n        overflow: TextOverflow.ellipsis,\n      ),\n    ),\n  ],\n)":s.m==='Broken'?"Row(\n  children: [\n    Icon(Icons.star),\n    SizedBox(width: 8),\n    Text(message), // wider than the Row\n  ],\n)":"Row(\n  children: [\n    Icon(Icons.star),\n    SizedBox(width: 8),\n    Expanded(child: Text(message)),\n  ],\n)";
+ return {code:row,hint:br?'The yellow and black stripes are what Flutter paints in debug mode. In a release build you would see a grey screen or clipped text.':el?'Flexible lets the Text be narrower than its share, and ellipsis marks the cut.':'Expanded gives the Text the leftover width, and it wraps onto more lines.'};
+},
+after(g){
+ const row=g.querySelector('.rowx'),m=g.querySelector('.erb'),o=g.querySelector('.ovf');
+ if(row&&m&&row.scrollWidth>row.clientWidth){m.textContent=m.textContent.replace(/by \d+ pixels/,'by '+(row.scrollWidth-row.clientWidth)+' pixels');if(o)o.style.display='flex'}
+}});
+
+def({cat:'Common errors',id:'err-unbounded',name:'Vertical viewport was given unbounded height',tags:'error listview column gridview expanded shrinkwrap sizedbox viewport unbounded scrollable',h:300,
+blurb:'A ListView (or GridView) is placed inside a Column with no height limit. The list wants all the vertical space it can get, and a Column does not limit the height of its children, so the list has nothing to measure against.',
+use:'Seen when a scrollable is nested inside a Column or other unbounded-height parent.',
+watch:'shrinkWrap: true also fixes the error, but it forces Flutter to measure every child. It is fine for short lists, but a poor choice for long ones. Prefer Expanded.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken','Fixed: Expanded','Fixed: SizedBox(height: 100)','Fixed: shrinkWrap: true'],v:'Broken'}],
+render(s,st,g){
+ const br=s.m==='Broken',ex=s.m.endsWith('Expanded'),sb=s.m.includes('SizedBox'),sw=s.m.includes('shrinkWrap');
+ const n=sw?3:6,rows=Array.from({length:n},(_,i)=>`<div class="li" style="height:34px">${['Map','Subway','Bus','Tram','Ferry','Bike'][i]}</div>`).join('');
+ let list;
+ if(br)list=`<div class="fb d" style="flex:none;height:60px;border-style:dashed;margin:6px">ListView: no height to measure</div>`;
+ else if(ex)list=`<div style="flex:1;min-height:0;overflow:auto">${rows}</div>`;
+ else if(sb)list=`<div style="height:100px;overflow:auto;flex:none;outline:1px dashed var(--c3)">${rows}</div>`;
+ else list=`<div style="flex:none">${rows}</div>`;
+ g.innerHTML=`<div class="fill" style="gap:14px;align-items:flex-start"><div style="width:190px;height:225px;border:2px solid var(--fg);border-radius:12px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column;flex:none"><div style="padding:10px 12px;font-weight:700;border-bottom:1px solid var(--line)">Header</div>${list}</div><div style="flex:1;min-width:0;align-self:center">${br?errb('Vertical viewport was given unbounded height.'):okb('No error. The list now has a height to work with.')}</div></div>`;
+ const inner=sw?'ListView(\n      shrinkWrap: true,\n      children: items,\n    )':'ListView(children: items)';
+ const code=br?`Column(\n  children: [\n    Text('Header'),\n    ListView(children: items), // no height limit\n  ],\n)`:ex?`Column(\n  children: [\n    Text('Header'),\n    Expanded(\n      child: ListView(children: items),\n    ),\n  ],\n)`:sb?`Column(\n  children: [\n    Text('Header'),\n    SizedBox(\n      height: 100,\n      child: ListView(children: items),\n    ),\n  ],\n)`:`Column(\n  children: [\n    Text('Header'),\n    ${inner},\n  ],\n)`;
+ return {code,hint:br?'In Flutter the whole screen turns red and the list never appears.':ex?'Expanded gives the list all the height left under the header.':sb?'A fixed height is enough for the list to scroll inside.':'The list wraps its own content, so it never scrolls on its own.'};
+}});
+
+def({cat:'Common errors',id:'err-parentdata',name:'Incorrect use of ParentDataWidget',tags:'error expanded flexible positioned stack row column table tablecell parent data widget wrong parent',h:260,
+blurb:'Some widgets only work as a direct child of one particular parent, because they pass layout information up to it. Put them anywhere else and Flutter throws this assertion.',
+use:'Seen when Expanded or Flexible is not directly inside a Row, Column or Flex, or when Positioned is not directly inside a Stack.',
+watch:'Check for a wrapper between the two. A Padding, Container or SizedBox placed between Expanded and its Row is enough to break it. The wrapper must go outside the Expanded, not between.',
+ctl:[{k:'w',l:'child widget',t:'sel',o:['Expanded','Flexible','Positioned'],v:'Expanded'},{k:'p',l:'parent',t:'sel',o:['Wrong: Container','Right: matching parent'],v:'Wrong: Container'}],
+render(s,st,g){
+ const bad=s.p.startsWith('Wrong'),pos=s.w==='Positioned',par=pos?'Stack':'Row';
+ let stage;
+ if(bad)stage=`<div style="width:190px;height:96px;border:2px dashed var(--danger);border-radius:8px;display:flex;align-items:center;justify-content:center;font:11px var(--f-mono);color:var(--danger);text-align:center;padding:6px">Container<br>${s.w} here cannot talk to it</div>`;
+ else if(pos)stage=`<div style="position:relative;width:190px;height:96px;border:2px solid var(--fg);border-radius:8px;background:var(--surface)"><div class="fb d" style="position:absolute;right:8px;top:8px;width:70px;height:34px">Positioned</div><div class="fb a" style="position:absolute;left:8px;bottom:8px;width:60px;height:34px">child</div></div>`;
+ else stage=`<div style="display:flex;width:190px;height:96px;border:2px solid var(--fg);border-radius:8px;background:var(--surface);align-items:center;padding:0 8px;gap:8px"><div class="fb a" style="width:44px;height:44px">A</div><div class="fb b" style="${s.w==='Expanded'?'flex:1':'width:70px'};height:44px">${s.w}</div></div>`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px">${stage}<div style="width:min(300px,100%)">${bad?errb('Incorrect use of ParentDataWidget.'):okb('No error. '+s.w+' sits directly inside a '+par+'.')}</div></div>`;
+ const kid=pos?"Positioned(\n      right: 8, top: 8,\n      child: Badge(),\n    )":`${s.w}(child: Box())`;
+ return {code:bad?`Container(\n  child: ${kid.replace(/\n    /g,'\n  ')}, // wrong parent\n)`:`${par}(\n  children: [\n    Child(),\n    ${kid},\n  ],\n)`,hint:'Expected parents: Flexible and Expanded need a Row, Column or Flex. Positioned needs a Stack. TableCell needs a Table.'};
+}});
+
+def({cat:'Common errors',id:'err-inputwidth',name:'An InputDecorator cannot have an unbounded width',tags:'error textfield textformfield row inputdecorator unbounded width expanded sizedbox form',h:240,
+blurb:'A TextField or TextFormField is placed in a Row with no width limit. The field wants to be as wide as it can, and a Row gives its children unbounded width, so Flutter cannot size the text box.',
+use:'Seen when a text field is put beside an icon or a button in a Row.',
+watch:'Expanded shares the leftover width with the other children. SizedBox sets a fixed width, which is less flexible on different screen sizes.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken','Fixed: Expanded','Fixed: SizedBox(width: 160)'],v:'Broken'}],
+render(s,st,g){
+ const br=s.m==='Broken',ex=s.m.endsWith('Expanded');
+ const fld=br?`<div class="fb d" style="width:120px;height:44px;border-style:dashed;flex:none">TextField ?</div>`:`<div style="${ex?'flex:1;min-width:0':'width:160px;flex:none'};height:44px;border:1.5px solid var(--muted);border-radius:6px;background:var(--surface);display:flex;align-items:center;padding:0 12px;color:var(--muted);font-size:14px">Type here</div>`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="display:flex;align-items:center;gap:10px;width:min(300px,100%);padding:8px;border:2px solid var(--fg);border-radius:10px;background:var(--surface)">${ic('person',26,'var(--c1)')}${fld}</div><div style="width:min(300px,100%)">${br?errb('An InputDecorator, which is typically created by a TextField, cannot have an unbounded width.'):okb('No error. The text field now has a width.')}</div></div>`;
+ return {code:br?"Row(\n  children: [\n    Icon(Icons.person),\n    TextField(), // unbounded width\n  ],\n)":ex?"Row(\n  children: [\n    Icon(Icons.person),\n    Expanded(child: TextField()),\n  ],\n)":"Row(\n  children: [\n    Icon(Icons.person),\n    SizedBox(width: 160, child: TextField()),\n  ],\n)",hint:br?'The text field never appears and the screen turns red.':'The field fits in the space the Row gives it.'};
+}});
+
+/* ---------- properties, related, references ---------- */
+Object.assign(META,{
+'backdrop-filter':{p:['filter|ImageFilter|required|The filter, for example ImageFilter.blur(sigmaX, sigmaY). Needs import \'dart:ui\'.','blendMode|BlendMode|srcOver|How the filtered backdrop is combined with what is under it.','enabled|bool|true|Turn the filter off without removing the widget.','child|Widget?|null|Drawn on top of the filtered area. Often a translucent Container.'],r:['clip','opacity','color-filtered','decorated-box']},
+'shader-mask':{p:['shaderCallback|Shader Function(Rect)|required|Builds the shader from the child\'s bounds, for example gradient.createShader(bounds).','blendMode|BlendMode|modulate|How the shader is combined with the child. srcIn paints it only where the child has pixels.','child|Widget?|null|The widget being masked. Keep it opaque or white with srcIn.'],r:['text','opacity','color-filtered','custom-paint']},
+'color-filtered':{p:['colorFilter|ColorFilter|required|Either ColorFilter.mode(color, blendMode) or ColorFilter.matrix(list of 20 numbers).','ColorFilter.mode(color, blendMode)|constructor|-|Blend one colour over every pixel.','ColorFilter.matrix(list)|constructor|-|Remap each pixel with a 4 x 5 matrix, such as greyscale or sepia.','child|Widget?|null|The widget being filtered.'],r:['opacity','image','backdrop-filter','shader-mask']}
+});
+[['clip','backdrop-filter'],['opacity','color-filtered'],['image','color-filtered'],['text','shader-mask'],['sized-box','err-unbounded'],['list-view','err-unbounded'],['row-column','err-overflow'],['expanded','err-overflow'],['expanded','err-parentdata'],['stack-positioned','err-parentdata'],['text-field','err-inputwidth']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+META['err-overflow']={r:['expanded','row-column','wrap','err-unbounded']};
+META['err-unbounded']={r:['list-view','expanded','scroll-view','err-overflow']};
+META['err-parentdata']={r:['expanded','stack-positioned','row-column','err-inputwidth']};
+META['err-inputwidth']={r:['text-field','expanded','sized-box','err-overflow']};
+
+const REFS={
+'constraints':'rendering:BoxConstraints;widgets:ConstrainedBox','row-column':'widgets:Row,Column','expanded':'widgets:Expanded,Flexible','stack-positioned':'widgets:Stack,Positioned','align-center':'widgets:Align,Center','padding':'widgets:Padding','sized-box':'widgets:SizedBox,ConstrainedBox','container':'widgets:Container','rotated-box':'widgets:RotatedBox,Transform','wrap':'widgets:Wrap','aspect-ratio':'widgets:AspectRatio','fitted-box':'widgets:FittedBox','layout-builder':'widgets:LayoutBuilder,MediaQuery',
+'list-view':'widgets:ListView','grid-view':'widgets:GridView','scroll-view':'widgets:SingleChildScrollView','page-view':'widgets:PageView','slivers':'widgets:CustomScrollView;material:SliverAppBar',
+'text':'widgets:Text','image':'widgets:Image','icon-avatar':'widgets:Icon;material:CircleAvatar','card-list-tile':'material:Card,ListTile','opacity':'widgets:Opacity','clip':'widgets:ClipRRect,ClipOval,ClipPath',
+'buttons':'material:FilledButton,ElevatedButton,IconButton','text-field':'material:TextField','toggles':'material:Checkbox,Switch,Radio','slider':'material:Slider','dropdown':'material:DropdownButton','scaffold':'material:Scaffold,AppBar','tab-bar':'material:TabBar,TabBarView',
+'gestures':'widgets:GestureDetector','ink-well':'material:InkWell','dismissible':'widgets:Dismissible','draggable':'widgets:Draggable,DragTarget',
+'animated-container':'widgets:AnimatedContainer','animated-switcher':'widgets:AnimatedSwitcher','navigator':'widgets:Navigator','stateful':'widgets:StatefulWidget,StatelessWidget','future-builder':'widgets:FutureBuilder',
+'fractionally-sized-box':'widgets:FractionallySizedBox','intrinsic':'widgets:IntrinsicHeight,IntrinsicWidth','overflow-box':'widgets:OverflowBox,UnconstrainedBox','indexed-stack':'widgets:IndexedStack','clip-rect':'widgets:ClipRect','decorated-box':'widgets:DecoratedBox;painting:BoxDecoration','tooltip':'material:Tooltip','interactive-viewer':'widgets:InteractiveViewer','implicit-animations':'widgets:AnimatedOpacity,AnimatedScale,AnimatedPositioned',
+'flex':'widgets:Flex','limited-box':'widgets:LimitedBox','constraints-transform-box':'widgets:ConstraintsTransformBox','fractional-translation':'widgets:FractionalTranslation','colored-box':'widgets:ColoredBox','text-rich':'widgets:Text,RichText','custom-paint':'widgets:CustomPaint;rendering:CustomPainter','animated-fractionally-sized-box':'widgets:AnimatedFractionallySizedBox',
+'backdrop-filter':'widgets:BackdropFilter','shader-mask':'widgets:ShaderMask','color-filtered':'widgets:ColorFiltered'
+};
+REFS['err-overflow']='widgets:Row,Flexible';REFS['err-unbounded']='widgets:ListView,Expanded';REFS['err-parentdata']='widgets:ParentDataWidget,Expanded';REFS['err-inputwidth']='material:TextField;widgets:Expanded';
+const ERRDOC='https://docs.flutter.dev/testing/common-errors';
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
