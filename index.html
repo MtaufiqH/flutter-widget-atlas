@@ -6,6 +6,7 @@
 <meta name="description" content="Interactive reference to 91 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* layout concept: left rail of widget names, one long reference column; each entry = short notes, a live stage with controls, and the Flutter code that matches the current settings */
@@ -46,7 +47,11 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 #count{font:12px var(--f-mono);color:var(--muted)}
 .shell{margin-top:36px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:start}
 #nav{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;padding-right:8px;font-size:13.5px}
-.nh{font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:20px 0 8px}
+.nh{font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:6px 0 0;width:100%;display:flex;align-items:center;gap:8px;padding:10px 0;background:none;border:0;border-top:1px solid var(--line);cursor:pointer;text-align:left}
+.nh:hover{color:var(--accent)}.nh .nc{margin-left:auto;font-weight:500;opacity:.7}
+.nh svg{flex:none;transition:transform .15s}.ng.cl .nh svg{transform:rotate(-90deg)}
+.ng.cl .nl{display:none}#nav.searching .ng.cl .nl{display:block}
+.nl{padding-bottom:6px}
 .ng:first-child .nh{margin-top:0}
 #nav a{display:block;padding:3px 0;color:var(--fg);text-decoration:none}
 #nav a:hover{color:var(--accent)}
@@ -2383,7 +2388,9 @@ Object.assign(REFS,{
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
 const main=$('#main'),nav=$('#nav');
 const ORD=CATS.flatMap(c=>W.filter(d=>d.cat===c));
-nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+CATS.map(c=>`<div class="ng"><div class="nh">${esc(c)}</div>${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div>`).join('');
+nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+CATS.map(c=>`<div class="ng cl"><button class="nh" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>${esc(c)}<span class="nc">${W.filter(d=>d.cat===c).length}</span></button><div class="nl">${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div></div>`).join('');
+const setGroup=(g,open)=>{g.classList.toggle('cl',!open);const b=g.querySelector('.nh');if(b)b.setAttribute('aria-expanded',String(open))};
+nav.addEventListener('click',e=>{const b=e.target.closest('.nh');if(b)setGroup(b.parentNode,b.parentNode.classList.contains('cl'))});
 const secs={};
 CATS.forEach(c=>{
  const sec=document.createElement('section');sec.className='cs';sec.hidden=true;
@@ -2433,6 +2440,7 @@ function show(id,user){
  START.hidden=!isStart;
  const key=isStart?'start':d.id;
  nav.querySelectorAll('a').forEach(a=>{if(a.dataset.id===key)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+ const cg=nav.querySelector('[aria-current]');const cgg=cg&&cg.closest('.ng');if(cgg&&!cgg.classList.contains('ngs'))setGroup(cgg,true);
  const act=nav.querySelector('[aria-current]');
  if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
  cur=d;if(d)d.draw();
@@ -2451,6 +2459,7 @@ $('#q').addEventListener('input',e=>{
   if(hit)n++;
   const l=nav.querySelector('[data-id="'+d.id+'"]');if(l)l.hidden=!hit;
  });
+ nav.classList.toggle('searching',!!q);
  nav.querySelectorAll('.ng').forEach(gp=>{gp.hidden=gp.classList.contains('ngs')?!!q:!gp.querySelector('a:not([hidden])')});
  $('#none').hidden=n>0;
  $('#count').textContent=q?n+' of '+W.length+' widgets':W.length+' widgets';
