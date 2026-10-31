@@ -286,6 +286,10 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .sr{margin-left:auto;flex:0 1 460px;display:flex;align-items:center;gap:10px;min-width:0;justify-content:flex-end}
 .sr.sc{flex:0 0 auto}.sr.sc #q,.sr.sc #count,.sr.sc .kbd{display:none}
 #sbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+#tbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+#tbtn:hover{background:var(--accent-soft);color:var(--accent)}
+#tbtn .tm{display:none}:root[data-theme="dark"] #tbtn .ts{display:none}:root[data-theme="dark"] #tbtn .tm{display:block}
+#bar.sx #tbtn{display:none}
 #sbtn:hover{background:var(--accent-soft);color:var(--accent)}
 .sr:not(.sc) #sbtn{border-color:transparent;background:none;pointer-events:none}
 #brand{font:700 17px var(--f-display);letter-spacing:-.01em;color:var(--fg);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
@@ -311,7 +315,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
 <div id="scrim" hidden></div>
-<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span><div class="sr sc"><button id="sbtn" type="button" aria-label="Search widgets" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div></div>
+<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span><div class="sr sc"><button id="sbtn" type="button" aria-label="Search widgets" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div><button id="tbtn" type="button" aria-label="Switch to dark theme"><svg class="ts" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg><svg class="tm" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></button></div>
 <button id="totop" type="button" hidden aria-label="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg><span>Top</span></button>
 <p id="none" hidden>No widget matches that search. Try a word like "scroll", "animation" or "button".</p>
 
@@ -2482,6 +2486,12 @@ document.addEventListener('keydown',e=>{
  else if(e.key==='Escape'&&t&&t.id==='q'&&t.value){t.value='';t.dispatchEvent(new Event('input'))}
 });
 const kb=$('#kb');if(kb&&/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent||''))kb.textContent='\u2318K';
+const tbtn=$('#tbtn'),root=document.documentElement;
+const sysDark=()=>window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;
+const applyTheme=m=>{root.setAttribute('data-theme',m);tbtn.setAttribute('aria-label',m==='dark'?'Switch to light theme':'Switch to dark theme');tbtn.title=tbtn.getAttribute('aria-label')};
+let saved=null;try{saved=localStorage.getItem('atlas-theme')}catch(_){}
+applyTheme(saved==='dark'||saved==='light'?saved:(sysDark()?'dark':'light'));
+tbtn.addEventListener('click',()=>{const m=root.getAttribute('data-theme')==='dark'?'light':'dark';applyTheme(m);try{localStorage.setItem('atlas-theme',m)}catch(_){}});
 const burger=$('#burger'),scrim=$('#scrim');
 const sr=$('.sr'),sbtn=$('#sbtn'),barEl=$('#bar'),qi=$('#q');
 const openSearch=()=>{sr.classList.remove('sc');barEl.classList.add('sx');sbtn.setAttribute('aria-expanded','true');qi.focus()};
