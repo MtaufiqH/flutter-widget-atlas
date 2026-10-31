@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 100 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 112 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
@@ -351,14 +351,16 @@ function relHTML(d){
  const links=m.r.map(id=>W.find(x=>x.id===id)).filter(Boolean).map(x=>`<a href="#${x.id}">${esc(x.name)}</a>`).join('');
  return links?`<div class="rel"><b>Related</b>${links}</div>`:'';
 }
+const LINKS={};
 function refsHTML(d){
- const spec=REFS[d.id];if(!spec)return '';
+ const spec=REFS[d.id]||'',ln=LINKS[d.id]||[];if(!spec&&!ln.length)return '';
  let first='';
  const api=spec.split(';').filter(Boolean).flatMap(p=>{const i=p.indexOf(':'),lib=p.slice(0,i);return p.slice(i+1).split(',').map(n=>{if(!first)first=n;return `<a class="ext" target="_blank" rel="noopener" href="https://api.flutter.dev/flutter/${lib}/${n}-class.html">${n}</a>`})}).join('');
  const err=d.cat==='Common errors'?`<a class="ext" target="_blank" rel="noopener" href="${ERRDOC}">Common errors guide</a>`:'';
- const vid=`<a class="ext" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent('flutter widget of the week '+first)}">Widget of the Week videos</a>`;
+ const pk=ln.map(([t,u])=>`<a class="ext" target="_blank" rel="noopener" href="${u}">${esc(t)}</a>`).join('');
+ const vid=!first?'':`<a class="ext" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent('flutter widget of the week '+first)}">Widget of the Week videos</a>`;
  const dp='<a class="ext" target="_blank" rel="noopener" href="https://dartpad.dev/">Try in DartPad</a>';
- return `<div class="rel refs"><b>Docs</b>${api}${err}${vid}${dp}</div>`;
+ return `<div class="rel refs"><b>Docs</b>${api}${pk}${err}${vid}${dp}</div>`;
 }
 function mount(d){
  const a=document.createElement('article');a.className='w';a.id=d.id;
@@ -2422,6 +2424,268 @@ Object.assign(REFS,{
 });
 [['scaffold','theme-data'],['text','text-theme'],['padding','spacing-dimens'],['container','color-roles'],['buttons','component-themes'],['card-list-tile','component-themes'],['image','app-resources'],['toggles','theme-mode']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
 
+/* ================= v8 A: STATE AND ARCHITECTURE ================= */
+const SA='State and architecture';
+const row=(t,sub,on,act)=>`<div ${act?`data-a="${act}" `:''}style="${act?'cursor:pointer;':''}padding:7px 10px;border-radius:8px;border:1.5px solid ${on?'var(--c1)':'var(--line)'};background:${on?'var(--c1s)':'var(--surface)'};color:${on?'var(--c1t)':'var(--fg)'};font-size:12.5px;line-height:1.35"><b style="font-weight:700">${t}</b>${sub?`<div style="font-size:11.5px;opacity:.85">${sub}</div>`:''}</div>`;
+
+def({cat:SA,id:'state-scope',name:'Ephemeral state vs app state',tags:'state management setstate ephemeral local app state shared choose which scope lift provider decision',h:340,
+blurb:'State is any data that changes while the app runs. Flutter docs split it in two. Ephemeral (local) state lives inside one widget, like the current tab or a text field. App (shared) state is needed by several screens, like the logged-in user or a shopping cart. The kind of state tells you which tool to use.',
+use:'Deciding where a piece of data should live before you write any code.',
+watch:'Do not put everything in one global store, and do not keep shared data inside a widget. A simple rule: start with setState in the widget that needs it, and move it up only when a second place needs the same data.',
+ctl:[{k:'q',l:'what is the data?',t:'sel',o:['Is the password field hidden?','Current tab of a bottom bar','Items in the shopping cart','The logged-in user','Progress of one animation','Todo list loaded from a server'],v:'Items in the shopping cart'}],
+render(s,st,g,d){
+ const M={
+  'Is the password field hidden?':['Ephemeral','Only that one field cares about it.','StatefulWidget + setState'],
+  'Current tab of a bottom bar':['Ephemeral','Only the shell screen needs it.','StatefulWidget + setState'],
+  'Items in the shopping cart':['App state','The list screen, the cart screen and the badge all read it.','ViewModel (ChangeNotifier) provided to the tree'],
+  'The logged-in user':['App state','Many screens and the router depend on it.','Repository + ViewModel provided to the tree'],
+  'Progress of one animation':['Ephemeral','Lives and dies with one widget.','State + AnimationController'],
+  'Todo list loaded from a server':['App state','It comes from the data layer, which is the source of truth.','Repository in the data layer + ViewModel in the UI layer']};
+ const m=M[s.q];
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:7px;padding:10px">${Object.keys(M).map(k=>row(esc(k),esc(M[k][0]),k===s.q,'q'+k)).join('')}<div style="margin-top:auto;padding:9px 11px;border-radius:8px;background:${m[0]==='Ephemeral'?'var(--c2s)':'var(--c3s)'};color:${m[0]==='Ephemeral'?'var(--c2t)':'var(--c3t)'};font-size:12.5px"><b>${m[0]}.</b> ${esc(m[1])}<br>Use: ${esc(m[2])}</div></div>`;
+ const eph=`class _PasswordFieldState extends State<PasswordField> {\n  bool _hidden = true;   // ephemeral: only this widget uses it\n\n  @override\n  Widget build(BuildContext context) {\n    return TextField(\n      obscureText: _hidden,\n      decoration: InputDecoration(\n        suffixIcon: IconButton(\n          icon: Icon(_hidden ? Icons.visibility : Icons.visibility_off),\n          onPressed: () => setState(() => _hidden = !_hidden),\n        ),\n      ),\n    );\n  }\n}`;
+ const app=`// shared: lives outside any single widget\nclass CartViewModel extends ChangeNotifier {\n  final List<Product> _items = [];\n  List<Product> get items => List.unmodifiable(_items);\n\n  void add(Product p) {\n    _items.add(p);\n    notifyListeners();   // tell every listener\n  }\n}\n\n// give it to the tree once, read it anywhere below\nChangeNotifierProvider(\n  create: (_) => CartViewModel(),\n  child: const MyApp(),\n)\nfinal cart = context.watch<CartViewModel>();`;
+ return {code:m[0]==='Ephemeral'?eph:app,hint:'Click a row. The coloured box shows the kind of state and the usual tool. The Flutter docs say the choice of package is largely a matter of preference, but the question "who needs this data?" always comes first.'};
+},
+act(a,st,s){if(a[0]==='q'&&a.length>1){s.q=a.slice(1);const sel=document.querySelector('#state-scope .ctl select');if(sel)sel.value=s.q}}});
+
+def({cat:SA,id:'lift-state',name:'setState & lifting state up',tags:'setstate lift state up parent child callback sibling share data stateful stateless valuechanged inherited',h:320,
+blurb:'When two widgets need the same value, the value moves up to their closest common parent. The parent passes the value down as a constructor parameter and passes a callback down so the child can ask for a change. This is called lifting state up, and it is the foundation of every state management package.',
+use:'Sharing one value between sibling widgets, or between a widget and its parent, before reaching for a package.',
+watch:'Passing data through many levels gets tedious ("prop drilling"). That is the point where InheritedWidget, Provider or Riverpod help. They do the same lifting, with less passing around.',
+ctl:[{k:'m',l:'where the counter lives',t:'sel',o:['inside each child (not shared)','in the parent (lifted up)'],v:'inside each child (not shared)'}],
+render(s,st,g,d){
+ if(st.a==null){st.a=0;st.p=0}
+ const lifted=s.m.startsWith('in the parent');
+ const shownA=lifted?st.p:st.a,shownB=lifted?st.p:0;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:10px;padding:12px"><div style="border:1.5px dashed var(--muted);border-radius:12px;padding:12px;flex:1;display:flex;flex-direction:column;gap:10px"><div style="font:600 11px var(--f-mono);color:var(--muted)">PARENT ${lifted?'(owns count = '+st.p+')':'(owns nothing)'}</div><div style="display:flex;gap:10px;flex:1"><div class="fb a" style="flex:1;flex-direction:column;gap:8px;border-radius:10px"><div>Child A</div><div style="font:700 28px var(--f-display)">${shownA}</div><span data-a="inc" class="btn k-Filled" style="padding:6px 14px;font-size:13px">+1</span></div><div class="fb b" style="flex:1;flex-direction:column;gap:8px;border-radius:10px"><div>Child B</div><div style="font:700 28px var(--f-display)">${shownB}</div><div style="font-weight:500;font-size:12px">only shows the count</div></div></div></div></div>`;
+ const own=`class ChildA extends StatefulWidget { /* ... */ }\nclass _ChildAState extends State<ChildA> {\n  int _count = 0;    // private to A\n  @override\n  Widget build(BuildContext context) => Column(children: [\n    Text('$_count'),\n    FilledButton(\n      onPressed: () => setState(() => _count++),\n      child: Text('+1'),\n    ),\n  ]);\n}\n\nclass ChildB extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return Text('???');  // B cannot see A's _count\n  }\n}`;
+ const up=`class Parent extends StatefulWidget { /* ... */ }\nclass _ParentState extends State<Parent> {\n  int _count = 0;    // lifted up: the parent owns it\n  @override\n  Widget build(BuildContext context) => Row(children: [\n    ChildA(\n      count: _count,\n      onIncrement: () => setState(() => _count++),\n    ),\n    ChildB(count: _count),\n  ]);\n}\n\nclass ChildA extends StatelessWidget {\n  const ChildA({super.key, required this.count, required this.onIncrement});\n  final int count;\n  final VoidCallback onIncrement;   // ask the parent to change\n  // ...\n}`;
+ return {code:lifted?up:own,hint:lifted?'The parent owns the count. Both children show the same value, and the children can be StatelessWidgets.':'Press +1. Child A has a count and Child B stays at 0, because B has no way to read A\'s private state.'};
+},
+act(a,st,s){if(a==='inc'){if(s.m.startsWith('in the parent'))st.p++;else st.a++}}});
+
+def({cat:SA,id:'change-notifier',name:'ChangeNotifier & ListenableBuilder',tags:'changenotifier notifylisteners listenablebuilder viewmodel rebuild scope listenable addlistener dispose built in state management',h:360,
+blurb:'ChangeNotifier is a class from Flutter itself. You put your data and the methods that change it in a subclass (often your ViewModel), call notifyListeners() after each change, and wrap only the widgets that care in a ListenableBuilder. No package is needed.',
+use:'Small and medium apps, ViewModels in an MVVM structure, any state that several widgets read.',
+watch:'Wrap the smallest widget that needs the data. Wrapping the whole screen rebuilds all of it on every change. Expose lists as unmodifiable, call notifyListeners() only after a real change, and call dispose() when you own the notifier.',
+ctl:[{k:'scope',l:'where ListenableBuilder sits',t:'sel',o:['around the whole screen','only around what changes'],v:'only around what changes'}],
+render(s,st,g,d){
+ if(!st.c){st.c={head:0,list:0,badge:0,total:0};st.n=0}
+ const whole=s.scope.startsWith('around the whole');
+ const cnt=k=>`<span style="font:600 10.5px var(--f-mono);background:var(--c3s);color:var(--c3t);border-radius:6px;padding:1px 6px">built ${st.c[k]}x</span>`;
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div class="fb a" style="justify-content:space-between;padding:0 12px;height:40px;border-radius:8px"><span>Shop ${cnt('head')}</span><span>Cart: <b>${st.n}</b> ${cnt('badge')}</span></div><div style="display:flex;flex-direction:column;gap:6px;flex:1">${['Coffee','Tea','Cake'].map((x,i)=>`<div class="li" style="border:1px solid var(--line);border-radius:8px;height:38px;justify-content:space-between"><span>${x}</span><span data-a="add" class="btn k-Outlined" style="padding:3px 12px;font-size:12px">Add</span></div>`).join('')}<div style="font:600 10.5px var(--f-mono);color:var(--muted)">list ${cnt('list')}</div></div><div class="fb c" style="height:34px;justify-content:space-between;padding:0 12px;border-radius:8px"><span>Total items: ${st.n}</span>${cnt('total')}</div></div>`;
+ const w=`class CartViewModel extends ChangeNotifier {\n  int _count = 0;\n  int get count => _count;\n\n  void add() {\n    _count++;\n    notifyListeners();\n  }\n}\n\n// rebuilds EVERYTHING on each change\nListenableBuilder(\n  listenable: viewModel,\n  builder: (context, _) => Scaffold(\n    appBar: AppBar(title: Text('Cart: \${viewModel.count}')),\n    body: ProductList(onAdd: viewModel.add),\n  ),\n)`;
+ const o=`class CartViewModel extends ChangeNotifier {\n  int _count = 0;\n  int get count => _count;\n\n  void add() {\n    _count++;\n    notifyListeners();\n  }\n}\n\nScaffold(\n  appBar: AppBar(\n    title: const Text('Shop'),     // not rebuilt\n    actions: [\n      ListenableBuilder(           // only this part\n        listenable: viewModel,\n        builder: (context, _) =>\n            Badge.count(count: viewModel.count),\n      ),\n    ],\n  ),\n  body: ProductList(onAdd: viewModel.add),  // not rebuilt\n)`;
+ return {code:whole?w:o,hint:whole?'Every area is rebuilt on each Add, so every "built" counter goes up.':'Only the badge and the total are rebuilt. The header and the list stay at 1.'};
+},
+act(a,st,s){
+ if(a!=='add')return;st.n++;const whole=s.scope.startsWith('around the whole');
+ if(whole){st.c.head++;st.c.list++;st.c.badge++;st.c.total++}else{st.c.badge++;st.c.total++}
+},
+after(g,st,s,draw,d){if(!st.init){st.init=true;st.c.head=1;st.c.list=1;st.c.badge=1;st.c.total=1;draw()}}});
+
+def({cat:SA,id:'state-packages',name:'Provider, Riverpod & Bloc',tags:'provider riverpod bloc cubit getx state management package compare choose dependency injection consumer watch read blocbuilder',h:340,
+blurb:'When the built-in tools start to feel repetitive, a state management package helps. Flutter\'s own architecture guide recommends Provider for dependency injection, and says the choice of state management approach is largely a matter of preference. Riverpod and Bloc are the other widely used options.',
+use:'Sharing and testing state across many screens, injecting repositories and services, and avoiding long chains of constructor parameters.',
+watch:'Pick one approach for the whole project and keep it. Check each package\'s current docs, because APIs change between major versions. The examples show the same counter in each style and are a starting point.',
+ctl:[{k:'p',l:'approach',t:'sel',o:['ChangeNotifier (built in)','Provider','Riverpod','Bloc / Cubit'],v:'Provider'}],
+render(s,st,g,d){
+ const I={
+  'ChangeNotifier (built in)':['no package','You wire it yourself with ListenableBuilder','small apps, learning'],
+  'Provider':['small','Wraps InheritedWidget. Simple to read','DI plus ChangeNotifier ViewModels'],
+  'Riverpod':['medium','Providers live outside the widget tree and are compile-safe','async data, caching, testing'],
+  'Bloc / Cubit':['more','Events or methods in, immutable states out','large teams, strict structure']};
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:7px;padding:10px">${Object.keys(I).map(k=>row(esc(k),'Boilerplate: '+I[k][0]+'. '+esc(I[k][1])+'. Good for: '+esc(I[k][2])+'.',k===s.p,'p'+k)).join('')}</div>`;
+ const C={
+  'ChangeNotifier (built in)':`class Counter extends ChangeNotifier {\n  int count = 0;\n  void increment() {\n    count++;\n    notifyListeners();\n  }\n}\n\nfinal counter = Counter();   // create and dispose it yourself\n\nListenableBuilder(\n  listenable: counter,\n  builder: (context, _) => Text('\${counter.count}'),\n)\nFilledButton(onPressed: counter.increment, child: Text('+1'))`,
+  'Provider':`// pubspec.yaml: provider\nChangeNotifierProvider(\n  create: (_) => Counter(),\n  child: const MyApp(),\n)\n\n// read and rebuild when it changes\nText('\${context.watch<Counter>().count}')\n\n// call a method, no rebuild\nFilledButton(\n  onPressed: () => context.read<Counter>().increment(),\n  child: Text('+1'),\n)`,
+  'Riverpod':`// pubspec.yaml: flutter_riverpod\nfinal counterProvider =\n    NotifierProvider<Counter, int>(Counter.new);\n\nclass Counter extends Notifier<int> {\n  @override\n  int build() => 0;\n  void increment() => state++;\n}\n\nvoid main() => runApp(const ProviderScope(child: MyApp()));\n\nclass CounterText extends ConsumerWidget {\n  const CounterText({super.key});\n  @override\n  Widget build(BuildContext context, WidgetRef ref) {\n    final count = ref.watch(counterProvider);\n    return FilledButton(\n      onPressed: () => ref.read(counterProvider.notifier).increment(),\n      child: Text('\$count'),\n    );\n  }\n}`,
+  'Bloc / Cubit':`// pubspec.yaml: flutter_bloc\nclass CounterCubit extends Cubit<int> {\n  CounterCubit() : super(0);\n  void increment() => emit(state + 1);\n}\n\nBlocProvider(\n  create: (_) => CounterCubit(),\n  child: const MyApp(),\n)\n\nBlocBuilder<CounterCubit, int>(\n  builder: (context, count) => Text('\$count'),\n)\nFilledButton(\n  onPressed: () => context.read<CounterCubit>().increment(),\n  child: Text('+1'),\n)`};
+ return {code:C[s.p],hint:'Click a card or use the menu. All four do the same job: hold the value, notify listeners, and rebuild only what reads it.'};
+},
+act(a,st,s){if(a[0]==='p'&&a.length>1){s.p=a.slice(1);const sel=document.querySelector('#state-packages .ctl select');if(sel)sel.value=s.p}}});
+
+const LAYERS=[
+ ['View','Widgets. Draw the screen and send user events to the ViewModel. No business logic.','ui/home/home_screen.dart','HomeScreen'],
+ ['ViewModel','Holds screen state, exposes it to the View, turns events into repository calls.','ui/home/home_view_model.dart','HomeViewModel'],
+ ['Repository','Single source of truth for one kind of data. Combines services, caches, maps API models to domain models.','data/repositories/user_repository.dart','UserRepository'],
+ ['Service','Wraps one data source: an HTTP API, a database or a platform plugin. No app logic.','data/services/client_api_service.dart','ClientApiService']];
+def({cat:SA,id:'mvvm-layers',name:'App architecture: View, ViewModel, Repository, Service',tags:'architecture mvvm layers ui data layer repository service viewmodel view clean separation of concerns unidirectional data flow dependency injection folder structure',h:350,
+blurb:'Flutter\'s official architecture guide splits an app into a UI layer (Views and ViewModels) and a data layer (Repositories and Services). Data flows up from the services to the screen, and user events flow back down. Each class has one job, so each can be tested alone.',
+use:'Any app that talks to an API or a database, or that will grow past a few screens.',
+watch:'Widgets should hold almost no logic. Repositories should be abstract classes so you can swap in a fake for tests. Add a domain layer only when ViewModels get crowded or repeat logic. For most apps it adds overhead.',
+ctl:[{k:'l',l:'layer',t:'sel',o:LAYERS.map(x=>x[0]),v:'ViewModel'}],
+render(s,st,g,d){
+ const i=LAYERS.findIndex(x=>x[0]===s.l),L=LAYERS[i];
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:0;padding:10px 14px;align-items:stretch"><div style="font:600 10.5px var(--f-mono);color:var(--muted);text-align:center">UI LAYER</div>${LAYERS.map((x,k)=>`${k===2?'<div style="font:600 10.5px var(--f-mono);color:var(--muted);text-align:center;margin-top:4px">DATA LAYER</div>':''}<div data-a="l${x[0]}" style="cursor:pointer;margin:3px 0;padding:8px 12px;border-radius:10px;border:1.5px solid ${k===i?'var(--c1)':'var(--line)'};background:${k===i?'var(--c1s)':'var(--surface)'};color:${k===i?'var(--c1t)':'var(--fg)'};display:flex;justify-content:space-between;font-size:13px"><b>${x[0]}</b><span style="font:11px var(--f-mono);opacity:.85">${x[3]}</span></div>${k<3?`<div style="text-align:center;font:10.5px var(--f-mono);color:var(--muted);line-height:1">&#8593; data &nbsp; &#8595; events</div>`:''}`).join('')}<div style="margin-top:6px;font-size:12.5px;color:var(--fg)"><b>${L[0]}:</b> ${esc(L[1])}<br><span style="font:11px var(--f-mono);color:var(--muted)">lib/${L[2]}</span></div></div>`;
+ const C=[
+  `class HomeScreen extends StatelessWidget {\n  const HomeScreen({super.key, required this.viewModel});\n  final HomeViewModel viewModel;\n\n  @override\n  Widget build(BuildContext context) {\n    return ListenableBuilder(\n      listenable: viewModel,\n      builder: (context, _) => switch (viewModel.state) {\n        Loading() => const CircularProgressIndicator(),\n        Data(:final value) => UserCard(user: value),\n        Failure(:final message) => Text(message),\n      },\n    );\n  }\n}`,
+  `class HomeViewModel extends ChangeNotifier {\n  HomeViewModel({required UserRepository userRepository})\n      : _userRepository = userRepository;\n  final UserRepository _userRepository;\n\n  UiState<User> state = const Loading();\n\n  Future<void> load() async {\n    state = const Loading();\n    notifyListeners();\n    try {\n      state = Data(await _userRepository.getUser());\n    } on Exception catch (e) {\n      state = Failure(e.toString());\n    }\n    notifyListeners();\n  }\n}`,
+  `abstract class UserRepository {\n  Future<User> getUser();\n}\n\nclass UserRepositoryRemote implements UserRepository {\n  UserRepositoryRemote({required ClientApiService apiService})\n      : _apiService = apiService;\n  final ClientApiService _apiService;\n\n  @override\n  Future<User> getUser() async {\n    final dto = await _apiService.fetchUser();   // API model\n    return User(id: dto.id, name: dto.name);     // domain model\n  }\n}`,
+  `class ClientApiService {\n  ClientApiService({http.Client? client})\n      : _client = client ?? http.Client();\n  final http.Client _client;\n\n  Future<UserDto> fetchUser() async {\n    final res = await _client\n        .get(Uri.parse('https://api.example.com/user'));\n    if (res.statusCode != 200) {\n      throw ApiException(res.statusCode);\n    }\n    return UserDto.fromJson(\n      jsonDecode(res.body) as Map<String, dynamic>,\n    );\n  }\n}`];
+ const wire=`\n\n// main.dart: wire the layers once (dependency injection)\nMultiProvider(\n  providers: [\n    Provider(create: (_) => ClientApiService()),\n    Provider<UserRepository>(\n      create: (c) => UserRepositoryRemote(\n        apiService: c.read<ClientApiService>(),\n      ),\n    ),\n  ],\n  child: const MyApp(),\n)`;
+ return {code:C[i]+(i===3?wire:''),hint:'Click a layer. A class only talks to the layer directly below it, so the View never knows whether the data comes from an API, a database or a test fake.'};
+},
+act(a,st,s){if(a[0]==='l'&&a.length>1){s.l=a.slice(1);const sel=document.querySelector('#mvvm-layers .ctl select');if(sel)sel.value=s.l}}});
+
+def({cat:SA,id:'ui-state',name:'Loading, data & error states',tags:'loading error empty state sealed class uistate result pattern matching switch expression async future snapshot booleans isloading haserror',h:330,
+blurb:'Every screen that loads data is in one of a few states: loading, showing data, or showing an error. Model them as one sealed class, not as separate booleans like isLoading and hasError, and the screen cannot be in a state that makes no sense.',
+use:'Any screen that fetches data from an API or a database.',
+watch:'With separate booleans it is easy to be isLoading and hasError at the same time. A sealed class makes the compiler check that your switch handles every case (Dart 3). Remember an "empty" result is a valid Data state, not an error.',
+ctl:[{k:'m',l:'how the state is modelled',t:'sel',o:['sealed class (best)','separate booleans (avoid)'],v:'sealed class (best)'}],
+render(s,st,g,d){
+ if(!st.s)st.s='idle';
+ const body={idle:`<div style="color:var(--muted);font-size:13px;text-align:center">Press a button to load.</div>`,loading:`<div style="text-align:center;font-size:13px"><div style="width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--c1);border-radius:50%;margin:0 auto 8px;animation:spin .8s linear infinite"></div>Loading...</div>`,data:`<div style="width:100%">${['Coffee','Tea','Cake'].map(x=>`<div class="li" style="border:1px solid var(--line);border-radius:8px;margin-bottom:5px;height:36px">${x}</div>`).join('')}</div>`,empty:`<div style="text-align:center;color:var(--muted);font-size:13px">${ic('search',34,'var(--muted)')}<div>Nothing here yet</div></div>`,error:`<div class="erb" style="width:100%">Could not load. The server returned 500.<div style="margin-top:6px"><span data-a="load" class="btn k-Outlined" style="padding:3px 12px;font-size:12px;color:var(--danger);border-color:var(--danger)">Retry</span></div></div>`}[st.s];
+ g.innerHTML=`<style>@keyframes spin{to{transform:rotate(360deg)}}</style><div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:6px;flex-wrap:wrap"><span data-a="load" class="btn k-Filled" style="padding:5px 12px;font-size:12px">Load OK</span><span data-a="empty" class="btn k-Outlined" style="padding:5px 12px;font-size:12px">Load empty</span><span data-a="fail" class="btn k-Outlined" style="padding:5px 12px;font-size:12px">Load fails</span></div><div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:10px">${body}</div><div style="font:600 11px var(--f-mono);color:var(--muted)">state = ${st.s==='idle'?'Loading (initial)':st.s==='data'?'Data(3 items)':st.s==='empty'?'Data([])':st.s==='error'?'Failure("500")':'Loading()'}</div></div>`;
+ const best=`sealed class UiState<T> {\n  const UiState();\n}\nclass Loading<T> extends UiState<T> {\n  const Loading();\n}\nclass Data<T> extends UiState<T> {\n  const Data(this.value);\n  final T value;\n}\nclass Failure<T> extends UiState<T> {\n  const Failure(this.message);\n  final String message;\n}\n\n// in build: the compiler checks every case is handled\nreturn switch (viewModel.state) {\n  Loading() => const CircularProgressIndicator(),\n  Data(:final value) when value.isEmpty => const EmptyView(),\n  Data(:final value) => ItemList(items: value),\n  Failure(:final message) => ErrorView(\n      message: message,\n      onRetry: viewModel.load,\n    ),\n};`;
+ const bad=`// avoid: three fields that can contradict each other\nbool isLoading = false;\nString? error;\nList<Item>? items;\n\n// isLoading == true AND error != null ?\n// items != null AND error != null ?\n// Nothing stops it, and every widget must check all three.\nif (isLoading) { ... }\nelse if (error != null) { ... }\nelse if (items != null) { ... }`;
+ return {code:s.m.startsWith('sealed')?best:bad,hint:s.m.startsWith('sealed')?'One value, three shapes. The switch must cover Loading, Data and Failure.':'Three loose fields allow impossible combinations. Prefer the sealed class.'};
+},
+act(a,st,s){
+ if(!['load','empty','fail'].includes(a))return;st.s='loading';clearTimeout(st.tm);
+ st.tm=setTimeout(()=>{if(!st.d||!st.d.el.isConnected)return;st.s=a==='load'?'data':a==='empty'?'empty':'error';st.d.draw()},900);
+},
+after(g,st,s,draw,d){st.d=d}});
+
+/* ================= v8 B: NETWORKING AND DATA ================= */
+const ND='Networking and data';
+const mono=(t,c)=>`<div style="font:12px/1.55 var(--f-mono);${c||''}">${t}</div>`;
+
+def({cat:ND,id:'api-client',name:'Calling an API (http & Dio)',tags:'api http dio rest request response status code timeout exception jsonDecode interceptor headers base url client service network error handling',h:360,
+blurb:'An API service is a plain class that makes the request, checks the status code, decodes the JSON and throws a clear exception when something goes wrong. The screen never sees http or Dio, only the typed result or the error.',
+use:'Any call to a REST API: listing items, signing in, uploading data.',
+watch:'Always set a timeout, always check the status code (http does not throw for 404 or 500), and always catch a bad JSON body. Keep the base URL and headers in one place. Do not call APIs from build().',
+ctl:[{k:'c',l:'client',t:'sel',o:['http','dio'],v:'http'},{k:'r',l:'server answers',t:'sel',o:['200 OK','404 Not Found','500 Server Error','Timeout (no reply)','200 but broken JSON'],v:'200 OK'}],
+render(s,st,g,d){
+ const R={
+  '200 OK':['200','ok','Returns the list. The screen shows 3 todos.'],
+  '404 Not Found':['404','err','ApiException(404). The screen shows "Not found" and a retry button.'],
+  '500 Server Error':['500','err','ApiException(500). Show a friendly message and offer a retry. Log the details.'],
+  'Timeout (no reply)':['no reply','err','TimeoutException after 10 s. Tell the user to check the connection.'],
+  '200 but broken JSON':['200','err','FormatException from jsonDecode. The server succeeded but the body is not valid, so treat it as an error.']}[s.r];
+ const dio=s.c==='dio';
+ const thrown=R[1]==='ok'?'(nothing thrown)':{'404 Not Found':dio?'DioException (badResponse, 404)':'ApiException(404)','500 Server Error':dio?'DioException (badResponse, 500)':'ApiException(500)','Timeout (no reply)':dio?'DioException (receiveTimeout)':'TimeoutException','200 but broken JSON':dio?'FormatException / TypeError':'FormatException'}[s.r];
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px">${mono('<b>GET</b> https://api.example.com/todos','background:var(--c1s);color:var(--c1t);padding:6px 10px;border-radius:8px')}<div style="text-align:center;font:600 11px var(--f-mono);color:var(--muted)">&#8595; ${esc(R[0])} &#8595;</div>${mono('<b>'+esc(s.r)+'</b>','border:1.5px solid '+(R[1]==='ok'?'var(--ok)':'var(--danger)')+';border-radius:8px;padding:6px 10px;color:'+(R[1]==='ok'?'var(--ok)':'var(--danger)'))}${mono('throws: '+esc(thrown),'color:var(--muted)')}<div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:10px;font-size:13px;display:flex;align-items:center">${R[1]==='ok'?'Coffee &middot; Tea &middot; Cake':esc(R[2])}</div></div>`;
+ const http=`class ApiException implements Exception {\n  ApiException(this.statusCode);\n  final int statusCode;\n}\n\nclass ClientApiService {\n  ClientApiService({http.Client? client})\n      : _client = client ?? http.Client();\n  final http.Client _client;\n  static const _base = 'https://api.example.com';\n\n  Future<List<Todo>> fetchTodos() async {\n    final res = await _client\n        .get(\n          Uri.parse('$_base/todos'),\n          headers: {'Accept': 'application/json'},\n        )\n        .timeout(const Duration(seconds: 10));  // TimeoutException\n\n    if (res.statusCode != 200) {\n      throw ApiException(res.statusCode);       // http does NOT throw\n    }\n    final list = jsonDecode(res.body) as List<dynamic>;  // FormatException\n    return list\n        .map((e) => Todo.fromJson(e as Map<String, dynamic>))\n        .toList();\n  }\n}`;
+ const dioC=`final dio = Dio(\n  BaseOptions(\n    baseUrl: 'https://api.example.com',\n    connectTimeout: const Duration(seconds: 10),\n    receiveTimeout: const Duration(seconds: 10),\n    headers: {'Accept': 'application/json'},\n  ),\n)..interceptors.add(\n    InterceptorsWrapper(\n      onRequest: (options, handler) {\n        options.headers['Authorization'] = 'Bearer $token';\n        handler.next(options);\n      },\n    ),\n  );\n\nFuture<List<Todo>> fetchTodos() async {\n  try {\n    final res = await dio.get<List<dynamic>>('/todos');\n    return res.data!\n        .map((e) => Todo.fromJson(e as Map<String, dynamic>))\n        .toList();\n  } on DioException catch (e) {\n    // Dio throws for 4xx/5xx and timeouts by default\n    throw ApiException(e.response?.statusCode ?? 0);\n  }\n}`;
+ return {code:dio?dioC:http,hint:'Pick a server answer. The top shows what the client throws and the box shows what the user should see. Both packages are on pub.dev.'};
+}});
+
+const JS_SAMPLES={
+ 'valid':'{ "id": 1, "title": "Buy milk", "done": false }',
+ 'missing field':'{ "id": 2, "title": "Call mom" }',
+ 'wrong type':'{ "id": "3", "title": "Pay rent", "done": false }',
+ 'null value':'{ "id": 4, "title": null, "done": true }'};
+def({cat:ND,id:'json-models',name:'JSON models & serialization',tags:'json model fromjson tojson serialization json_serializable freezed built_value dto domain model immutable build_runner null safety parse manual dart:convert',h:360,
+blurb:'JSON arrives as loose maps. A model class turns it into typed, immutable Dart objects once, at the edge of your app, so the rest of the code never touches raw maps. You can write fromJson by hand, or generate it with json_serializable or freezed.',
+use:'Every API response and every JSON file you read or write.',
+watch:'Flutter\'s architecture guide recommends immutable models, and freezed or built_value for generated code. Real APIs send surprises (missing keys, null, a string instead of a number), so decide what to do with each. Generation can slow builds in big projects. Large API and domain models can be kept separate in big apps.',
+ctl:[{k:'j',l:'what the server sent',t:'sel',o:Object.keys(JS_SAMPLES),v:'valid'},{k:'def',l:'defensive parsing',t:'chk',v:false},{k:'how',l:'how to write it',t:'sel',o:['by hand','json_serializable','freezed'],v:'by hand'}],
+render(s,st,g,d){
+ const src=JS_SAMPLES[s.j];let res;
+ const o=JSON.parse(src);
+ if(s.def){res={ok:true,t:'Todo(id: '+(parseInt(o.id)||0)+', title: "'+(typeof o.title==='string'?o.title:'')+'", done: '+(o.done===true)+')'}}
+ else{
+  const bad=typeof o.id!=='number'?'id':typeof o.title!=='string'?'title':typeof o.done!=='boolean'?'done':null;
+  res=bad?{ok:false,t:"TypeError: type '"+(o[bad]===undefined||o[bad]===null?'Null':'String')+"' is not a subtype of type '"+(bad==='id'?'int':bad==='title'?'String':'bool')+"' in type cast"}:{ok:true,t:'Todo(id: '+o.id+', title: "'+o.title+'", done: '+o.done+')'};
+ }
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px">${mono('JSON','color:var(--muted);font-weight:700')}${mono(esc(src),'background:var(--code-bg);color:var(--code-fg);padding:10px;border-radius:8px;overflow-wrap:anywhere')}<div style="text-align:center;font:600 11px var(--f-mono);color:var(--muted)">&#8595; Todo.fromJson &#8595;</div>${mono(esc(res.t),'border:1.5px solid '+(res.ok?'var(--ok)':'var(--danger)')+';color:'+(res.ok?'var(--ok)':'var(--danger)')+';background:'+(res.ok?'rgba(22,121,74,.1)':'rgba(200,40,63,.1)')+';padding:10px;border-radius:8px;overflow-wrap:anywhere')}<div style="font-size:12.5px;color:var(--muted)">${res.ok?(s.def?'Defaults fill the gaps, so the app keeps working. Decide if hiding a bad value is right for your data.':'All fields have the expected type.'):'A required field is missing or has the wrong type. The parse fails at the edge, where you can show an error.'}</div></div>`;
+ const hand=s.def?`factory Todo.fromJson(Map<String, dynamic> json) => Todo(\n  id: int.tryParse('\${json['id']}') ?? 0,\n  title: json['title'] as String? ?? '',\n  done: json['done'] as bool? ?? false,\n);`:`factory Todo.fromJson(Map<String, dynamic> json) => Todo(\n  id: json['id'] as int,          // TypeError if not an int\n  title: json['title'] as String,\n  done: json['done'] as bool,\n);`;
+ const C={
+  'by hand':`@immutable\nclass Todo {\n  const Todo({required this.id, required this.title, required this.done});\n  final int id;\n  final String title;\n  final bool done;\n\n  ${hand.replace(/\n/g,'\n  ')}\n\n  Map<String, dynamic> toJson() =>\n      {'id': id, 'title': title, 'done': done};\n}`,
+  'json_serializable':`// pubspec: json_annotation, dev: json_serializable, build_runner\nimport 'package:json_annotation/json_annotation.dart';\npart 'todo.g.dart';\n\n@JsonSerializable()\nclass Todo {\n  const Todo({required this.id, required this.title, this.done = false});\n  final int id;\n  final String title;\n  @JsonKey(defaultValue: false)${s.def?'':'  // only used when the key is missing'}\n  final bool done;\n\n  factory Todo.fromJson(Map<String, dynamic> json) => _$TodoFromJson(json);\n  Map<String, dynamic> toJson() => _$TodoToJson(this);\n}\n// dart run build_runner build`,
+  'freezed':`// pubspec: freezed_annotation, json_annotation, dev: freezed, json_serializable, build_runner\n// (syntax of freezed 3, check the docs of your version)\npart 'todo.freezed.dart';\npart 'todo.g.dart';\n\n@freezed\nabstract class Todo with _$Todo {\n  const factory Todo({\n    required int id,\n    required String title,\n    @Default(false) bool done,\n  }) = _Todo;\n\n  factory Todo.fromJson(Map<String, dynamic> json) =>\n      _$TodoFromJson(json);\n}\n// gives you ==, hashCode, copyWith and toString\n// dart run build_runner build`};
+ return {code:C[s.how],hint:'Switch the server answer and the defensive option. Generated code gives you immutability and equality for free. Read the generated errors the same way.'};
+}});
+
+def({cat:ND,id:'repository-cache',name:'Repository: API + local cache (offline)',tags:'repository pattern cache offline first network fallback source of truth dao remote local data source stale sqlite single source of truth abstract fake testing',h:370,
+blurb:'A repository is the one class the rest of the app asks for data. It decides where the data comes from: the network, a local database, or memory. Here the repository tries the network first, saves the result, and falls back to the saved copy when the network fails.',
+use:'Offline support, faster start-up (show cached data first), and keeping API details out of ViewModels.',
+watch:'Make the repository an abstract class so tests can use a fake. There are other strategies, like cache first with a background refresh, or a Stream that emits cached data and then fresh data. Choose by how fresh the data must be. Decide how long a cache stays valid.',
+ctl:[{k:'net',l:'network',t:'sel',o:['online','offline'],v:'online'},{k:'cache',l:'saved copy on the phone',t:'sel',o:['empty','has data'],v:'empty'}],
+render(s,st,g,d){
+ if(!st.log){st.log=['(press getTodos())'];st.has=s.cache==='has data';st.last=s.cache}
+ if(st.last!==s.cache){st.has=s.cache==='has data';st.last=s.cache}
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center"><span data-a="get" class="btn k-Filled" style="padding:6px 14px;font-size:13px">getTodos()</span><span style="font:11px var(--f-mono);color:var(--muted)">network: ${s.net} &middot; cache: ${st.has?'has data':'empty'}</span></div><div style="display:flex;gap:8px"><div class="fb ${s.net==='online'?'b':'d'}" style="flex:1;height:44px;border-radius:8px">API ${s.net==='online'?'(reachable)':'(unreachable)'}</div><div class="fb ${st.has?'c':'a'}" style="flex:1;height:44px;border-radius:8px">Local DB ${st.has?'(3 rows)':'(empty)'}</div></div><div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:10px;font:12px/1.6 var(--f-mono);overflow:hidden">${st.log.slice(-7).map(esc).join('<br>')}</div></div>`;
+ const code=`abstract class TodoRepository {\n  Future<List<Todo>> getTodos();\n}\n\nclass TodoRepositoryImpl implements TodoRepository {\n  TodoRepositoryImpl(this._api, this._dao);\n  final ClientApiService _api;   // remote\n  final TodoDao _dao;            // local (SQLite)\n\n  @override\n  Future<List<Todo>> getTodos() async {\n    try {\n      final fresh = await _api.fetchTodos();\n      await _dao.replaceAll(fresh);        // keep the copy up to date\n      return fresh;\n    } on Exception {\n      final cached = await _dao.getAll();  // fall back to the copy\n      if (cached.isNotEmpty) return cached;\n      rethrow;                             // nothing to show: report it\n    }\n  }\n}\n\n// test: no network needed\nclass FakeTodoRepository implements TodoRepository {\n  @override\n  Future<List<Todo>> getTodos() async => [Todo(id: 1, title: 'Test', done: false)];\n}`;
+ return {code,hint:'Change the network and saved copy, then press getTodos(). The ViewModel calls the same method each time and never knows which source answered.'};
+},
+act(a,st,s){
+ if(a!=='get')return;
+ if(s.net==='online'){st.has=true;st.log.push('> API ok: 3 todos','> saved 3 rows to the local DB','< returned 3 todos (fresh)')}
+ else if(st.has){st.log.push('> API failed (no connection)','> read 3 rows from the local DB','< returned 3 todos (cached)')}
+ else{st.log.push('> API failed (no connection)','> local DB is empty','< threw the error, the screen shows "No connection"')}
+}});
+
+def({cat:ND,id:'storage-choice',name:'Local storage: which one to use',tags:'shared_preferences secure storage flutter_secure_storage sqflite drift sqlite path_provider file hive key value database token settings cache choose persistence',h:350,
+blurb:'Flutter has no single built-in database. The Flutter cookbook shows three options: files, key-value storage and SQLite. Each fits a different kind of data. Choosing the wrong one is a common beginner mistake, for example saving a login token in plain key-value storage.',
+use:'Deciding where to save settings, tokens, lists of records and downloaded files.',
+watch:'Anything secret goes to the platform\'s secure storage, never to shared_preferences. Large or related data goes to a database. Files are for blobs such as images and PDFs. Always check that a package is maintained before you depend on it.',
+ctl:[{k:'d',l:'what do you need to save?',t:'sel',o:['A setting (dark mode, language)','A login token','A list of records you query','A big cache of API results','A photo or PDF','A user profile object'],v:'A setting (dark mode, language)'}],
+render(s,st,g,d){
+ const M={
+  'A setting (dark mode, language)':['shared_preferences','Small key-value pairs. Not secret.','prefs'],
+  'A login token':['flutter_secure_storage','Encrypted by the platform (Keychain, Keystore).','secure'],
+  'A list of records you query':['sqflite or drift (SQLite)','Rows, filters, sorting and relations.','sql'],
+  'A big cache of API results':['sqflite or drift (SQLite)','Query, expire and replace many rows quickly.','sql'],
+  'A photo or PDF':['files with path_provider','Save the file, store only its path in the database.','file'],
+  'A user profile object':['shared_preferences (JSON string) or a database','Small: jsonEncode into one key. Many users or edits: a table.','prefs']};
+ const m=M[s.d];
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:7px;padding:10px">${Object.keys(M).map(k=>row(esc(k),esc(M[k][0]),k===s.d,'d'+k)).join('')}<div style="margin-top:auto;padding:9px 11px;border-radius:8px;background:var(--c2s);color:var(--c2t);font-size:12.5px"><b>${esc(m[0])}</b><br>${esc(m[1])}</div></div>`;
+ const C={
+  prefs:`// pubspec: shared_preferences\nfinal prefs = await SharedPreferences.getInstance();\n\nawait prefs.setBool('darkMode', true);\nfinal dark = prefs.getBool('darkMode') ?? false;\n\n// a small object as JSON\nawait prefs.setString('profile', jsonEncode(profile.toJson()));\nfinal json = prefs.getString('profile');\nfinal p = json == null\n    ? null\n    : Profile.fromJson(jsonDecode(json) as Map<String, dynamic>);`,
+  secure:`// pubspec: flutter_secure_storage\nconst storage = FlutterSecureStorage();\n\nawait storage.write(key: 'access_token', value: token);\nfinal token = await storage.read(key: 'access_token');\nawait storage.delete(key: 'access_token');   // on log out\n\n// Never log tokens, never put them in shared_preferences.`,
+  sql:`// pubspec: sqflite, path (or drift)\nfinal db = await openDatabase(\n  join(await getDatabasesPath(), 'app.db'),\n  version: 1,\n  onCreate: (db, v) => db.execute(\n    'CREATE TABLE todos('\n    'id INTEGER PRIMARY KEY, title TEXT NOT NULL, done INTEGER NOT NULL)',\n  ),\n);\nfinal rows = await db.query('todos', where: 'done = ?', whereArgs: [0]);`,
+  file:`// pubspec: path_provider\nfinal dir = await getApplicationDocumentsDirectory();\nfinal file = File('\${dir.path}/report.pdf');\nawait file.writeAsBytes(bytes);\n\n// keep only the path in your database\nawait db.insert('documents', {'title': 'Report', 'path': file.path});\n// not available on web: guard with kIsWeb`};
+ return {code:C[m[2]],hint:'Click a row. The Flutter cookbook covers files, key-value storage and SQLite, and the packages named here are the common ones for each.'};
+},
+act(a,st,s){if(a[0]==='d'&&a.length>1){s.d=a.slice(1);const sel=document.querySelector('#storage-choice .ctl select');if(sel)sel.value=s.d}}});
+
+def({cat:ND,id:'sqlite-crud',name:'SQLite CRUD (sqflite & drift)',tags:'sqlite sqflite drift database crud insert query update delete table migration onupgrade whereargs sql injection transaction batch singleton',h:370,
+blurb:'SQLite is a database file inside the app. You create tables once, then Create, Read, Update and Delete rows. sqflite gives you SQL with small helper methods. drift lets you describe tables in Dart and generates type-safe queries.',
+use:'Offline lists, notes, carts, caches and any data with many records that you search or sort.',
+watch:'Open the database once and reuse it. Never build SQL by joining strings, use ? and whereArgs. Change the schema by raising the version and writing onUpgrade, or users lose data. Group several writes in a transaction or batch.',
+ctl:[{k:'pk',l:'package',t:'sel',o:['sqflite (SQL)','drift (typed Dart)'],v:'sqflite (SQL)'},{k:'op',l:'operation',t:'sel',o:['insert','query','update','delete'],v:'insert'}],
+render(s,st,g,d){
+ if(!st.rows){st.rows=[{id:1,t:'Buy milk',d:0},{id:2,t:'Call mom',d:1}];st.next=3;st.sql='-- press Run'}
+ const sqlOf={insert:"INSERT INTO todos(title, done) VALUES (?, ?)  -- ['Item', 0]",query:'SELECT * FROM todos WHERE done = ? ORDER BY id DESC  -- [0]',update:'UPDATE todos SET done = 1 WHERE id = ?  -- [first row]',delete:'DELETE FROM todos WHERE id = ?  -- [first row]'};
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center"><span data-a="run" class="btn k-Filled" style="padding:6px 14px;font-size:13px">Run ${s.op}</span><span data-a="reset" class="btn k-Outlined" style="padding:6px 12px;font-size:12px">Reset table</span></div><div style="border:1.5px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;font:12px var(--f-mono)"><div style="display:grid;grid-template-columns:34px 1fr 52px;background:var(--c1s);color:var(--c1t);font-weight:700;padding:5px 8px"><span>id</span><span>title</span><span>done</span></div>${st.rows.length?st.rows.map(r=>`<div style="display:grid;grid-template-columns:34px 1fr 52px;padding:5px 8px;border-top:1px solid var(--line)"><span>${r.id}</span><span>${esc(r.t)}</span><span>${r.d}</span></div>`).join(''):'<div style="padding:8px;color:var(--muted)">(no rows)</div>'}</div><div style="font:11.5px/1.5 var(--f-mono);color:var(--muted);overflow-wrap:anywhere">${esc(st.sql)}</div></div>`;
+ const dr=s.pk.startsWith('drift');
+ const setup=dr?`class Todos extends Table {\n  IntColumn get id => integer().autoIncrement()();\n  TextColumn get title => text()();\n  BoolColumn get done => boolean().withDefault(const Constant(false))();\n}\n\n@DriftDatabase(tables: [Todos])\nclass AppDatabase extends _\$AppDatabase {\n  AppDatabase(super.e);\n  @override\n  int get schemaVersion => 1;   // raise it when the schema changes\n\n  // methods of AppDatabase:\n`:`// open ONCE and reuse (for example in a service)\nfinal db = await openDatabase(\n  join(await getDatabasesPath(), 'app.db'),\n  version: 1,           // raise it when the schema changes\n  onCreate: (db, v) => db.execute(\n    'CREATE TABLE todos(id INTEGER PRIMARY KEY AUTOINCREMENT, '\n    'title TEXT NOT NULL, done INTEGER NOT NULL DEFAULT 0)',\n  ),\n  onUpgrade: (db, oldV, newV) async { /* migrate */ },\n);\n\n`;
+ const ops=dr?{insert:`Future<int> addTodo(String title) =>\n    into(todos).insert(TodosCompanion.insert(title: title));`,query:`Future<List<Todo>> openTodos() => (select(todos)\n      ..where((t) => t.done.equals(false))\n      ..orderBy([(t) => OrderingTerm.desc(t.id)]))\n    .get();`,update:`Future<int> markDone(int id) =>\n    (update(todos)..where((t) => t.id.equals(id)))\n        .write(const TodosCompanion(done: Value(true)));`,delete:`Future<int> removeTodo(int id) =>\n    (delete(todos)..where((t) => t.id.equals(id))).go();`}:{insert:`await db.insert(\n  'todos',\n  {'title': 'Item', 'done': 0},\n  conflictAlgorithm: ConflictAlgorithm.replace,\n);`,query:`final rows = await db.query(\n  'todos',\n  where: 'done = ?',\n  whereArgs: [0],        // never join strings into SQL\n  orderBy: 'id DESC',\n);\nfinal todos = rows.map(Todo.fromMap).toList();`,update:`await db.update(\n  'todos',\n  {'done': 1},\n  where: 'id = ?',\n  whereArgs: [id],\n);`,delete:`await db.delete(\n  'todos',\n  where: 'id = ?',\n  whereArgs: [id],\n);`};
+ return {code:setup+ops[s.op]+(dr?'\n}\n// dart run build_runner build':''),hint:'Run the operation on the demo table. The code shown is for the chosen package and operation. drift needs build_runner to generate its code.'};
+},
+act(a,st,s){
+ if(a==='reset'){st.rows=[{id:1,t:'Buy milk',d:0},{id:2,t:'Call mom',d:1}];st.next=3;st.sql='-- table reset';return}
+ if(a!=='run')return;
+ const sqlOf={insert:"INSERT INTO todos(title, done) VALUES ('Item "+st.next+"', 0)",query:'SELECT * FROM todos WHERE done = 0 ORDER BY id DESC',update:null,delete:null};
+ if(s.op==='insert'){st.rows.push({id:st.next,t:'Item '+st.next,d:0});st.next++;st.sql='> '+sqlOf.insert}
+ else if(s.op==='query'){const r=st.rows.filter(x=>!x.d).sort((a,b)=>b.id-a.id);st.sql='> '+sqlOf.query+'\n-- '+r.length+' row'+(r.length===1?'':'s')+': '+(r.map(x=>x.t).join(', ')||'none')}
+ else if(s.op==='update'){const r=st.rows.find(x=>!x.d);if(r){r.d=1;st.sql='> UPDATE todos SET done = 1 WHERE id = '+r.id}else st.sql='> UPDATE ... -- no open rows to update'}
+ else{const r=st.rows[0];if(r){st.rows.shift();st.sql='> DELETE FROM todos WHERE id = '+r.id}else st.sql='> DELETE ... -- table is empty'}
+}});
+
+def({cat:ND,id:'data-best-practices',name:'API & database best practices: do and don\'t',tags:'best practice api key secret token security https isolate compute parsing futurebuilder cache sql injection migration error handling checklist',h:360,
+blurb:'A checklist for the data layer. Pick a topic to see what to avoid, what to write instead, and why. Most of these mistakes work fine in a demo and fail later with real users.',
+use:'Reviewing your own networking and database code, or a pull request.',
+watch:'None of this replaces testing on a real device with a slow or missing network. Secrets cannot be hidden in a mobile app, so anything truly secret must stay on your server.',
+ctl:[{k:'t',l:'topic',t:'sel',o:['API keys & secrets','Login tokens','Slow JSON parsing','Errors','Fetching in build()','SQL strings','Database changes','Plain http'],v:'API keys & secrets'}],
+render(s,st,g,d){
+ const T={
+  'API keys & secrets':['const secretKey = \'sk_live_123\';   // in the app code','// keep the secret on your server; the app calls your server\nfinal res = await client.get(Uri.parse(\'https://api.example.com/payments\'));','Anyone can extract strings from an installed app, and --dart-define values are also inside the app. A secret in the app is public.'],
+  'Login tokens':['await prefs.setString(\'token\', token);   // shared_preferences','await const FlutterSecureStorage()\n    .write(key: \'token\', value: token);','shared_preferences is plain text. Secure storage uses the Keychain or Keystore.'],
+  'Slow JSON parsing':['final data = jsonDecode(hugeBody);   // blocks the UI thread','final data = await Isolate.run(() => jsonDecode(hugeBody));','Parsing a very large body on the main isolate drops frames. Isolate.run (Dart 2.19+) does it on another thread. Measure first, small bodies are fine.'],
+  'Errors':['try { await api.load(); } catch (_) {}   // swallowed','try {\n  state = Data(await repo.load());\n} on Exception catch (e) {\n  state = Failure(friendly(e));\n}','Swallowed errors leave a blank screen. Turn them into a Failure state with a retry.'],
+  'Fetching in build()':['Widget build(BuildContext c) => FutureBuilder(\n  future: api.load(),   // new request on every rebuild\n  builder: ...);','// start once in the ViewModel\nviewModel.load();   // from initState or a command\n// the widget only reads viewModel.state','build can run many times per second. Keep the request out of it.'],
+  'SQL strings':['db.rawQuery("SELECT * FROM todos WHERE title = \'$input\'");','db.query(\'todos\', where: \'title = ?\', whereArgs: [input]);','Joining user input into SQL allows SQL injection and breaks on quotes. Pass values as arguments.'],
+  'Database changes':['// added a column, kept version: 1\nCREATE TABLE todos(id, title, due)','openDatabase(path, version: 2,\n  onUpgrade: (db, oldV, newV) async {\n    if (oldV < 2) {\n      await db.execute(\'ALTER TABLE todos ADD COLUMN due TEXT\');\n    }\n  });','Existing users already have the old file. Without a version bump and onUpgrade the new code crashes or loses data.'],
+  'Plain http':['Uri.parse(\'http://api.example.com/login\')','Uri.parse(\'https://api.example.com/login\')','Plain http can be read and changed on the network, and Android and iOS block it by default. Use https for everything.']};
+ const [bad,good,why]=T[s.t];
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:8px;padding:10px;overflow:hidden">${errb('AVOID\n'+bad)}${okb('PREFER\n'+good)}</div>`;
+ return {code:good,hint:why};
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -2437,7 +2701,7 @@ put('Async','future-builder');
 put('Material','card-list-tile tab-bar');
 W.forEach(d=>{if(RECAT[d.id])d.cat=RECAT[d.id]});
 CATS.length=0;
-['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Theming and resources','Painting and effects','Animation and motion','Assets, images, and icons','Async','Accessibility','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
+['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Theming and resources','Painting and effects','Animation and motion','Assets, images, and icons','Async','State and architecture','Networking and data','Accessibility','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
 Object.assign(CINTRO,{
  'Basics':'Widgets to know before building your first Flutter app.',
  'Layout':'Arrange other widgets in rows, columns, stacks and other layouts, and learn how sizes are decided.',
@@ -2451,6 +2715,8 @@ Object.assign(CINTRO,{
  'Animation and motion':'Bring animations to your app.',
  'Assets, images, and icons':'Display images and show icons.',
  'Async':'Widgets that work with asynchronous data.',
+ 'State and architecture':'Decide where state lives, share it between screens, and structure an app into layers.',
+ 'Networking and data':'Call APIs, parse JSON, save data on the device, and keep it all in a tidy data layer.',
  'Accessibility':'Make your app usable with screen readers and other assistive technology.',
  'Material':'Ready-made widgets that follow the Material 3 design system.'
 });
@@ -2565,6 +2831,47 @@ Object.assign(REFS,{
 /* v7: learning path stage for theming */
 (()=>{ const i=PATH.findIndex(p=>p.t==='When things break');
  PATH.splice(i,0,{t:'Style the whole app',i:'Set colours, text, sizes and dark mode in one place instead of in every widget.',s:[['theme-data','Create one ThemeData and give it to MaterialApp.'],['color-roles','Pick colours by role, not by hex value.'],['text-theme','Use named text styles and set the font once.'],['spacing-dimens','Name your spacing, radius and sizes.'],['component-themes','Style buttons, fields and cards in the theme.'],['theme-mode','Add dark mode and a user setting for it.']]});
+})();
+
+/* ================= v8: props, links and learning path for state, architecture and data ================= */
+Object.assign(META,{
+'state-scope':{r:['stateful','lift-state','change-notifier','state-packages','mvvm-layers']},
+'lift-state':{p:['State<T>.setState(fn)|void|-|Runs fn, then marks the widget dirty so build runs again. Never call it inside build.','Widget parameters|final fields|-|How a parent passes values down to a child.','ValueChanged<T> / VoidCallback|typedef|-|How a child asks the parent to change something.','InheritedWidget|class|-|Shares data with all widgets below it without passing it through every constructor. Provider is built on it.'],r:['stateful','change-notifier','state-scope','err-setstate-build']},
+'change-notifier':{p:['notifyListeners()|void|-|Call after the data changed. Every listener is told to rebuild.','addListener / removeListener|method|-|Low-level way to listen. ListenableBuilder does this for you.','dispose()|void|-|Release listeners. Call it when you own the notifier. Do not call notifyListeners after dispose.','ListenableBuilder(listenable, builder, child)|widget|-|Rebuilds the builder whenever the listenable changes. child is built once.','ValueNotifier<T>|class|-|A ChangeNotifier that holds one value.','ValueListenableBuilder<T>|widget|-|Rebuilds when a ValueNotifier changes.'],r:['state-scope','lift-state','mvvm-layers','state-packages','ui-state']},
+'state-packages':{p:['Provider: context.watch / read / select|extension methods|-|watch rebuilds, read does not, select rebuilds only for one field.','Riverpod: ref.watch / read / listen|WidgetRef methods|-|Providers are declared outside the widget tree.','Bloc: BlocBuilder / BlocListener|widgets|-|Rebuild or react (navigate, show a snack bar) when the state changes.','Choosing|advice|-|Pick one and use it everywhere. Prefer what your team knows and what is easy to test.'],r:['change-notifier','mvvm-layers','state-scope','ui-state']},
+'mvvm-layers':{p:['View|widget|-|Reads state from the ViewModel, sends events to it. No logic.','ViewModel|ChangeNotifier|-|Screen state and commands. Depends on repositories, not on widgets.','Repository|abstract class|-|Source of truth for one kind of data. Hides where the data comes from.','Service|class|-|One data source: HTTP, database or plugin.','Domain layer|optional|-|Add only when ViewModels repeat or get crowded logic.','Dependency injection|pattern|-|Pass dependencies in (constructor or Provider) instead of creating them inside classes.','Naming|convention|-|HomeScreen, HomeViewModel, UserRepository, ClientApiService.'],r:['change-notifier','repository-cache','api-client','ui-state','state-packages']},
+'ui-state':{p:['sealed class UiState<T>|Dart 3|-|A closed set of subclasses. A switch must handle all of them.','Loading / Data / Failure|subclasses|-|The three shapes a loading screen can have.','switch expression|Dart 3|-|Returns a widget for each state. Use `Data(:final value)` to read a field.','Empty list|Data([])|-|An empty result is a successful state, show an empty view, not an error.','Retry|command|-|Offer a retry that calls the ViewModel again.'],r:['future-builder','stream-builder','change-notifier','mvvm-layers','err-setstate-build']},
+'api-client':{p:['http.get(Uri, headers:)|Future<Response>|-|Basic request. Does not throw for 404 or 500, check statusCode.','Response.statusCode / body|int / String|-|Check the code first, then decode the body.','jsonDecode(body)|dynamic|-|Throws FormatException for invalid JSON.','.timeout(Duration)|Future|-|Throws TimeoutException if there is no answer.','Dio(BaseOptions(baseUrl, connectTimeout, receiveTimeout))|class|-|A client with defaults, interceptors, cancel tokens and upload progress.','DioException|exception|-|Thrown for bad status codes, timeouts and cancellations. Check type and response.','Interceptors|Dio feature|-|Add an Authorization header, refresh a token, log requests.'],r:['mvvm-layers','json-models','repository-cache','data-best-practices','future-builder']},
+'json-models':{p:['fromJson(Map<String,dynamic>)|factory|-|Create the model from decoded JSON.','toJson()|method|-|Turn the model back into a Map for jsonEncode.','as int / as String? ?? default|cast|-|A cast throws on a wrong type. A nullable cast with ?? gives a default.','@JsonSerializable()|annotation|-|json_serializable generates fromJson and toJson. Run build_runner.','@freezed|annotation|-|Generates immutability, ==, hashCode, copyWith and JSON support.','@Default(value)|annotation|-|Default for a missing field in freezed.','API model vs domain model|concept|-|Keep them separate in large apps so API changes do not leak into the UI.'],r:['api-client','repository-cache','mvvm-layers','sqlite-crud']},
+'repository-cache':{p:['abstract class Repository|class|-|The contract. ViewModels depend on this, not on the implementation.','Remote data source|service|-|Calls the API.','Local data source (DAO)|class|-|Reads and writes the database.','Strategy|choice|-|Network first with cache fallback, cache first with refresh, or a Stream of both.','Fake repository|class|-|An in-memory version for tests and previews.'],r:['api-client','sqlite-crud','storage-choice','mvvm-layers','ui-state']},
+'storage-choice':{p:['shared_preferences|package|-|Small key-value data: settings and flags. Not secure.','flutter_secure_storage|package|-|Tokens and secrets, stored with Keychain or Keystore.','sqflite|package|-|SQLite with SQL strings and helper methods.','drift|package|-|SQLite with typed Dart queries and streams. Needs build_runner.','path_provider + dart:io File|packages|-|Folders and files for images, PDFs and exports.','Web|note|-|Some of these work differently or not at all on Flutter web. Check each package.'],r:['sqlite-crud','repository-cache','data-best-practices','theme-mode']},
+'sqlite-crud':{p:['openDatabase(path, version, onCreate, onUpgrade)|Future<Database>|-|Open once and reuse. version drives migrations.','db.insert / query / update / delete|methods|-|Helpers that take table, values, where and whereArgs.','whereArgs|List|-|Values for ? in where. Always use it instead of string joining.','db.transaction / db.batch|methods|-|Run many writes together and fast, all or nothing.','drift Table classes|Dart|-|Describe tables in Dart. Queries are checked by the compiler.','schemaVersion + migration|drift|-|Same idea as version and onUpgrade.'],r:['storage-choice','repository-cache','json-models','data-best-practices']},
+'data-best-practices':{r:['api-client','json-models','sqlite-crud','storage-choice','repository-cache']}
+});
+Object.assign(LINKS,{
+'state-scope':[['Managing state (docs)','https://docs.flutter.dev/data-and-backend/state-mgmt/intro']],
+'lift-state':[['Lifting state up (docs)','https://docs.flutter.dev/data-and-backend/state-mgmt/ephemeral-vs-app']],
+'change-notifier':[['Simple app state (docs)','https://docs.flutter.dev/data-and-backend/state-mgmt/simple']],
+'state-packages':[['provider','https://pub.dev/packages/provider'],['flutter_riverpod','https://pub.dev/packages/flutter_riverpod'],['flutter_bloc','https://pub.dev/packages/flutter_bloc'],['State management options','https://docs.flutter.dev/data-and-backend/state-mgmt/options']],
+'mvvm-layers':[['App architecture guide','https://docs.flutter.dev/app-architecture/guide'],['Architecture recommendations','https://docs.flutter.dev/app-architecture/recommendations'],['Compass app sample','https://github.com/flutter/samples/tree/main/compass_app']],
+'ui-state':[['App architecture guide','https://docs.flutter.dev/app-architecture/guide']],
+'api-client':[['http','https://pub.dev/packages/http'],['dio','https://pub.dev/packages/dio'],['Networking cookbook','https://docs.flutter.dev/cookbook/networking']],
+'json-models':[['JSON and serialization','https://docs.flutter.dev/data-and-backend/serialization/json'],['json_serializable','https://pub.dev/packages/json_serializable'],['freezed','https://pub.dev/packages/freezed']],
+'repository-cache':[['Architecture recommendations','https://docs.flutter.dev/app-architecture/recommendations']],
+'storage-choice':[['Persistence cookbook','https://docs.flutter.dev/cookbook/persistence'],['shared_preferences','https://pub.dev/packages/shared_preferences'],['flutter_secure_storage','https://pub.dev/packages/flutter_secure_storage']],
+'sqlite-crud':[['SQLite cookbook','https://docs.flutter.dev/cookbook/persistence/sqlite'],['sqflite','https://pub.dev/packages/sqflite'],['drift','https://pub.dev/packages/drift']],
+'data-best-practices':[['Networking cookbook','https://docs.flutter.dev/cookbook/networking']]
+});
+Object.assign(REFS,{
+'lift-state':'widgets:State,InheritedWidget',
+'change-notifier':'foundation:ChangeNotifier,ValueNotifier;widgets:ListenableBuilder,ValueListenableBuilder'
+});
+[['stateful','state-scope'],['stateful','lift-state'],['stateful','change-notifier'],['future-builder','ui-state'],['stream-builder','ui-state'],['list-view','ui-state'],['err-setstate-build','change-notifier'],['theme-mode','change-notifier']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+(()=>{
+ const i=PATH.findIndex(p=>p.t==='When things break');
+ PATH.splice(i,0,
+  {t:'Manage state',i:'Decide where data lives and how widgets find out when it changes.',s:[['state-scope','Tell ephemeral state from shared state.'],['lift-state','Share a value by moving it to the parent.'],['change-notifier','Notify listeners with only the Flutter SDK.'],['ui-state','Model loading, data and error as one value.'],['state-packages','See the same counter in Provider, Riverpod and Bloc.']]},
+  {t:'Talk to servers and databases',i:'Structure the data layer so screens stay simple and apps work offline.',s:[['mvvm-layers','Split the app into View, ViewModel, Repository and Service.'],['api-client','Call an API with timeouts and error handling.'],['json-models','Turn JSON into typed models.'],['storage-choice','Pick the right place to save each kind of data.'],['sqlite-crud','Create, read, update and delete rows in SQLite.'],['repository-cache','Fall back to a saved copy when offline.'],['data-best-practices','A checklist of mistakes to avoid.']]});
 })();
 
 /* ================= BOOTSTRAP ================= */
