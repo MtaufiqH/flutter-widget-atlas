@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 113 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 115 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
@@ -2713,6 +2713,63 @@ act(a,st,s){
  else if(a==='x'){if(st.has){st.has=false;st.log.push('> delete()','< deleted')}else st.log.push('> exists() -> false','< nothing to delete')}
 }});
 
+/* ================= v9: image_picker and file_picker ================= */
+const PICKFILES=[['report.pdf','pdf',820],['photo.jpg','jpg',3400],['notes.docx','docx',64],['clip.mp4','mp4',18200],['logo.png','png',210],['budget.xlsx','xlsx',48]];
+const fsz=n=>n>=1024?(n/1024).toFixed(1)+' MB':n+' KB';
+def({cat:'Input',id:'image-picker',name:'image_picker (photos & camera)',tags:'image_picker imagepicker xfile pickimage pickmultiimage camera gallery photo video permission info.plist NSPhotoLibraryUsageDescription NSCameraUsageDescription imagequality maxwidth compress upload avatar',h:380,
+blurb:'image_picker is the Flutter team\'s plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back an XFile (or null if the user cancelled). Then you show it, copy it, or upload it.',
+use:'Profile pictures, attaching photos to a post, scanning a receipt, and any "choose or take a picture" button.',
+watch:'Always handle null (the user cancelled) and errors (permission denied). On iOS, add the usage descriptions to Info.plist or the app crashes. Pass maxWidth, maxHeight or imageQuality to avoid uploading 12 MB photos. On web the XFile has no real file path, so read its bytes.',
+ctl:[{k:'src',l:'source',t:'sel',o:['gallery','camera'],v:'gallery'},{k:'multi',l:'pick several (gallery only)',t:'chk',v:false},{k:'q',l:'imageQuality',t:'rng',min:10,max:100,step:10,v:80},{k:'mw',l:'maxWidth',t:'sel',o:['no limit','1024','512'],v:'1024'},{k:'deny',l:'user denies permission',t:'chk',v:false}],
+render(s,st,g,d){
+ if(!st.res)st.res={k:'none'};
+ const r=st.res,imgs=[0,1,2];
+ let out;
+ if(r.k==='none')out=`<div style="color:var(--muted);font-size:13px">Press the button.</div>`;
+ else if(r.k==='cancel')out=`<div class="okb" style="background:var(--c3s);border-color:var(--c3);color:var(--c3t)">pickImage returned <b>null</b>. The user cancelled, so do nothing.</div>`;
+ else if(r.k==='denied')out=`<div class="erb">PlatformException(photo_access_denied, The user did not allow photo access, null, null)<br>Show a message and a button that opens the app settings.</div>`;
+ else out=`<div style="display:flex;gap:8px;flex-wrap:wrap">${r.files.map(f=>`<div style="width:86px"><img draggable="false" src="${PIC}" style="width:86px;height:64px;object-fit:cover;border-radius:8px;filter:hue-rotate(${f.h}deg);pointer-events:none"><div style="font:10.5px/1.3 var(--f-mono);margin-top:3px;overflow-wrap:anywhere">${esc(f.name)}<br>${esc(f.size)}</div></div>`).join('')}</div>`;
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap"><span data-a="pick" class="btn k-Filled" style="padding:6px 14px;font-size:13px">${s.src==='camera'?'Take photo':s.multi?'Pick photos':'Pick photo'}</span><span data-a="cancel" class="btn k-Outlined" style="padding:6px 12px;font-size:12px">User cancels</span></div><div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:10px;overflow:auto;font-size:13px">${out}</div><div style="font:11px var(--f-mono);color:var(--muted)">${r.k==='picked'?'XFile.path = '+esc(r.path):'XFile? file = await picker.pickImage(...)'}</div></div>`;
+ const opts=(s.mw==='no limit'?'':'\n  maxWidth: '+s.mw+',')+(s.q<100?'\n  imageQuality: '+s.q+',':'');
+ const multi=s.multi&&s.src==='gallery';
+ const call=multi?`final List<XFile> files = await picker.pickMultiImage(${opts?opts.replace(/^\n/,'\n  ').replace(/\n  /g,'\n  ')+'\n':''});\nif (files.isEmpty) return;           // cancelled`:`final XFile? file = await picker.pickImage(\n  source: ImageSource.${s.src},${opts}\n);\nif (file == null) return;            // cancelled`;
+ const code=`// pubspec: image_picker\nfinal picker = ImagePicker();\n\nFuture<void> choose() async {\n  try {\n    ${call.replace(/\n/g,'\n    ')}\n    setState(() => _file = ${multi?'files.first':'file'});\n  } on PlatformException catch (e) {\n    // permission denied or camera not available\n  }\n}\n\n// show it\nImage.file(File(_file!.path))        // mobile\n// web: Image.memory(await _file!.readAsBytes())\n\n// iOS: ios/Runner/Info.plist\n// NSPhotoLibraryUsageDescription  (why you read photos)\n// NSCameraUsageDescription        (why you use the camera)`;
+ return {code,hint:'Choose options, then press the button. The result card shows the three outcomes your code must handle: picked, cancelled and permission denied.'};
+},
+act(a,st,s){
+ if(a==='cancel'){st.res={k:'cancel'};return}
+ if(a!=='pick')return;
+ if(s.deny){st.res={k:'denied'};return}
+ const n=s.multi&&s.src==='gallery'?3:1,w=s.mw==='no limit'?4032:+s.mw,sz=Math.round(w*0.75*w*s.q/100/1000*0.2);
+ st.res={k:'picked',path:s.src==='camera'?'/data/user/0/com.example.app/cache/scaled_a1b2c3.jpg':'/data/user/0/com.example.app/cache/scaled_IMG_0042.jpg',files:Array.from({length:n},(_,i)=>({name:(s.src==='camera'?'scaled_cam_':'scaled_IMG_')+(42+i)+'.jpg',size:fsz(Math.max(60,sz)),h:i*70}))};
+}});
+
+def({cat:'Input',id:'file-picker',name:'file_picker (documents & other files)',tags:'file_picker filepicker pickfiles platformfile filetype custom allowedextensions withdata allowmultiple pdf document upload bytes web path null savefile getdirectorypath',h:380,
+blurb:'file_picker opens the system file chooser so the user can pick any file, not just photos. pickFiles returns a FilePickerResult that holds one PlatformFile for each file chosen. It is a community package, widely used, and it works on mobile, web and desktop.',
+use:'Uploading a PDF, importing a spreadsheet or backup, attaching documents to a message.',
+watch:'The result is null when the user cancels. On web a PlatformFile has no path, only bytes, so ask for withData: true. Check the size and the real file type yourself before you upload, because an extension filter is only a hint to the picker. withData loads the whole file into memory, so avoid it for very large files. Check the changelog, because its API changes between major versions.',
+ctl:[{k:'t',l:'allowed type',t:'sel',o:['any file','custom: pdf, docx, xlsx','image','video'],v:'custom: pdf, docx, xlsx'},{k:'multi',l:'allowMultiple',t:'chk',v:false},{k:'wd',l:'withData (load bytes)',t:'chk',v:false},{k:'web',l:'running on web',t:'chk',v:false}],
+render(s,st,g,d){
+ if(!st.sel)st.sel=new Set();
+ const ok=f=>s.t==='any file'||(s.t.startsWith('custom')&&['pdf','docx','xlsx'].includes(f[1]))||(s.t==='image'&&['jpg','png'].includes(f[1]))||(s.t==='video'&&f[1]==='mp4');
+ const list=PICKFILES.filter(ok);
+ if(!s.multi&&st.sel.size>1){const f=[...st.sel][0];st.sel=new Set([f])}
+ [...st.sel].forEach(n=>{if(!list.some(f=>f[0]===n))st.sel.delete(n)});
+ const r=st.res;let out;
+ if(!r)out=`<div style="color:var(--muted);font-size:13px">Select files on the left, then press Pick.</div>`;
+ else if(r==='null')out=`<div class="okb" style="background:var(--c3s);border-color:var(--c3);color:var(--c3t)">pickFiles returned <b>null</b>. The user cancelled.</div>`;
+ else out=`<div style="font:11.5px/1.7 var(--f-mono)">${r.map(f=>`<div style="border-top:1px solid var(--line);padding:3px 0"><b>${esc(f.name)}</b> &middot; ${fsz(f.size)}<br>path: ${s.web?'<span style="color:var(--danger)">null (web)</span>':'/data/.../cache/file_picker/'+esc(f.name)}<br>bytes: ${s.wd?'Uint8List('+f.size*1024+')':'null'}</div>`).join('')}</div>`;
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;gap:10px"><div style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0"><div style="font:600 10.5px var(--f-mono);color:var(--muted)">PHONE STORAGE</div>${list.length?list.map(f=>`<div data-a="f${f[0]}" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;border:1.5px solid ${st.sel.has(f[0])?'var(--c1)':'var(--line)'};background:${st.sel.has(f[0])?'var(--c1s)':'var(--surface)'};font-size:12.5px"><span>${st.sel.has(f[0])?ic('check',16):''}</span>${esc(f[0])}</div>`).join(''):'<div style="color:var(--muted);font-size:12.5px">No file matches this type.</div>'}<div style="display:flex;gap:6px;margin-top:auto"><span data-a="pick" class="btn k-Filled" style="padding:5px 12px;font-size:12px">Pick</span><span data-a="cancel" class="btn k-Outlined" style="padding:5px 12px;font-size:12px">Cancel</span></div></div><div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px;overflow:auto;min-width:0">${out}</div></div>`;
+ const ty=s.t==='any file'?'':s.t.startsWith('custom')?"\n  type: FileType.custom,\n  allowedExtensions: ['pdf', 'docx', 'xlsx'],":s.t==='image'?'\n  type: FileType.image,':'\n  type: FileType.video,';
+ const code=`// pubspec: file_picker\nFuture<void> choose() async {\n  final result = await FilePicker.platform.pickFiles(${ty}${s.multi?'\n  allowMultiple: true,':''}${s.wd?'\n  withData: true,':''}\n  );\n  if (result == null) return;          // cancelled\n\n  for (final file in result.files) {\n    debugPrint(file.name);              // report.pdf\n    debugPrint(file.size.toString());   // bytes\n    ${s.web?'// web: file.path is always null\n    final bytes = file.bytes;           // needs withData: true':'final path = file.path;             // on mobile and desktop\n    if (path != null) {\n      final f = File(path);             // copy it to your app folder\n    }'}\n    if (file.size > 10 * 1024 * 1024) {\n      // reject: too big for your server\n    }\n  }\n}`;
+ return {code,hint:s.web?'On web there is no file path, so turn on withData and use file.bytes.':'The type filter only guides the picker. Validate the file again before you upload it.'};
+},
+act(a,st,s){
+ if(a==='cancel'){st.res='null';return}
+ if(a==='pick'){const f=PICKFILES.filter(x=>st.sel.has(x[0])).map(x=>({name:x[0],size:x[2]}));st.res=f.length?f:'null';return}
+ if(a[0]==='f'&&a.length>1){const n=a.slice(1);if(st.sel.has(n))st.sel.delete(n);else{if(!s.multi)st.sel.clear();st.sel.add(n)}}
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -2874,6 +2931,8 @@ Object.assign(META,{
 'storage-choice':{p:['shared_preferences|package|-|Small key-value data: settings and flags. Not secure.','flutter_secure_storage|package|-|Tokens and secrets, stored with Keychain or Keystore.','sqflite|package|-|SQLite with SQL strings and helper methods.','drift|package|-|SQLite with typed Dart queries and streams. Needs build_runner.','path_provider + dart:io File|packages|-|Folders and files for images, PDFs and exports.','Web|note|-|Some of these work differently or not at all on Flutter web. Check each package.'],r:['sqlite-crud','repository-cache','data-best-practices','theme-mode']},
 'sqlite-crud':{p:['openDatabase(path, version, onCreate, onUpgrade)|Future<Database>|-|Open once and reuse. version drives migrations.','db.insert / query / update / delete|methods|-|Helpers that take table, values, where and whereArgs.','whereArgs|List|-|Values for ? in where. Always use it instead of string joining.','db.transaction / db.batch|methods|-|Run many writes together and fast, all or nothing.','drift Table classes|Dart|-|Describe tables in Dart. Queries are checked by the compiler.','schemaVersion + migration|drift|-|Same idea as version and onUpgrade.'],r:['storage-choice','repository-cache','json-models','data-best-practices']},
 'path-provider':{p:['getApplicationDocumentsDirectory()|Future<Directory>|-|Long-lived files that belong to the app.','getApplicationSupportDirectory()|Future<Directory>|-|Long-lived app files that the user should not see.','getTemporaryDirectory()|Future<Directory>|-|Scratch files. The system can delete them.','getApplicationCacheDirectory()|Future<Directory>|-|Cache the app can rebuild.','getExternalStorageDirectory()|Future<Directory?>|-|Android only. Throws UnsupportedError elsewhere.','getDownloadsDirectory()|Future<Directory?>|-|Desktop only.','File(path).writeAsString / readAsString / exists / delete|dart:io|-|The normal file API. Not available on web.','path.join(a, b)|String|-|Build paths with the right separator for the platform.'],r:['storage-choice','sqlite-crud','image','data-best-practices']},
+'image-picker':{p:['pickImage(source, maxWidth, maxHeight, imageQuality)|Future<XFile?>|-|One image from ImageSource.gallery or ImageSource.camera. null when cancelled.','pickMultiImage()|Future<List<XFile>>|-|Several images from the gallery. Empty list when cancelled.','pickVideo(source)|Future<XFile?>|-|A video. The Info.plist needs the microphone description on iOS.','XFile.path / name / readAsBytes()|class|-|The chosen file. On web use readAsBytes, there is no real path.','imageQuality|int?|100|1 to 100. Applies to JPEG output. Smaller means a smaller upload.','maxWidth / maxHeight|double?|null|Scale down large photos before they reach your code.','retrieveLostData()|Future<LostDataResponse>|-|Android may restart your app while the camera is open. Recover the photo here.'],r:['file-picker','path-provider','image','storage-choice','api-client']},
+'file-picker':{p:['FilePicker.platform.pickFiles(...)|Future<FilePickerResult?>|-|Opens the chooser. null when cancelled.','type|FileType|any|any, image, video, audio, media or custom.','allowedExtensions|List<String>?|null|Used with FileType.custom, for example [\'pdf\'].','allowMultiple|bool|false|Let the user choose more than one file.','withData|bool|false|Load the bytes into memory. Needed on web.','PlatformFile.name / size / path / bytes|class|-|path is null on web. bytes is null unless withData is true.','FilePicker.platform.saveFile / getDirectoryPath|methods|-|Choose where to save a file or pick a folder (not on every platform).'],r:['image-picker','path-provider','api-client','storage-choice']},
 'data-best-practices':{r:['api-client','json-models','sqlite-crud','storage-choice','repository-cache']}
 });
 Object.assign(LINKS,{
@@ -2887,6 +2946,8 @@ Object.assign(LINKS,{
 'json-models':[['JSON and serialization','https://docs.flutter.dev/data-and-backend/serialization/json'],['json_serializable','https://pub.dev/packages/json_serializable'],['freezed','https://pub.dev/packages/freezed']],
 'repository-cache':[['Architecture recommendations','https://docs.flutter.dev/app-architecture/recommendations']],
 'storage-choice':[['Persistence cookbook','https://docs.flutter.dev/cookbook/persistence'],['shared_preferences','https://pub.dev/packages/shared_preferences'],['flutter_secure_storage','https://pub.dev/packages/flutter_secure_storage']],
+'image-picker':[['image_picker','https://pub.dev/packages/image_picker']],
+'file-picker':[['file_picker','https://pub.dev/packages/file_picker']],
 'path-provider':[['path_provider','https://pub.dev/packages/path_provider'],['Read and write files (cookbook)','https://docs.flutter.dev/cookbook/persistence/reading-writing-files'],['path','https://pub.dev/packages/path']],
 'sqlite-crud':[['SQLite cookbook','https://docs.flutter.dev/cookbook/persistence/sqlite'],['sqflite','https://pub.dev/packages/sqflite'],['drift','https://pub.dev/packages/drift']],
 'data-best-practices':[['Networking cookbook','https://docs.flutter.dev/cookbook/networking']]
@@ -2895,12 +2956,12 @@ Object.assign(REFS,{
 'lift-state':'widgets:State,InheritedWidget',
 'change-notifier':'foundation:ChangeNotifier,ValueNotifier;widgets:ListenableBuilder,ValueListenableBuilder'
 });
-[['storage-choice','path-provider'],['image','path-provider'],['stateful','state-scope'],['stateful','lift-state'],['stateful','change-notifier'],['future-builder','ui-state'],['stream-builder','ui-state'],['list-view','ui-state'],['err-setstate-build','change-notifier'],['theme-mode','change-notifier']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+[['storage-choice','path-provider'],['path-provider','image-picker'],['path-provider','file-picker'],['image','image-picker'],['text-field','file-picker'],['buttons','image-picker'],['image','path-provider'],['stateful','state-scope'],['stateful','lift-state'],['stateful','change-notifier'],['future-builder','ui-state'],['stream-builder','ui-state'],['list-view','ui-state'],['err-setstate-build','change-notifier'],['theme-mode','change-notifier']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
 (()=>{
  const i=PATH.findIndex(p=>p.t==='When things break');
  PATH.splice(i,0,
   {t:'Manage state',i:'Decide where data lives and how widgets find out when it changes.',s:[['state-scope','Tell ephemeral state from shared state.'],['lift-state','Share a value by moving it to the parent.'],['change-notifier','Notify listeners with only the Flutter SDK.'],['ui-state','Model loading, data and error as one value.'],['state-packages','See the same counter in Provider, Riverpod and Bloc.']]},
-  {t:'Talk to servers and databases',i:'Structure the data layer so screens stay simple and apps work offline.',s:[['mvvm-layers','Split the app into View, ViewModel, Repository and Service.'],['api-client','Call an API with timeouts and error handling.'],['json-models','Turn JSON into typed models.'],['storage-choice','Pick the right place to save each kind of data.'],['path-provider','Find the right folder for files, and read and write them.'],['sqlite-crud','Create, read, update and delete rows in SQLite.'],['repository-cache','Fall back to a saved copy when offline.'],['data-best-practices','A checklist of mistakes to avoid.']]});
+  {t:'Talk to servers and databases',i:'Structure the data layer so screens stay simple and apps work offline.',s:[['mvvm-layers','Split the app into View, ViewModel, Repository and Service.'],['api-client','Call an API with timeouts and error handling.'],['json-models','Turn JSON into typed models.'],['storage-choice','Pick the right place to save each kind of data.'],['path-provider','Find the right folder for files, and read and write them.'],['image-picker','Let the user choose or take a photo.'],['file-picker','Let the user choose documents and other files.'],['sqlite-crud','Create, read, update and delete rows in SQLite.'],['repository-cache','Fall back to a saved copy when offline.'],['data-best-practices','A checklist of mistakes to avoid.']]});
 })();
 
 /* ================= BOOTSTRAP ================= */
