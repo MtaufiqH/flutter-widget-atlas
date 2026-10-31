@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 112 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 113 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
@@ -2686,6 +2686,33 @@ render(s,st,g,d){
  return {code:good,hint:why};
 }});
 
+const PDIR=[
+ ['getApplicationDocumentsDirectory','Files the app owns and wants to keep: exports, downloaded documents, user data.','Kept until the app is removed. Not for temporary data.','/data/user/0/com.example.app/app_flutter','…/Containers/Data/Application/<id>/Documents'],
+ ['getApplicationSupportDirectory','App files the user should not see: generated data, config, local indexes.','Kept until the app is removed. Not shown to the user.','/data/user/0/com.example.app/files','…/Library/Application Support'],
+ ['getTemporaryDirectory','Scratch files and downloads you can re-create.','The system may delete it at any time. Clean it up yourself too.','/data/user/0/com.example.app/cache','…/Library/Caches'],
+ ['getApplicationCacheDirectory','Cached data the app can rebuild.','May be cleared by the system or the user.','/data/user/0/com.example.app/cache','…/Library/Caches'],
+ ['getExternalStorageDirectory','App folder on shared storage (Android only).','Android only. Throws UnsupportedError on iOS. Can be null.','/storage/emulated/0/Android/data/com.example.app/files','not available'],
+ ['getDownloadsDirectory','The user\'s Downloads folder (desktop).','Meant for desktop. Not supported on Android and iOS.','not available','not available']];
+def({cat:ND,id:'path-provider',name:'Files & path_provider',tags:'path_provider getApplicationDocumentsDirectory getTemporaryDirectory getApplicationSupportDirectory file read write dart:io directory path join kIsWeb images pdf export cache folder',h:370,
+blurb:'Flutter code can not guess where it is allowed to write files, because every platform uses different folders. The path_provider package asks the platform for the right folder. Then you use the normal dart:io File class to write and read inside it.',
+use:'Saving downloaded images, PDFs, exports and logs, and holding cache files that a database is not suited for.',
+watch:'Pick the folder by how long the data must live (documents and support stay, temporary and cache can be deleted). Store large files on disk and only their path in your database. dart:io does not exist on Flutter web, so guard with kIsWeb and use another approach there. Always catch FileSystemException.',
+ctl:[{k:'dir',l:'folder',t:'sel',o:PDIR.map(x=>x[0]),v:'getApplicationDocumentsDirectory'},{k:'os',l:'show path for',t:'sel',o:['Android','iOS'],v:'Android'}],
+render(s,st,g,d){
+ if(st.has==null){st.has=false;st.log=['(press write)']}
+ const D=PDIR.find(x=>x[0]===s.dir),path=s.os==='Android'?D[3]:D[4];
+ g.innerHTML=`<div style="position:absolute;inset:10px 14px;display:flex;flex-direction:column;gap:8px"><div style="font:600 12px var(--f-mono);background:var(--c1s);color:var(--c1t);padding:7px 10px;border-radius:8px;overflow-wrap:anywhere">${esc(s.dir)}()</div><div style="font:11.5px/1.5 var(--f-mono);color:var(--muted);overflow-wrap:anywhere">${esc(path)} <i style="opacity:.8">(example, differs per device)</i></div><div style="font-size:12.5px"><b>Good for:</b> ${esc(D[1])}<br><b>Lifetime:</b> ${esc(D[2])}</div><div style="display:flex;gap:8px"><span data-a="w" class="btn k-Filled" style="padding:5px 12px;font-size:12px">write</span><span data-a="r" class="btn k-Outlined" style="padding:5px 12px;font-size:12px">read</span><span data-a="x" class="btn k-Outlined" style="padding:5px 12px;font-size:12px">delete</span><span style="font:11px var(--f-mono);color:var(--muted);align-self:center">notes.txt: ${st.has?'exists':'missing'}</span></div><div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px;font:12px/1.6 var(--f-mono);overflow:hidden">${st.log.slice(-5).map(esc).join('<br>')}</div></div>`;
+ const fn=s.dir;
+ const code=`// pubspec: path_provider, path\nimport 'dart:io';\nimport 'package:path/path.dart' as p;\nimport 'package:path_provider/path_provider.dart';\n\nFuture<File> _notesFile() async {\n  final dir = await ${fn}();\n  return File(p.join(dir${fn==='getExternalStorageDirectory'?'!':''}.path, 'notes.txt'));   // join, never '+ "/" +'\n}\n\nFuture<void> save(String text) async {\n  final file = await _notesFile();\n  await file.writeAsString(text);\n}\n\nFuture<String?> load() async {\n  final file = await _notesFile();\n  if (!await file.exists()) return null;\n  try {\n    return await file.readAsString();\n  } on FileSystemException {\n    return null;   // show an error state instead\n  }\n}\n\nFuture<void> remove() async {\n  final file = await _notesFile();\n  if (await file.exists()) await file.delete();\n}\n\n// web has no dart:io files: if (kIsWeb) use another approach`;
+ return {code,hint:'Pick a folder and press write, read or delete on the virtual file. Real paths are different on every device, so never hard-code one.'};
+},
+act(a,st,s){
+ const f=s.dir;
+ if(a==='w'){st.has=true;st.log.push('> File(join('+f+', "notes.txt")).writeAsString("hello")','< written (5 chars)')}
+ else if(a==='r'){if(st.has)st.log.push('> readAsString()','< "hello"');else st.log.push('> exists() -> false','< load() returned null')}
+ else if(a==='x'){if(st.has){st.has=false;st.log.push('> delete()','< deleted')}else st.log.push('> exists() -> false','< nothing to delete')}
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -2846,6 +2873,7 @@ Object.assign(META,{
 'repository-cache':{p:['abstract class Repository|class|-|The contract. ViewModels depend on this, not on the implementation.','Remote data source|service|-|Calls the API.','Local data source (DAO)|class|-|Reads and writes the database.','Strategy|choice|-|Network first with cache fallback, cache first with refresh, or a Stream of both.','Fake repository|class|-|An in-memory version for tests and previews.'],r:['api-client','sqlite-crud','storage-choice','mvvm-layers','ui-state']},
 'storage-choice':{p:['shared_preferences|package|-|Small key-value data: settings and flags. Not secure.','flutter_secure_storage|package|-|Tokens and secrets, stored with Keychain or Keystore.','sqflite|package|-|SQLite with SQL strings and helper methods.','drift|package|-|SQLite with typed Dart queries and streams. Needs build_runner.','path_provider + dart:io File|packages|-|Folders and files for images, PDFs and exports.','Web|note|-|Some of these work differently or not at all on Flutter web. Check each package.'],r:['sqlite-crud','repository-cache','data-best-practices','theme-mode']},
 'sqlite-crud':{p:['openDatabase(path, version, onCreate, onUpgrade)|Future<Database>|-|Open once and reuse. version drives migrations.','db.insert / query / update / delete|methods|-|Helpers that take table, values, where and whereArgs.','whereArgs|List|-|Values for ? in where. Always use it instead of string joining.','db.transaction / db.batch|methods|-|Run many writes together and fast, all or nothing.','drift Table classes|Dart|-|Describe tables in Dart. Queries are checked by the compiler.','schemaVersion + migration|drift|-|Same idea as version and onUpgrade.'],r:['storage-choice','repository-cache','json-models','data-best-practices']},
+'path-provider':{p:['getApplicationDocumentsDirectory()|Future<Directory>|-|Long-lived files that belong to the app.','getApplicationSupportDirectory()|Future<Directory>|-|Long-lived app files that the user should not see.','getTemporaryDirectory()|Future<Directory>|-|Scratch files. The system can delete them.','getApplicationCacheDirectory()|Future<Directory>|-|Cache the app can rebuild.','getExternalStorageDirectory()|Future<Directory?>|-|Android only. Throws UnsupportedError elsewhere.','getDownloadsDirectory()|Future<Directory?>|-|Desktop only.','File(path).writeAsString / readAsString / exists / delete|dart:io|-|The normal file API. Not available on web.','path.join(a, b)|String|-|Build paths with the right separator for the platform.'],r:['storage-choice','sqlite-crud','image','data-best-practices']},
 'data-best-practices':{r:['api-client','json-models','sqlite-crud','storage-choice','repository-cache']}
 });
 Object.assign(LINKS,{
@@ -2859,6 +2887,7 @@ Object.assign(LINKS,{
 'json-models':[['JSON and serialization','https://docs.flutter.dev/data-and-backend/serialization/json'],['json_serializable','https://pub.dev/packages/json_serializable'],['freezed','https://pub.dev/packages/freezed']],
 'repository-cache':[['Architecture recommendations','https://docs.flutter.dev/app-architecture/recommendations']],
 'storage-choice':[['Persistence cookbook','https://docs.flutter.dev/cookbook/persistence'],['shared_preferences','https://pub.dev/packages/shared_preferences'],['flutter_secure_storage','https://pub.dev/packages/flutter_secure_storage']],
+'path-provider':[['path_provider','https://pub.dev/packages/path_provider'],['Read and write files (cookbook)','https://docs.flutter.dev/cookbook/persistence/reading-writing-files'],['path','https://pub.dev/packages/path']],
 'sqlite-crud':[['SQLite cookbook','https://docs.flutter.dev/cookbook/persistence/sqlite'],['sqflite','https://pub.dev/packages/sqflite'],['drift','https://pub.dev/packages/drift']],
 'data-best-practices':[['Networking cookbook','https://docs.flutter.dev/cookbook/networking']]
 });
@@ -2866,12 +2895,12 @@ Object.assign(REFS,{
 'lift-state':'widgets:State,InheritedWidget',
 'change-notifier':'foundation:ChangeNotifier,ValueNotifier;widgets:ListenableBuilder,ValueListenableBuilder'
 });
-[['stateful','state-scope'],['stateful','lift-state'],['stateful','change-notifier'],['future-builder','ui-state'],['stream-builder','ui-state'],['list-view','ui-state'],['err-setstate-build','change-notifier'],['theme-mode','change-notifier']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+[['storage-choice','path-provider'],['image','path-provider'],['stateful','state-scope'],['stateful','lift-state'],['stateful','change-notifier'],['future-builder','ui-state'],['stream-builder','ui-state'],['list-view','ui-state'],['err-setstate-build','change-notifier'],['theme-mode','change-notifier']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
 (()=>{
  const i=PATH.findIndex(p=>p.t==='When things break');
  PATH.splice(i,0,
   {t:'Manage state',i:'Decide where data lives and how widgets find out when it changes.',s:[['state-scope','Tell ephemeral state from shared state.'],['lift-state','Share a value by moving it to the parent.'],['change-notifier','Notify listeners with only the Flutter SDK.'],['ui-state','Model loading, data and error as one value.'],['state-packages','See the same counter in Provider, Riverpod and Bloc.']]},
-  {t:'Talk to servers and databases',i:'Structure the data layer so screens stay simple and apps work offline.',s:[['mvvm-layers','Split the app into View, ViewModel, Repository and Service.'],['api-client','Call an API with timeouts and error handling.'],['json-models','Turn JSON into typed models.'],['storage-choice','Pick the right place to save each kind of data.'],['sqlite-crud','Create, read, update and delete rows in SQLite.'],['repository-cache','Fall back to a saved copy when offline.'],['data-best-practices','A checklist of mistakes to avoid.']]});
+  {t:'Talk to servers and databases',i:'Structure the data layer so screens stay simple and apps work offline.',s:[['mvvm-layers','Split the app into View, ViewModel, Repository and Service.'],['api-client','Call an API with timeouts and error handling.'],['json-models','Turn JSON into typed models.'],['storage-choice','Pick the right place to save each kind of data.'],['path-provider','Find the right folder for files, and read and write them.'],['sqlite-crud','Create, read, update and delete rows in SQLite.'],['repository-cache','Fall back to a saved copy when offline.'],['data-best-practices','A checklist of mistakes to avoid.']]});
 })();
 
 /* ================= BOOTSTRAP ================= */
