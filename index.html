@@ -219,6 +219,14 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--muted);background:var(--surface)}
 .ln{height:10px;border-radius:5px;background:var(--line)}
 
+#nav a[aria-current]{color:var(--accent);font-weight:600;box-shadow:inset 2px 0 var(--accent);padding-left:8px;margin-left:-8px}
+.pnx{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.pnx a{flex:1 1 0;max-width:48%;display:flex;flex-direction:column;gap:4px;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);text-decoration:none;font:600 15px var(--f-display)}
+.pnx a small{font:500 11px var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pnx a:hover{border-color:var(--accent);color:var(--accent)}
+.pnx .nx{text-align:right;margin-left:auto}
+.pnx>span{flex:1 1 0}
+
 @media (max-width:900px){
  .shell{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:24px}
  #nav{position:fixed;top:0;bottom:0;left:0;width:min(320px,86vw);max-height:none;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));font-size:15px;z-index:50;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;box-shadow:0 0 30px rgba(0,0,0,.25)}
@@ -245,7 +253,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 <div class="top">
  <p class="eyebrow" id="eyebrow">Interactive reference</p>
  <h1>Flutter Widget Atlas</h1>
- <p class="lead">Every widget here has a live stage you can poke, controls that change its properties, and the Flutter code that matches whatever you set. The stages imitate Flutter's layout rules in the browser, so a pixel here or there may differ from a real device. The code is real Flutter.</p>
+ <p class="lead">Every widget here has a live stage you can poke, controls that change its properties, and the Flutter code that matches whatever you set. The stages imitate Flutter's layout rules in the browser, so a pixel here or there may differ from a real device. The code is real Flutter. Pick a widget from the list to open it, or press / to search.</p>
  <div class="sr"><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div>
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -1364,28 +1372,52 @@ Object.assign(META,{
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
 const main=$('#main'),nav=$('#nav');
+const ORD=CATS.flatMap(c=>W.filter(d=>d.cat===c));
 nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>'+CATS.map(c=>`<div class="ng"><div class="nh">${esc(c)}</div>${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div>`).join('');
+const secs={};
 CATS.forEach(c=>{
- const sec=document.createElement('section');sec.className='cs';
+ const sec=document.createElement('section');sec.className='cs';sec.hidden=true;
  sec.innerHTML=`<h2>${esc(c)}</h2><p class="ci">${esc(CINTRO[c])}</p>`;
- W.filter(d=>d.cat===c).forEach(d=>sec.appendChild(mount(d)));
- main.appendChild(sec);
+ W.filter(d=>d.cat===c).forEach(d=>{const el=mount(d);el.hidden=true;sec.appendChild(el)});
+ main.appendChild(sec);secs[c]=sec;
 });
-W.forEach(d=>d.draw());
+ORD.forEach((d,i)=>{
+ const p=ORD[i-1],n=ORD[i+1],bar=document.createElement('nav');
+ bar.className='pnx';bar.setAttribute('aria-label','Previous and next widget');
+ bar.innerHTML=(p?`<a class="pv" href="#${p.id}"><small>Previous</small>${esc(p.name)}</a>`:'<span></span>')+(n?`<a class="nx" href="#${n.id}"><small>Next</small>${esc(n.name)}</a>`:'<span></span>');
+ d.el.appendChild(bar);
+});
 $('#eyebrow').textContent='Interactive reference  ·  '+W.length+' widgets  ·  '+CATS.length+' categories';
 $('#count').textContent=W.length+' widgets';
+
+let cur=null;
+function show(id,user){
+ const d=W.find(x=>x.id===id)||ORD[0];
+ W.forEach(x=>{x.el.hidden=x!==d});
+ CATS.forEach(c=>{secs[c].hidden=c!==d.cat});
+ nav.querySelectorAll('a').forEach(a=>{if(a.dataset.id===d.id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+ const act=nav.querySelector('[aria-current]');
+ if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
+ cur=d;d.draw();
+ document.title=d.name+' \u00b7 Flutter Widget Atlas';
+ if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell');window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12))}
+}
+window.addEventListener('hashchange',()=>show(location.hash.slice(1),true));
 
 $('#q').addEventListener('input',e=>{
  const q=e.target.value.trim().toLowerCase();let n=0;
  W.forEach(d=>{
   const mp=META[d.id]&&META[d.id].p?META[d.id].p.map(r=>r.split('|')[0]).join(' '):'';
   const hit=!q||(d.name+' '+d.cat+' '+d.blurb+' '+(d.tags||'')+' '+mp).toLowerCase().includes(q);
-  d.el.hidden=!hit;if(hit)n++;
+  if(hit)n++;
   const l=nav.querySelector('[data-id="'+d.id+'"]');if(l)l.hidden=!hit;
  });
- main.querySelectorAll('.cs').forEach(s=>{s.hidden=!s.querySelector('.w:not([hidden])')});
+ nav.querySelectorAll('.ng').forEach(gp=>{gp.hidden=!gp.querySelector('a:not([hidden])')});
  $('#none').hidden=n>0;
  $('#count').textContent=q?n+' of '+W.length+' widgets':W.length+' widgets';
+});
+$('#q').addEventListener('keydown',e=>{
+ if(e.key==='Enter'){const f=nav.querySelector('a:not([hidden])[data-id]');if(f){e.preventDefault();location.hash=f.dataset.id;e.target.blur()}}
 });
 
 document.addEventListener('keydown',e=>{
@@ -1411,7 +1443,6 @@ tb.addEventListener('click',()=>{
  window.scrollTo({top:0,behavior:calm?'auto':'smooth'});
 });
 
-const h=location.hash.slice(1);
-if(h){const t=document.getElementById(h);if(t)setTimeout(()=>t.scrollIntoView(),50)}
+show(location.hash.slice(1),false);
 })();
 </script>
