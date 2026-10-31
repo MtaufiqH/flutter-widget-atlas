@@ -283,9 +283,15 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .navhead button{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .navhead button:hover{background:var(--accent-soft)}
 #bar{display:flex;position:fixed;top:0;left:0;right:0;height:60px;align-items:center;gap:14px;padding:env(safe-area-inset-top,0px) max(16px,calc((100% - 1240px)/2)) 0;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(10,20,60,.1);z-index:60}
-.sr{margin-left:auto;flex:0 1 460px;display:flex;align-items:center;gap:10px;min-width:0}
+.sr{margin-left:auto;flex:0 1 460px;display:flex;align-items:center;gap:10px;min-width:0;justify-content:flex-end}
+.sr.sc{flex:0 0 auto}.sr.sc #q,.sr.sc #count,.sr.sc .kbd{display:none}
+#sbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+#sbtn:hover{background:var(--accent-soft);color:var(--accent)}
+.sr:not(.sc) #sbtn{border-color:transparent;background:none;pointer-events:none}
+#brand{font:700 17px var(--f-display);letter-spacing:-.01em;color:var(--fg);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+#barT{color:var(--muted);font-weight:600;flex:1 1 0}#barT:not(:empty)::before{content:"/";margin-right:12px;color:var(--line)}
 #q{flex:1;min-width:0;max-width:none;padding:8px 12px;font-size:14px}
-@media (max-width:900px){#barT{display:none}.sr{margin-left:0;flex:1 1 0}#count,.kbd{display:none}#bar{padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));gap:10px}}
+@media (max-width:900px){#barT{display:none}#brand{flex:1 1 0;font-size:15px}.sr{margin-left:auto}.sr:not(.sc){flex:1 1 0}#bar.sx #brand,#bar.sx #burger{display:none!important}#count,.kbd{display:none}#bar{padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));gap:10px}}
 #burger{display:none;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;border:2px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font:700 14px var(--f-body);cursor:pointer;box-shadow:0 0 0 2px var(--accent);flex:none}
 #barT{font:700 16px var(--f-display);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:720px){
@@ -305,7 +311,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
 <div id="scrim" hidden></div>
-<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span><div class="sr"><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div></div>
+<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><a id="brand" href="#start">Flutter Widget Atlas</a><span id="barT" aria-live="polite"></span><div class="sr sc"><button id="sbtn" type="button" aria-label="Search widgets" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div></div>
 <button id="totop" type="button" hidden aria-label="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg><span>Top</span></button>
 <p id="none" hidden>No widget matches that search. Try a word like "scroll", "animation" or "button".</p>
 
@@ -2472,11 +2478,17 @@ $('#q').addEventListener('keydown',e=>{
 
 document.addEventListener('keydown',e=>{
  const t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
- if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(!typing&&e.key==='/'&&!e.metaKey&&!e.ctrlKey&&!e.altKey)){e.preventDefault();const q=$('#q');q.focus();q.select();if(q.scrollIntoView)q.scrollIntoView({block:'center'})}
+ if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(!typing&&e.key==='/'&&!e.metaKey&&!e.ctrlKey&&!e.altKey)){e.preventDefault();openSearch();const q=$('#q');q.select();if(q.scrollIntoView)q.scrollIntoView({block:'center'})}
  else if(e.key==='Escape'&&t&&t.id==='q'&&t.value){t.value='';t.dispatchEvent(new Event('input'))}
 });
 const kb=$('#kb');if(kb&&/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent||''))kb.textContent='\u2318K';
 const burger=$('#burger'),scrim=$('#scrim');
+const sr=$('.sr'),sbtn=$('#sbtn'),barEl=$('#bar'),qi=$('#q');
+const openSearch=()=>{sr.classList.remove('sc');barEl.classList.add('sx');sbtn.setAttribute('aria-expanded','true');qi.focus()};
+const closeSearch=()=>{if(qi.value.trim())return;sr.classList.add('sc');barEl.classList.remove('sx');sbtn.setAttribute('aria-expanded','false')};
+sbtn.addEventListener('click',openSearch);
+qi.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==qi)closeSearch()},150));
+qi.addEventListener('keydown',e=>{if(e.key==='Escape'&&!qi.value){closeSearch();sbtn.focus()}});
 const setMenu=(o,keep)=>{nav.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));if(o&&!keep)$('#navx').focus()};
 burger.addEventListener('click',()=>setMenu(!nav.classList.contains('open')));
 $('#q').addEventListener('input',e=>{if(e.target.value.trim()){nav.scrollTop=0;if(getComputedStyle(burger).display!=='none')setMenu(true,true)}});
