@@ -234,12 +234,13 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
  #nav a{padding:8px 0}
  .navhead{display:flex!important}
  #burger{display:flex!important}
+ body{padding-top:76px}
 }
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
 .navhead{display:none;align-items:center;justify-content:space-between;font:700 18px var(--f-display);margin-bottom:4px}
 .navhead button{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .navhead button:hover{background:var(--accent-soft)}
-#burger{display:none;position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 13px var(--f-body);cursor:pointer;box-shadow:0 6px 18px rgba(20,30,80,.28);z-index:30}
+#burger{display:none;position:fixed;left:max(14px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:2px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font:700 14px var(--f-body);cursor:pointer;box-shadow:0 0 0 2px var(--accent),0 6px 18px rgba(10,20,60,.4);z-index:30}
 @media (max-width:720px){
  .demo{grid-template-columns:minmax(0,1fr)}
  .facts{grid-template-columns:minmax(0,1fr);gap:12px}
