@@ -234,13 +234,16 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
  #nav a{padding:8px 0}
  .navhead{display:flex!important}
  #burger{display:flex!important}
- body{padding-top:76px}
+ body{padding-top:84px}
+ #bar{display:flex!important;position:fixed;top:0;left:0;right:0;height:60px;align-items:center;gap:12px;padding:env(safe-area-inset-top,0px) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(10,20,60,.14);z-index:30}
 }
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
 .navhead{display:none;align-items:center;justify-content:space-between;font:700 18px var(--f-display);margin-bottom:4px}
 .navhead button{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .navhead button:hover{background:var(--accent-soft)}
-#burger{display:none;position:fixed;left:max(14px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:2px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font:700 14px var(--f-body);cursor:pointer;box-shadow:0 0 0 2px var(--accent),0 6px 18px rgba(10,20,60,.4);z-index:30}
+#bar{display:none}
+#burger{display:none;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;border:2px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font:700 14px var(--f-body);cursor:pointer;box-shadow:0 0 0 2px var(--accent);flex:none}
+#barT{font:700 16px var(--f-display);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:720px){
  .demo{grid-template-columns:minmax(0,1fr)}
  .facts{grid-template-columns:minmax(0,1fr);gap:12px}
@@ -259,7 +262,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
 <div id="scrim" hidden></div>
-<button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button>
+<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span></div>
 <button id="totop" type="button" hidden aria-label="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg><span>Top</span></button>
 <p id="none" hidden>No widget matches that search. Try a word like "scroll", "animation" or "button".</p>
 
@@ -1401,7 +1404,8 @@ function show(id,user){
  if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
  cur=d;d.draw();
  document.title=d.name+' \u00b7 Flutter Widget Atlas';
- if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell');window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12))}
+ const bt=$('#barT');if(bt)bt.textContent=d.name;
+ if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell');const bar=$('#bar'),bh=bar&&bar.offsetHeight||0;window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12-bh))}
 }
 window.addEventListener('hashchange',()=>show(location.hash.slice(1),true));
 
