@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Interactive reference to 64 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
+<meta name="description" content="Interactive reference to 91 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Flutter Widget Atlas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1555,6 +1555,640 @@ const REFS={
 REFS['err-overflow']='widgets:Row,Flexible';REFS['err-unbounded']='widgets:ListView,Expanded';REFS['err-parentdata']='widgets:ParentDataWidget,Expanded';REFS['err-inputwidth']='material:TextField;widgets:Expanded';
 const ERRDOC='https://docs.flutter.dev/testing/common-errors';
 
+/* ================= v6 GROUP A: accessibility, scrolling, layout, painting ================= */
+Object.assign(IC,{close:'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',handle:'M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z',search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',cal:'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V9h14v11z',clock:'M12 2a10 10 0 100 20 10 10 0 000-20zm1 11h-5V7h2v4h3v2z',share:'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 10-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 006 9a3 3 0 100 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a2.92 2.92 0 102.92-2.92z'});
+const NAMES=['Alpha','Bravo','Charlie','Delta','Echo','Foxtrot','Golf','Hotel','India','Juliet','Kilo','Lima'];
+
+def({cat:'Accessibility',id:'semantics',name:'Semantics, MergeSemantics & ExcludeSemantics',tags:'screen reader talkback voiceover accessibility label button merge exclude a11y',h:310,
+blurb:'Semantics describes a widget to assistive technology such as TalkBack and VoiceOver. A screen reader moves through the semantics tree one stop at a time. MergeSemantics joins several nodes into one stop, and ExcludeSemantics hides decoration.',
+use:'Naming icon-only buttons, grouping a title and a price into one reading, and hiding purely decorative images.',
+watch:'Many widgets already add their own semantics (Text, buttons, Image with semanticLabel). Add Semantics only where something is missing, and do not hide controls the user needs.',
+ctl:[{k:'lab',l:'label on the icon button',t:'chk',v:false},{k:'merge',l:'MergeSemantics on the card',t:'chk',v:false},{k:'ex',l:'ExcludeSemantics on the image',t:'chk',v:false}],
+render(s,st,g){
+ const stops=[];
+ if(!s.ex)stops.push('Image');
+ if(s.merge)stops.push('Chair, $24'+(s.lab?', Add to favourites':'')+', button');
+ else{stops.push('Chair');stops.push('$24');stops.push(s.lab?'Add to favourites, button':'button (no label)')}
+ g.innerHTML=`<div style="position:absolute;left:16px;right:16px;top:14px;display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--c1);border-radius:12px;background:var(--surface);${s.merge?'outline:2px dashed var(--c2);outline-offset:3px':''}"><div class="fb ${s.ex?'d':'c'}" style="width:48px;height:48px;opacity:${s.ex?.45:1}">img</div><div style="flex:1"><b>Chair</b><div style="color:var(--muted)">$24</div></div><div style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--muted);display:flex;align-items:center;justify-content:center;color:var(--c4)">${ic('favorite',22)}</div></div><div style="position:absolute;left:16px;right:16px;top:112px;font:600 11px var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)">Screen reader reads</div><ol style="position:absolute;left:16px;right:16px;top:134px;margin:0;padding:0;list-style:none;display:grid;gap:6px">${stops.map((t,i)=>`<li style="display:flex;gap:10px;align-items:center;padding:7px 12px;border-radius:8px;background:${/no label/.test(t)?'rgba(200,40,63,.12)':'var(--accent-soft)'};color:var(--fg);font-size:14px"><span style="font:500 11px var(--f-mono);color:var(--muted)">${i+1}</span>${esc(t)}</li>`).join('')}</ol>`;
+ let btn='IconButton(\n  icon: Icon(Icons.favorite),\n  onPressed: toggle,\n)';
+ if(s.lab)btn=`Semantics(\n  label: 'Add to favourites',\n  button: true,\n  child: ${btn.replace(/\n/g,'\n  ')},\n)`;
+ const img=s.ex?'ExcludeSemantics(child: Image.asset(\'chair.png\'))':"Image.asset('chair.png')";
+ const row=`Row(children: [\n  ${img},\n  Column(children: [Text('Chair'), Text('\\$24')]),\n  ${btn.replace(/\n/g,'\n  ')},\n])`;
+ return {code:s.merge?`MergeSemantics(\n  child: ${row.replace(/\n/g,'\n  ')},\n)`:row,hint:/no label/.test(stops.join())?'An icon button with no label is read as just "button". The user cannot tell what it does.':'Each line is one swipe for a screen reader user. Fewer, clearer stops make the card faster to use.'};
+}});
+
+def({cat:'Scrolling',id:'reorderable-list-view',name:'ReorderableListView',tags:'drag reorder sort handle onreorder move item list',h:310,
+blurb:'ReorderableListView lets the user drag items to a new position. It tells you the old and new index in onReorder and you update your list.',
+use:'Playlists, to-do lists and settings where the user decides the order.',
+watch:'Every item needs a unique Key. And in onReorder, newIndex is counted before the item is removed, so when moving an item down you must subtract 1.',
+ctl:[{k:'n',l:'item count',t:'rng',min:3,max:8,v:5},{k:'h',l:'buildDefaultDragHandles',t:'chk',v:true}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ if(st.n!==s.n){st.n=s.n;st.items=NAMES.slice(0,s.n);st.built=false}
+ if(!st.built){
+  st.built=true;g.innerHTML='<div class="rl" style="position:absolute;inset:10px 16px 10px;display:flex;flex-direction:column;gap:6px"></div>';st.box=g.querySelector('.rl');
+ }
+ st.box.innerHTML=st.items.map(n=>`<div class="ri fb a" data-n="${n}" style="height:38px;justify-content:space-between;padding:0 12px;border-radius:8px;flex:none;user-select:none"><span>${n}</span><span class="rh" style="touch-action:none;cursor:${s.h?'grab':'default'};padding:6px;display:flex;opacity:${s.h?1:.25}">${ic('handle',20)}</span></div>`).join('');
+ const rows=[...st.box.children];
+ rows.forEach(r=>{
+  const hd=r.querySelector('.rh');
+  hd.addEventListener('pointerdown',e=>{
+   if(!s.h)return;e.preventDefault();
+   try{st.box.setPointerCapture(e.pointerId)}catch(_){}
+   r.style.boxShadow='0 6px 14px rgba(20,30,80,.3)';r.style.zIndex=2;
+   const mv=ev=>{
+    const kids=[...st.box.children],top=st.box.getBoundingClientRect().top,rh=44;
+    const to=Math.max(0,Math.min(kids.length-1,Math.floor((ev.clientY-top)/rh))),from=kids.indexOf(r);
+    if(to!==from){const ref=to>from?kids[to].nextSibling:kids[to];st.box.insertBefore(r,ref);const nm=r.dataset.n;st.items.splice(st.items.indexOf(nm),1);st.items.splice(to,0,nm);st.moves=(st.moves||0)+1;st.last=[from,to]}
+   };
+   const up=()=>{st.box.removeEventListener('pointermove',mv);st.box.removeEventListener('pointerup',up);st.box.removeEventListener('pointercancel',up);r.style.boxShadow='';r.style.zIndex='';d_hint(st)};
+   st.box.addEventListener('pointermove',mv);st.box.addEventListener('pointerup',up);st.box.addEventListener('pointercancel',up);
+  });
+ });
+ return {code:`ReorderableListView(\n  buildDefaultDragHandles: ${s.h},\n  onReorder: (int oldIndex, int newIndex) {\n    setState(() {\n      if (newIndex > oldIndex) newIndex -= 1; // moving down\n      final item = items.removeAt(oldIndex);\n      items.insert(newIndex, item);\n    });\n  },\n  children: [\n    for (final item in items)\n      ListTile(key: ValueKey(item), title: Text(item)),\n  ],\n)`,hint:s.h?'Drag the ≡ handle up or down. Order: '+st.items.join(', '):'With no default handles you wrap items in ReorderableDragStartListener to choose the drag area.'};
+}});
+function d_hint(st){const h=st.hintHost;if(h)h.textContent='Order: '+st.items.join(', ')+(st.last?`  (last move: onReorder(${st.last[0]}, ${st.last[1]>st.last[0]?st.last[1]+1:st.last[1]}))`:'')}
+
+def({cat:'Scrolling',id:'refresh-indicator',name:'RefreshIndicator',tags:'pull to refresh swipe down onrefresh future spinner list reload',h:300,
+blurb:'RefreshIndicator adds the pull-to-refresh gesture to a scrollable. When the user pulls past the threshold it shows a spinner and waits for the Future returned by onRefresh.',
+use:'Feeds, inboxes and any list that can be reloaded from a server.',
+watch:'onRefresh must return a Future, and the spinner stays until it completes. The child must be scrollable and able to overscroll, so a short ListView may need AlwaysScrollableScrollPhysics.',
+ctl:[{k:'du',l:'refresh takes (ms)',t:'rng',min:500,max:3000,step:250,v:1200},{k:'cl',l:'color',t:'sel',o:['blue','pink','teal'],v:'blue'}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ const col={blue:'var(--c1)',pink:'var(--c4)',teal:'var(--c2)'}[s.cl];
+ if(!st.box){
+  st.n=3;st.busy=false;
+  g.innerHTML=`<div class="rfw" style="position:absolute;inset:0;overflow:hidden;touch-action:pan-x"><div class="rfs" style="position:absolute;left:50%;top:0;width:40px;height:40px;margin-left:-20px;margin-top:-50px;border-radius:50%;background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:3"><div class="spin" style="width:22px;height:22px;border-width:3px"></div></div><div class="rfl" style="position:absolute;left:0;right:0;top:0"></div></div><button class="btn k-Outlined btm" data-a="pull" type="button" style="padding:7px 16px">Simulate pull</button>`;
+  st.box=g.querySelector('.rfw');st.sp=g.querySelector('.rfs');st.list=g.querySelector('.rfl');
+  const body=()=>{st.list.innerHTML=Array.from({length:st.n},(_,i)=>`<div class="li"><span>${i+1}</span>${i===0&&st.n>3?'Fresh item':'Item '+(i+1)}</div>`).join('')};
+  st.body=body;body();
+  st.go=()=>{
+   if(st.busy)return;st.busy=true;st.sp.style.transition='margin-top .2s';st.sp.style.marginTop='24px';st.list.style.transition='transform .2s';st.list.style.transform='translateY(60px)';
+   setTimeout(()=>{st.n=Math.min(st.n+2,9);st.body();st.busy=false;st.sp.style.marginTop='-50px';st.list.style.transform='';st.refreshes=(st.refreshes||0)+1;st.hintHost&&(st.hintHost.textContent='onRefresh ran '+st.refreshes+' time'+(st.refreshes>1?'s':'')+'. Two new items arrived.')},st.du);
+  };
+  let y0=null,dy=0;
+  st.box.addEventListener('pointerdown',e=>{if(st.busy)return;y0=e.clientY;dy=0;try{st.box.setPointerCapture(e.pointerId)}catch(_){}});
+  st.box.addEventListener('pointermove',e=>{if(y0===null||st.busy)return;dy=Math.max(0,Math.min(110,e.clientY-y0));st.sp.style.transition='none';st.list.style.transition='none';st.sp.style.marginTop=(-50+Math.min(dy,74))+'px';st.list.style.transform=`translateY(${dy*.55}px)`;});
+  const end=()=>{if(y0===null)return;y0=null;if(dy>=70)st.go();else{st.sp.style.transition='margin-top .2s';st.list.style.transition='transform .2s';st.sp.style.marginTop='-50px';st.list.style.transform=''}};
+  st.box.addEventListener('pointerup',end);st.box.addEventListener('pointercancel',end);
+ }
+ st.du=s.du;st.sp.firstChild.style.borderTopColor=col;
+ return {code:`RefreshIndicator(\n  color: Colors.${s.cl},\n  onRefresh: () async {\n    await repository.reload(); // about ${s.du} ms here\n    setState(() {});\n  },\n  child: ListView.builder(\n    physics: const AlwaysScrollableScrollPhysics(),\n    itemCount: items.length,\n    itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n  ),\n)`,hint:'Drag the list downward past the threshold and let go, or press Simulate pull.'};
+},
+act(a,st){if(a==='pull'&&st.go)st.go()}});
+
+def({cat:'Scrolling',id:'scrollbar',name:'Scrollbar',tags:'thumb scroll bar thumbvisibility interactive radius thickness controller desktop',h:290,
+blurb:'Scrollbar draws a scroll thumb beside a scrollable. By default it appears while scrolling and fades away. Desktop and web users often expect it always visible and draggable.',
+use:'Long lists on desktop and web, and any scroll area where the user needs to see how far they are.',
+watch:'With thumbVisibility true you must give the Scrollbar and the scroll view the same ScrollController, or Flutter throws an error.',
+ctl:[{k:'tv',l:'thumbVisibility',t:'chk',v:false},{k:'ia',l:'interactive (drag thumb)',t:'chk',v:true},{k:'th',l:'thickness',t:'rng',min:3,max:16,v:8},{k:'rd',l:'rounded thumb',t:'chk',v:true}],
+render(s,st,g){
+ if(!st.sc){
+  g.innerHTML=`<div class="sbw" style="position:absolute;inset:12px 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)"><div class="sbs" style="position:absolute;inset:0;overflow-y:scroll;scrollbar-width:none">${Array.from({length:40},(_,i)=>`<div class="li"><span>${i+1}</span>Row ${i+1}</div>`).join('')}</div><div class="sbt" style="position:absolute;right:3px;top:0;border-radius:4px;background:var(--muted);opacity:0;transition:opacity .25s"></div></div>`;
+  st.sc=g.querySelector('.sbs');st.th=g.querySelector('.sbt');
+  st.place=()=>{const c=st.sc,r=c.clientHeight,h=c.scrollHeight;if(!h)return;const len=Math.max(30,r*r/h),top=(c.scrollTop/(h-r||1))*(r-len);st.th.style.height=len+'px';st.th.style.transform=`translateY(${top||0}px)`};
+  const flash=()=>{st.th.style.opacity=.75;clearTimeout(st.t);if(!st.tv)st.t=setTimeout(()=>{st.th.style.opacity=0},900)};
+  st.sc.addEventListener('scroll',()=>{st.place();flash()},{passive:true});
+  let drag=null;
+  st.th.addEventListener('pointerdown',e=>{if(!st.ia)return;drag={y:e.clientY,top:st.sc.scrollTop};try{st.th.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+  st.th.addEventListener('pointermove',e=>{if(!drag)return;const c=st.sc,r=c.clientHeight,h=c.scrollHeight,len=parseFloat(st.th.style.height)||30;c.scrollTop=drag.top+(e.clientY-drag.y)*(h-r)/(r-len)});
+  const stop=()=>{drag=null};st.th.addEventListener('pointerup',stop);st.th.addEventListener('pointercancel',stop);
+ }
+ st.tv=s.tv;st.ia=s.ia;const t=st.th.style;t.width=s.th+'px';t.borderRadius=s.rd?s.th+'px':'0';t.cursor=s.ia?'grab':'default';t.opacity=s.tv?.75:0;t.pointerEvents=s.ia?'auto':'none';st.place();
+ return {code:`final controller = ScrollController();\n\nScrollbar(\n  controller: controller,\n  thumbVisibility: ${s.tv},\n  interactive: ${s.ia},\n  thickness: ${s.th},\n  radius: ${s.rd?`Radius.circular(${s.th})`:'null'},\n  child: ListView.builder(\n    controller: controller,\n    itemCount: 40,\n    itemBuilder: (context, i) => ListTile(title: Text('Row $i')),\n  ),\n)`,hint:s.tv?'The thumb stays visible all the time.':'Scroll the list and the thumb appears, then fades out.'};
+}});
+
+def({cat:'Scrolling',id:'nested-scroll-view',name:'NestedScrollView',tags:'collapsing header tabs sliver appbar pinned floating headersliverbuilder inner outer',h:320,
+blurb:'NestedScrollView joins an outer header (usually a SliverAppBar) and an inner scrollable body into one scroll gesture. The header collapses first, then the inner list takes over.',
+use:'Collapsing profile headers with a tab bar and a list below, such as a user profile or a product page.',
+watch:'Without NestedScrollView, the inner ListView and the outer scroll view fight for the same drag. Each tab\'s list also needs its own PageStorageKey to keep its position.',
+ctl:[{k:'pin',l:'SliverAppBar pinned',t:'chk',v:true},{k:'tabs',l:'pinned tab bar',t:'chk',v:true}],
+render(s,st,g){
+ const rows=Array.from({length:30},(_,i)=>`<div class="li"><span>${i+1}</span>Post ${i+1}</div>`).join('');
+ g.innerHTML=`<div class="phone" style="top:8px;bottom:8px"><div style="position:absolute;inset:0;overflow-y:auto" class="nsv"><div style="${s.pin?'position:sticky;top:0;z-index:3;':''}height:${s.pin?56:110}px;background:var(--c1);color:var(--accent-ink);display:flex;align-items:flex-end;padding:0 14px 10px;font:700 18px var(--f-display)">${s.pin?'Profile':'Profile header'}</div>${s.pin?'<div style="height:60px;background:var(--c1s);display:flex;align-items:center;padding:0 14px;color:var(--c1t);font-size:13px">Expanded header area scrolls away</div>':''}<div style="${s.tabs?`position:sticky;top:${s.pin?56:0}px;z-index:2;`:''}background:var(--surface);display:flex;border-bottom:1px solid var(--line)"><div class="tab on" style="flex:1;text-align:center">Posts</div><div class="tab" style="flex:1;text-align:center">Likes</div></div>${rows}</div></div>`;
+ return {code:`NestedScrollView(\n  headerSliverBuilder: (context, innerBoxIsScrolled) => [\n    SliverAppBar(\n      pinned: ${s.pin},\n      expandedHeight: 120,\n      title: Text('Profile'),\n      bottom: TabBar(tabs: [Tab(text: 'Posts'), Tab(text: 'Likes')]),\n    ),\n  ],\n  body: TabBarView(children: [PostsList(), LikesList()]),\n)`,hint:'Scroll inside the phone. The header collapses first, then the list moves. The tab bar '+(s.tabs?'stays pinned.':'scrolls away too.')};
+}});
+
+/* ---- Layout ---- */
+def({cat:'Layout',id:'table',name:'Table',tags:'grid rows columns tablerow tablecell columnwidths border flexcolumnwidth fixedcolumnwidth intrinsic',h:300,
+blurb:'Table lays children out in rows and columns where each column has one width for all rows. You choose how column widths are decided with columnWidths.',
+use:'Small grids of aligned data, such as a spec sheet or a price list. For long data use DataTable or ListView.',
+watch:'Table does not scroll and does not lazy-load. IntrinsicColumnWidth measures every cell in the column, so it is the most expensive choice on big tables.',
+ctl:[{k:'w',l:'columnWidths',t:'sel',o:['FlexColumnWidth (equal)','IntrinsicColumnWidth','FixedColumnWidth(80) first column'],v:'FlexColumnWidth (equal)'},{k:'b',l:'TableBorder.all',t:'chk',v:true},{k:'va',l:'defaultVerticalAlignment',t:'sel',o:['top','middle','bottom'],v:'middle'}],
+render(s,st,g){
+ const rows=[['Name','Size','Notes'],['Row','1D','Lays out children horizontally'],['Stack','Layers','Overlap'],['Table','2D','Aligned columns, no scroll']];
+ const fx=s.w.startsWith('Flex'),it=s.w.startsWith('Intr');
+ const colg=fx?'<col><col><col>':it?'':'<col style="width:80px"><col><col>';
+ const va={top:'top',middle:'middle',bottom:'bottom'}[s.va];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><table style="border-collapse:collapse;font-size:13.5px;${it?'':'width:100%;table-layout:fixed;'}${s.b?'':''}">${colg}${rows.map((r,i)=>`<tr style="height:${i===3?64:i===0?30:44}px">${r.map(c=>`<td style="vertical-align:${va};padding:6px 10px;${s.b?'border:1px solid var(--muted);':''}${i===0?'font-weight:700;background:var(--c1s);color:var(--c1t)':''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</table></div>`;
+ const cw=fx?'// default: FlexColumnWidth(1.0) for every column':it?'columnWidths: {\n    0: IntrinsicColumnWidth(),\n    1: IntrinsicColumnWidth(),\n    2: IntrinsicColumnWidth(),\n  },':'columnWidths: {\n    0: FixedColumnWidth(80),\n    1: FlexColumnWidth(),\n    2: FlexColumnWidth(),\n  },';
+ return {code:`Table(\n  ${cw}\n${s.b?'  border: TableBorder.all(),\n':''}  defaultVerticalAlignment:\n      TableCellVerticalAlignment.${s.va},\n  children: [\n    TableRow(children: [Text('Name'), Text('Size'), Text('Notes')]),\n    // more TableRow(...) widgets\n  ],\n)`,hint:'The last row is taller so you can see the vertical alignment setting.'};
+}});
+
+def({cat:'Layout',id:'baseline',name:'Baseline',tags:'text baseline align alphabetic ideographic crossaxisalignment baseline row mixed font sizes',h:240,
+blurb:'Baseline positions a child so its text baseline sits at a given distance from the top. In a Row, CrossAxisAlignment.baseline lines up the baselines of children with different sizes.',
+use:'Mixing text of different sizes on one line, such as a big price next to a small currency sign.',
+watch:'CrossAxisAlignment.baseline needs textBaseline to be set, and it only aligns children that have a baseline, so a plain box without text uses its bottom edge.',
+ctl:[{k:'m',l:'approach',t:'sel',o:['Row + CrossAxisAlignment.baseline','Row + CrossAxisAlignment.center','Baseline widget'],v:'Row + CrossAxisAlignment.baseline'},{k:'sz',l:'big text size',t:'rng',min:20,max:64,v:44},{k:'bl',l:'Baseline(baseline:)',t:'rng',min:30,max:120,step:5,v:70}],
+render(s,st,g){
+ if(s.m==='Baseline widget'){
+  const top=s.bl-s.sz*.8;
+  g.innerHTML=`<div class="fill" style="align-items:flex-start;padding:30px 24px"><div style="position:relative;width:100%;height:150px"><div style="position:absolute;left:0;right:0;top:${s.bl}px;border-top:1.5px dashed var(--c4)"></div><span style="position:absolute;right:0;top:${s.bl-12}px;font:11px var(--f-mono);color:var(--c4t)">baseline: ${s.bl}</span><span style="position:absolute;left:0;top:${top}px;font:700 ${s.sz}px/1 var(--f-display)">Flutter</span></div></div>`;
+  return {code:`Baseline(\n  baseline: ${s.bl},\n  baselineType: TextBaseline.alphabetic,\n  child: Text(\n    'Flutter',\n    style: TextStyle(fontSize: ${s.sz}, fontWeight: FontWeight.bold),\n  ),\n)`,hint:'The pink line sits ' + s.bl + ' px from the top, and the letters\' baseline rests on it.'};
+ }
+ const al=s.m.includes('baseline')?'baseline':'center';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="display:flex;align-items:${al};gap:8px;padding:10px;border:1.5px dashed var(--c3)"><span style="font:600 16px var(--f-body)">$</span><span style="font:700 ${s.sz}px/1 var(--f-display)">49</span><span style="font:500 14px var(--f-body);color:var(--muted)">.99 / month</span></div></div>`;
+ return {code:`Row(\n  crossAxisAlignment: CrossAxisAlignment.${al},\n${al==='baseline'?'  textBaseline: TextBaseline.alphabetic,\n':''}  children: [\n    Text('\\$', style: small),\n    Text('49', style: TextStyle(fontSize: ${s.sz})),\n    Text('.99 / month', style: small),\n  ],\n)`,hint:al==='baseline'?'All three texts sit on one baseline, like printed text.':'Centering lines up the middles, so the small text floats above the big number\'s baseline.'};
+}});
+
+def({cat:'Layout',id:'flow',name:'Flow',tags:'flowdelegate paintchildren transform matrix4 radial menu fan custom layout performance',h:300,
+blurb:'Flow positions its children with a FlowDelegate that paints each child with a transform. Because it only changes the paint transform and does not re-run layout, it is efficient for animated layouts such as a fan menu.',
+use:'Custom animated arrangements, for example a floating action button that fans out its actions.',
+watch:'Flow does not size itself to its children, so give it a size. Children are laid out once, and the delegate only moves them, so they cannot change each other\'s size.',
+ctl:[{k:'n',l:'items',t:'rng',min:3,max:8,v:5},{k:'r',l:'radius',t:'rng',min:50,max:120,step:5,v:95}],
+render(s,st,g){
+ if(!st.built){st.built=true;st.open=false;g.innerHTML='<div class="flw" style="position:absolute;left:50%;bottom:36px;width:0;height:0"></div>'}
+ const host=g.querySelector('.flw'),n=s.n,icons=['home','star','favorite','person','menu','add','back','check'];
+ host.innerHTML=Array.from({length:n},(_,i)=>{const a=Math.PI*(i/(n-1)),x=-Math.cos(a)*s.r,y=-Math.sin(a)*s.r;return `<div class="fb ${['a','b','c','d'][i%4]}" style="position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;transition:transform .35s cubic-bezier(.2,.8,.2,1);transform:${st.open?`translate(${x}px,${y}px)`:'translate(0,0)'};z-index:1">${ic(icons[i],20)}</div>`}).join('')+`<button class="fab" data-a="tog" type="button" aria-label="Toggle flow menu" style="left:-24px;top:-24px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);z-index:2;transition:transform .3s;transform:rotate(${st.open?45:0}deg)">${ic('add',26)}</button>`;
+ return {code:`class FanDelegate extends FlowDelegate {\n  FanDelegate(this.progress) : super(repaint: progress);\n  final Animation<double> progress;\n\n  @override\n  void paintChildren(FlowPaintingContext context) {\n    final n = context.childCount - 1; // last child is the button\n    for (var i = 0; i < n; i++) {\n      final angle = pi * i / (${n}-1);\n      context.paintChild(i,\n        transform: Matrix4.translationValues(\n          -cos(angle) * ${s.r} * progress.value,\n          -sin(angle) * ${s.r} * progress.value, 0));\n    }\n    context.paintChild(n);\n  }\n\n  @override\n  bool shouldRepaint(FanDelegate old) => progress != old.progress;\n}`,hint:'Press the + button. Flow only repaints children at new transforms, so no layout runs.'};
+},
+act(a,st){if(a==='tog')st.open=!st.open}});
+
+def({cat:'Layout',id:'safe-area',name:'SafeArea',tags:'notch status bar home indicator cutout inset padding mediaquery viewpadding display cutout',h:330,
+blurb:'SafeArea pads its child to keep it out of areas the system uses: the status bar, the notch or camera cutout, rounded corners and the home indicator.',
+use:'Any screen that draws edge to edge, such as a custom page without a Scaffold and AppBar.',
+watch:'Scaffold and AppBar already handle the top inset. Wrapping a Scaffold body in SafeArea as well can add a double gap. SafeArea reads the real device insets, so test it on a phone.',
+ctl:[{k:'on',l:'SafeArea',t:'chk',v:true},{k:'top',l:'top',t:'chk',v:true},{k:'bottom',l:'bottom',t:'chk',v:true}],
+render(s,st,g){
+ const pt=s.on&&s.top?34:0,pb=s.on&&s.bottom?24:0;
+ g.innerHTML=`<div class="phone" style="top:8px;bottom:8px;width:210px;margin-left:-105px"><div style="position:absolute;inset:0;background:linear-gradient(180deg,var(--c1s),var(--c2s));padding:${pt}px 0 ${pb}px"><div style="height:100%;border:1.5px dashed var(--c4);display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-size:13px"><b>Top of my content</b><span style="color:var(--muted)">Bottom of my content</span></div></div><div style="position:absolute;left:0;right:0;top:0;height:34px;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#fff;font:600 11px var(--f-mono)"><span>9:41</span><span style="width:62px;height:16px;border-radius:8px;background:#000;position:absolute;left:50%;margin-left:-31px;top:5px"></span><span>5G</span></div><div style="position:absolute;left:0;right:0;bottom:0;height:24px;display:flex;align-items:center;justify-content:center"><i style="width:80px;height:4px;border-radius:2px;background:var(--fg);opacity:.7"></i></div></div>`;
+ return {code:s.on?`SafeArea(\n  top: ${s.top},\n  bottom: ${s.bottom},\n  child: MyPage(),\n)`:'MyPage() // no SafeArea: the notch can cover the content',hint:s.on?'The dashed box is your content. The dark bars are the system areas it now avoids.':'Without SafeArea the first line sits under the status bar and notch.'};
+}});
+
+/* ---- Painting ---- */
+def({cat:'Painting and effects',id:'physical-model',name:'PhysicalModel',tags:'elevation shadow material card shape circle shadowcolor borderradius materialdesign',h:250,
+blurb:'PhysicalModel draws a shape with a Material-style elevation shadow, and clips its child to that shape. It is the lightweight way to add elevation without a Material widget.',
+use:'Raised cards, floating badges and avatars with a real elevation shadow.',
+watch:'Unlike BoxDecoration, elevation here follows the Material shadow model and uses shadowColor. It does not draw ink splashes, so use Material when you need a tappable surface.',
+ctl:[{k:'e',l:'elevation',t:'rng',min:0,max:24,v:10},{k:'sh',l:'shape',t:'sel',o:['rectangle','circle'],v:'rectangle'},{k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},{k:'c',l:'shadowColor',t:'sel',o:['black','pink','blue'],v:'black'}],
+render(s,st,g){
+ const circ=s.sh==='circle',sc={black:'0,0,0',pink:'217,71,106',blue:'47,107,255'}[s.c];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${circ?120:190}px;height:120px;background:var(--surface);border-radius:${circ?'50%':s.r+'px'};box-shadow:0 ${s.e*.5}px ${s.e*1.2}px rgba(${sc},.${s.e?38:0}),0 ${s.e*.2}px ${s.e*.4}px rgba(${sc},.${s.e?28:0});display:flex;align-items:center;justify-content:center;font:600 14px var(--f-body)">child</div></div>`;
+ return {code:`PhysicalModel(\n  color: Colors.white,\n  elevation: ${s.e},\n  shadowColor: Colors.${s.c},\n  shape: BoxShape.${s.sh},\n${circ?'':`  borderRadius: BorderRadius.circular(${s.r}),\n`}  child: SizedBox(width: ${circ?120:190}, height: 120, child: Center(child: Text('child'))),\n)`,hint:s.e?'':'Elevation 0 means no shadow.'};
+}});
+
+/* ================= v6 GROUP B: animation, async, input ================= */
+const alive=g=>g&&g.isConnected;
+
+def({cat:'Animation and motion',id:'explicit-animations',name:'AnimationController & transitions',tags:'animationcontroller vsync forward reverse repeat fadetransition slidetransition rotationtransition scaletransition animatedbuilder tween ticker',h:300,
+blurb:'An explicit animation is driven by an AnimationController, which counts from 0.0 to 1.0 over a duration. A transition widget such as FadeTransition listens to it and rebuilds only itself on every frame. You choose when to play, reverse or repeat.',
+use:'Looping or repeating motion, animations the user can pause or scrub, and several properties that must move together.',
+watch:'The State needs SingleTickerProviderStateMixin as the vsync, and you must call controller.dispose(). If a built-in implicit widget can do the job, it is less code.',
+ctl:[{k:'w',l:'transition widget',t:'sel',o:['FadeTransition','ScaleTransition','RotationTransition','SlideTransition'],v:'FadeTransition'},{k:'du',l:'duration (ms)',t:'rng',min:300,max:2500,step:100,v:1200},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','bounceOut'],v:'linear'}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;st.s=s;
+ if(!st.box){
+  st.v=0;st.dir=0;st.rep=false;st.t0=0;
+  g.innerHTML=`<div style="position:absolute;left:0;right:0;top:0;height:170px;display:flex;align-items:center;justify-content:center;overflow:hidden"><div class="xb fb a" style="width:80px;height:80px;border-radius:14px;font-size:14px">child</div></div><div style="position:absolute;left:18px;right:18px;top:176px"><div style="height:6px;border-radius:3px;background:var(--line);overflow:hidden"><div class="xv" style="height:100%;background:var(--c1);width:0"></div></div><div class="xl" style="font:600 12px var(--f-mono);color:var(--muted);margin-top:5px">controller.value = 0.00</div></div><div style="position:absolute;left:0;right:0;bottom:10px;display:flex;gap:8px;justify-content:center"><button class="btn k-Filled" data-a="fwd" style="padding:6px 12px">forward</button><button class="btn k-Outlined" data-a="rev" style="padding:6px 12px">reverse</button><button class="btn k-Outlined" data-a="rep" style="padding:6px 12px">repeat</button><button class="btn k-Outlined" data-a="stop" style="padding:6px 12px">stop</button></div>`;
+  st.box=g.querySelector('.xb');st.bar=g.querySelector('.xv');st.lab=g.querySelector('.xl');
+  const tick=ts=>{
+   if(!alive(g))return;
+   if(st.dir!==0){
+    if(!st.t0)st.t0=ts;
+    const dt=(ts-st.t0)/st.s.du;st.t0=ts;
+    st.v+=st.dir*dt;
+    if(st.dir>0&&st.v>=1){st.v=1;if(st.rep)st.dir=-1;else st.dir=0}
+    else if(st.dir<0&&st.v<=0){st.v=0;if(st.rep)st.dir=1;else st.dir=0}
+    if(st.dir===0)st.t0=0;
+   }
+   paint();requestAnimationFrame(tick);
+  };
+  const cv={linear:x=>x,easeInOut:x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,bounceOut:bounce};
+  const paint=()=>{
+   const c=cv[st.s.cv]||cv.linear,t=c(Math.max(0,Math.min(1,st.v))),w=st.s.w,b=st.box;
+   b.style.opacity=w==='FadeTransition'?t:1;
+   b.style.transform=w==='ScaleTransition'?`scale(${(.3+.7*t).toFixed(3)})`:w==='RotationTransition'?`rotate(${(t*360).toFixed(1)}deg)`:w==='SlideTransition'?`translateX(${((t-.5)*160).toFixed(1)}px)`:'none';
+   st.bar.style.width=(st.v*100)+'%';st.lab.textContent='controller.value = '+st.v.toFixed(2);
+  };
+  st.paint=paint;requestAnimationFrame(tick);
+ }
+ st.paint();
+ const w=s.w,cur=s.cv==='linear'?'_controller':'_animation';
+ const anim2=s.cv==='linear'?'':`late final _animation = CurvedAnimation(\n  parent: _controller,\n  curve: Curves.${s.cv},\n);\n\n`;
+ const child={FadeTransition:`FadeTransition(\n  opacity: ${cur},`,ScaleTransition:`ScaleTransition(\n  scale: ${cur},`,RotationTransition:`RotationTransition(\n  turns: ${cur},`,SlideTransition:`SlideTransition(\n  position: Tween(\n    begin: Offset(-0.5, 0),\n    end: Offset(0.5, 0),\n  ).animate(${cur}),`}[w];
+ const code=`class _BoxState extends State<Box>\n    with SingleTickerProviderStateMixin {\n  late final _controller = AnimationController(\n    vsync: this,\n    duration: Duration(milliseconds: ${s.du}),\n  );\n${anim2?'  '+anim2.trim().replace(/\n/g,'\n  ')+'\n':''}\n  @override\n  Widget build(BuildContext context) {\n    return ${child.replace(/\n/g,'\n    ')}\n      child: MyBox(),\n    );\n  }\n\n  @override\n  void dispose() {\n    _controller.dispose();\n    super.dispose();\n  }\n}\n// _controller.forward();   _controller.reverse();\n// _controller.repeat(reverse: true);`;
+ return {code,hint:'Press the buttons. The bar is the controller value. A '+w+' reads it on every frame, and nothing else on the screen rebuilds.'};
+},
+act(a,st){
+ if(a==='fwd'){st.rep=false;st.dir=1;st.t0=0;if(st.v>=1)st.v=0}
+ else if(a==='rev'){st.rep=false;st.dir=-1;st.t0=0;if(st.v<=0)st.v=1}
+ else if(a==='rep'){st.rep=true;st.dir=st.v>=1?-1:1;st.t0=0}
+ else if(a==='stop'){st.dir=0;st.rep=false;st.t0=0}
+}});
+
+def({cat:'Animation and motion',id:'tween-animation-builder',name:'TweenAnimationBuilder',tags:'tween animation builder implicit custom begin end lerp colortween duration',h:270,
+blurb:'TweenAnimationBuilder is an implicit animation you build yourself. Give it a Tween and a duration. Whenever the end value changes, it animates from the old value to the new one and calls your builder every frame.',
+use:'Animating one custom value, such as a corner radius, an angle or a colour, when no ready-made AnimatedFoo widget exists and you do not want a controller.',
+watch:'It animates from the current value only when the tween end changes. A new begin value is ignored until the next change. For several values, use an AnimationController.',
+ctl:[{k:'p',l:'animated value',t:'sel',o:['double (angle)','double (size)','Color'],v:'double (angle)'},{k:'du',l:'duration (ms)',t:'rng',min:200,max:2500,step:100,v:900},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','bounceOut','elasticOut'],v:'easeInOut'}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ if(!st.box){
+  st.on=false;
+  g.innerHTML=`<div style="position:absolute;inset:0 0 54px;display:flex;align-items:center;justify-content:center"><div class="tb fb a" style="width:90px;height:90px;border-radius:14px;font-size:13px">child</div></div><div style="position:absolute;left:0;right:0;bottom:10px;text-align:center"><button class="btn k-Filled" data-a="go" style="padding:7px 18px">Change end value</button></div>`;
+  st.box=g.querySelector('.tb');
+ }
+ const c={linear:'linear',easeInOut:'ease-in-out',bounceOut:lin(bounce),elasticOut:lin(elastic)}[s.cv];
+ const b=st.box;b.style.transition=`transform ${s.du}ms ${c}, width ${s.du}ms ${c}, height ${s.du}ms ${c}, background-color ${s.du}ms ${c}`;
+ const on=st.on;
+ b.style.transform=s.p.includes('angle')?`rotate(${on?180:0}deg)`:'none';
+ b.style.width=b.style.height=(s.p.includes('size')?(on?140:60):90)+'px';
+ b.style.backgroundColor=s.p==='Color'?(on?'#d9476a':'#2f6bff'):'';
+ b.style.color=s.p==='Color'?'#fff':'';
+ const k=s.p.includes('angle')?{t:'double',b:'0',e:'math.pi',f:'Transform.rotate(\n      angle: value,\n      child: child,\n    )'}:s.p.includes('size')?{t:'double',b:'60',e:'140',f:'SizedBox(\n      width: value,\n      height: value,\n      child: child,\n    )'}:{t:'Color?',b:'Colors.blue',e:'Colors.pink',f:'ColorFiltered(\n      colorFilter: ColorFilter.mode(value!, BlendMode.srcIn),\n      child: child,\n    )'};
+ const tw=s.p==='Color'?`ColorTween(\n    begin: ${k.b},\n    end: ${k.e},\n  )`:`Tween<double>(\n    begin: ${k.b},\n    end: ${k.e},\n  )`;
+ const cr=s.cv==='linear'?'':`\n  curve: Curves.${s.cv},`;
+ const code=`TweenAnimationBuilder<${k.t}>(\n  tween: ${s.p==='Color'?`ColorTween(\n    begin: Colors.blue,\n    end: ${on?'Colors.pink':'Colors.blue'},\n  )`:`Tween<double>(\n    begin: 0,\n    end: ${s.p.includes('angle')?(on?'math.pi':'0'):(on?'140':'60')},\n  )`},\n  duration: Duration(milliseconds: ${s.du}),${cr}\n  builder: (context, value, child) {\n    return ${k.f};\n  },\n  child: MyBox(), // not rebuilt every frame\n)`;
+ return {code,hint:'End value is now '+(on?'the second':'the first')+' one. Press the button to change it. The widget animates from wherever it currently is.'};
+},
+act(a,st){if(a==='go')st.on=!st.on}});
+
+def({cat:'Animation and motion',id:'hero',name:'Hero',tags:'hero shared element transition tag navigator route flight page image fly',h:310,
+blurb:'A Hero marks a widget that appears on two routes with the same tag. When you navigate, Flutter flies the widget from its old position and size to its new one while the new page fades in.',
+use:'Thumbnail to full-size photo, a list item opening a detail page, any shared element between two screens.',
+watch:'Every tag must be unique on a page, and the same tag must exist on both routes. Heroes only fly during a Navigator push or pop, not when you swap widgets with setState.',
+ctl:[{k:'du',l:'flight time (ms)',t:'rng',min:200,max:1500,step:50,v:500},{k:'tag',l:'tag matches on both pages',t:'chk',v:true}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;st.s=s;
+ if(!st.box){
+  st.open=-1;
+  const tiles=[0,1,2].map(i=>`<div class="ht" data-a="open${i}" style="width:84px;height:84px;border-radius:10px;overflow:hidden;cursor:pointer;border:1.5px solid var(--line);flex:none"><img draggable="false" src="${PIC}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;filter:hue-rotate(${i*70}deg)"></div>`).join('');
+  g.innerHTML=`<div class="hl1" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px">${tiles}</div><div class="hd" style="position:absolute;inset:0;background:var(--surface);display:none"><div style="position:absolute;left:0;right:0;top:0;height:40px;display:flex;align-items:center;gap:8px;padding:0 8px;border-bottom:1px solid var(--line);font-weight:600;font-size:14px"><span data-a="close" style="cursor:pointer;display:inline-flex">${ic('back',22)}</span>Detail page</div><img class="hi" draggable="false" src="${PIC}" style="position:absolute;left:50%;top:56px;width:260px;margin-left:-130px;height:130px;object-fit:cover;border-radius:10px;pointer-events:none"><div style="position:absolute;left:0;right:0;top:200px;text-align:center;font-size:13px;color:var(--muted)">Tap the arrow to fly back</div></div>`;
+  st.det=g.querySelector('.hd');st.big=g.querySelector('.hi');st.g=g;st.box=true;
+ }
+ const tag=s.tag?"'photo-0'":"'photo-0' // other page: 'photo-1'";
+ const code=`// list page\nGestureDetector(\n  onTap: () => Navigator.push(context,\n    MaterialPageRoute(builder: (_) => Detail()),\n  ),\n  child: Hero(\n    tag: ${s.tag?"'photo-0'":"'photo-0'"},\n    child: Image.asset('photo.png'),\n  ),\n)\n\n// detail page\nHero(\n  tag: ${s.tag?"'photo-0'":"'photo-1'"},${s.tag?'':'  // does not match, so no flight'}\n  child: Image.asset('photo.png'),\n)`;
+ return {code,hint:s.tag?'Tap a picture. The big image flies from the thumbnail you tapped. Duration only changes this demo, in Flutter it is the route transition time.':'The tags differ, so Flutter finds no pair and nothing flies. The page simply appears.'};
+},
+act(a,st,s,t){
+ const g=st.g;
+ if(a.startsWith('open')){
+  const i=+a.slice(4),tile=g.querySelectorAll('.ht')[i];
+  st.open=i;st.det.style.display='block';st.det.style.opacity='1';
+  st.big.style.filter=`hue-rotate(${i*70}deg)`;
+  if(!s.tag){anim(st.det,[{opacity:0},{opacity:1}],{duration:s.du/2});return}
+  const gr=g.getBoundingClientRect(),a1=tile.getBoundingClientRect(),b1=st.big.getBoundingClientRect();
+  const sx=a1.width/b1.width,sy=a1.height/b1.height,dx=a1.left-b1.left,dy=a1.top-b1.top;
+  tile.style.visibility='hidden';
+  anim(st.det,[{opacity:0},{opacity:1}],{duration:s.du/2});
+  const f=anim(st.big,[{transformOrigin:'0 0',transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`},{transformOrigin:'0 0',transform:'none'}],{duration:s.du,easing:'cubic-bezier(.4,0,.2,1)'});
+ }else if(a==='close'&&st.open>=0){
+  const tile=g.querySelectorAll('.ht')[st.open];
+  const done=()=>{st.det.style.display='none';g.querySelectorAll('.ht').forEach(x=>x.style.visibility='')};
+  if(!s.tag){done();return}
+  const a1=tile.getBoundingClientRect(),b1=st.big.getBoundingClientRect();
+  const sx=a1.width/b1.width,sy=a1.height/b1.height,dx=a1.left-b1.left,dy=a1.top-b1.top;
+  anim(st.det,[{opacity:1},{opacity:0}],{duration:s.du,fill:'forwards'});
+  const f=anim(st.big,[{transformOrigin:'0 0',transform:'none'},{transformOrigin:'0 0',transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`}],{duration:s.du,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+  if(f)f.onfinish=()=>{done();f.cancel()};else done();
+  st.open=-1;
+ }
+}});
+
+def({cat:'Async',id:'stream-builder',name:'StreamBuilder',tags:'stream snapshot connectionstate async data error done listen asyncsnapshot realtime firebase',h:300,
+blurb:'StreamBuilder rebuilds every time a Stream emits a new value. Unlike FutureBuilder, which answers once, a stream can send many values, then an error, then close. The snapshot tells you which of these just happened.',
+use:'Live data: chat messages, sensor readings, a countdown, Firestore or WebSocket updates.',
+watch:'Create the Stream once (in initState or a field), not inside build, or every rebuild subscribes to a new stream. Always handle snapshot.hasError.',
+ctl:[{k:'iv',l:'emit every (ms)',t:'rng',min:300,max:2000,step:100,v:800}],
+render(s,st,g,d){
+ st.s=s;st.d=d;
+ if(!st.box){
+  st.cs='none';st.data=null;st.err=null;st.n=0;st.log=[];
+  g.innerHTML=`<div class="sb" style="position:absolute;left:14px;right:14px;top:12px;bottom:56px;display:flex;flex-direction:column;gap:8px"></div><div style="position:absolute;left:0;right:0;bottom:10px;display:flex;gap:8px;justify-content:center"><button class="btn k-Filled" data-a="listen" style="padding:6px 14px">Listen</button><button class="btn k-Outlined" data-a="err" style="padding:6px 14px">addError()</button><button class="btn k-Outlined" data-a="close" style="padding:6px 14px">close()</button></div>`;
+  st.box=g.querySelector('.sb');st.g=g;
+ }
+ const cs=st.cs;
+ const col=cs==='active'?'var(--ok)':cs==='done'?'var(--muted)':cs==='waiting'?'var(--c3)':'var(--muted)';
+ const shown=st.err?`<span style="color:var(--danger)">Error: ${esc(st.err)}</span>`:st.data==null?'<span style="color:var(--muted)">no data yet</span>':'<b style="font-size:26px">'+st.data+'</b>';
+ st.box.innerHTML=`<div style="font:600 12px var(--f-mono);color:var(--muted)">snapshot.connectionState</div><div style="font:700 15px var(--f-mono);color:${col}">ConnectionState.${cs}</div><div style="font:600 12px var(--f-mono);color:var(--muted);margin-top:4px">snapshot.data / hasError</div><div style="min-height:36px;display:flex;align-items:center">${shown}</div><div style="font:12px var(--f-mono);color:var(--muted);margin-top:auto">${st.log.slice(-3).map(esc).join('<br>')||'press Listen'}</div>`;
+ const code=`final Stream<int> _ticks = Stream.periodic(\n  Duration(milliseconds: ${s.iv}),\n  (n) => n + 1,\n);\n\nStreamBuilder<int>(\n  stream: _ticks,\n  builder: (context, snapshot) {\n    if (snapshot.hasError) {\n      return Text('Error: \${snapshot.error}');\n    }\n    switch (snapshot.connectionState) {\n      case ConnectionState.none:\n        return Text('No stream');\n      case ConnectionState.waiting:\n        return CircularProgressIndicator();\n      case ConnectionState.active:\n        return Text('\${snapshot.data}');\n      case ConnectionState.done:\n        return Text('Done: \${snapshot.data}');\n    }\n  },\n)`;
+ return {code,hint:'Listen subscribes. Each tick is one emit. addError() sends an error and the stream keeps going. close() ends it and the state becomes done.'};
+},
+act(a,st,s){
+ const stop=()=>{if(st.tm){clearInterval(st.tm);st.tm=null}};
+ if(a==='listen'){
+  stop();st.n=0;st.data=null;st.err=null;st.cs='waiting';st.log=['listen()'];
+  st.tm=setInterval(()=>{
+   if(!alive(st.g)){stop();return}
+   st.n++;st.data=st.n;st.err=null;st.cs='active';st.log.push('emit '+st.n);
+   if(st.d)st.d.draw();
+  },st.s.iv);
+ }else if(a==='err'&&st.tm){st.err='bad packet';st.log.push('addError()')}
+ else if(a==='close'&&(st.tm||st.cs==='active')){stop();st.cs='done';st.log.push('close()')}
+}});
+
+def({cat:'Input',id:'form',name:'Form & TextFormField validation',tags:'form validator formkey validate autovalidatemode textformfield submit error email password save',h:330,
+blurb:'A Form groups form fields. Each TextFormField has a validator that returns an error message, or null when the value is fine. Calling formKey.currentState.validate() runs every validator at once and shows the messages.',
+use:'Sign-in and sign-up screens, checkout, any screen where several fields must be correct before you submit.',
+watch:'You need a GlobalKey<FormState> and it must stay the same across rebuilds. autovalidateMode decides when errors appear: never, after the user types, or immediately.',
+ctl:[{k:'am',l:'autovalidateMode',t:'sel',o:['disabled','onUserInteraction','always'],v:'onUserInteraction'}],
+render(s,st,g,d){
+ st.s=s;st.hintHost=d.hintEl;
+ if(!st.box){
+  st.touched={};
+  g.innerHTML=`<form class="ff" novalidate style="position:absolute;left:16px;right:16px;top:10px;bottom:8px;display:flex;flex-direction:column;gap:2px;font-size:14px"><label style="font-weight:600;font-size:12px;color:var(--muted)">Email</label><input name="e" type="text" autocomplete="off" placeholder="you@example.com" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit"><div class="e1" style="min-height:18px;font-size:12px;color:var(--danger)"></div><label style="font-weight:600;font-size:12px;color:var(--muted)">Password</label><input name="p" type="password" autocomplete="off" placeholder="at least 6 characters" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit"><div class="e2" style="min-height:18px;font-size:12px;color:var(--danger)"></div><button class="btn k-Filled" type="submit" style="align-self:flex-start;padding:7px 20px">Submit</button><div class="fr" style="font-size:12.5px;margin-top:6px;color:var(--muted)"></div></form>`;
+  st.box=true;const f=g.querySelector('form'),ie=f.querySelector('[name=e]'),ip=f.querySelector('[name=p]');
+  const ve=v=>!v?'Please enter an email':!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)?'Enter a valid email':null;
+  const vp=v=>!v?'Please enter a password':v.length<6?'At least 6 characters':null;
+  const show=(el,box,fn,key,force)=>{const m=st.s.am,on=force||m==='always'||(m==='onUserInteraction'&&st.touched[key]);box.textContent=on?(fn(el.value)||''):'';el.style.borderColor=on&&fn(el.value)?'var(--danger)':''};
+  const all=force=>{show(ie,f.querySelector('.e1'),ve,'e',force);show(ip,f.querySelector('.e2'),vp,'p',force)};
+  st.refresh=()=>all(false);
+  ie.addEventListener('input',()=>{st.touched.e=1;all(false)});ip.addEventListener('input',()=>{st.touched.p=1;all(false)});
+  f.addEventListener('submit',e=>{e.preventDefault();all(true);const ok=!ve(ie.value)&&!vp(ip.value);const r=f.querySelector('.fr');r.style.color=ok?'var(--ok)':'var(--danger)';r.textContent=ok?'validate() returned true. The form is saved.':'validate() returned false. Fix the red messages.'});
+ }
+ st.touched={};st.refresh();
+ const code=`final _formKey = GlobalKey<FormState>();\n\nForm(\n  key: _formKey,\n  autovalidateMode: AutovalidateMode.${s.am},\n  child: Column(children: [\n    TextFormField(\n      decoration: InputDecoration(labelText: 'Email'),\n      validator: (v) {\n        if (v == null || v.isEmpty) return 'Please enter an email';\n        if (!v.contains('@')) return 'Enter a valid email';\n        return null; // null means valid\n      },\n    ),\n    TextFormField(\n      obscureText: true,\n      validator: (v) =>\n          (v ?? '').length < 6 ? 'At least 6 characters' : null,\n    ),\n    FilledButton(\n      onPressed: () {\n        if (_formKey.currentState!.validate()) {\n          // all fields are valid\n        }\n      },\n      child: Text('Submit'),\n    ),\n  ]),\n)`;
+ return {code,hint:s.am==='disabled'?'Nothing is checked until you press Submit.':s.am==='always'?'Errors show at once, even before you type.':'Type in a field and leave it wrong. Its error appears while the other field stays quiet.'};
+}});
+
+const FRUIT=['Apple','Apricot','Avocado','Banana','Blueberry','Cherry','Coconut','Grape','Guava','Kiwi','Lemon','Lime','Mango','Melon','Orange','Papaya','Peach','Pear','Pineapple','Plum'];
+def({cat:'Input',id:'autocomplete',name:'Autocomplete',tags:'autocomplete suggestions search optionsbuilder typeahead dropdown filter onselected',h:300,
+blurb:'Autocomplete shows a text field and a list of suggestions that updates as the user types. You write optionsBuilder, which receives the current text and returns the options that match.',
+use:'Search boxes, tag pickers, address and country fields, anywhere a list is too long for a dropdown.',
+watch:'optionsBuilder must be fast and return an empty list when nothing matches. For server lookups, debounce the call. Use displayStringForOption when your option is an object, not a String.',
+ctl:[{k:'m',l:'matching',t:'sel',o:['startsWith','contains'],v:'contains'},{k:'mx',l:'optionsMaxHeight',t:'rng',min:80,max:200,step:20,v:160}],
+render(s,st,g,d){
+ st.s=s;st.hintHost=d.hintEl;
+ if(!st.box){
+  g.innerHTML=`<div style="position:absolute;left:16px;right:16px;top:12px"><input class="ai" type="text" autocomplete="off" placeholder="Type a fruit" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--c1);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit;font-size:14px"><div class="ao" style="margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 14px rgba(20,30,80,.2);overflow:auto;display:none"></div></div>`;
+  st.box=g.querySelector('.ai');st.op=g.querySelector('.ao');
+  const upd=()=>{
+   const q=st.box.value.toLowerCase(),m=st.s.m;
+   const r=q?FRUIT.filter(o=>m==='contains'?o.toLowerCase().includes(q):o.toLowerCase().startsWith(q)):[];
+   st.op.style.display=r.length?'block':'none';st.op.style.maxHeight=st.s.mx+'px';
+   st.op.innerHTML=r.map(o=>`<div class="aop" data-o="${o}" style="padding:9px 12px;cursor:pointer;font-size:14px">${o}</div>`).join('');
+  };
+  st.upd=upd;
+  st.box.addEventListener('input',upd);
+  st.op.addEventListener('pointerdown',e=>{const o=e.target.closest('.aop');if(!o)return;e.preventDefault();st.box.value=o.dataset.o;st.op.style.display='none';st.hintHost.textContent='onSelected: '+o.dataset.o});
+ }
+ st.upd();
+ const test=s.m==='contains'?'option.toLowerCase().contains(\n          value.text.toLowerCase())':'option.toLowerCase().startsWith(\n          value.text.toLowerCase())';
+ const code=`const _fruits = ['Apple', 'Apricot', 'Banana', /* ... */];\n\nAutocomplete<String>(\n  optionsMaxHeight: ${s.mx},\n  optionsBuilder: (TextEditingValue value) {\n    if (value.text.isEmpty) {\n      return const Iterable<String>.empty();\n    }\n    return _fruits.where((option) =>\n        ${test});\n  },\n  onSelected: (String choice) {\n    debugPrint('You picked $choice');\n  },\n)`;
+ return {code,hint:'Type "a" or "an". With contains, "an" also finds Banana and Mango. With startsWith it does not.'};
+}});
+
+def({cat:'Input',id:'date-time-picker',name:'showDatePicker & showTimePicker',tags:'date picker time picker calendar showdatepicker showtimepicker timeofday firstdate lastdate dialog',h:340,
+blurb:'showDatePicker and showTimePicker open a ready-made Material dialog and return a Future. The date picker returns a DateTime (or null if cancelled). The time picker returns a TimeOfDay.',
+use:'Birthdays, bookings, reminders, alarm times, and any field where typing a date is error-prone.',
+watch:'Always check the result for null (the user may cancel). initialDate must be between firstDate and lastDate or Flutter throws. After an await, check context.mounted before using context again.',
+ctl:[{k:'k',l:'dialog',t:'sel',o:['showDatePicker','showTimePicker'],v:'showDatePicker'},{k:'rg',l:'lastDate (day of the month)',t:'rng',min:8,max:28,v:20},{k:'h24',l:'alwaysUse24HourFormat',t:'chk',v:false}],
+render(s,st,g,d){
+ st.s=s;st.hintHost=d.hintEl;
+ const now=new Date(),y=now.getFullYear(),mo=now.getMonth(),today=5,dim=new Date(y,mo+1,0).getDate();
+ if(st.sel==null)st.sel=12;if(st.sel>s.rg)st.sel=s.rg;if(st.h==null){st.h=9;st.mi=30}
+ const MN=['January','February','March','April','May','June','July','August','September','October','November','December'][mo];
+ const first=new Date(y,mo,1).getDay();
+ let body;
+ if(s.k==='showDatePicker'){
+  let cells='';for(let i=0;i<first;i++)cells+='<span></span>';
+  for(let dd=1;dd<=dim;dd++){const ok=dd>=today&&dd<=s.rg;cells+=`<span data-a="day${dd}" style="${ok?'cursor:pointer;':'opacity:.3;pointer-events:none;'}height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;${dd===st.sel?'background:var(--c1);color:#fff;font-weight:700;':''}">${dd}</span>`}
+  body=`<div style="font:600 15px var(--f-body);margin-bottom:6px">${MN} ${y}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;color:var(--muted);margin-bottom:2px">${'SMTWTFS'.split('').map(c=>`<span>${c}</span>`).join('')}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">${cells}</div>`;
+ }else{
+  const hh=s.h24?String(st.h).padStart(2,'0'):String(((st.h+11)%12)+1),mm=String(st.mi).padStart(2,'0');
+  const ap=st.h<12?'AM':'PM';
+  const stp=(a,l)=>`<span data-a="${a}" style="cursor:pointer;display:inline-flex;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);align-items:center;justify-content:center;font-weight:700">${l}</span>`;
+  body=`<div style="font:600 13px var(--f-body);margin-bottom:10px">Select time</div><div style="display:flex;align-items:center;justify-content:center;gap:12px"><div style="text-align:center">${stp('hp','+')}<div style="font:700 40px var(--f-mono);padding:4px 10px;background:var(--c1s);border-radius:10px;margin:6px 0">${hh}</div>${stp('hm','−')}</div><div style="font:700 36px var(--f-mono)">:</div><div style="text-align:center">${stp('mp','+')}<div style="font:700 40px var(--f-mono);padding:4px 10px;background:var(--c1s);border-radius:10px;margin:6px 0">${mm}</div>${stp('mm','−')}</div>${s.h24?'':`<div data-a="ap" style="cursor:pointer;font:700 15px var(--f-mono);padding:8px 10px;border:1.5px solid var(--c1);border-radius:8px">${ap}</div>`}</div>`;
+ }
+ g.innerHTML=`<div style="position:absolute;left:50%;top:10px;margin-left:-135px;width:270px;box-sizing:border-box;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(20,30,80,.2);${s.k==='showDatePicker'?'':'min-height:200px'}">${body}<div style="display:flex;justify-content:flex-end;gap:14px;margin-top:10px;font:600 13px var(--f-body);color:var(--accent)"><span data-a="cancel" style="cursor:pointer">Cancel</span><span data-a="ok" style="cursor:pointer">OK</span></div></div>`;
+ const res=s.k==='showDatePicker'?`${y}-${String(mo+1).padStart(2,'0')}-${String(st.sel).padStart(2,'0')}`:`${String(st.h).padStart(2,'0')}:${String(st.mi).padStart(2,'0')}`;
+ const code=s.k==='showDatePicker'?`final DateTime? picked = await showDatePicker(\n  context: context,\n  initialDate: DateTime(${y}, ${mo+1}, ${st.sel}),\n  firstDate: DateTime(${y}, ${mo+1}, 5),\n  lastDate: DateTime(${y}, ${mo+1}, ${s.rg}),\n);\nif (picked == null) return; // user cancelled\nsetState(() => _date = picked);`:`final TimeOfDay? picked = await showTimePicker(\n  context: context,\n  initialTime: TimeOfDay(hour: ${st.h}, minute: ${st.mi}),\n  ${s.h24?'builder: (context, child) => MediaQuery(\n    data: MediaQuery.of(context)\n        .copyWith(alwaysUse24HourFormat: true),\n    child: child!,\n  ),':'// builder: ... alwaysUse24HourFormat: true'}\n);\nif (picked == null) return; // user cancelled\nsetState(() => _time = picked);`;
+ return {code,hint:'Selected so far: '+res+'. In this demo firstDate is the 5th. Days outside firstDate and lastDate are greyed out and cannot be tapped.'};
+},
+act(a,st,s){
+ if(a.startsWith('day'))st.sel=+a.slice(3);
+ else if(a==='hp')st.h=(st.h+1)%24;else if(a==='hm')st.h=(st.h+23)%24;
+ else if(a==='mp')st.mi=(st.mi+5)%60;else if(a==='mm')st.mi=(st.mi+55)%60;
+ else if(a==='ap')st.h=(st.h+12)%24;
+}});
+
+def({cat:'Input',id:'segmented-button',name:'SegmentedButton',tags:'segmented button toggle single multi selection segments choice selected icon material3',h:270,
+blurb:'SegmentedButton shows two to five related options in one row. By default exactly one is selected. Turn on multiSelectionEnabled to allow several, and emptySelectionAllowed to allow none.',
+use:'Switching a view (day, week, month), choosing a size, or toggling a few filters. Better than radio buttons for short, equal-weight choices.',
+watch:'selected is a Set, even for single choice, and onSelectionChanged gives you the new Set. Keep labels short. For more than five options use a dropdown.',
+ctl:[{k:'mu',l:'multiSelectionEnabled',t:'chk',v:false},{k:'em',l:'emptySelectionAllowed',t:'chk',v:false},{k:'ic',l:'showSelectedIcon',t:'chk',v:true},{k:'ico',l:'icons on segments',t:'chk',v:false}],
+render(s,st,g,d){
+ if(!st.set)st.set=['M'];
+ if(!s.mu&&st.set.length>1)st.set=[st.set[0]];
+ if(!s.em&&!st.set.length)st.set=['M'];
+ const segs=['S','M','L','XL'],full={S:'Small',M:'Medium',L:'Large',XL:'XL'};
+ const ico={S:'person',M:'home',L:'star',XL:'favorite'};
+ const html=segs.map((k,i)=>{
+  const on=st.set.includes(k);
+  return `<div data-a="seg${k}" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 14px;height:40px;font-weight:600;font-size:14px;border:1.5px solid var(--muted);${i?'margin-left:-1.5px;':''}border-radius:${i===0?'20px 0 0 20px':i===3?'0 20px 20px 0':'0'};background:${on?'var(--c1s)':'transparent'};color:${on?'var(--c1t)':'var(--fg)'}">${on&&s.ic?ic('check',18):s.ico?ic(ico[k],18):''}${full[k]}</div>`}).join('');
+ g.innerHTML=`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">${html}</div>`;
+ const code=`Set<Size> _selection = {${st.set.map(x=>'Size.'+x.toLowerCase()).join(', ')}};\n\nSegmentedButton<Size>(\n  segments: [\n    ButtonSegment(value: Size.s, label: Text('Small')${s.ico?',\n      icon: Icon(Icons.person)':''}),\n    ButtonSegment(value: Size.m, label: Text('Medium')),\n    ButtonSegment(value: Size.l, label: Text('Large')),\n    ButtonSegment(value: Size.xl, label: Text('XL')),\n  ],\n  selected: _selection,${s.mu?'\n  multiSelectionEnabled: true,':''}${s.em?'\n  emptySelectionAllowed: true,':''}${s.ic?'':'\n  showSelectedIcon: false,'}\n  onSelectionChanged: (Set<Size> next) {\n    setState(() => _selection = next);\n  },\n)`;
+ return {code,hint:'Selected: {'+st.set.join(', ')+'}. '+(s.mu?'Several can be on at once.':'Only one can be on, and tapping another replaces it.')};
+},
+act(a,st,s){
+ if(!a.startsWith('seg'))return;const k=a.slice(3),i=st.set.indexOf(k);
+ if(s.mu){if(i>=0){if(st.set.length>1||s.em)st.set.splice(i,1)}else st.set.push(k)}
+ else{if(i>=0){if(s.em)st.set=[]}else st.set=[k]}
+}});
+
+/* ================= v6 GROUP C: Material widgets and more common errors ================= */
+const phone=(inner,extra)=>`<div class="ph" style="position:absolute;left:50%;top:8px;bottom:8px;width:210px;margin-left:-105px;border:2px solid var(--fg);border-radius:18px;overflow:hidden;background:var(--bg);${extra||''}">${inner}</div>`;
+const appbar=t=>`<div style="height:34px;background:var(--c1);color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:600;font-size:13px">${t}</div>`;
+
+def({cat:'Material',id:'dialog',name:'AlertDialog & showDialog',tags:'dialog alertdialog simpledialog showdialog modal barrier dismissible actions confirm cancel popup navigator pop',h:330,
+blurb:'showDialog puts a modal on top of the current screen and returns a Future that completes when it closes. AlertDialog is the usual content: a title, a message and action buttons. Navigator.pop(context, value) closes it and sends a value back.',
+use:'Confirm a delete, ask a yes or no question, show a short choice list (SimpleDialog) or a full-screen form (Dialog.fullscreen).',
+watch:'Dialogs are routes, so close them with Navigator.pop, not by hiding a widget. The barrier colour blocks taps on the page, and barrierDismissible decides if tapping it closes the dialog. Never call showDialog from build.',
+ctl:[{k:'k',l:'dialog type',t:'sel',o:['AlertDialog','SimpleDialog','Dialog.fullscreen'],v:'AlertDialog'},{k:'bd',l:'barrierDismissible',t:'chk',v:true}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ const body=`<div style="padding:12px"><div style="height:10px;width:60%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><div style="height:10px;width:85%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><button class="btn k-Filled" data-a="show" style="padding:7px 14px;font-size:13px">Show dialog</button></div>`;
+ let dlg='';
+ if(st.open){
+  if(s.k==='AlertDialog')dlg=`<div style="position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:20px;padding:18px 16px 10px;box-shadow:0 8px 28px rgba(0,0,0,.35)"><div style="font:600 17px var(--f-body);margin-bottom:8px">Delete file?</div><div style="font-size:13px;color:var(--muted);margin-bottom:14px">This cannot be undone.</div><div style="display:flex;justify-content:flex-end;gap:14px;font:600 13px var(--f-body);color:var(--accent)"><span data-a="no" style="cursor:pointer">Cancel</span><span data-a="yes" style="cursor:pointer">Delete</span></div></div>`;
+  else if(s.k==='SimpleDialog')dlg=`<div style="position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:20px;padding:16px 0 8px;box-shadow:0 8px 28px rgba(0,0,0,.35)"><div style="font:600 17px var(--f-body);margin:0 16px 8px">Pick a colour</div>${['Blue','Pink','Teal'].map(c=>`<div data-a="pick${c}" style="cursor:pointer;padding:10px 16px;font-size:14px">${c}</div>`).join('')}</div>`;
+  else dlg=`<div style="position:absolute;inset:0;background:var(--surface)">${appbar(`<span data-a="no" style="cursor:pointer;display:inline-flex">${ic('close',20)}</span>New event<span data-a="yes" style="margin-left:auto;cursor:pointer">Save</span>`)}<div style="padding:14px"><div style="height:34px;border:1.5px solid var(--line);border-radius:8px;margin-bottom:10px"></div><div style="height:34px;border:1.5px solid var(--line);border-radius:8px"></div></div></div>`;
+  dlg=(s.k==='Dialog.fullscreen'?'':`<div data-a="scrim" style="position:absolute;inset:0;background:rgba(0,0,0,.45)"></div>`)+dlg;
+ }
+ g.innerHTML=phone(appbar('Files')+body+dlg);
+ const call=s.k==='AlertDialog'?`AlertDialog(\n      title: Text('Delete file?'),\n      content: Text('This cannot be undone.'),\n      actions: [\n        TextButton(\n          onPressed: () => Navigator.pop(context, false),\n          child: Text('Cancel'),\n        ),\n        TextButton(\n          onPressed: () => Navigator.pop(context, true),\n          child: Text('Delete'),\n        ),\n      ],\n    )`:s.k==='SimpleDialog'?`SimpleDialog(\n      title: Text('Pick a colour'),\n      children: [\n        SimpleDialogOption(\n          onPressed: () => Navigator.pop(context, 'Blue'),\n          child: Text('Blue'),\n        ),\n        // Pink, Teal ...\n      ],\n    )`:`Dialog.fullscreen(\n      child: NewEventForm(),\n    )`;
+ const code=`final result = await showDialog<${s.k==='SimpleDialog'?'String':s.k==='AlertDialog'?'bool':'void'}>(\n  context: context,${s.bd?'':'\n  barrierDismissible: false,'}\n  builder: (context) =>\n    ${call},\n);\n// result is null if the user tapped the barrier`;
+ return {code,hint:st.res?('showDialog returned: '+st.res):(s.bd?'Tap the dim area to dismiss. The Future completes with null.':'barrierDismissible is false, so tapping outside does nothing. The user must choose.')};
+},
+act(a,st,s,t){
+ if(a==='show'){st.open=true;st.res=''}
+ else if(a==='scrim'){if(s.bd){st.open=false;st.res='null (dismissed by tapping the barrier)'}}
+ else if(a==='yes'){st.open=false;st.res=s.k==='AlertDialog'?'true':'saved'}
+ else if(a==='no'){st.open=false;st.res=s.k==='AlertDialog'?'false':'null (closed)'}
+ else if(a.startsWith('pick')){st.open=false;st.res="'"+a.slice(4)+"'"}
+}});
+
+def({cat:'Material',id:'bottom-sheet',name:'BottomSheet',tags:'bottom sheet modal persistent showmodalbottomsheet drag handle scroll controlled draggablescrollablesheet slide up',h:340,
+blurb:'A bottom sheet is a panel that slides up from the bottom edge. showModalBottomSheet blocks the page behind it with a barrier, like a dialog. A persistent sheet (Scaffold.showBottomSheet) stays while the user keeps using the page.',
+use:'Share menus, filters, action lists, a mini player or any short task that does not need a full page.',
+watch:'The sheet only takes the height it needs, up to about 9/16 of the screen. For tall content or a keyboard, set isScrollControlled: true. Close it with Navigator.pop.',
+ctl:[{k:'md',l:'type',t:'sel',o:['modal','persistent'],v:'modal'},{k:'dh',l:'showDragHandle',t:'chk',v:true},{k:'sc',l:'isScrollControlled (taller)',t:'chk',v:false}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ if(!st.box){
+  g.innerHTML=phone(`${appbar('Photos')}<div style="padding:12px"><div style="height:10px;width:70%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><button class="btn k-Filled" data-a="tog" style="padding:7px 14px;font-size:13px">Open sheet</button></div><div class="bs1" style="position:absolute;inset:34px 0 0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s" data-a="scrim"></div><div class="bs2" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:26px 26px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.3);transform:translateY(105%);transition:transform .28s cubic-bezier(.3,0,.2,1);padding:0 16px 14px"><div class="bh" style="width:32px;height:4px;border-radius:2px;background:var(--muted);margin:10px auto 10px"></div><div style="font:600 15px var(--f-body);margin-bottom:6px">Share</div>${['Copy link','Send message','More apps'].map(x=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;font-size:14px;border-top:1px solid var(--line)">${ic('share',18,'var(--c1)')}${x}</div>`).join('')}<div class="bx" style="display:none;font-size:12px;color:var(--muted);padding:10px 0;border-top:1px solid var(--line);line-height:2.6">More rows because isScrollControlled lets the sheet grow.<br>Row A<br>Row B<br>Row C</div></div>`,'');
+  st.box=true;st.scrim=g.querySelector('.bs1');st.sh=g.querySelector('.bs2');st.hd=g.querySelector('.bh');st.bx=g.querySelector('.bx');st.open=false;
+ }
+ st.hd.style.display=s.dh?'block':'none';st.bx.style.display=s.sc?'block':'none';
+ st.sh.style.transform=st.open?'translateY(0)':'translateY(105%)';
+ const modal=s.md==='modal';
+ st.scrim.style.opacity=st.open&&modal?'1':'0';st.scrim.style.pointerEvents=st.open&&modal?'auto':'none';
+ const code=modal?`showModalBottomSheet<void>(\n  context: context,${s.dh?'\n  showDragHandle: true,':''}${s.sc?'\n  isScrollControlled: true,':''}\n  builder: (context) => Padding(\n    padding: EdgeInsets.all(16),\n    child: Column(\n      mainAxisSize: MainAxisSize.min,\n      children: [\n        ListTile(title: Text('Copy link')),\n        ListTile(title: Text('Send message')),\n        TextButton(\n          onPressed: () => Navigator.pop(context),\n          child: Text('Close'),\n        ),\n      ],\n    ),\n  ),\n);`:`// inside a State that has a Scaffold above it\nfinal controller = Scaffold.of(context).showBottomSheet(\n  (context) => Container(\n    height: 200,\n    child: Text('Stays while you use the page'),\n  ),\n);\n// close it later\ncontroller.close();`;
+ return {code,hint:modal?'Modal: tap the dim area or press the button to close it. The page behind is blocked.':'Persistent: the page stays usable. Press the button again to close it.'};
+},
+act(a,st,s){if(a==='tog')st.open=!st.open;else if(a==='scrim')st.open=false}});
+
+def({cat:'Material',id:'snackbar',name:'SnackBar',tags:'snackbar toast message undo action scaffoldmessenger showsnackbar duration floating behavior feedback',h:320,
+blurb:'A SnackBar is a short message that slides up from the bottom, stays for a few seconds, then leaves on its own. It can carry one action such as Undo. You show it through ScaffoldMessenger, not through Scaffold.',
+use:'Confirm a quick action ("Message sent") or let the user undo it ("Item deleted. Undo").',
+watch:'One snackbar shows at a time and the next one waits in a queue. Use ScaffoldMessenger.of(context).hideCurrentSnackBar() before showing a new one if you want to replace it. Do not put important information only in a snackbar.',
+ctl:[{k:'bh',l:'behavior',t:'sel',o:['fixed','floating'],v:'floating'},{k:'ac',l:'action: Undo',t:'chk',v:true},{k:'du',l:'duration (s)',t:'rng',min:1,max:6,v:3}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;st.s=s;
+ if(!st.box){
+  g.innerHTML=phone(`${appbar('Inbox')}<div style="padding:12px"><button class="btn k-Filled" data-a="show" style="padding:7px 14px;font-size:13px">Delete message</button></div><div class="sn" style="position:absolute;left:0;right:0;bottom:0;background:#2d3142;color:#fff;display:flex;align-items:center;padding:12px 14px;font-size:13px;gap:10px;transform:translateY(120%);transition:transform .25s,margin .25s"><span style="flex:1">Message deleted</span><span class="su" data-a="undo" style="color:#9fc0ff;font-weight:700;cursor:pointer">UNDO</span></div>`,'');
+  st.box=true;st.sn=g.querySelector('.sn');st.su=g.querySelector('.su');st.g=g;
+ }
+ const fl=s.bh==='floating';
+ st.sn.style.margin=fl?'0 10px 10px':'0';st.sn.style.borderRadius=fl?'6px':'0';
+ st.su.style.display=s.ac?'':'none';
+ st.sn.style.transform=st.vis?'translateY(0)':'translateY(140%)';
+ const code=`ScaffoldMessenger.of(context).showSnackBar(\n  SnackBar(\n    content: Text('Message deleted'),\n    duration: Duration(seconds: ${s.du}),${fl?'\n    behavior: SnackBarBehavior.floating,':''}${s.ac?'\n    action: SnackBarAction(\n      label: \'Undo\',\n      onPressed: () {\n        // put the message back\n      },\n    ),':''}\n  ),\n);`;
+ return {code,hint:st.note||'Press the button. The bar stays for '+s.du+' s and then hides itself.'};
+},
+act(a,st,s){
+ if(a==='show'){st.vis=true;st.note='Visible. It will close by itself after '+s.du+' s.';clearTimeout(st.tm);st.tm=setTimeout(()=>{if(!alive(st.g))return;st.vis=false;st.note='Closed after the duration ('+s.du+' s). onPressed did not run.';st.d&&st.d.draw()},s.du*1000)}
+ else if(a==='undo'&&st.vis){st.vis=false;clearTimeout(st.tm);st.note='Undo pressed: the action onPressed ran and the snackbar closed.'}
+},
+after(g,st,s,draw,d){st.d=d}});
+
+def({cat:'Material',id:'chip',name:'Chip family',tags:'chip inputchip choicechip filterchip actionchip avatar delete selected tag filter label',h:300,
+blurb:'Chips are small pills that stand for an input, a choice, a filter or an action. Flutter has one widget for each job so the semantics and the look are right.',
+use:'ChoiceChip: pick one. FilterChip: toggle several filters. InputChip: tags the user added, with a delete button. ActionChip: a quick action. Chip: a plain label.',
+watch:'Choose the type by what the chip does, not by how it looks. FilterChip and ChoiceChip need you to keep the selected state and call setState in onSelected.',
+ctl:[{k:'k',l:'chip type',t:'sel',o:['ChoiceChip','FilterChip','InputChip','ActionChip','Chip'],v:'ChoiceChip'}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ const items=['Flutter','Dart','Android','iOS'];
+ if(!st.sel){st.sel={ChoiceChip:'Dart',FilterChip:['Flutter'],InputChip:items.slice(),ActionChip:0}}
+ const base='display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--muted);font-size:13px;font-weight:600;cursor:pointer;user-select:none;';
+ let html='';
+ const sel=(on,x,a)=>`<span data-a="${a}" style="${base}${on?'background:var(--c1s);border-color:var(--c1);color:var(--c1t);':'color:var(--fg);'}">${on?ic('check',16):''}${x}</span>`;
+ if(s.k==='ChoiceChip')html=items.map(x=>sel(st.sel.ChoiceChip===x,x,'c'+x)).join('');
+ else if(s.k==='FilterChip')html=items.map(x=>sel(st.sel.FilterChip.includes(x),x,'f'+x)).join('');
+ else if(s.k==='InputChip')html=(st.sel.InputChip.length?st.sel.InputChip.map(x=>`<span style="${base}cursor:default">${x}<span data-a="d${x}" style="cursor:pointer;display:inline-flex">${ic('close',16)}</span></span>`).join(''):'<span style="color:var(--muted);font-size:13px">No tags left. Press reset.</span>')+`<span data-a="reset" style="${base}border-style:dashed">${ic('add',16)}reset</span>`;
+ else if(s.k==='ActionChip')html=`<span data-a="act" style="${base}">${ic('share',16)}Share</span><span style="font-size:13px;color:var(--muted)">pressed ${st.sel.ActionChip} time${st.sel.ActionChip===1?'':'s'}</span>`;
+ else html=`<span style="${base}cursor:default">${ic('person',16)}Taufiq</span><span style="${base}cursor:default">Label only</span>`;
+ g.innerHTML=`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding:20px">${html}</div>`;
+ const code={ChoiceChip:`ChoiceChip(\n  label: Text('Dart'),\n  selected: _picked == 'Dart',\n  onSelected: (on) {\n    setState(() => _picked = 'Dart');\n  },\n)`,FilterChip:`FilterChip(\n  label: Text('Flutter'),\n  selected: _filters.contains('Flutter'),\n  onSelected: (on) {\n    setState(() {\n      on ? _filters.add('Flutter')\n         : _filters.remove('Flutter');\n    });\n  },\n)`,InputChip:`InputChip(\n  label: Text('Flutter'),\n  onDeleted: () {\n    setState(() => _tags.remove('Flutter'));\n  },\n)`,ActionChip:`ActionChip(\n  avatar: Icon(Icons.share),\n  label: Text('Share'),\n  onPressed: () => share(),\n)`,Chip:`Chip(\n  avatar: Icon(Icons.person),\n  label: Text('Taufiq'),\n)`}[s.k];
+ return {code,hint:{ChoiceChip:'Only one chip can be selected. Tapping another replaces the choice.',FilterChip:'Each chip toggles on its own. The selected list is a Set you keep.',InputChip:'Press the x on a tag. onDeleted runs and you remove it from your list.',ActionChip:'It has no selected state. It just runs onPressed.',Chip:'A Chip does nothing by itself. It is only a label with an optional avatar.'}[s.k]};
+},
+act(a,st,s){
+ const S=st.sel;
+ if(a[0]==='c')S.ChoiceChip=a.slice(1);
+ else if(a[0]==='f'){const x=a.slice(1),i=S.FilterChip.indexOf(x);i>=0?S.FilterChip.splice(i,1):S.FilterChip.push(x)}
+ else if(a[0]==='d'){const x=a.slice(1);S.InputChip=S.InputChip.filter(y=>y!==x)}
+ else if(a==='reset')S.InputChip=['Flutter','Dart','Android','iOS'];
+ else if(a==='act')S.ActionChip++;
+}});
+
+def({cat:'Material',id:'drawer',name:'Drawer',tags:'drawer navigation menu side scaffold hamburger enddrawer opendrawer swipe edge listtile',h:340,
+blurb:'A Drawer is a panel that slides in from the side of a Scaffold. Scaffold adds the menu button to the AppBar for you when you pass a drawer. Swiping from the screen edge opens it too.',
+use:'Apps with more than four or five top-level destinations, or settings and account links that do not need to be on screen all the time.',
+watch:'Close it after navigating with Navigator.pop(context), or it stays open over the next screen. For three to five destinations, NavigationBar is the better choice on phones.',
+ctl:[{k:'end',l:'endDrawer (opens from the right)',t:'chk',v:false}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ if(!st.box){
+  st.open=false;st.page='Inbox';
+  g.innerHTML=phone(`<div class="dbar"></div><div class="dpg" style="padding:14px;font:600 15px var(--f-body)"></div><div class="dsc" data-a="scrim" style="position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s"></div><div class="dp" style="position:absolute;top:0;bottom:0;width:150px;background:var(--surface);box-shadow:0 0 20px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,0,.2,1)"><div style="background:var(--c1s);height:70px;padding:12px;display:flex;align-items:flex-end;font:700 14px var(--f-body);color:var(--c1t)">Drawer header</div>${['Inbox','Starred','Sent'].map(x=>`<div class="di" data-a="p${x}" style="padding:12px 14px;font-size:14px;cursor:pointer;display:flex;gap:10px;align-items:center">${ic(x==='Inbox'?'home':x==='Starred'?'star':'share',18)}${x}</div>`).join('')}</div>`,'');
+  st.box=true;st.bar=g.querySelector('.dbar');st.pg=g.querySelector('.dpg');st.sc=g.querySelector('.dsc');st.dp=g.querySelector('.dp');
+ }
+ const end=s.end;
+ st.bar.innerHTML=appbar(end?`${st.page}<span data-a="tog" style="margin-left:auto;cursor:pointer;display:inline-flex">${ic('menu',22)}</span>`:`<span data-a="tog" style="cursor:pointer;display:inline-flex">${ic('menu',22)}</span>${st.page}`);
+ st.pg.textContent='Page: '+st.page;
+ st.dp.style[end?'right':'left']='0';st.dp.style[end?'left':'right']='auto';
+ st.dp.style.transform=st.open?'translateX(0)':`translateX(${end?'105%':'-105%'})`;
+ st.sc.style.opacity=st.open?'1':'0';st.sc.style.pointerEvents=st.open?'auto':'none';
+ g.querySelectorAll('.di').forEach(x=>{x.style.background=x.dataset.a==='p'+st.page?'var(--c1s)':''});
+ const code=`Scaffold(\n  appBar: AppBar(title: Text('${st.page}')),\n  ${end?'endDrawer':'drawer'}: Drawer(\n    child: ListView(children: [\n      DrawerHeader(child: Text('Drawer header')),\n      ListTile(\n        leading: Icon(Icons.home),\n        title: Text('Inbox'),\n        onTap: () {\n          // go to the page, then close the drawer\n          Navigator.pop(context);\n        },\n      ),\n      // Starred, Sent ...\n    ]),\n  ),\n  body: Center(child: Text('Page: ${st.page}')),\n)`;
+ return {code,hint:'Press the menu icon or the dim area. '+(end?'endDrawer slides in from the right.':'The default drawer slides in from the left.')};
+},
+act(a,st){
+ if(a==='tog')st.open=!st.open;else if(a==='scrim')st.open=false;
+ else if(a[0]==='p'&&a.length>1){st.page=a.slice(1);st.open=false}
+}});
+
+def({cat:'Material',id:'navigation-bar',name:'NavigationBar',tags:'navigation bar bottom tabs destinations selectedindex material3 labelbehavior badge navigationdestination',h:330,
+blurb:'NavigationBar is the Material 3 bottom bar with two to five destinations. You keep selectedIndex in your state and update it in onDestinationSelected. The selected item gets a pill-shaped indicator.',
+use:'The main sections of a phone app, such as Home, Search and Profile.',
+watch:'It does not switch pages for you. Pair it with IndexedStack to keep each page\'s state, or with a router. NavigationBar replaces BottomNavigationBar in Material 3.',
+ctl:[{k:'n',l:'destinations',t:'rng',min:2,max:5,v:3},{k:'lb',l:'labelBehavior',t:'sel',o:['alwaysShow','onlyShowSelected','alwaysHide'],v:'alwaysShow'}],
+render(s,st,g,d){
+ st.hintHost=d.hintEl;
+ const all=[['Home','home'],['Search','search'],['Saved','favorite'],['Alerts','clock'],['Profile','person']].slice(0,s.n);
+ if(st.i==null||st.i>=s.n)st.i=0;
+ const items=all.map(([l,k],i)=>{const on=i===st.i;return `<div data-a="n${i}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding-top:8px"><span style="width:56px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:${on?'var(--c1s)':'transparent'};color:${on?'var(--c1t)':'var(--fg)'}">${ic(k,20)}</span>${s.lb==='alwaysHide'||(s.lb==='onlyShowSelected'&&!on)?'':`<span style="font-size:11px;font-weight:${on?700:500}">${l}</span>`}</div>`}).join('');
+ g.innerHTML=phone(`${appbar(all[st.i][0])}<div style="padding:16px;font:600 15px var(--f-body)">Body of ${all[st.i][0]}</div><div style="position:absolute;left:0;right:0;bottom:0;height:${s.lb==='alwaysHide'?58:70}px;background:var(--surface);border-top:1px solid var(--line);display:flex">${items}</div>`);
+ const code=`int _index = ${st.i};\n\nScaffold(\n  body: pages[_index],\n  bottomNavigationBar: NavigationBar(\n    selectedIndex: _index,${s.lb==='alwaysShow'?'':`\n    labelBehavior:\n        NavigationDestinationLabelBehavior.${s.lb},`}\n    onDestinationSelected: (i) {\n      setState(() => _index = i);\n    },\n    destinations: const [\n${all.map(([l,k])=>`      NavigationDestination(\n        icon: Icon(Icons.${k==='clock'?'notifications':k==='person'?'person':k==='favorite'?'bookmark':k}),\n        label: '${l}',\n      ),`).join('\n')}\n    ],\n  ),\n)`;
+ return {code,hint:'selectedIndex = '+st.i+'. NavigationBar only reports the tap, and you decide what to show.'};
+},
+act(a,st){if(a[0]==='n')st.i=+a.slice(1)}});
+
+/* ---- more common errors ---- */
+def({cat:'Common errors',id:'err-setstate-build',name:'setState() called during build',tags:'error setstate markneedsbuild showdialog build during frame postframecallback navigator dialog exception',h:290,
+blurb:'Flutter is already building the widget tree, and your code asks it to build again (setState) or to put something on screen (a dialog, a snackbar, a Navigator push) from inside build. The framework refuses because the tree is in the middle of changing.',
+use:'Seen when build() calls showDialog, setState, Navigator.push or a state-changing callback directly.',
+watch:'build must stay a pure description of the UI. Start side effects from an event (onPressed, initState, a stream listener) or, if you really need one right after the first frame, from WidgetsBinding.instance.addPostFrameCallback.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken: showDialog inside build','Fixed: addPostFrameCallback','Fixed: from an event handler'],v:'Broken: showDialog inside build'}],
+render(s,st,g,d){
+ const br=s.m.startsWith('Broken'),pf=s.m.includes('PostFrame');
+ const dlg=!br?`<div style="position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:18px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.3)"><div style="font:600 15px var(--f-body)">Welcome</div><div style="font-size:12.5px;color:var(--muted)">${pf?'Shown after the first frame finished.':'Shown because the user pressed a button.'}</div></div>`:'';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:10px;padding:10px">${br?errb('Exception caught by widgets library\nsetState() or markNeedsBuild() called during build.\nThe widget on which setState() or markNeedsBuild() was called was:\n  Overlay-[LabeledGlobalKey<OverlayState>]'):okb('No exception')}<div style="position:relative;flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;font-size:13px;padding:10px">${br?'<span style="color:var(--muted)">Screen did not build.</span>':'Home screen'}${dlg}</div></div>`;
+ const bad=`class HomePage extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    // WRONG: runs while the tree is building\n    showDialog(\n      context: context,\n      builder: (_) => AlertDialog(title: Text('Welcome')),\n    );\n    return Scaffold(body: Text('Home screen'));\n  }\n}`;
+ const post=`class _HomeState extends State<HomePage> {\n  @override\n  void initState() {\n    super.initState();\n    WidgetsBinding.instance.addPostFrameCallback((_) {\n      // safe: the first frame is done\n      showDialog(\n        context: context,\n        builder: (_) => AlertDialog(title: Text('Welcome')),\n      );\n    });\n  }\n\n  @override\n  Widget build(BuildContext context) =>\n      Scaffold(body: Text('Home screen'));\n}`;
+ const ev=`@override\nWidget build(BuildContext context) {\n  return Scaffold(\n    body: FilledButton(\n      onPressed: () {\n        // safe: runs when the user taps\n        showDialog(\n          context: context,\n          builder: (_) => AlertDialog(title: Text('Welcome')),\n        );\n      },\n      child: Text('Say hello'),\n    ),\n  );\n}`;
+ return {code:br?bad:pf?post:ev,hint:br?'The message is the real Flutter wording. The point is that build() may be called many times and at any moment, so it must have no side effects.':pf?'The callback waits until the frame finishes, so the tree is stable when the dialog opens.':'Most of the time the best fix: do the action when something happens, not when the widget draws.'};
+}});
+
+def({cat:'Common errors',id:'err-scrollcontroller',name:'ScrollController attached to multiple scroll views',tags:'error scrollcontroller multiple scroll views listview position attached primaryscrollcontroller animateto jumpto',h:300,
+blurb:'One ScrollController can drive one scrollable at a time. When the same controller is given to two ListViews, both try to attach a ScrollPosition to it, and reading controller.position or controller.offset throws.',
+use:'Seen with two lists on one screen, a TabBarView where every tab reuses one controller, or a controller kept in a global.',
+watch:'The standard fix is one controller per scrollable, created in initState and disposed in dispose. Do not pass a controller if you do not need one. Tabs and Scaffold may use PrimaryScrollController automatically.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken: one controller, two lists','Fixed: one controller each','Fixed: no controller on the second list'],v:'Broken: one controller, two lists'}],
+render(s,st,g,d){
+ const br=s.m.startsWith('Broken');
+ const list=(c,t)=>`<div style="flex:1;border:1.5px solid ${c};border-radius:10px;background:var(--surface);overflow:hidden"><div style="padding:6px 10px;font:600 12px var(--f-mono);color:var(--muted);border-bottom:1px solid var(--line)">${t}</div>${[1,2,3,4].map(i=>`<div class="li" style="height:34px">Item ${i}</div>`).join('')}</div>`;
+ const t1=br?'controller: _c':'controller: _c1',t2=br?'controller: _c':s.m.includes('each')?'controller: _c2':'(no controller)';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:10px;padding:10px">${br?errb('ScrollController attached to multiple scroll views.\n\'package:flutter/src/widgets/scroll_controller.dart\':\nFailed assertion: line 153 pos 7: \'_positions.length == 1\''):okb('No exception. Each list owns its position.')}<div style="display:flex;gap:10px;flex:1;min-height:0">${list(br?'var(--danger)':'var(--c2)',t1)}${list(br?'var(--danger)':'var(--c2)',t2)}</div></div>`;
+ const code=br?`final _c = ScrollController();\n\nRow(children: [\n  Expanded(child: ListView(controller: _c, children: a)),\n  Expanded(child: ListView(controller: _c, children: b)),\n])\n// _c.offset now throws: it has two positions`:s.m.includes('each')?`final _c1 = ScrollController();\nfinal _c2 = ScrollController();\n\nRow(children: [\n  Expanded(child: ListView(controller: _c1, children: a)),\n  Expanded(child: ListView(controller: _c2, children: b)),\n])\n\n@override\nvoid dispose() {\n  _c1.dispose();\n  _c2.dispose();\n  super.dispose();\n}`:`final _c = ScrollController();\n\nRow(children: [\n  Expanded(child: ListView(controller: _c, children: a)),\n  // no controller: the list makes its own\n  Expanded(child: ListView(children: b)),\n])`;
+ return {code,hint:'The exact assertion text may differ a little between Flutter versions. The cause and the fix are the same.'};
+}});
+
+def({cat:'Common errors',id:'err-notlaidout',name:'RenderBox was not laid out',tags:'error renderbox not laid out needs-layout needs-paint hassize cascade follow-on first error unbounded',h:330,
+blurb:'This message is usually a side effect. An earlier error (often an unbounded height or width) stopped layout, so later render objects were never given a size. Fixing the first error makes this one disappear.',
+use:'You see it in the console, often many times, together with another exception that was printed above it.',
+watch:'Scroll the console up to the first exception and fix that one. Do not try to fix "not laid out" by itself, there is nothing to fix at that line.',
+ctl:[{k:'m',l:'version',t:'sel',o:['Broken','Fixed: Expanded around the list'],v:'Broken'}],
+render(s,st,g,d){
+ const br=s.m==='Broken';
+ const log=br?`<div style="font:12px/1.5 var(--f-mono);padding:10px;border-radius:8px;background:#fff3f4;border:1.5px solid var(--danger);color:#7a1020;overflow:hidden"><div style="font-weight:700">[1] Vertical viewport was given unbounded height.</div><div style="margin-bottom:6px;color:#9c1538">&#8592; the REAL error. Fix this one.</div><div style="font-weight:700">[2] RenderBox was not laid out: RenderViewport#a1b2c NEEDS-LAYOUT NEEDS-PAINT</div><div style="margin-bottom:6px;color:#9c1538">&#8592; follow-on, ignore</div><div style="font-weight:700">[3] Failed assertion: 'hasSize'</div><div style="color:#9c1538">&#8592; follow-on, ignore</div></div>`:okb('No exceptions. The list gets a bounded height, so every render object receives a size.');
+ g.innerHTML=`<div class="fill" style="flex-direction:column;gap:10px;padding:10px">${log}<div style="flex:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden">${br?'<div style="padding:10px;color:var(--muted);font-size:13px">Column→ListView never got a size.</div>':[1,2,3,4].map(i=>`<div class="li" style="height:34px">Item ${i}</div>`).join('')}</div></div>`;
+ const code=br?`Column(\n  children: [\n    Text('Header'),\n    ListView(   // no height limit\n      children: items,\n    ),\n  ],\n)`:`Column(\n  children: [\n    Text('Header'),\n    Expanded(   // gives the list a height\n      child: ListView(\n        children: items,\n      ),\n    ),\n  ],\n)`;
+ return {code,hint:br?'Read the exception log from the top. Only error 1 points to your code. See "Vertical viewport was given unbounded height" for the same fix.':'Fixing the first error fixed all three messages.'};
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -1570,7 +2204,7 @@ put('Async','future-builder');
 put('Material','card-list-tile tab-bar');
 W.forEach(d=>{if(RECAT[d.id])d.cat=RECAT[d.id]});
 CATS.length=0;
-['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
+['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Accessibility','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
 Object.assign(CINTRO,{
  'Basics':'Widgets to know before building your first Flutter app.',
  'Layout':'Arrange other widgets in rows, columns, stacks and other layouts, and learn how sizes are decided.',
@@ -1583,6 +2217,7 @@ Object.assign(CINTRO,{
  'Animation and motion':'Bring animations to your app.',
  'Assets, images, and icons':'Display images and show icons.',
  'Async':'Widgets that work with asynchronous data.',
+ 'Accessibility':'Make your app usable with screen readers and other assistive technology.',
  'Material':'Ready-made widgets that follow the Material 3 design system.'
 });
 
@@ -1618,6 +2253,80 @@ const PATH=[
   ['err-unbounded','A list inside a Column with no height.'],
   ['err-parentdata','Expanded or Positioned in the wrong parent.']]}
 ];
+
+/* ================= v6: props, related and reference links for the 27 new items ================= */
+Object.assign(META,{
+'semantics':{p:['label|String?|null|The text a screen reader speaks for this node.','button|bool?|null|Marks the node as a button, so the reader says "button".','hint|String?|null|Extra help read after the label, such as "double tap to open".','excludeSemantics|bool|false|Drop the semantics of the whole subtree and use only this node.','container|bool|false|Make this node its own separate semantics node.','MergeSemantics(child)|widget|-|Combines all descendant nodes into one single node.','ExcludeSemantics(excluding)|widget|-|Hides the subtree from assistive technology when excluding is true.'],r:['text','buttons','icon-avatar','image']},
+'reorderable-list-view':{p:['children / itemBuilder|List<Widget> / IndexedWidgetBuilder|required|The items. Every item needs a unique key. Use .builder for long lists.','onReorder|void Function(int oldIndex, int newIndex)|required|Called when the user drops an item. Update your list here.','buildDefaultDragHandles|bool|true|Adds a drag handle on desktop and long-press dragging on mobile. Set false to place your own ReorderableDragStartListener.','padding|EdgeInsets?|null|Space around the list.','scrollDirection|Axis|vertical|Direction the list scrolls and items move.','proxyDecorator|Widget Function(...)?|null|Changes the look of the item while it is being dragged.'],r:['list-view','dismissible','draggable']},
+'refresh-indicator':{p:['onRefresh|Future<void> Function()|required|Called when the user pulls far enough. The spinner stays until this Future completes.','child|Widget|required|A scrollable widget, such as a ListView.','displacement|double|40.0|How far the spinner is pulled down from the top edge.','color|Color?|null|Spinner colour.','triggerMode|RefreshIndicatorTriggerMode|onEdge|anywhere also starts the refresh when the list is not at its edge.','notificationPredicate|bool Function(ScrollNotification)|defaultScrollNotificationPredicate|Chooses which scrollable (depth) can start the refresh.'],r:['list-view','future-builder','scroll-view']},
+'scrollbar':{p:['controller|ScrollController?|null|Needed when you want to share the controller with the scrollable.','thumbVisibility|bool?|null|true keeps the thumb visible all the time.','trackVisibility|bool?|null|Shows the track behind the thumb.','thickness|double?|null|Width of the thumb.','radius|Radius?|null|Rounds the thumb.','interactive|bool?|null|Lets the user drag the thumb. Default is true on desktop.','child|Widget|required|The scrollable to add a bar to.'],r:['list-view','scroll-view','nested-scroll-view']},
+'nested-scroll-view':{p:['headerSliverBuilder|List<Widget> Function(BuildContext, bool innerBoxIsScrolled)|required|Builds the slivers that sit above the body, such as SliverAppBar.','body|Widget|required|The scrollable content below the header.','controller|ScrollController?|null|Controls the outer scroll position.','floatHeaderSlivers|bool|true|Header floats back as soon as the user scrolls up.','scrollDirection|Axis|vertical|Scroll axis.'],r:['slivers','tab-bar','list-view','scrollbar']},
+'table':{p:['children|List<TableRow>|const []|The rows. Every row must have the same number of cells.','columnWidths|Map<int, TableColumnWidth>?|null|Width rule per column index.','defaultColumnWidth|TableColumnWidth|FlexColumnWidth()|Rule for columns not listed in columnWidths.','border|TableBorder?|null|Lines between cells, for example TableBorder.all().','defaultVerticalAlignment|TableCellVerticalAlignment|top|Where cell content sits inside a taller row.','textBaseline|TextBaseline?|null|Needed for baseline alignment.'],r:['row-column','grid-view','intrinsic','scroll-view']},
+'baseline':{p:['baseline|double|required|Distance from the top of the box to place the baseline at.','baselineType|TextBaseline|required|alphabetic for Latin text, ideographic for CJK.','child|Widget?|null|Widget whose baseline is used.'],r:['align-center','row-column','text']},
+'flow':{p:['delegate|FlowDelegate|required|Decides the size and paints each child with a transform. Override paintChildren.','children|List<Widget>|const []|Widgets laid out by the delegate.','clipBehavior|Clip|hardEdge|How to clip children that paint outside.','FlowDelegate.paintChildren|method|-|Call context.paintChild(i, transform: Matrix4.translationValues(...)) for each child.','FlowDelegate.getConstraintsForChild|method|-|Optionally give each child its own constraints.'],r:['stack-positioned','wrap','custom-paint']},
+'safe-area':{p:['left / top / right / bottom|bool|true|Which sides add padding.','minimum|EdgeInsets|EdgeInsets.zero|Padding to keep even if the device has no inset there.','maintainBottomViewPadding|bool|false|Keeps bottom padding stable when the keyboard opens.','child|Widget|required|The content to keep inside the safe area.'],r:['scaffold','padding','layout-builder']},
+'physical-model':{p:['color|Color|required|Fill colour of the shape.','shadowColor|Color|black|Colour of the shadow.','elevation|double|0.0|How high the surface floats. More elevation means a bigger shadow.','shape|BoxShape|rectangle|rectangle or circle.','borderRadius|BorderRadius?|null|Corner radius when the shape is a rectangle.','clipBehavior|Clip|none|Clip the child to the shape.'],r:['card-list-tile','decorated-box','clip','container']},
+'explicit-animations':{p:['AnimationController(vsync, duration)|constructor|-|The clock. Needs a TickerProvider such as SingleTickerProviderStateMixin.','forward() / reverse()|method|-|Play from the current value to 1.0 or back to 0.0.','repeat(reverse: true)|method|-|Loop. With reverse: true it plays back and forth.','CurvedAnimation(parent, curve)|constructor|-|Applies a Curve to the controller value.','Tween<T>(begin, end).animate(controller)|method|-|Maps 0..1 to your own range of values or Offsets.','AnimatedBuilder(animation, builder, child)|widget|-|Rebuilds only the builder subtree on every tick. Pass a static child to keep it cheap.','dispose()|method|-|Always call controller.dispose() in State.dispose.'],r:['implicit-animations','tween-animation-builder','animated-container','hero']},
+'tween-animation-builder':{p:['tween|Tween<T>|required|begin and end values to animate between. T can be double, Color, Offset and more.','duration|Duration|required|How long each animation takes.','builder|Widget Function(BuildContext, T value, Widget? child)|required|Builds the widget for the current animated value.','curve|Curve|Curves.linear|Easing curve.','onEnd|VoidCallback?|null|Runs when the animation finishes.','child|Widget?|null|A subtree that does not depend on the value, so it is not rebuilt every frame.'],r:['implicit-animations','animated-container','explicit-animations']},
+'hero':{p:['tag|Object|required|The same tag on both routes pairs the two heroes. Must be unique on each page.','child|Widget|required|The widget that flies.','createRectTween|CreateRectTween?|null|Changes the path of the flight (for example an arc).','flightShuttleBuilder|HeroFlightShuttleBuilder?|null|Builds a different widget while in flight.','transitionOnUserGestures|bool|false|Also fly during an iOS back swipe.','placeholderBuilder|HeroPlaceholderBuilder?|null|What is left behind at the original spot during flight.'],r:['navigator','image','animated-container','gestures']},
+'stream-builder':{p:['stream|Stream<T>?|null|The stream to listen to. Create it once, not in build.','initialData|T?|null|Value to show before the first event arrives.','builder|Widget Function(BuildContext, AsyncSnapshot<T>)|required|Called for every event, error and state change.','snapshot.connectionState|ConnectionState|-|none, waiting, active or done.','snapshot.data / snapshot.error|T? / Object?|-|The latest value or error.','snapshot.hasData / hasError|bool|-|Quick checks before you read data or error.'],r:['future-builder','stateful']},
+'form':{p:['key|GlobalKey<FormState>|-|Lets you call validate(), save() and reset() from outside.','autovalidateMode|AutovalidateMode|disabled|disabled, always or onUserInteraction.','child|Widget|required|The tree that contains the FormFields.','onChanged|VoidCallback?|null|Runs when any field changes.','TextFormField.validator|String? Function(String?)?|null|Return an error message, or null when the value is valid.','TextFormField.onSaved|void Function(String?)?|null|Called by formKey.currentState.save().','formKey.currentState!.validate()|bool|-|Runs all validators and returns true if every field is valid.'],r:['text-field','buttons','toggles','err-inputwidth']},
+'autocomplete':{p:['optionsBuilder|FutureOr<Iterable<T>> Function(TextEditingValue)|required|Returns the options for the current text. Empty list hides the overlay.','onSelected|void Function(T)?|null|Called when the user picks an option.','displayStringForOption|String Function(T)|RawAutocomplete.defaultStringForOption|Text shown for an option that is not a String.','optionsMaxHeight|double|200.0|Maximum height of the suggestion list.','fieldViewBuilder|AutocompleteFieldViewBuilder?|null|Build your own text field.','optionsViewBuilder|AutocompleteOptionsViewBuilder?|null|Build your own list of options.','initialValue|TextEditingValue?|null|Text the field starts with.'],r:['text-field','dropdown','list-view']},
+'date-time-picker':{p:['showDatePicker: initialDate|DateTime?|null|The date selected at first. Must be inside firstDate to lastDate.','showDatePicker: firstDate / lastDate|DateTime|required|The range that can be picked.','showDatePicker: initialEntryMode|DatePickerEntryMode|calendar|calendar, input or their only-variants.','showDatePicker: selectableDayPredicate|bool Function(DateTime)?|null|Disable single days, for example weekends.','showTimePicker: initialTime|TimeOfDay|required|The time shown at first.','showTimePicker: builder|TransitionBuilder?|null|Wrap the dialog, for example to force 24 hour format.','Returns|Future<DateTime?> / Future<TimeOfDay?>|-|null when the user cancels.'],r:['dialog','text-field','form']},
+'segmented-button':{p:['segments|List<ButtonSegment<T>>|required|Two to five segments. Each has a value, a label and an optional icon.','selected|Set<T>|required|The values currently selected.','onSelectionChanged|void Function(Set<T>)?|null|Called with the new selection. Null disables the button.','multiSelectionEnabled|bool|false|Allow more than one selected segment.','emptySelectionAllowed|bool|false|Allow nothing to be selected.','showSelectedIcon|bool|true|Show a check mark on selected segments.','style|ButtonStyle?|null|Colours, shape and size.'],r:['toggles','buttons','chip','tab-bar']},
+'dialog':{p:['showDialog: builder|WidgetBuilder|required|Builds the dialog widget.','showDialog: barrierDismissible|bool|true|Whether tapping outside closes it.','showDialog: barrierColor|Color?|Colors.black54|Colour of the scrim.','AlertDialog: title / content / actions|Widget? / Widget? / List<Widget>?|null|The three standard slots.','SimpleDialog: children|List<Widget>?|null|Usually SimpleDialogOption items.','Dialog.fullscreen|constructor|-|A dialog that fills the whole screen.','Navigator.pop(context, value)|method|-|Closes the dialog. value becomes the Future result.'],r:['navigator','snackbar','bottom-sheet','date-time-picker','err-setstate-build']},
+'bottom-sheet':{p:['showModalBottomSheet: builder|WidgetBuilder|required|Builds the sheet content.','isScrollControlled|bool|false|true lets the sheet be taller and move with the keyboard.','showDragHandle|bool?|null|Shows the small bar at the top.','useSafeArea|bool|false|Keeps the sheet out of the system areas.','isDismissible / enableDrag|bool|true|Allow tapping the barrier and swiping down to close.','Scaffold.showBottomSheet|method|-|A persistent sheet that does not block the page.','DraggableScrollableSheet|widget|-|A sheet the user can pull to different heights.'],r:['dialog','scaffold','navigator','snackbar']},
+'snackbar':{p:['content|Widget|required|The message, usually a Text.','duration|Duration|4 seconds|How long it stays.','action|SnackBarAction?|null|One button, for example Undo.','behavior|SnackBarBehavior?|fixed|fixed attaches to the bottom, floating hovers above it.','showCloseIcon|bool?|null|Adds an x button.','ScaffoldMessenger.of(context).showSnackBar(...)|method|-|The only way to show it.','hideCurrentSnackBar() / clearSnackBars()|method|-|Remove the current one or the whole queue.'],r:['scaffold','dialog','bottom-sheet','buttons']},
+'chip':{p:['label|Widget|required|The chip text.','avatar|Widget?|null|Leading widget, usually an icon or CircleAvatar.','onDeleted|VoidCallback?|null|Shows a delete icon and runs when pressed. Chip and InputChip.','selected / onSelected|bool / ValueChanged<bool>?|-|ChoiceChip and FilterChip state and callback.','onPressed|VoidCallback?|null|ActionChip and InputChip tap.','showCheckmark|bool?|null|FilterChip and ChoiceChip tick when selected.'],r:['segmented-button','toggles','buttons','text-field']},
+'drawer':{p:['Scaffold.drawer / endDrawer|Widget?|null|Drawer from the left (start) or the right (end).','child|Widget?|null|Usually a ListView with a DrawerHeader.','width|double?|null|Panel width. Default is 304.','Scaffold.drawerEdgeDragWidth|double?|null|Width of the edge area that opens it by swiping.','Scaffold.of(context).openDrawer()|method|-|Open it from your own button.','NavigationDrawer|widget|-|The Material 3 drawer with destinations and a selected indicator.'],r:['scaffold','navigation-bar','navigator','card-list-tile']},
+'navigation-bar':{p:['destinations|List<Widget>|required|Two to five NavigationDestination widgets.','selectedIndex|int|0|Which destination is selected.','onDestinationSelected|ValueChanged<int>?|null|Called with the tapped index.','labelBehavior|NavigationDestinationLabelBehavior?|alwaysShow|alwaysShow, onlyShowSelected or alwaysHide.','indicatorColor|Color?|null|Colour of the selected pill.','height|double?|null|Bar height. Default is 80.'],r:['scaffold','tab-bar','drawer','indexed-stack']},
+'err-setstate-build':{r:['stateful','dialog','snackbar','navigator','future-builder']},
+'err-scrollcontroller':{r:['list-view','scroll-view','tab-bar','scrollbar']},
+'err-notlaidout':{r:['err-unbounded','expanded','list-view','constraints']}
+});
+['semantics','reorderable-list-view','refresh-indicator','scrollbar','nested-scroll-view','table','baseline','flow','safe-area','physical-model','explicit-animations','tween-animation-builder','hero','stream-builder','form','autocomplete','date-time-picker','segmented-button','dialog','bottom-sheet','snackbar','chip','drawer','navigation-bar'].forEach(i=>{if(META[i]&&!META[i].r)META[i].r=[]});
+/* link older widgets to the new ones */
+[['list-view','reorderable-list-view'],['list-view','refresh-indicator'],['row-column','table'],['text','baseline'],['scaffold','safe-area'],['scaffold','drawer'],['scaffold','snackbar'],['future-builder','stream-builder'],['text-field','form'],['text-field','autocomplete'],['navigator','hero'],['navigator','dialog'],['implicit-animations','explicit-animations'],['implicit-animations','tween-animation-builder'],['card-list-tile','physical-model'],['toggles','segmented-button'],['tab-bar','navigation-bar'],['err-unbounded','err-notlaidout'],['stateful','err-setstate-build'],['list-view','err-scrollcontroller']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
+
+Object.assign(REFS,{
+'semantics':'widgets:Semantics,MergeSemantics,ExcludeSemantics',
+'reorderable-list-view':'material:ReorderableListView',
+'refresh-indicator':'material:RefreshIndicator',
+'scrollbar':'material:Scrollbar;widgets:RawScrollbar',
+'nested-scroll-view':'widgets:NestedScrollView',
+'table':'widgets:Table,TableRow;rendering:TableBorder',
+'baseline':'widgets:Baseline',
+'flow':'widgets:Flow',
+'safe-area':'widgets:SafeArea',
+'physical-model':'widgets:PhysicalModel,PhysicalShape',
+'explicit-animations':'animation:AnimationController;widgets:AnimatedBuilder,FadeTransition,SlideTransition,ScaleTransition,RotationTransition',
+'tween-animation-builder':'widgets:TweenAnimationBuilder',
+'hero':'widgets:Hero',
+'stream-builder':'widgets:StreamBuilder',
+'form':'widgets:Form,FormField;material:TextFormField',
+'autocomplete':'widgets:Autocomplete,RawAutocomplete',
+'date-time-picker':'material:showDatePicker,showTimePicker',
+'segmented-button':'material:SegmentedButton,ButtonSegment',
+'dialog':'material:AlertDialog,SimpleDialog,Dialog,showDialog',
+'bottom-sheet':'material:showModalBottomSheet,BottomSheet,DraggableScrollableSheet',
+'snackbar':'material:SnackBar,ScaffoldMessenger',
+'chip':'material:Chip,ChoiceChip,FilterChip,InputChip,ActionChip',
+'drawer':'material:Drawer,NavigationDrawer',
+'navigation-bar':'material:NavigationBar,NavigationDestination'
+});
+
+/* learning path additions */
+(()=>{
+ const add=(stage,after,id,txt)=>{const st=PATH.find(p=>p.t===stage);if(!st)return;const i=st.s.findIndex(x=>x[0]===after);st.s.splice(i<0?st.s.length:i+1,0,[id,txt])};
+ add('Make it interactive','text-field','form','Check several fields at once and show error messages.');
+ add('Build real screens','scaffold','safe-area','Keep content out of the notch and the home indicator.');
+ add('Build real screens','navigator','dialog','Ask the user a question on top of the current screen.');
+ add('Build real screens','dialog','snackbar','Confirm an action with a short message.');
+ add('Add polish','animated-container','explicit-animations','Take full control of an animation with a controller.');
+ add('Add polish','explicit-animations','hero','Fly a picture from one screen to the next.');
+ add('When things break','err-parentdata','err-setstate-build','A dialog or setState triggered from build.');
+ add('When things break','err-setstate-build','err-notlaidout','The follow-on message. Learn to find the real error above it.');
+})();
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
