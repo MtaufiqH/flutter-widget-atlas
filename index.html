@@ -200,6 +200,12 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .cw{position:relative}
 .cp{position:absolute;top:8px;right:8px;z-index:1;font:500 11px var(--f-mono);padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:var(--code-fg);cursor:pointer}
 .cp:hover{background:rgba(255,255,255,.2)}
+.rs{position:absolute;top:8px;right:68px;z-index:1;font:500 11px var(--f-mono);padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:var(--code-fg);cursor:pointer}
+.rs:hover{background:rgba(255,255,255,.2)}
+.code[contenteditable]{cursor:text;outline:none;caret-color:#fff}
+.code[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent)}
+.cstat{font-size:12px;color:var(--muted);min-height:18px;margin-top:6px}
+.cstat.ok{color:var(--ok)}.cstat.no{color:var(--c3t)}
 .props{margin-top:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .props>summary{cursor:pointer;padding:12px 14px;font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);list-style:none;display:flex;align-items:center;gap:10px}
 .props>summary::-webkit-details-marker{display:none}
@@ -341,7 +347,7 @@ function refsHTML(d){
 }
 function mount(d){
  const a=document.createElement('article');a.className='w';a.id=d.id;
- a.innerHTML=`<header><div class="wt"><span class="cat">${esc(d.cat)}</span><h3>${esc(d.name)}</h3></div><a class="lnk" href="#${d.id}" aria-label="Link to ${esc(d.name)}">#</a></header><p class="blurb">${esc(d.blurb)}</p><div class="demo"><div class="left"><div class="stage" style="height:${d.h||260}px"></div><div class="hint"></div></div><div class="right"><div class="ctl"></div><div class="cw"><button class="cp" type="button" aria-label="Copy code">Copy</button><pre class="code" tabindex="0"></pre></div></div></div><div class="facts"><div><b>Use it for</b><p>${esc(d.use)}</p></div><div><b>Watch out</b><p>${esc(d.watch)}</p></div></div>${propsHTML(d)}${relHTML(d)}${refsHTML(d)}`;
+ a.innerHTML=`<header><div class="wt"><span class="cat">${esc(d.cat)}</span><h3>${esc(d.name)}</h3></div><a class="lnk" href="#${d.id}" aria-label="Link to ${esc(d.name)}">#</a></header><p class="blurb">${esc(d.blurb)}</p><div class="demo"><div class="left"><div class="stage" style="height:${d.h||260}px"></div><div class="hint"></div></div><div class="right"><div class="ctl"></div><div class="cw"><button class="cp" type="button" aria-label="Copy code">Copy</button><button class="rs" type="button" aria-label="Reset code" hidden>Reset</button><pre class="code" spellcheck="false" aria-label="Flutter code, editable"></pre></div><div class="cstat" role="status"></div></div></div><div class="facts"><div><b>Use it for</b><p>${esc(d.use)}</p></div><div><b>Watch out</b><p>${esc(d.watch)}</p></div></div>${propsHTML(d)}${relHTML(d)}${refsHTML(d)}`;
  const g=$('.stage',a),code=$('.code',a),ctl=$('.ctl',a);
  const cp=$('.cp',a);
  cp.addEventListener('click',()=>{
@@ -350,11 +356,12 @@ function mount(d){
   const fb=()=>{try{const t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();done()}catch(_){cp.textContent='Press Ctrl+C'}};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,fb);else fb();
  });
- d.s={};d.st={};d.el=a;d.g=g;d.hintEl=$('.hint',a);
+ d.s={};d.st={};d.cin={};d.el=a;d.g=g;d.hintEl=$('.hint',a);
  function draw(){
   let r;
   try{r=d.render(d.s,d.st,g,d)||{}}catch(e){console.error(d.id,e);r={code:'// demo error: '+e.message}}
-  code.innerHTML=hl(r.code||'');
+  d.gen=r.code||'';
+  if(!d.editing)code.innerHTML=hl(d.gen);
   if(r.hint!=null)d.hintEl.textContent=r.hint;
   if(d.after){try{d.after(g,d.st,d.s,draw,d)}catch(e){console.error(d.id,e)}}
  }
@@ -373,8 +380,52 @@ function mount(d){
    const o=$('output',row);if(o)o.textContent=el.value;
    draw();
   });
-  ctl.appendChild(row);
+  ctl.appendChild(row);d.cin[c.k]={el,out:$('output',row)};
  });
+
+ /* editable code: match what the user typed back to the controls */
+ const stat=$('.cstat',a),rsb=$('.rs',a);
+ try{code.contentEditable='plaintext-only'}catch(_){}
+ if(code.contentEditable!=='plaintext-only')code.contentEditable='true';
+ const txt=()=>code.innerText.replace(/\u00a0/g,' ').replace(/\r/g,'');
+ const norm=t=>t.split('\n').map(x=>x.trim()).filter(Boolean);
+ const trial=s2=>{
+  const h=document.createElement('div');h.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden;width:'+g.offsetWidth+'px;height:'+g.offsetHeight+'px';h.className=g.className;
+  document.body.appendChild(h);let out='';
+  try{const dd=Object.create(d);dd.hintEl=document.createElement('div');out=(d.render(Object.assign({},s2),{},h,dd)||{}).code||''}catch(_){out=''}
+  h.remove();return out;
+ };
+ const dist=(A,B)=>{const m=new Map();A.forEach(x=>m.set(x,(m.get(x)||0)+1));let miss=0;B.forEach(x=>{const c=m.get(x);if(c>0)m.set(x,c-1);else miss++});let left=0;m.forEach(v=>left+=v);return miss+left};
+ const fit=()=>{
+  const want=norm(txt());let cur=Object.assign({},d.s),best=dist(norm(trial(cur)),want);const start=best;
+  const nums=(txt().match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);
+  for(let pass=0;pass<8&&best>0;pass++){
+   let pick=null;
+   for(const c of d.ctl||[]){
+    let cands=c.t==='chk'?[!cur[c.k]]:c.t==='sel'?c.o.filter(o=>o!==cur[c.k]):[...new Set([...nums,...Array.from({length:Math.min(60,Math.floor((c.max-c.min)/(c.step||1))+1)},(_,i)=>c.min+i*(c.step||1))])].filter(v=>v!==cur[c.k]);
+    for(const v of cands){const sc=dist(norm(trial(Object.assign({},cur,{[c.k]:v}))),want);if(sc<best&&(!pick||sc<pick.sc))pick={k:c.k,v,sc}}
+   }
+   if(!pick)break;cur[pick.k]=pick.v;best=pick.sc;
+  }
+  return {s:cur,best,start};
+ };
+ const syncCtl=()=>(d.ctl||[]).forEach(c=>{const x=d.cin[c.k];if(!x)return;if(c.t==='chk')x.el.checked=!!d.s[c.k];else{x.el.value=d.s[c.k];if(x.out)x.out.textContent=d.s[c.k]}});
+ let tm=0;
+ const edited=()=>{
+  clearTimeout(tm);tm=setTimeout(()=>{
+   const r=fit(),changed=(d.ctl||[]).some(c=>r.s[c.k]!==d.s[c.k]);
+   rsb.hidden=false;
+   if(changed){d.s=r.s;syncCtl();draw()}
+   if(r.best===0){stat.className='cstat ok';stat.textContent=changed?'The demo now matches your code.':'Your code matches the demo.'}
+   else{stat.className='cstat no';stat.textContent=changed?'Demo updated for the values it understands. The rest of your edit is not shown in the demo.':'The demo only understands values that match its controls (numbers, options, on/off). Other changes are not shown.'}
+  },500);
+ };
+ code.addEventListener('focus',()=>{d.editing=true});
+ code.addEventListener('input',edited);
+ code.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text');document.execCommand('insertText',false,t)});
+ code.addEventListener('blur',()=>{d.editing=false;code.innerHTML=hl(txt())});
+ rsb.addEventListener('click',()=>{d.editing=false;rsb.hidden=true;stat.className='cstat';stat.textContent='';code.innerHTML=hl(d.gen)});
+ stat.textContent='Click the code to edit it. Change a number or an option and the demo follows.';
  g.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&d.act&&g.contains(t)){d.act(t.dataset.a,d.st,d.s,t,e);draw()}});
  return a;
 }
