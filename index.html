@@ -35,18 +35,18 @@
  --grid:#1b2140;--code-bg:#090c1c;--code-fg:#cdd6ff;--danger:#ff6b81;--ok:#3ec886;color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);padding-block:76px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 button,input,select,textarea{font-family:inherit}
 .top,.shell{max-width:1240px;margin:0 auto}
 .eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
 h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.025em;margin:0;text-wrap:balance}
 .lead{max-width:64ch;color:var(--muted);font-size:17px;margin:14px 0 20px}
 .sr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-#q{flex:1 1 280px;max-width:420px;font-size:15px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+#q{font-size:15px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
 #q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #count{font:12px var(--f-mono);color:var(--muted)}
-.shell{margin-top:36px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:start}
-#nav{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;padding-right:8px;font-size:13.5px}
+.shell{margin-top:28px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:start}
+#nav{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto;padding-right:8px;font-size:13.5px}
 .nh{font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:6px 0 0;width:100%;display:flex;align-items:center;gap:8px;padding:10px 0;background:none;border:0;border-top:1px solid var(--line);cursor:pointer;text-align:left}
 .nh:hover{color:var(--accent)}.nh .nc{margin-left:auto;font-weight:500;opacity:.7}
 .nh svg{flex:none;transition:transform .15s}.ng.cl .nh svg{transform:rotate(-90deg)}
@@ -271,19 +271,21 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 
 @media (max-width:900px){
  .shell{grid-template-columns:minmax(0,1fr);gap:20px;margin-top:24px}
- #nav{position:fixed;top:0;bottom:0;left:0;width:min(320px,86vw);max-height:none;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));font-size:15px;z-index:50;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;box-shadow:0 0 30px rgba(0,0,0,.25)}
+ #nav{position:fixed;top:calc(60px + env(safe-area-inset-top,0px));bottom:0;left:0;width:min(320px,86vw);max-height:none;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:12px 16px calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));font-size:15px;z-index:50;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;box-shadow:0 0 30px rgba(0,0,0,.25)}
  #nav.open{transform:none;visibility:visible}
  #nav a{padding:8px 0}
  .navhead{display:flex!important}
  #burger{display:flex!important}
  body{padding-top:84px}
- #bar{display:flex!important;position:fixed;top:0;left:0;right:0;height:60px;align-items:center;gap:12px;padding:env(safe-area-inset-top,0px) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(10,20,60,.14);z-index:30}
 }
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
 .navhead{display:none;align-items:center;justify-content:space-between;font:700 18px var(--f-display);margin-bottom:4px}
 .navhead button{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .navhead button:hover{background:var(--accent-soft)}
-#bar{display:none}
+#bar{display:flex;position:fixed;top:0;left:0;right:0;height:60px;align-items:center;gap:14px;padding:env(safe-area-inset-top,0px) max(16px,calc((100% - 1240px)/2)) 0;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(10,20,60,.1);z-index:60}
+.sr{margin-left:auto;flex:0 1 460px;display:flex;align-items:center;gap:10px;min-width:0}
+#q{flex:1;min-width:0;max-width:none;padding:8px 12px;font-size:14px}
+@media (max-width:900px){#barT{display:none}.sr{margin-left:0;flex:1 1 0}#count,.kbd{display:none}#bar{padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));gap:10px}}
 #burger{display:none;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;border:2px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font:700 14px var(--f-body);cursor:pointer;box-shadow:0 0 0 2px var(--accent);flex:none}
 #barT{font:700 16px var(--f-display);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:720px){
@@ -300,11 +302,10 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
  <p class="eyebrow" id="eyebrow">Interactive reference</p>
  <h1>Flutter Widget Atlas</h1>
  <p class="lead">Every widget here has a live stage you can poke, controls that change its properties, and the Flutter code that matches whatever you set. The stages imitate Flutter's layout rules in the browser, so a pixel here or there may differ from a real device. The code is real Flutter. Pick a widget from the list to open it, or press / to search.</p>
- <div class="sr"><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div>
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
 <div id="scrim" hidden></div>
-<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span></div>
+<div id="bar"><button id="burger" type="button" aria-label="Open widget menu" aria-controls="nav" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>Widgets</button><span id="barT" aria-live="polite"></span><div class="sr"><input id="q" type="search" placeholder="Search widgets or properties, e.g. list, flex, tap" aria-label="Search widgets" autocomplete="off"><span id="count"></span><span class="kbd" id="kb" aria-hidden="true">/</span></div></div>
 <button id="totop" type="button" hidden aria-label="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg><span>Top</span></button>
 <p id="none" hidden>No widget matches that search. Try a word like "scroll", "animation" or "button".</p>
 
@@ -2438,6 +2439,7 @@ function show(id,user){
  W.forEach(x=>{x.el.hidden=x!==d});
  CATS.forEach(c=>{secs[c].hidden=!d||c!==d.cat});
  START.hidden=!isStart;
+ const topEl=$('.top');if(topEl)topEl.hidden=!isStart;
  const key=isStart?'start':d.id;
  nav.querySelectorAll('a').forEach(a=>{if(a.dataset.id===key)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
  const cg=nav.querySelector('[aria-current]');const cgg=cg&&cg.closest('.ng');if(cgg&&!cgg.classList.contains('ngs'))setGroup(cgg,true);
@@ -2475,8 +2477,9 @@ document.addEventListener('keydown',e=>{
 });
 const kb=$('#kb');if(kb&&/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent||''))kb.textContent='\u2318K';
 const burger=$('#burger'),scrim=$('#scrim');
-const setMenu=o=>{nav.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));if(o)$('#navx').focus()};
-burger.addEventListener('click',()=>setMenu(true));
+const setMenu=(o,keep)=>{nav.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));if(o&&!keep)$('#navx').focus()};
+burger.addEventListener('click',()=>setMenu(!nav.classList.contains('open')));
+$('#q').addEventListener('input',e=>{if(e.target.value.trim()){nav.scrollTop=0;if(getComputedStyle(burger).display!=='none')setMenu(true,true)}});
 $('#navx').addEventListener('click',()=>{setMenu(false);burger.focus()});
 scrim.addEventListener('click',()=>setMenu(false));
 nav.addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});
