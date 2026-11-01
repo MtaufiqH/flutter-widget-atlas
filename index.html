@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Interactive reference to 161 Flutter widgets and common errors, with a learning path, live demos, property tables and matching Flutter code.">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
-<title>Flutter Widget Atlas</title>
+<title>Flutter Atlas</title>
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -307,11 +310,37 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
  html{scroll-behavior:auto}
  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+.navtools{margin:2px 0 4px}.navtools button{font:600 11px var(--f-mono);color:var(--muted);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.navtools button:hover{color:var(--accent)}
+#nav a[data-mk]:not([data-mk=""])::before{content:attr(data-mk) " ";color:var(--accent);font-size:11px}
+#nav.searching a[data-cat]::after{content:attr(data-cat);display:block;font:500 10.5px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+#nav a.sel{background:var(--accent-soft);border-radius:6px;padding-left:8px;margin-left:-8px}
+.pgact{display:flex;gap:6px;margin-left:auto;margin-right:6px;flex-wrap:wrap;justify-content:flex-end}
+.pgact button{font:600 12px var(--f-mono);padding:5px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.pgact button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pgact button:hover{border-color:var(--accent);color:var(--accent)}
+.w>header{flex-wrap:wrap;gap:6px}
+.jump{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;font:12px var(--f-mono);color:var(--muted)}
+.jump button{font:inherit;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--fg);cursor:pointer}
+.jump button:hover{border-color:var(--accent);color:var(--accent)}
+.ctb{display:flex;gap:6px;justify-content:flex-end;margin-bottom:6px}
+.ctb button{font:500 11px var(--f-mono);padding:3px 9px;border-radius:6px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
+.ctb button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.ctb button:hover{color:var(--accent);border-color:var(--accent)}
+html.cwrap .code{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:visible}
+html[data-cs="s"] .code{font-size:11px}html[data-cs="l"] .code{font-size:14.5px}html[data-cs="xl"] .code{font-size:16.5px}
+#mylist{margin-top:18px;display:grid;gap:12px}.myrow b{font:700 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.myrow>div{display:flex;flex-wrap:wrap;gap:6px}.mychip{padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);text-decoration:none;font-size:13px}.mychip:hover{border-color:var(--accent);color:var(--accent)}.mynone{font-size:13px;color:var(--muted)}
+.w,.demo,.facts,.props,.rel{scroll-margin-top:84px}
+@media (min-width:901px) and (min-height:760px){.demo>.left{position:sticky;top:78px;align-self:start}}
+@media (max-width:600px){.props .pt{overflow-x:auto}.cr{min-width:0}.cr .cv{min-width:0;max-width:60%}.cr select{max-width:100%;min-width:0}}
+.pnx a{min-width:0;overflow-wrap:anywhere}
+@media (max-width:600px){.pnx{flex-direction:column}.pnx a{max-width:none}.pnx>span{display:none}}
 </style>
 
 <div class="top">
  <p class="eyebrow" id="eyebrow">Interactive reference</p>
- <h1>Flutter Widget Atlas</h1>
+ <h1>Flutter Atlas</h1>
  <p class="lead">Every widget here has a live stage you can poke, controls that change its properties, and the Flutter code that matches whatever you set. The stages imitate Flutter's layout rules in the browser, so a pixel here or there may differ from a real device. The code is real Flutter. Pick a page from the list to open it, or press / to search.</p>
 </div>
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -4070,7 +4099,7 @@ function show(id,user){
  if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
  cur=d;if(d)d.draw();
  const name=isStart?'Start here':d.name;
- document.title=name+' · Flutter Widget Atlas';
+ document.title=name+' · Flutter Atlas';
  const bt=$('#barT');if(bt)bt.textContent=name;
  if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell'),bar=$('#bar'),bh=bar&&bar.offsetHeight||0;window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12-bh))}
 }
@@ -4118,7 +4147,7 @@ const wide=()=>window.matchMedia('(min-width:901px)').matches,hroot=document.doc
 const setHide=(v)=>{hroot.classList.toggle('navhide',v);burger.setAttribute('aria-expanded',String(!v));try{localStorage.setItem('atlas-nav',v?'hide':'show')}catch(_){}};
 try{if(localStorage.getItem('atlas-nav')==='hide'&&wide())setHide(true)}catch(_){}
 burger.addEventListener('click',()=>{if(wide())setHide(!hroot.classList.contains('navhide'));else setMenu(!nav.classList.contains('open'))});
-$('#q').addEventListener('input',e=>{if(e.target.value.trim()){nav.scrollTop=0;if(wide()&&hroot.classList.contains('navhide'))setHide(false);if(getComputedStyle(burger).display!=='none')setMenu(true,true)}});
+$('#q').addEventListener('input',e=>{if(e.target.value.trim()){nav.scrollTop=0;if(wide()&&hroot.classList.contains('navhide'))setHide(false);if(!wide())setMenu(true,true)}});
 $('#navx').addEventListener('click',()=>{setMenu(false);burger.focus()});
 scrim.addEventListener('click',()=>setMenu(false));
 nav.addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});
@@ -4126,5 +4155,91 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.conta
 if(window.matchMedia){const mq=window.matchMedia('(min-width:901px)');if(mq.addEventListener)mq.addEventListener('change',e=>{if(e.matches)setMenu(false)})}
 
 show(location.hash.slice(1),false);
+/* ================= v14: UI upgrades (menu, search, progress, bookmarks, code options, jump links, offline) ================= */
+(()=>{
+const lsGet=(k,f)=>{try{const v=localStorage.getItem(k);return v===null?f:v}catch(_){return f}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}};
+const favSet=(()=>{try{return new Set(JSON.parse(lsGet('atlas-fav','[]')))}catch(_){return new Set()}})();
+const saveFav=()=>lsSet('atlas-fav',JSON.stringify([...favSet]));
+const byId=id=>W.find(x=>x.id===id);
+
+/* 1. menu: collapse all, one group open at a time, category label in search results */
+nav.querySelectorAll('a[data-id]:not(.startlink)').forEach(a=>{const d=byId(a.dataset.id);if(d)a.dataset.cat=d.cat});
+const tools=document.createElement('div');tools.className='navtools';
+tools.innerHTML='<button id="colall" type="button">Collapse all</button>';
+const startGrp=nav.querySelector('.ngs');if(startGrp)startGrp.after(tools);
+$('#colall').addEventListener('click',()=>nav.querySelectorAll('.ng:not(.ngs)').forEach(g=>setGroup(g,false)));
+const closeOthers=keep=>{if(nav.classList.contains('searching'))return;nav.querySelectorAll('.ng:not(.ngs):not(.cl)').forEach(g=>{if(g!==keep)setGroup(g,false)})};
+nav.addEventListener('click',e=>{const b=e.target.closest('.nh');if(!b)return;const g=b.parentNode;if(!g.classList.contains('cl'))closeOthers(g)});
+const tidy=()=>{const cur=nav.querySelector('[aria-current]');const g=cur&&cur.closest('.ng:not(.ngs)');if(g)closeOthers(g)};
+
+/* 2. search: arrow keys, highlighted result */
+const q=$('#q');
+const links=()=>[...nav.querySelectorAll('a[data-id]:not(.startlink):not([hidden])')].filter(a=>!a.closest('[hidden]'));
+const clearSel=()=>nav.querySelectorAll('a.sel').forEach(a=>a.classList.remove('sel'));
+q.addEventListener('input',()=>{clearSel();if(q.value.trim()){const f=links()[0];if(f)f.classList.add('sel')}});
+q.addEventListener('keydown',e=>{
+ if(e.key!=='ArrowDown'&&e.key!=='ArrowUp'&&e.key!=='Enter')return;
+ const L=links();if(!L.length)return;
+ let i=L.findIndex(a=>a.classList.contains('sel'));
+ if(e.key==='Enter'){if(i<0)return;e.preventDefault();e.stopImmediatePropagation();location.hash=L[i].dataset.id;q.blur();return}
+ e.preventDefault();
+ i=e.key==='ArrowDown'?Math.min(L.length-1,i+1):Math.max(0,i-1);
+ clearSel();L[i].classList.add('sel');L[i].scrollIntoView({block:'nearest'});
+},true);
+
+/* 3. progress, bookmarks, last page */
+const mark=()=>{nav.querySelectorAll('a[data-id]:not(.startlink)').forEach(a=>{const id=a.dataset.id;a.dataset.mk=(favSet.has(id)?'★':'')+(doneSet.has(id)?'✓':'')});
+ W.forEach(d=>{const f=d.el.querySelector('.favb'),k=d.el.querySelector('.donb');if(f){f.textContent=favSet.has(d.id)?'★ Saved':'☆ Save';f.setAttribute('aria-pressed',String(favSet.has(d.id)))}if(k){k.textContent=doneSet.has(d.id)?'✓ Done':'Mark as done';k.setAttribute('aria-pressed',String(doneSet.has(d.id)))}})};
+const ml=document.createElement('div');ml.id='mylist';
+const pact=START.querySelector('.pact');if(pact)pact.after(ml);
+const renderMy=()=>{
+ const last=byId(lsGet('atlas-last',''));
+ const chips=ids=>ids.map(byId).filter(Boolean).map(d=>`<a class="mychip" href="#${d.id}">${esc(d.name)}</a>`).join('');
+ ml.innerHTML=(last?`<div class="myrow"><b>Continue where you left off</b><div>${chips([last.id])}</div></div>`:'')+`<div class="myrow"><b>My list</b><div>${favSet.size?chips([...favSet]):'<span class="mynone">Press "Save" on a page to keep it here.</span>'}</div></div>`;
+};
+W.forEach(d=>{
+ const head=d.el.querySelector('header');
+ const wrap=document.createElement('div');wrap.className='pgact';
+ wrap.innerHTML=`<button class="favb" type="button" aria-pressed="false">☆ Save</button><button class="donb" type="button" aria-pressed="false">Mark as done</button>`;
+ head.querySelector('.lnk').before(wrap);
+ wrap.querySelector('.favb').addEventListener('click',()=>{if(favSet.has(d.id))favSet.delete(d.id);else favSet.add(d.id);saveFav();mark();renderMy()});
+ wrap.querySelector('.donb').addEventListener('click',()=>{if(doneSet.has(d.id))doneSet.delete(d.id);else doneSet.add(d.id);saveDone();updateProgress();START.querySelectorAll('input[data-s]').forEach(c=>{c.checked=doneSet.has(c.dataset.s)});mark()});
+});
+START.addEventListener('change',()=>mark());
+$('#preset').addEventListener('click',()=>mark());
+const onNav=()=>{const id=location.hash.slice(1);if(byId(id))lsSet('atlas-last',id);renderMy();tidy()};
+window.addEventListener('hashchange',onNav);
+
+/* 4. jump links on every page */
+W.forEach(d=>{
+ const el=d.el,items=[['Demo','.demo'],['Use it for','.facts'],['Props','.props'],['Related','.rel']].filter(x=>el.querySelector(x[1]));
+ const nv=document.createElement('nav');nv.className='jump';nv.setAttribute('aria-label','On this page');
+ nv.innerHTML='<span>On this page</span>'+items.map(x=>`<button type="button" data-j="${x[1]}">${x[0]}</button>`).join('');
+ nv.addEventListener('click',e=>{const b=e.target.closest('button[data-j]');if(!b)return;const t=el.querySelector(b.dataset.j);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
+ el.querySelector('.blurb').after(nv);
+});
+
+/* 5. code options: wrap lines and text size, shared by all pages */
+const rootEl=document.documentElement;
+const SIZES=['s','m','l','xl'];
+const applyCode=()=>{rootEl.classList.toggle('cwrap',lsGet('atlas-wrap','0')==='1');rootEl.setAttribute('data-cs',lsGet('atlas-cs','m'));
+ document.querySelectorAll('.cwrapb').forEach(b=>{b.setAttribute('aria-pressed',String(rootEl.classList.contains('cwrap')))})};
+W.forEach(d=>{
+ const tb=document.createElement('div');tb.className='ctb';
+ tb.innerHTML='<button class="cwrapb" type="button" aria-pressed="false">Wrap lines</button><button class="csm" type="button" aria-label="Smaller code text">A−</button><button class="cbg" type="button" aria-label="Larger code text">A+</button>';
+ d.el.querySelector('.cw').before(tb);
+ tb.querySelector('.cwrapb').addEventListener('click',()=>{lsSet('atlas-wrap',rootEl.classList.contains('cwrap')?'0':'1');applyCode()});
+ tb.querySelector('.csm').addEventListener('click',()=>{const i=SIZES.indexOf(lsGet('atlas-cs','m'));lsSet('atlas-cs',SIZES[Math.max(0,i-1)]);applyCode()});
+ tb.querySelector('.cbg').addEventListener('click',()=>{const i=SIZES.indexOf(lsGet('atlas-cs','m'));lsSet('atlas-cs',SIZES[Math.min(SIZES.length-1,i+1)]);applyCode()});
+});
+applyCode();mark();onNav();
+
+/* 6. offline: only on the real website (GitHub Pages), never in the preview */
+if('serviceWorker' in navigator&&location.protocol==='https:'&&/github\.io$/.test(location.hostname)){
+ window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+}
+})();
+
 })();
 </script>
