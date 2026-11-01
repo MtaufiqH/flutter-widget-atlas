@@ -53,6 +53,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .ng.cl .nl{display:none}#nav.searching .ng.cl .nl{display:block}
 .nl{padding-bottom:6px}
 .ng:first-child .nh{margin-top:0}
+.ns{font:700 10.5px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:18px 0 2px;padding:8px 0 6px;border-top:2px solid var(--accent)}.nsec[hidden]{display:none}
 #nav a{display:block;padding:3px 0;color:var(--fg);text-decoration:none}
 #nav a:hover{color:var(--accent)}
 .cs>h2{font:700 1.9rem/1.1 var(--f-display);letter-spacing:-.015em;margin:0;padding-top:8px}
@@ -2812,7 +2813,8 @@ put('Async','future-builder');
 put('Material','card-list-tile tab-bar');
 W.forEach(d=>{if(RECAT[d.id])d.cat=RECAT[d.id]});
 CATS.length=0;
-['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Theming and resources','Painting and effects','Animation and motion','Assets, images, and icons','Async','State and architecture','Networking and data','Accessibility','Material','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
+const SECT=[['Widgets and UI',['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility']],['Build the app',['Theming and resources','State and architecture','Networking and data']],['Fix problems',['Common errors']]];
+['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility','Theming and resources','State and architecture','Networking and data','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
 Object.assign(CINTRO,{
  'Basics':'Widgets to know before building your first Flutter app.',
  'Layout':'Arrange other widgets in rows, columns, stacks and other layouts, and learn how sizes are decided.',
@@ -2997,7 +2999,7 @@ Object.assign(REFS,{
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
 const main=$('#main'),nav=$('#nav');
 const ORD=CATS.flatMap(c=>W.filter(d=>d.cat===c));
-nav.innerHTML='<div class="navhead"><span>All widgets</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+CATS.map(c=>`<div class="ng cl"><button class="nh" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>${esc(c)}<span class="nc">${W.filter(d=>d.cat===c).length}</span></button><div class="nl">${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div></div>`).join('');
+nav.innerHTML='<div class="navhead"><span>Contents</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+SECT.map(([lab,cs])=>`<div class="nsec"><div class="ns">${esc(lab)}</div>${cs.filter(c=>CATS.includes(c)).map(c=>`<div class="ng cl"><button class="nh" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>${esc(c)}<span class="nc">${W.filter(d=>d.cat===c).length}</span></button><div class="nl">${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div></div>`).join('')}</div>`).join('');
 const setGroup=(g,open)=>{g.classList.toggle('cl',!open);const b=g.querySelector('.nh');if(b)b.setAttribute('aria-expanded',String(open))};
 nav.addEventListener('click',e=>{const b=e.target.closest('.nh');if(b)setGroup(b.parentNode,b.parentNode.classList.contains('cl'))});
 const secs={};
@@ -3038,7 +3040,7 @@ function updateProgress(){
 START.addEventListener('change',e=>{const c=e.target.closest('input[data-s]');if(!c)return;if(c.checked)doneSet.add(c.dataset.s);else doneSet.delete(c.dataset.s);saveDone();updateProgress()});
 $('#preset').addEventListener('click',()=>{doneSet.clear();saveDone();START.querySelectorAll('input[data-s]').forEach(c=>{c.checked=false});updateProgress()});
 updateProgress();
-$('#eyebrow').textContent='Interactive reference  ·  '+W.length+' widgets  ·  '+CATS.length+' categories';
+$('#eyebrow').textContent='Interactive reference  ·  '+W.length+' pages  ·  '+CATS.length+' topics';
 $('#count').textContent=W.length+' widgets';
 
 let cur=null;
@@ -3071,6 +3073,7 @@ $('#q').addEventListener('input',e=>{
  });
  nav.classList.toggle('searching',!!q);
  nav.querySelectorAll('.ng').forEach(gp=>{gp.hidden=gp.classList.contains('ngs')?!!q:!gp.querySelector('a:not([hidden])')});
+ nav.querySelectorAll('.nsec').forEach(s=>{s.hidden=!s.querySelector('.ng:not([hidden])')});
  $('#none').hidden=n>0;
  $('#count').textContent=q?n+' of '+W.length+' widgets':W.length+' widgets';
 });
