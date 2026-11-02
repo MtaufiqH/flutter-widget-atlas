@@ -40,6 +40,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -512,6 +513,9 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .dpw iframe{height:640px}
 #nav .nl a,#nav .nl a[aria-current],#nav .nl a.sel{margin-left:22px;padding-left:10px;padding-right:8px;border-radius:8px}
 #nav .nl a[aria-current]{box-shadow:inset 2px 0 var(--accent)}
+.dpl{display:flex;align-items:center;gap:8px;font:600 13px var(--f-body);color:var(--muted)}
+.dpw .dps{font:13px var(--f-body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.demo:has(.dpw) .right{display:none}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -3947,21 +3951,22 @@ render(s,st,g,d){
 
 /* ================= v15: one general Flutter playground (DartPad) ================= */
 def({cat:'Playground',id:'playground',name:'Run Flutter code (DartPad)',tags:'playground dartpad run flutter code editor try online sandbox sample dart',
-blurb:'Write, edit and run real Flutter code in your browser. This is DartPad, the same editor the Flutter docs use. Pick a starting sample, change the code, press Run and the app appears beside the code.',
+blurb:'Write, edit and run real Flutter code in your browser. This is DartPad, the same editor the Flutter docs use. Pick a starting sample at the top, press Run, then change the code and run it again.',
 use:'Try an idea fast, test a snippet from this atlas, or share a small example. No install and no project needed.',
 watch:'It needs internet. DartPad runs only Flutter and Dart code with a few packages, so plugins that use the phone (camera, storage, Firebase) will not work here. Code you type is not saved on this page: use the Share or Open in a new tab options in DartPad to keep it.',
-ctl:[{k:'sample',l:'start from',t:'sel',o:['Blank counter app','Hello world','Material AppBar','ListView','Switch and Checkbox','TextField','AnimatedContainer','Hero'],v:'Blank counter app'}],
+ctl:[],
 render(s,st,g,d){
- const IDS={'Blank counter app':'','Hello world':'material.Scaffold.1','Material AppBar':'material.AppBar.1','ListView':'widgets.ListView.1','Switch and Checkbox':'material.Switch.1','TextField':'material.TextField.1','AnimatedContainer':'widgets.AnimatedContainer.1','Hero':'widgets.Hero.1'};
- const id=IDS[s.sample]||'',gist='';
+ const OPT=[['Default DartPad app',''],['Scaffold','material.Scaffold.1'],['AppBar','material.AppBar.1'],['ListView','widgets.ListView.1'],['Switch','material.Switch.1'],['TextField','material.TextField.1'],['AnimatedContainer','widgets.AnimatedContainer.1'],['Hero','widgets.Hero.1']];
+ const PG=window.__pg=window.__pg||{i:0,ran:false};
  const th=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';
- const q=gist?'id='+gist:id?'sample_id='+encodeURIComponent(id):'';
- const emb='https://dartpad.dev/embed-flutter.html?split=60&run=true&theme='+th+(q?'&'+q:'')+'&channel=stable';
- const full=gist?'https://dartpad.dev/?id='+gist:id?'https://dartpad.dev/?sample_id='+encodeURIComponent(id)+'&channel=stable':'https://dartpad.dev/?channel=stable';
- g.innerHTML='<div class="dpw"><button type="button" class="dpb">Run in DartPad</button><a class="dpo" target="_blank" rel="noopener" href="'+full+'">Open in a new tab</a><div class="dpf" hidden></div></div>';
- const f=g.querySelector('.dpf'),b=g.querySelector('.dpb');
- b.onclick=()=>{f.hidden=false;f.innerHTML='<iframe title="DartPad" allow="clipboard-write" src="'+emb+'"></iframe>';b.textContent='Reload'};
- return {code:'// Paste any Flutter code in the editor, then press Run.\n// Start with a full app like this:\nimport \'package:flutter/material.dart\';\n\nvoid main() => runApp(const MaterialApp(home: Scaffold(body: Center(child: Text(\'Hello Flutter\')))));',hint:'Choose a sample, then press Run in DartPad.'};
+ g.innerHTML='<div class="dpw"><label class="dpl">Start from <select class="dps">'+OPT.map((o,i)=>'<option value="'+i+'"'+(i===PG.i?' selected':'')+'>'+o[0]+(o[1]?' (official sample)':'')+'</option>').join('')+'</select></label><button type="button" class="dpb">Run in DartPad</button><a class="dpo" target="_blank" rel="noopener">Open in a new tab</a><div class="dpf" hidden></div></div>';
+ const f=g.querySelector('.dpf'),b=g.querySelector('.dpb'),sel=g.querySelector('.dps'),a=g.querySelector('.dpo');
+ const cur=()=>OPT[PG.i][1];
+ const links=()=>{a.href=cur()?'https://dartpad.dev/?sample_id='+encodeURIComponent(cur())+'&channel=stable':'https://dartpad.dev/?channel=stable'};
+ const load=()=>{PG.ran=true;const id=cur();f.hidden=false;f.innerHTML='<iframe title="DartPad" allow="clipboard-write" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&theme='+th+(id?'&sample_id='+encodeURIComponent(id):'')+'&channel=stable"></iframe>';b.textContent='Reload'};
+ sel.onchange=()=>{PG.i=+sel.value;links();if(PG.ran)load()};
+ b.onclick=load;links();if(PG.ran)load();
+ return {code:'// Edit and run code inside DartPad above.\n// Pick a starting sample, or keep the default app.\n// The sample comes from the official Flutter docs, so it may not match the name exactly.',hint:'Pick a start, press Run in DartPad, then edit the code on the left.'};
 }});
 
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
