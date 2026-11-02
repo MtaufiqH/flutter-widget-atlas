@@ -37,6 +37,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -498,9 +499,15 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .dpb:hover{filter:brightness(1.1)}
 .dpo{font-size:13px;color:var(--accent)}
 .dps{font:13px var(--f-body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
-.dpw{border-top:1px solid var(--line)}
+.dpw{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;width:100%;padding:12px}
+.dpf{flex:0 0 calc(100% + 24px);margin:4px -12px -12px;min-width:0}
 .dpw iframe{display:block;width:100%;height:560px;border:0;background:#0d1020}
 @media (max-width:600px){.dpw iframe{height:640px}}
+.demo:has(.dpw){grid-template-columns:minmax(0,1fr)}
+.stage:has(.dpw){height:auto!important;min-height:0!important;overflow:visible!important}
+.demo:has(.dpw) .cw{display:none}
+.demo:has(.dpw) .left{position:static!important}
+.dpw iframe{height:640px}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -3934,6 +3941,25 @@ render(s,st,g,d){
 }});
 
 
+/* ================= v15: one general Flutter playground (DartPad) ================= */
+def({cat:'Playground',id:'playground',name:'Run Flutter code (DartPad)',tags:'playground dartpad run flutter code editor try online sandbox sample dart',
+blurb:'Write, edit and run real Flutter code in your browser. This is DartPad, the same editor the Flutter docs use. Pick a starting sample, change the code, press Run and the app appears beside the code.',
+use:'Try an idea fast, test a snippet from this atlas, or share a small example. No install and no project needed.',
+watch:'It needs internet. DartPad runs only Flutter and Dart code with a few packages, so plugins that use the phone (camera, storage, Firebase) will not work here. Code you type is not saved on this page: use the Share or Open in a new tab options in DartPad to keep it.',
+ctl:[{k:'sample',l:'start from',t:'sel',o:['Blank counter app','Hello world','Material AppBar','ListView','Switch and Checkbox','TextField','AnimatedContainer','Hero'],v:'Blank counter app'}],
+render(s,st,g,d){
+ const IDS={'Blank counter app':'','Hello world':'material.Scaffold.1','Material AppBar':'material.AppBar.1','ListView':'widgets.ListView.1','Switch and Checkbox':'material.Switch.1','TextField':'material.TextField.1','AnimatedContainer':'widgets.AnimatedContainer.1','Hero':'widgets.Hero.1'};
+ const id=IDS[s.sample]||'',gist='';
+ const th=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';
+ const q=gist?'id='+gist:id?'sample_id='+encodeURIComponent(id):'';
+ const emb='https://dartpad.dev/embed-flutter.html?split=60&run=true&theme='+th+(q?'&'+q:'')+'&channel=stable';
+ const full=gist?'https://dartpad.dev/?id='+gist:id?'https://dartpad.dev/?sample_id='+encodeURIComponent(id)+'&channel=stable':'https://dartpad.dev/?channel=stable';
+ g.innerHTML='<div class="dpw"><button type="button" class="dpb">Run in DartPad</button><a class="dpo" target="_blank" rel="noopener" href="'+full+'">Open in a new tab</a><div class="dpf" hidden></div></div>';
+ const f=g.querySelector('.dpf'),b=g.querySelector('.dpb');
+ b.onclick=()=>{f.hidden=false;f.innerHTML='<iframe title="DartPad" allow="clipboard-write" src="'+emb+'"></iframe>';b.textContent='Reload'};
+ return {code:'// Paste any Flutter code in the editor, then press Run.\n// Start with a full app like this:\nimport \'package:flutter/material.dart\';\n\nvoid main() => runApp(const MaterialApp(home: Scaffold(body: Center(child: Text(\'Hello Flutter\')))));',hint:'Choose a sample, then press Run in DartPad.'};
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -3949,10 +3975,11 @@ put('Async','future-builder');
 put('Material','card-list-tile tab-bar');
 W.forEach(d=>{if(RECAT[d.id])d.cat=RECAT[d.id]});
 CATS.length=0;
-const SECT=[['Get started',['Dart language','Coming from Android']],['Widgets and UI',['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility']],['Build the app',['Theming and resources','State and architecture','Navigation and routing','App structure and auth','Responsive and adaptive','Localization','Permissions and platform','Background and native code','Networking and data','Firebase','Worked example']],['Ship the app',['Testing and quality','Performance','Flavors and release']],['Fix problems',['Common errors']]];
-['Dart language','Coming from Android','Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility','Theming and resources','State and architecture','Navigation and routing','App structure and auth','Responsive and adaptive','Localization','Permissions and platform','Background and native code','Networking and data','Firebase','Worked example','Testing and quality','Performance','Flavors and release','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
+const SECT=[['Get started',['Dart language','Coming from Android','Playground']],['Widgets and UI',['Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility']],['Build the app',['Theming and resources','State and architecture','Navigation and routing','App structure and auth','Responsive and adaptive','Localization','Permissions and platform','Background and native code','Networking and data','Firebase','Worked example']],['Ship the app',['Testing and quality','Performance','Flavors and release']],['Fix problems',['Common errors']]];
+['Dart language','Coming from Android','Playground','Basics','Layout','Scrolling','Text','Input','Interaction models','Styling','Painting and effects','Animation and motion','Assets, images, and icons','Async','Material','Accessibility','Theming and resources','State and architecture','Navigation and routing','App structure and auth','Responsive and adaptive','Localization','Permissions and platform','Background and native code','Networking and data','Firebase','Worked example','Testing and quality','Performance','Flavors and release','Common errors'].forEach(c=>{if(W.some(d=>d.cat===c))CATS.push(c)});
 Object.assign(CINTRO,{
  'Dart language':'The Dart features you need to read Flutter code: null safety, records and patterns, collections and async.',
+ 'Playground':'Write and run real Flutter code in the browser.',
  'Coming from Android':'Map what you know from Android and Kotlin to Flutter: concepts, UI elements, libraries and language.',
  'Firebase':'Set up Firebase and use it for login and a live database.',
  'Worked example':'One small app that joins the topics of this atlas.',
@@ -4495,23 +4522,6 @@ W.forEach(d=>{
 });
 applyCode();mark();onNav();
 
-
-/* real Flutter samples from the Flutter docs, run in DartPad */
-{const SAMPLES={"refresh-indicator": ["material.RefreshIndicator.1"], "reorderable-list-view": ["material.ReorderableListView.1"], "scrollbar": ["material.Scrollbar.1"], "nested-scroll-view": ["widgets.NestedScrollView.1"], "hero": ["widgets.Hero.1"], "stream-builder": ["widgets.StreamBuilder.1"], "form": ["widgets.Form.1"], "autocomplete": ["material.Autocomplete.1"], "date-time-picker": ["material.showDatePicker.1"], "segmented-button": ["material.SegmentedButton.1"], "dialog": ["material.AlertDialog.1"], "bottom-sheet": ["material.showModalBottomSheet.1"], "snackbar": ["material.SnackBar.1"], "drawer": ["material.Drawer.1"], "navigation-bar": ["material.NavigationBar.1"], "row-column": ["widgets.Row.1", "widgets.Column.1"], "expanded": ["widgets.Expanded.1", "widgets.Flexible.1"], "stack-positioned": ["widgets.Stack.1", "widgets.Positioned.1"], "align-center": ["widgets.Align.1"], "padding": ["widgets.Padding.1"], "sized-box": ["widgets.SizedBox.1"], "container": ["widgets.Container.1"], "wrap": ["widgets.Wrap.1"], "aspect-ratio": ["widgets.AspectRatio.1"], "fitted-box": ["widgets.FittedBox.1"], "layout-builder": ["widgets.LayoutBuilder.1"], "list-view": ["widgets.ListView.1", "widgets.ListView.2"], "grid-view": ["widgets.GridView.1"], "scroll-view": ["widgets.SingleChildScrollView.1"], "page-view": ["widgets.PageView.1"], "slivers": ["widgets.CustomScrollView.1"], "text": ["widgets.Text.1"], "image": ["widgets.Image.1"], "icon-avatar": ["material.CircleAvatar.1"], "card-list-tile": ["material.Card.1", "material.ListTile.1"], "opacity": ["widgets.Opacity.1"], "clip": ["widgets.ClipRRect.1"], "buttons": ["material.ElevatedButton.1", "material.TextButton.1"], "text-field": ["material.TextField.1"], "toggles": ["material.Checkbox.1", "material.Switch.1", "material.Radio.1"], "slider": ["material.Slider.1"], "dropdown": ["material.DropdownButton.1"], "scaffold": ["material.Scaffold.1", "material.AppBar.1"], "tab-bar": ["material.TabBar.1"], "gestures": ["widgets.GestureDetector.1"], "ink-well": ["material.InkWell.1"], "dismissible": ["widgets.Dismissible.1"], "draggable": ["widgets.Draggable.1"], "animated-container": ["widgets.AnimatedContainer.1"], "animated-switcher": ["widgets.AnimatedSwitcher.1"], "tween-animation-builder": ["widgets.TweenAnimationBuilder.1"], "stateful": ["widgets.StatefulWidget.1"], "navigator": ["widgets.Navigator.1"], "chip": ["material.Chip.1"]};
-const theme=()=>document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';
-const src=id=>'https://dartpad.dev/embed-flutter.html?split=60&run=true&theme='+theme()+'&sample_id='+encodeURIComponent(id)+'&channel=stable';
-const link=id=>'https://dartpad.dev/?sample_id='+encodeURIComponent(id)+'&channel=stable';
-Object.keys(SAMPLES).forEach(k=>{const d=byId(k);if(!d||!d.el)return;const ids=SAMPLES[k];const demo=d.el.querySelector('.demo');if(!demo)return;
- const sec=document.createElement('section');sec.className='dpad';
- sec.innerHTML=`<div class="dph"><div><b>Run the real Flutter sample</b><span>Official sample from the Flutter docs. Edit the code, then press Run. Needs internet.</span></div>${ids.length>1?'<select class="dps" aria-label="Choose a sample">'+ids.map(i=>'<option value="'+i+'">'+i.split('.').slice(1,2)+' (sample '+i.split('.').pop()+')</option>').join('')+'</select>':''}<button type="button" class="dpb">Run in DartPad</button><a class="dpo" target="_blank" rel="noopener" href="${link(ids[0])}">Open in a new tab</a></div><div class="dpw" hidden></div>`;
- demo.after(sec);
- const btn=sec.querySelector('.dpb'),w=sec.querySelector('.dpw'),sel=sec.querySelector('.dps'),a=sec.querySelector('.dpo');
- const cur=()=>sel?sel.value:ids[0];
- const load=()=>{w.hidden=false;w.innerHTML='<iframe title="DartPad: '+cur()+'" allow="clipboard-write" loading="lazy" src="'+src(cur())+'"></iframe>';btn.textContent='Reload sample'};
- btn.addEventListener('click',load);
- if(sel)sel.addEventListener('change',()=>{a.href=link(cur());if(!w.hidden)load()});
-});
-}
 
 /* icon rail for the desktop menu: one icon per section */
 {const IC=["<path d=\"M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5V16h8v-2.5A6 6 0 0012 3z\"/>", "<rect x=\"3\" y=\"3\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"13\" y=\"3\" width=\"8\" height=\"5\" rx=\"1\"/><rect x=\"13\" y=\"10\" width=\"8\" height=\"11\" rx=\"1\"/><rect x=\"3\" y=\"13\" width=\"8\" height=\"8\" rx=\"1\"/>", "<path d=\"M21 7a5 5 0 01-6.5 4.8L7 19.3a2 2 0 01-3-3l7.5-7.5A5 5 0 0117 3l-3 3 1 3 3 1z\"/>", "<path d=\"M12 3c3 2 5 5 5 9l-3 3h-4l-3-3c0-4 2-7 5-9zM9 18l-2 3M15 18l2 3\"/><circle cx=\"12\" cy=\"10\" r=\"1.5\"/>", "<rect x=\"8\" y=\"8\" width=\"8\" height=\"12\" rx=\"4\"/><path d=\"M4 10l4 2M20 10l-4 2M4 17l4-1M20 17l-4-1M9 4l2 4M15 4l-2 4\"/>"];
