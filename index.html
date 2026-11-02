@@ -43,6 +43,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -522,6 +523,20 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 #pgl:hover{background:var(--accent-soft);color:var(--accent)}
 #bar.sx #pgl{display:none}
 @media (min-width:901px){#pgl{display:none!important}}
+.tf.sf input,.tf.sf textarea{padding-right:44px}
+.tf.sf input:focus,.tf.sf textarea:focus{padding-right:43px}
+.tfs{position:absolute;right:6px;top:8px;width:34px;height:34px;border:0;border-radius:50%;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tfs:hover{background:var(--accent-soft);color:var(--accent)}
+.tf.u input,.tf.u textarea{border-width:0 0 1px;border-radius:0}
+.tf.u input:focus,.tf.u textarea:focus{border-width:0 0 2px;padding:15px 12px 14px}
+.tf.fi input,.tf.fi textarea{border-width:0 0 1px;border-radius:6px 6px 0 0;background:var(--accent-soft)}
+.tf.fi input:focus,.tf.fi textarea:focus{border-width:0 0 2px;padding:15px 12px 14px}
+.tf.nb input,.tf.nb textarea{border-color:transparent}
+.tf.nb input:focus,.tf.nb textarea:focus{border:1px solid transparent;padding:15px 12px}
+.tf.pf.u input:focus,.tf.pf.fi input:focus,.tf.pf.u textarea:focus,.tf.pf.fi textarea:focus{padding-left:42px}
+.tf.pf.nb input:focus,.tf.pf.nb textarea:focus{padding-left:42px}
+.tf.dis{opacity:.5}
+.tf.err.u input,.tf.err.fi input{border-color:var(--danger)}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -540,7 +555,7 @@ const def=o=>W.push(o);
 const AX={start:'flex-start',end:'flex-end',center:'center',spaceBetween:'space-between',spaceAround:'space-around',spaceEvenly:'space-evenly',stretch:'stretch'};
 const AL={topLeft:['flex-start','flex-start'],topCenter:['center','flex-start'],topRight:['flex-end','flex-start'],centerLeft:['flex-start','center'],center:['center','center'],centerRight:['flex-end','center'],bottomLeft:['flex-start','flex-end'],bottomCenter:['center','flex-end'],bottomRight:['flex-end','flex-end']};
 const box=(t,c,st)=>`<div class="fb ${c}" style="${st||''}">${t}</div>`;
-const IC={favorite:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',star:'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',menu:'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',chevron:'M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',check:'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'};
+const IC={visibility:'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',visibility_off:'M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z',close:'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',favorite:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',star:'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',menu:'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',chevron:'M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',check:'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'};
 const ic=(n,sz,col)=>`<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="${col||'currentColor'}" aria-hidden="true" style="flex:none"><path d="${IC[n]}"/></svg>`;
 const PIC='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="#bfe3ff"/><circle cx="230" cy="40" r="22" fill="#ffd166"/><path d="M0 150L80 60l60 60 60-50 100 80z" fill="#2a9d8f"/><rect x="2" y="2" width="296" height="146" fill="none" stroke="#d9476a" stroke-width="4"/></svg>');
 const bounce=t=>{const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+.75;if(t<2.5/d)return n*(t-=2.25/d)*t+.9375;return n*(t-=2.625/d)*t+.984375};
@@ -1002,23 +1017,44 @@ def({cat:'Input',id:'text-field',name:'TextField',tags:'input form textformfield
 blurb:'TextField takes typed input. The InputDecoration object controls how it looks: label or hint, icons, helper and error text, and the character counter.',
 use:'Any single-value text entry. Use TextFormField when it lives in a Form with validation.',
 watch:'Create the TextEditingController in initState and dispose it. Creating it inside build wipes the text on every rebuild.',
-ctl:[{k:'lab',l:'Placeholder',t:'sel',o:['labelText','hintText'],v:'labelText'},{k:'ob',l:'obscureText',t:'chk',v:false},{k:'ml',l:'maxLines',t:'sel',o:['1','3'],v:'1'},{k:'er',l:'errorText',t:'chk',v:false},{k:'pf',l:'prefixIcon',t:'chk',v:true},{k:'mx',l:'maxLength: 20',t:'chk',v:false}],
+ctl:[{k:'lab',l:'Placeholder',t:'sel',o:['labelText','hintText'],v:'labelText'},{k:'bd',l:'border',t:'sel',o:['Outline','Underline','Filled','None'],v:'Outline'},{k:'kt',l:'keyboardType',t:'sel',o:['text','emailAddress','number','phone'],v:'text'},{k:'tc',l:'textCapitalization',t:'sel',o:['none','words','characters'],v:'none'},{k:'ta',l:'textAlign',t:'sel',o:['start','center','end'],v:'start'},{k:'sf',l:'suffixIcon',t:'sel',o:['None','Clear button','Show/hide eye'],v:'None'},{k:'ml',l:'maxLines',t:'sel',o:['1','3'],v:'1'},{k:'ob',l:'obscureText',t:'chk',v:false},{k:'pf',l:'prefixIcon',t:'chk',v:true},{k:'hp',l:'helperText',t:'chk',v:false},{k:'er',l:'errorText',t:'chk',v:false},{k:'mx',l:'maxLength: 20',t:'chk',v:false},{k:'dg',l:'digits only (inputFormatters)',t:'chk',v:false},{k:'en',l:'enabled',t:'chk',v:true},{k:'ro',l:'readOnly',t:'chk',v:false}],
 render(s,st,g){
- const v=st.v||'',multi=s.ml==='3',attr=`id="tfi" ${s.mx?'maxlength="20"':''} placeholder="${s.lab==='hintText'?'you@example.com':' '}"`;
- const input=multi?`<textarea ${attr} rows="3">${esc(v)}</textarea>`:`<input ${attr} type="${s.ob?'password':'text'}" value="${esc(v)}" autocomplete="off">`;
- g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:10px"><label class="tf${s.er?' err':''}${s.pf?' pf':''}${multi?' multi':''}">${s.pf?`<span class="tfi">${ic('person',20)}</span>`:''}${input}${s.lab==='labelText'?'<span class="fl">Email</span>':''}</label><div class="tfm"><span class="erm">${s.er?'Enter a valid email':''}</span><span class="cnt">${s.mx?v.length+'/20':''}</span></div><div class="cap" style="margin:0">onChanged: <b class="ech">"${esc(v)}"</b></div></div>`;
- const d=[];
- d.push(s.lab==='labelText'?"labelText: 'Email',":"hintText: 'you@example.com',");
- if(s.pf)d.push('prefixIcon: Icon(Icons.person),');
- if(s.er)d.push("errorText: 'Enter a valid email',");
- d.push('border: OutlineInputBorder(),');
- const a=[];if(s.ob)a.push('obscureText: true,');if(multi)a.push('maxLines: 3,');if(s.mx)a.push('maxLength: 20,');a.push('onChanged: (value) => setState(() => text = value),','decoration: InputDecoration(');
- return {code:`TextField(\n${a.map(x=>'  '+x).join('\n')}\n${d.map(x=>'    '+x).join('\n')}\n  ),\n)`,hint:'Type in the field. The text is kept when you change the options.'};
-},
-after(g,st,s){
- const i=g.querySelector('#tfi'),e=g.querySelector('.ech'),c=g.querySelector('.cnt');
- i.addEventListener('input',()=>{st.v=i.value;e.textContent='"'+i.value+'"';if(s.mx)c.textContent=i.value.length+'/20'});
-}});
+  const v=st.v||'',multi=s.ml==='3',eye=s.sf==='Show/hide eye',clr=s.sf==='Clear button';
+  const hide=s.ob&&!(eye&&st.show);
+  const ty=hide?'password':s.kt==='emailAddress'?'email':s.kt==='number'?'text':s.kt==='phone'?'tel':'text';
+  const im=s.kt==='number'?'numeric':s.kt==='phone'?'tel':s.kt==='emailAddress'?'email':'text';
+  const attr=`id="tfi" ${s.mx?'maxlength="20"':''} ${s.en?'':'disabled'} ${s.ro?'readonly':''} inputmode="${im}" style="text-align:${s.ta==='start'?'left':s.ta==='end'?'right':'center'}" placeholder="${s.lab==='hintText'?'you@example.com':' '}"`;
+  const input=multi?`<textarea ${attr} rows="3">${esc(v)}</textarea>`:`<input ${attr} type="${ty==='email'?'text':ty}" value="${esc(v)}" autocomplete="off">`;
+  const sfx=eye?`<button type="button" class="tfs" id="tfs" aria-label="Show or hide text" ${s.en?'':'disabled'}>${ic(st.show?'visibility_off':'visibility',20)}</button>`:clr?`<button type="button" class="tfs" id="tfs" aria-label="Clear text" ${s.en?'':'disabled'}>${ic('close',20)}</button>`:'';
+  const cls=['tf',s.bd==='Underline'?'u':s.bd==='Filled'?'fi':s.bd==='None'?'nb':'',s.er?'err':'',s.pf?'pf':'',sfx?'sf':'',multi?'multi':'',s.en?'':'dis'].filter(Boolean).join(' ');
+  const msg=s.er?'Enter a valid email':s.hp?'We never share your email':'';
+  g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:10px"><label class="${cls}">${s.pf?`<span class="tfi">${ic('person',20)}</span>`:''}${input}${s.lab==='labelText'?'<span class="fl">Email</span>':''}${sfx}</label><div class="tfm"><span class="erm">${msg}</span><span class="cnt">${s.mx?v.length+'/20':''}</span></div><div class="cap" style="margin:0">onChanged: <b class="ech">"${esc(v)}"</b></div></div>`;
+  const d=[];
+  d.push(s.lab==='labelText'?"labelText: 'Email',":"hintText: 'you@example.com',");
+  if(s.pf)d.push('prefixIcon: Icon(Icons.person),');
+  if(eye)d.push('suffixIcon: IconButton(\n  icon: Icon(show ? Icons.visibility_off : Icons.visibility),\n  onPressed: () => setState(() => show = !show),\n),');
+  if(clr)d.push('suffixIcon: IconButton(\n  icon: Icon(Icons.close),\n  onPressed: controller.clear,\n),');
+  if(s.hp&&!s.er)d.push("helperText: 'We never share your email',");
+  if(s.er)d.push("errorText: 'Enter a valid email',");
+  d.push(s.bd==='Underline'?'border: UnderlineInputBorder(),':s.bd==='Filled'?'filled: true,\n    border: UnderlineInputBorder(),':s.bd==='None'?'border: InputBorder.none,':'border: OutlineInputBorder(),');
+  const a=['controller: controller,'];
+  if(s.kt!=='text')a.push('keyboardType: '+(s.kt==='emailAddress'?'TextInputType.emailAddress':s.kt==='number'?'TextInputType.number':'TextInputType.phone')+',');
+  if(s.tc!=='none')a.push('textCapitalization: TextCapitalization.'+s.tc+',');
+  if(s.ta!=='start')a.push('textAlign: TextAlign.'+s.ta+',');
+  if(s.ob)a.push('obscureText: '+(eye?'!show':'true')+',');
+  if(multi)a.push('maxLines: 3,');if(s.mx)a.push('maxLength: 20,');
+  if(s.dg)a.push('inputFormatters: [FilteringTextInputFormatter.digitsOnly],');
+  if(!s.en)a.push('enabled: false,');
+  if(s.ro)a.push('readOnly: true,');
+  a.push('onChanged: (value) => setState(() => text = value),','decoration: InputDecoration(');
+  return {code:`TextField(\n${a.map(x=>'  '+x).join('\n')}\n${d.map(x=>'    '+x).join('\n')}\n  ),\n)`,hint:'Type in the field. The text is kept when you change the options. Try Filled, Clear button and digits only.'};
+ },
+ after(g,st,s,rerender){
+  const i=g.querySelector('#tfi'),e=g.querySelector('.ech'),c=g.querySelector('.cnt'),b=g.querySelector('#tfs');
+  const fix=x=>{if(s.dg)x=x.replace(/\D/g,'');if(s.kt==='number'&&!s.dg)x=x.replace(/[^\d.\-]/g,'');if(s.kt==='phone')x=x.replace(/[^\d+\-() ]/g,'');if(s.tc==='characters')x=x.toUpperCase();if(s.tc==='words')x=x.replace(/(^|\s)(\S)/g,(m,a2,b2)=>a2+b2.toUpperCase());return x};
+  i.addEventListener('input',()=>{const pos=i.selectionStart,n=fix(i.value);if(n!==i.value)i.value=n;try{i.setSelectionRange(pos,pos)}catch(_){}st.v=i.value;e.textContent='"'+i.value+'"';if(s.mx)c.textContent=i.value.length+'/20'});
+  if(b)b.addEventListener('click',()=>{if(s.sf==='Clear button'){i.value='';st.v='';e.textContent='""';if(s.mx)c.textContent='0/20';i.focus()}else{st.show=!st.show;(rerender||(()=>{}))()}});
+ }});
 
 def({cat:'Input',id:'toggles',name:'Checkbox, Switch & Radio',tags:'checkbox switch radio tristate radiogroup selection',
 blurb:'Three ways to pick a value. Checkbox is on or off (or null when tristate). Switch is an instant on/off setting. Radio chooses exactly one option from a group.',
@@ -1525,7 +1561,7 @@ const META={
 'opacity':{p:['opacity|double|required|0.0 invisible to 1.0 fully visible.','alwaysIncludeSemantics|bool|false|Keep screen reader info while fully transparent.','child|Widget?|null|The subtree made translucent.'],r:['implicit-animations','decorated-box','animated-container']},
 'clip':{p:['ClipRRect.borderRadius|BorderRadius|zero|Corner radius of the clip.','ClipOval.clipper|CustomClipper<Rect>?|null|Optionally choose the bounding rect.','ClipPath.clipper|CustomClipper<Path>?|null|Returns the Path to cut to.','clipBehavior|Clip|antiAlias|hardEdge is faster. antiAlias is smoother.'],r:['clip-rect','decorated-box','image']},
 'buttons':{p:['onPressed|VoidCallback?|required|Tap callback. null disables the button.','onLongPress|VoidCallback?|null|Long press callback.','style|ButtonStyle?|null|Colours, shape and padding. Use styleFrom helpers.','child|Widget?|required|Usually Text.','.icon constructor|constructor|-|Adds icon and label parameters.'],r:['ink-well','tooltip','gestures']},
-'text-field':{p:['controller|TextEditingController?|null|Read or set the text.','decoration|InputDecoration?|const|labelText, hintText, errorText, prefixIcon and borders.','obscureText|bool|false|Hides the characters for passwords.','keyboardType|TextInputType?|text|Picks the on-screen keyboard.','onChanged / onSubmitted|ValueChanged<String>?|null|Called while typing and on submit.','maxLines|int?|1|null makes a multi-line field.'],r:['buttons','toggles','scaffold']},
+'text-field':{p:['controller|TextEditingController?|null|Read or set the text.','decoration|InputDecoration?|const|labelText, hintText, errorText, prefixIcon and borders.','obscureText|bool|false|Hides the characters for passwords.','keyboardType|TextInputType?|text|Picks the on-screen keyboard.','onChanged / onSubmitted|ValueChanged<String>?|null|Called while typing and on submit.','maxLines|int?|1|null makes a multi-line field.','textCapitalization|TextCapitalization|none|none, words, sentences or characters. Changes the keyboard hint and what the user types.','textAlign|TextAlign|start|Aligns the typed text: start, center or end.','inputFormatters|List<TextInputFormatter>?|null|Filter or reshape input, for example FilteringTextInputFormatter.digitsOnly.','maxLength|int?|null|Limits characters and shows a counter.','enabled|bool?|true|false greys the field out and ignores input.','readOnly|bool|false|Keeps the field focusable and selectable but not editable.','InputDecoration: suffixIcon / prefixIcon|Widget?|null|Icon or IconButton inside the field, such as a clear or show-password button.','InputDecoration: helperText / errorText|String?|null|Hint line under the field. errorText replaces helperText and turns the border red.','InputDecoration: border / filled|InputBorder? / bool?|outline|OutlineInputBorder, UnderlineInputBorder or InputBorder.none. filled adds a background.','textInputAction|TextInputAction?|null|Label of the keyboard action key: next, done, search and so on.'],r:['buttons','toggles','scaffold']},
 'toggles':{p:['value|bool|required|Current state. You must hold it in a StatefulWidget.','onChanged|ValueChanged<bool?>?|required|Called with the new value. null disables the control.','Radio.groupValue|T?|required|Currently selected value of the group.','Checkbox.tristate|bool|false|Adds a null (indeterminate) state.'],r:['slider','dropdown','stateful']},
 'slider':{p:['value|double|required|Current position between min and max.','onChanged|ValueChanged<double>?|required|Called while dragging. null disables the slider.','min, max|double|0.0 / 1.0|Range of values.','divisions|int?|null|Number of discrete steps.','label|String?|null|Bubble shown while dragging. Needs divisions.'],r:['toggles','stateful','dropdown']},
 'dropdown':{p:['value|T?|null|Currently selected item.','items|List<DropdownMenuItem<T>>?|required|The choices.','onChanged|ValueChanged<T?>?|required|Called with the new choice. null disables it.','hint|Widget?|null|Shown while value is null.','isExpanded|bool|false|Fill the width of the parent.'],r:['toggles','text-field','slider']},
