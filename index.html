@@ -15,6 +15,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -377,7 +378,7 @@ html.navhide #nav{display:block}
 #nav .rail a:hover,#nav .rail button:hover{background:rgba(255,255,255,.1);color:#fff}
 #nav .rail .on{background:rgba(139,184,255,.2);color:#fff}
 #nav .rail .on::before{content:'';position:absolute;left:-11px;top:9px;bottom:9px;width:3px;border-radius:2px;background:#8bb8ff}
-.ns{display:flex;align-items:center;gap:10px}.nsi{display:flex;flex:none;color:var(--accent)}
+.ns{display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;padding:12px 0 10px}.ns:hover{opacity:.85}.nsi{display:flex;flex:none;color:var(--accent);width:22px;justify-content:center}.nsc{margin-left:auto;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .15s;margin-right:4px}.nsec.sc .nsc{transform:rotate(-45deg)}.nsec.sc>.ng{display:none}#nav.searching .nsec.sc>.ng:not([hidden]){display:block}
 .rail hr{width:26px;border:0;border-top:1px solid rgba(255,255,255,.16);margin:6px 0;flex:none}
 #nav a{color:var(--fg)}
 #nav a:hover{color:var(--accent)}
@@ -4388,11 +4389,18 @@ const rail=document.createElement('div');rail.className='rail';
 rail.innerHTML=`<a href="#start" data-r="home" title="Start here" aria-label="Start here">${sv(HOME)}</a><hr>`+SECT.map((s,i)=>`<button type="button" data-s="${i}" title="${esc(s[0])}" aria-label="${esc(s[0])}">${sv(IC[i])}</button>`).join('');
 nav.insertBefore(rail,nav.firstChild);
 nav.querySelectorAll('.nsec').forEach((s,i)=>{const l=s.querySelector('.ns');if(l&&IC[i]){l.insertAdjacentHTML('afterbegin','<span class="nsi">'+sv(IC[i],18)+'</span>')}});
-const openSec=i=>{const s=nav.querySelectorAll('.nsec')[i];if(!s)return;nav.classList.add('pinned');nav.scrollTop=Math.max(0,s.offsetTop-12)};
+const secs=[...nav.querySelectorAll('.nsec')];
+secs.forEach(s=>{const l=s.querySelector('.ns');if(!l)return;l.setAttribute('role','button');l.tabIndex=0;l.insertAdjacentHTML('beforeend','<span class="nsc" aria-hidden="true"></span>');
+ const tg=()=>{const was=s.classList.contains('sc');secs.forEach(x=>x.classList.add('sc'));if(was)s.classList.remove('sc');l.setAttribute('aria-expanded',String(was));upd()};
+ l.addEventListener('click',tg);l.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg()}})});
+const upd=()=>secs.forEach(s=>{const l=s.querySelector('.ns');if(l)l.setAttribute('aria-expanded',String(!s.classList.contains('sc')))});
+const syncSec=()=>{const cur=nav.querySelector('a[aria-current]');const sec=cur&&cur.closest('.nsec');secs.forEach(s=>s.classList.toggle('sc',!(sec?s===sec:s===secs[0])));upd()};
+window.addEventListener('hashchange',()=>setTimeout(syncSec,0));syncSec();
+const openSec=i=>{const s=secs[i];if(!s)return;nav.classList.add('pinned');secs.forEach(x=>x.classList.toggle('sc',x!==s));upd();nav.scrollTop=0};
 rail.addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b)openSec(+b.dataset.s)});
 nav.addEventListener('mouseleave',()=>{nav.classList.remove('pinned');delete nav.dataset.touched;delete nav.dataset.hov;delete nav.dataset.want});
 nav.addEventListener('mouseover',e=>{if(nav.dataset.hov)return;nav.dataset.hov='1';const b=e.target.closest&&e.target.closest('[data-s]');if(b)nav.dataset.want=b.dataset.s});
-nav.addEventListener('mouseenter',()=>{if(innerWidth<901)return;setTimeout(()=>{const w=nav.dataset.want;if(w!==undefined){const s=nav.querySelectorAll('.nsec')[+w];if(s)nav.scrollTop=Math.max(0,s.offsetTop-12);return}const c=nav.querySelector('a[aria-current]');if(c&&!nav.dataset.touched)nav.scrollTop=Math.max(0,c.offsetTop-nav.clientHeight/2)},0)});
+nav.addEventListener('mouseenter',()=>{if(innerWidth<901)return;setTimeout(()=>{const w=nav.dataset.want;if(w!==undefined){const s=secs[+w];if(s){secs.forEach(x=>x.classList.toggle('sc',x!==s));upd();nav.scrollTop=0}return}const c=nav.querySelector('a[aria-current]');if(c&&!nav.dataset.touched)nav.scrollTop=Math.max(0,c.offsetTop-nav.clientHeight/2)},0)});
 nav.addEventListener('wheel',()=>{nav.dataset.touched='1'},{passive:true});
 document.addEventListener('click',e=>{if(!nav.contains(e.target))nav.classList.remove('pinned')});
 const mkOn=()=>{const cur=nav.querySelector('a[aria-current]');const sec=cur&&cur.closest('.nsec');const idx=sec?[...nav.querySelectorAll('.nsec')].indexOf(sec):-1;rail.querySelectorAll('[data-s],[data-r]').forEach(b=>{const v=b.dataset.r==='home'?(cur&&idx<0):(+b.dataset.s===idx);b.classList.toggle('on',!!v)})};
