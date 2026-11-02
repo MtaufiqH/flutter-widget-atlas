@@ -18,6 +18,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -253,7 +254,7 @@ h1{font:700 clamp(2.1rem,5.5vw,3.6rem)/1.02 var(--f-display);letter-spacing:-.02
 .erb{border:1.5px solid var(--danger);background:rgba(200,40,63,.1);color:var(--danger);font:500 12px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere;white-space:pre-wrap}
 .okb{border:1.5px solid var(--ok);background:rgba(22,121,74,.1);color:var(--ok);font:500 12px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;overflow-wrap:anywhere;white-space:pre-wrap}
 
-.startlink{font-weight:600;color:var(--accent)!important;margin-bottom:6px}
+.startlink{font-weight:600;color:var(--accent)!important;margin-bottom:6px;display:flex!important;align-items:center;gap:12px;padding:8px 0!important}.startlink svg{flex:none}
 .stepchip{align-self:flex-start;margin-top:4px;font:500 12px var(--f-mono);color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
 .stepchip:hover{color:var(--accent);border-color:var(--accent)}
 .nstep{display:flex;flex-direction:column;gap:4px;margin-top:22px;padding:14px 18px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--fg);text-decoration:none;font:700 17px var(--f-display)}
@@ -4191,7 +4192,7 @@ Object.assign(LINKS,{
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
 const main=$('#main'),nav=$('#nav');
 const ORD=CATS.flatMap(c=>W.filter(d=>d.cat===c));
-nav.innerHTML='<div class="navhead"><span>Contents</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink">Start here: learning path</a></div>'+SECT.map(([lab,cs])=>`<div class="nsec"><div class="ns">${esc(lab)}</div>${cs.filter(c=>CATS.includes(c)).map(c=>`<div class="ng cl"><button class="nh" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>${esc(c)}<span class="nc">${W.filter(d=>d.cat===c).length}</span></button><div class="nl">${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div></div>`).join('')}</div>`).join('');
+nav.innerHTML='<div class="navhead"><span>Contents</span><button id="navx" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div><div class="ng ngs"><a href="#start" data-id="start" class="startlink"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a></div>'+SECT.map(([lab,cs])=>`<div class="nsec"><div class="ns">${esc(lab)}</div>${cs.filter(c=>CATS.includes(c)).map(c=>`<div class="ng cl"><button class="nh" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>${esc(c)}<span class="nc">${W.filter(d=>d.cat===c).length}</span></button><div class="nl">${W.filter(d=>d.cat===c).map(d=>`<a href="#${d.id}" data-id="${d.id}">${esc(d.name)}</a>`).join('')}</div></div>`).join('')}</div>`).join('');
 const setGroup=(g,open)=>{g.classList.toggle('cl',!open);const b=g.querySelector('.nh');if(b)b.setAttribute('aria-expanded',String(open))};
 nav.addEventListener('click',e=>{const b=e.target.closest('.nh');if(b)setGroup(b.parentNode,b.parentNode.classList.contains('cl'))});
 const secs={};
@@ -4219,7 +4220,7 @@ const doneSet=(()=>{try{return new Set(JSON.parse(localStorage.getItem('atlas-do
 const saveDone=()=>{try{localStorage.setItem('atlas-done',JSON.stringify([...doneSet]))}catch(_){}};
 const START=document.createElement('section');START.id='start';START.className='startpg';START.hidden=true;
 let sn=0;
-START.innerHTML=`<h2>Start here</h2><p class="ci">A suggested order for learning Flutter layout and UI. Tick a step when you finish it. Your progress stays in this browser.</p><div class="prog"><div class="pbar"><i id="pfill"></i></div><span id="ptxt"></span></div><div class="pact"><a class="btn k-Filled" id="pgo" href="#"></a><button class="btn k-Outlined" id="preset" type="button">Reset progress</button></div>`+PATH.map((g,gi)=>`<div class="stg"><h3><span class="gn">${gi+1}</span>${esc(g.t)}</h3><p class="gi">${esc(g.i)}</p>${g.s.map(([id,why])=>{const d=W.find(x=>x.id===id);if(!d)return '';sn++;return `<div class="stp"><input type="checkbox" data-s="${id}" aria-label="Mark ${esc(d.name)} as done"${doneSet.has(id)?' checked':''}><span class="sn">${sn}</span><div><a href="#${id}">${esc(d.name)}</a><small>${esc(why)}</small></div></div>`}).join('')}</div>`).join('');
+START.innerHTML=`<h2>Home</h2><p class="ci">A suggested order for learning Flutter layout and UI. Tick a step when you finish it. Your progress stays in this browser.</p><div class="prog"><div class="pbar"><i id="pfill"></i></div><span id="ptxt"></span></div><div class="pact"><a class="btn k-Filled" id="pgo" href="#"></a><button class="btn k-Outlined" id="preset" type="button">Reset progress</button></div>`+PATH.map((g,gi)=>`<div class="stg"><h3><span class="gn">${gi+1}</span>${esc(g.t)}</h3><p class="gi">${esc(g.i)}</p>${g.s.map(([id,why])=>{const d=W.find(x=>x.id===id);if(!d)return '';sn++;return `<div class="stp"><input type="checkbox" data-s="${id}" aria-label="Mark ${esc(d.name)} as done"${doneSet.has(id)?' checked':''}><span class="sn">${sn}</span><div><a href="#${id}">${esc(d.name)}</a><small>${esc(why)}</small></div></div>`}).join('')}</div>`).join('');
 main.insertBefore(START,main.firstChild);
 function updateProgress(){
  const n=STEPS.filter(i=>doneSet.has(i)).length;
@@ -4247,7 +4248,7 @@ function show(id,user){
  const act=nav.querySelector('[aria-current]');
  if(act&&nav.clientHeight&&(act.offsetTop<nav.scrollTop||act.offsetTop>nav.scrollTop+nav.clientHeight-40))nav.scrollTop=Math.max(0,act.offsetTop-60);
  cur=d;if(d)d.draw();
- const name=isStart?'Start here':d.name;
+ const name=isStart?'Home':d.name;
  document.title=name+' · Flutter Atlas';
  const bt=$('#barT');if(bt)bt.textContent=name;
  if(user&&!/jsdom/i.test(navigator.userAgent||'')){const sh=$('.shell'),bar=$('#bar'),bh=bar&&bar.offsetHeight||0;window.scrollTo(0,Math.max(0,sh.getBoundingClientRect().top+(window.scrollY||0)-12-bh))}
@@ -4384,11 +4385,10 @@ applyCode();mark();onNav();
 const sv=(b,n)=>`<svg viewBox="0 0 24 24" width="${n||24}" height="${n||24}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b}</svg>`;
 const HOME='<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>';
 const rail=document.createElement('div');rail.className='rail';
-rail.innerHTML=`<a href="#start" data-r="home" title="Start here" aria-label="Start here">${sv(HOME)}</a>`+SECT.map((s,i)=>`<button type="button" data-s="${i}" title="${esc(s[0])}" aria-label="${esc(s[0])}">${sv(IC[i])}</button>`).join('');
+rail.innerHTML=`<a href="#start" data-r="home" title="Home" aria-label="Home">${sv(HOME)}</a>`+SECT.map((s,i)=>`<button type="button" data-s="${i}" title="${esc(s[0])}" aria-label="${esc(s[0])}">${sv(IC[i])}</button>`).join('');
 nav.insertBefore(rail,nav.firstChild);
 nav.querySelectorAll('.nsec').forEach((s,i)=>{const l=s.querySelector('.ns');if(l&&IC[i]){l.insertAdjacentHTML('afterbegin','<span class="nsi">'+sv(IC[i],18)+'</span>')}});
 const secs=[...nav.querySelectorAll('.nsec')];
-{const sg=nav.querySelector('.ngs'),f=secs[0]&&secs[0].querySelector('.ns');if(sg&&f)f.after(sg)}
 secs.forEach(s=>{const l=s.querySelector('.ns');if(!l)return;l.setAttribute('role','button');l.tabIndex=0;l.insertAdjacentHTML('beforeend','<span class="nsc" aria-hidden="true"></span>');
  const tg=()=>{const was=s.classList.contains('sc');secs.forEach(x=>x.classList.add('sc'));if(was)s.classList.remove('sc');l.setAttribute('aria-expanded',String(was));upd()};
  l.addEventListener('click',tg);l.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg()}})});
