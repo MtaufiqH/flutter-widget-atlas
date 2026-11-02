@@ -16,6 +16,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -4311,10 +4312,6 @@ const byId=id=>W.find(x=>x.id===id);
 
 /* 1. menu: collapse all, one group open at a time, category label in search results */
 nav.querySelectorAll('a[data-id]:not(.startlink)').forEach(a=>{const d=byId(a.dataset.id);if(d)a.dataset.cat=d.cat});
-const tools=document.createElement('div');tools.className='navtools';
-tools.innerHTML='<button id="colall" type="button">Collapse all</button>';
-const startGrp=nav.querySelector('.ngs');if(startGrp)startGrp.after(tools);
-$('#colall').addEventListener('click',()=>nav.querySelectorAll('.ng:not(.ngs)').forEach(g=>setGroup(g,false)));
 const closeOthers=keep=>{if(nav.classList.contains('searching'))return;nav.querySelectorAll('.ng:not(.ngs):not(.cl)').forEach(g=>{if(g!==keep)setGroup(g,false)})};
 nav.addEventListener('click',e=>{const b=e.target.closest('.nh');if(!b)return;const g=b.parentNode;if(!g.classList.contains('cl'))closeOthers(g)});
 const tidy=()=>{const cur=nav.querySelector('[aria-current]');const g=cur&&cur.closest('.ng:not(.ngs)');if(g)closeOthers(g)};
