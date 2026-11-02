@@ -12,6 +12,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -352,6 +353,32 @@ html[data-ts="l"] #nav,html[data-ts="x"] #nav{zoom:1}
 #bar.sx #tsz{display:none}
 .pt td,.pt th{line-height:1.5}
 .cw .code{padding-right:48px}
+#nav .rail{display:none}
+@media (min-width:901px){
+#burger,html.navhide #burger{display:none!important}
+body{padding-left:calc(64px + 20px)}
+#bar{padding-left:calc(64px + 24px)}
+.shell,html.navhide .shell{grid-template-columns:minmax(0,1fr);max-width:1240px}
+html.navhide #nav{display:block}
+#nav{--fg:#e6ecff;--muted:#a3b2d8;--line:rgba(255,255,255,.14);--accent:#8bb8ff;--accent-soft:rgba(139,184,255,.18);--surface:#0a1a3d;position:fixed;top:0;bottom:0;left:0;max-height:none;width:64px;padding:0;background:#0a1a3d;color:var(--fg);z-index:70;overflow:hidden;transition:width .18s ease,box-shadow .18s ease;border-right:1px solid rgba(255,255,255,.08)}
+#nav>*:not(.rail){display:none}
+#nav .rail{display:flex}
+#nav:hover,#nav:focus-within,#nav.pinned{width:304px;overflow-y:auto;overflow-x:hidden;padding:16px 16px 28px 20px;box-shadow:8px 0 32px rgba(0,0,0,.35)}
+#nav:hover>*:not(.rail),#nav:focus-within>*:not(.rail),#nav.pinned>*:not(.rail){display:block}
+#nav:hover>.ng,#nav:focus-within>.ng,#nav.pinned>.ng{display:block}
+#nav:hover>.rail,#nav:focus-within>.rail,#nav.pinned>.rail{display:none}
+#nav:hover .navhead,#nav:focus-within .navhead,#nav.pinned .navhead{display:none!important}
+#nav::-webkit-scrollbar{width:8px}#nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+.rail{flex-direction:column;align-items:center;gap:6px;padding:14px 0}
+.rail a,.rail button{width:44px;height:44px;border-radius:10px;border:0;background:none;color:#b8c6ec;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;padding:0;margin:0;box-shadow:none}
+.rail a:hover,.rail button:hover{background:rgba(255,255,255,.1);color:#fff}
+.rail .on{background:rgba(139,184,255,.18);color:#fff}
+.rail .on::before{content:'';position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:2px;background:#8bb8ff}
+.rail hr{width:28px;border:0;border-top:1px solid rgba(255,255,255,.14);margin:6px 0}
+.rail .rl{margin-left:0}
+#nav a{color:var(--fg)}
+#nav a:hover{color:var(--accent)}
+}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -4261,7 +4288,6 @@ qi.addEventListener('keydown',e=>{if(e.key==='Escape'&&!qi.value){closeSearch();
 const setMenu=(o,keep)=>{nav.classList.toggle('open',o);scrim.hidden=!o;burger.setAttribute('aria-expanded',String(o));if(o&&!keep)$('#navx').focus()};
 const wide=()=>window.matchMedia('(min-width:901px)').matches,hroot=document.documentElement;
 const setHide=(v)=>{hroot.classList.toggle('navhide',v);burger.setAttribute('aria-expanded',String(!v));try{localStorage.setItem('atlas-nav',v?'hide':'show')}catch(_){}};
-try{if(localStorage.getItem('atlas-nav')==='hide'&&wide())setHide(true)}catch(_){}
 burger.addEventListener('click',()=>{if(wide())setHide(!hroot.classList.contains('navhide'));else setMenu(!nav.classList.contains('open'))});
 $('#q').addEventListener('input',e=>{if(e.target.value.trim()){nav.scrollTop=0;if(wide()&&hroot.classList.contains('navhide'))setHide(false);if(!wide())setMenu(true,true)}});
 $('#navx').addEventListener('click',()=>{setMenu(false);burger.focus()});
@@ -4350,6 +4376,26 @@ W.forEach(d=>{
  tb.querySelector('.cbg').addEventListener('click',()=>{const i=SIZES.indexOf(lsGet('atlas-cs','m'));lsSet('atlas-cs',SIZES[Math.min(SIZES.length-1,i+1)]);applyCode()});
 });
 applyCode();mark();onNav();
+
+/* icon rail for the desktop menu */
+{const IC={home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+0:'M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z',
+1:'M13 13v8h8v-8h-8zM3 21h8v-8H3v8zM3 3v8h8V3H3zm13.66-1.31L11 7.34 16.66 13l5.66-5.66-5.66-5.65z',
+2:'M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z',
+3:'M12 2.5s4.5 2.04 4.5 10.5c0 2.49-1.04 5.57-1.6 7H9.1c-.56-1.43-1.6-4.51-1.6-7C7.5 4.54 12 2.5 12 2.5zm2 8.5c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-6.31 9.52c-.48-1.23-1.52-4.17-1.67-6.87l-1.13.75c-.5.33-.89.92-.89 1.53V22l3.69-1.48zM20 22v-5.07c0-.61-.39-1.2-.89-1.53l-1.13-.75c-.15 2.7-1.19 5.64-1.67 6.87L20 22z',
+4:'M20 8h-2.81a5.985 5.985 0 00-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z'};
+const sv=p=>`<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
+const rail=document.createElement('div');rail.className='rail';
+rail.innerHTML=`<a href="#start" data-r="home" title="Start here" aria-label="Start here">${sv(IC.home)}</a><button type="button" data-r="search" title="Search pages" aria-label="Search pages">${sv(IC.search)}</button><hr>`+SECT.map((s,i)=>`<button type="button" class="rl" data-r="${i}" title="${esc(s[0])}" aria-label="${esc(s[0])}">${sv(IC[i])}</button>`).join('');
+nav.insertBefore(rail,nav.firstChild);
+rail.addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;if(b.dataset.r==='search'){const sb=document.getElementById('sbtn');if(sb)sb.click()}else if(b.dataset.r!=='home'){nav.classList.add('pinned');const sec=nav.querySelectorAll('.nsec')[+b.dataset.r];if(sec)sec.scrollIntoView({block:'start'})}});
+nav.addEventListener('mouseleave',()=>nav.classList.remove('pinned'));
+nav.addEventListener('mouseenter',()=>{if(innerWidth<901)return;setTimeout(()=>{const c=nav.querySelector('a[aria-current]');if(c&&!nav.dataset.touched)nav.scrollTop=Math.max(0,c.offsetTop-nav.clientHeight/2)},0)});nav.addEventListener('wheel',()=>{nav.dataset.touched='1'},{passive:true});nav.addEventListener('mouseleave',()=>{delete nav.dataset.touched});
+document.addEventListener('click',e=>{if(!nav.contains(e.target))nav.classList.remove('pinned')});
+const mkOn=()=>{const cur=nav.querySelector('a[aria-current]');const sec=cur&&cur.closest('.nsec');const idx=sec?[...nav.querySelectorAll('.nsec')].indexOf(sec):-1;rail.querySelectorAll('[data-r]').forEach(b=>{const r=b.dataset.r;b.classList.toggle('on',r==='home'?!sec&&!!cur:(r!=='search'&&+r===idx))})};
+window.addEventListener('hashchange',()=>setTimeout(mkOn,0));mkOn();
+}
+
 
 /* 6. offline: only on the real website (GitHub Pages), never in the preview */
 if('serviceWorker' in navigator&&location.protocol==='https:'&&/github\.io$/.test(location.hostname)){
