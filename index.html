@@ -63,6 +63,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -2411,22 +2412,49 @@ render(s,st,g,d){
 }});
 /* ================= NAVIGATION & STATE ================= */
 const PAGES=['Home','Details','Settings','Profile','Help'];
-def({cat:'Navigation & state',id:'navigator',name:'Navigator',tags:'push pop route materialpageroute stack routes screens go_router',h:290,
-blurb:'Navigator manages a stack of routes (screens). push puts a new screen on top, pop removes the top one, and the screen underneath is shown again.',
-use:'Moving between screens. For deep links and URL-based routing most apps layer go_router or the Router API on top.',
-watch:'Never call Navigator.push straight from build. Use callbacks such as onPressed, and check that the context is still mounted after an await.',
-render(s,st,g){
- if(!st.stack)st.stack=['Home'];
- const top=st.stack[st.stack.length-1],deep=st.stack.length>1;
- g.innerHTML=`<div class="nvp"><div class="abar">${deep?`<button class="ib" data-a="pop" aria-label="Back">${ic('back',20)}</button>`:''}<span>${top}</span></div><div class="nvbody"><button class="btn k-Filled" data-a="push">push</button><button class="btn k-Outlined" data-a="rep">pushReplacement</button><button class="btn k-Text" data-a="pop"${deep?'':' disabled'}>pop</button><button class="btn k-Text" data-a="root"${deep?'':' disabled'}>popUntil(first)</button></div></div><div class="nvs">Stack: ${st.stack.map(p=>`<span class="chip c${PAGES.indexOf(p)%4}">${p}</span>`).join(' › ')}</div>`;
- if(st.anim){anim(g.querySelector('.nvp'),st.anim==='push'?[{transform:'translateX(40px)',opacity:0},{transform:'none',opacity:1}]:[{transform:'translateX(-40px)',opacity:0},{transform:'none',opacity:1}],{duration:260,easing:'ease-out'});st.anim=null}
- return {code:`// push a new screen\nNavigator.push(\n  context,\n  MaterialPageRoute(builder: (_) => ${PAGES[st.stack.length%PAGES.length]}Page()),\n);\n\nNavigator.pop(context);\nNavigator.pushReplacement(context, route);\nNavigator.popUntil(context, (r) => r.isFirst);`,hint:'The stack grows with push and shrinks with pop. The top route is the visible screen.'};
-},
-act(a,st){
- if(a==='push'){st.stack.push(PAGES[st.stack.length%PAGES.length]);st.anim='push'}
- else if(a==='pop'&&st.stack.length>1){st.stack.pop();st.anim='pop'}
- else if(a==='rep'){const t=st.stack.length-1;st.stack[t]=PAGES[(PAGES.indexOf(st.stack[t])+1)%PAGES.length];st.anim='push'}
- else if(a==='root'){st.stack=[st.stack[0]];st.anim='pop'}
+def({cat:'Interaction models',id:'navigator',name:'Navigator',tags:'push pop routes stack named pushreplacement popuntil result materialpageroute popscope dialog',h:340,
+blurb:'Navigator keeps a stack of routes. push adds one, pop removes the top and can send a value back. The other methods are shortcuts for rearranging that stack.',
+use:'Moving between screens, returning a result from a picker, clearing history after a sign-in.',
+watch:'A dialog or a bottom sheet is a route too, so an extra pop closes the screen behind it. After awaiting a push, check context.mounted before using the context again.',
+ctl:[{k:'op',l:'operation',t:'sel',o:['push','pop','pushReplacement','pushAndRemoveUntil','popUntil'],v:'push'},
+ {k:'result',l:'pop returns a value',t:'chk',v:true},
+ {k:'named',l:'named routes',t:'chk',v:false},
+ {k:'full',l:'fullscreenDialog',t:'chk',v:false},
+ {k:'guard',l:'PopScope guard',t:'chk',v:false}],
+render(s,st,g,d){
+ let stack=st.stack||['Home','List'];
+ const op=s.op;
+ const draw=(arr,hl)=>arr.map((r,i)=>`<div style="padding:10px 14px;border-radius:9px;background:${i===arr.length-1?'var(--accent-soft)':'var(--surface)'};border:1.3px solid ${i===arr.length-1?'var(--accent)':'var(--line)'};color:${i===arr.length-1?'var(--accent)':'var(--fg)'};font:600 13px var(--f-body);display:flex;align-items:center;gap:8px"><span style="font:600 10px var(--f-mono);color:var(--muted)">${i}</span>${r}${i===arr.length-1?'<span style="margin-left:auto;font:10px var(--f-mono);color:var(--muted)">top</span>':''}</div>`).join('');
+ let after=[...stack];
+ if(op==='push')after=[...stack,'Detail'];
+ else if(op==='pop')after=stack.slice(0,-1);
+ else if(op==='pushReplacement')after=[...stack.slice(0,-1),'Detail'];
+ else if(op==='pushAndRemoveUntil')after=['Detail'];
+ else if(op==='popUntil')after=[stack[0]];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:16px;padding:14px">
+   <div style="flex:1;max-width:150px"><div class="cap" style="margin:0 0 7px">before</div><div style="display:flex;flex-direction:column-reverse;gap:5px">${draw(stack)}</div></div>
+   <div style="color:var(--muted);font-size:20px">&rarr;</div>
+   <div style="flex:1;max-width:150px"><div class="cap" style="margin:0 0 7px">after ${op}</div><div style="display:flex;flex-direction:column-reverse;gap:5px">${draw(after)||'<div class="cap" style="margin:0">empty</div>'}</div></div>
+ </div>`;
+ const route=s.named
+  ?`Navigator.pushNamed(context, '/detail', arguments: item.id)`
+  :`Navigator.push(\n  context,\n  MaterialPageRoute(\n    builder: (context) => DetailPage(item: item),\n${s.full?'    fullscreenDialog: true,   // slides up, shows a close icon\n':''}    settings: const RouteSettings(name: '/detail'),\n  ),\n)`;
+ const C={
+  push:`${s.result?'final result = await ':''}${route};\n${s.result?"if (!context.mounted) return;\nif (result != null) setState(() => selected = result);":''}`,
+  pop:`Navigator.pop(context${s.result?", 'the value'":''});   // returns to the caller's await`,
+  pushReplacement:`Navigator.pushReplacement(\n  context,\n  MaterialPageRoute(builder: (context) => const HomePage()),\n);\n// the old route is disposed, so Back does not return to it`,
+  pushAndRemoveUntil:`Navigator.pushAndRemoveUntil(\n  context,\n  MaterialPageRoute(builder: (context) => const HomePage()),\n  (route) => false,   // clear the whole history\n);`,
+  popUntil:`Navigator.popUntil(context, ModalRoute.withName('/home'));\n// go back several screens at once`}[op];
+ const guard=s.guard?`\n\n// ask before leaving a half-filled form\nPopScope(\n  canPop: !hasUnsavedChanges,\n  onPopInvokedWithResult: (didPop, result) async {\n    if (didPop) return;\n    final leave = await confirmDiscard(context);\n    if (leave && context.mounted) Navigator.pop(context);\n  },\n  child: form,\n)`:'';
+ const notes=[];
+ if(op==='push'&&s.result)notes.push('await the push and the value from pop lands here. Check context.mounted before using the context afterwards.');
+ if(op==='pushReplacement')notes.push('The replaced route is disposed, which is what you want after a sign-in so Back does not return to the login screen.');
+ if(op==='pushAndRemoveUntil')notes.push('With (route) => false every earlier route is removed, leaving one screen on the stack.');
+ if(op==='popUntil')notes.push('popUntil needs a named route or a predicate, so give your routes a RouteSettings name.');
+ if(s.full)notes.push('fullscreenDialog changes the transition to a slide up and the back arrow to a close icon.');
+ if(s.named)notes.push('Named routes are quick to start with. For deep links, guards and the web, go_router handles far more.');
+ notes.push('Navigator.of(context, rootNavigator: true) escapes a nested navigator, which a dialog over a bottom bar needs.');
+ return {code:C+guard,hint:notes.join(' ')};
 }});
 
 def({cat:'Basics',id:'stateful',name:'StatelessWidget vs StatefulWidget',tags:'setstate initstate dispose lifecycle didupdatewidget mounted rebuild controller state',h:340,
@@ -2950,15 +2978,38 @@ const META={
 };
 
 /* ================= NEW IN v3 ================= */
-def({cat:'Layout',id:'flex',name:'Flex',tags:'row column direction axis spacing verticaldirection reverse base',
-blurb:'Flex is the widget that Row and Column are built on. Row is Flex(direction: Axis.horizontal) and Column is Flex(direction: Axis.vertical). Use Flex directly when the direction is only known at runtime.',
-use:'A layout that switches between horizontal and vertical, for example by screen width or orientation.',
-watch:'Flex needs a direction. Expanded and Flexible only work as children of a Flex, and the same rule applies to Row and Column.',
-ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},{k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','center','end','spaceBetween','spaceEvenly'],v:'start'},{k:'sp',l:'spacing',t:'rng',min:0,max:30,v:8},{k:'rev',l:'reverse order',t:'chk',v:false}],
+def({cat:'Layout',id:'flex',name:'Flex',tags:'row column direction axis dynamic orientation responsive mainaxis crossaxis spacing',h:330,
+blurb:'Flex is the widget behind Row and Column: it takes the axis as an argument. Use it when the direction itself is a variable, such as a layout that is a Row on a tablet and a Column on a phone.',
+use:'Responsive layouts that switch direction, and any code where the axis comes from data.',
+watch:'Everything else is identical to Row and Column, including the unbounded-axis rules and the fact that Expanded must be a direct child.',
+ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},
+ {k:'auto',l:'pick direction from the width',t:'chk',v:false},
+ {k:'w',l:'available width',t:'rng',min:200,max:620,step:20,v:280},
+ {k:'bp',l:'breakpoint',t:'rng',min:240,max:600,step:20,v:420},
+ {k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','center','spaceBetween','spaceEvenly'],v:'start'},
+ {k:'ca',l:'crossAxisAlignment',t:'sel',o:['start','center','stretch'],v:'stretch'},
+ {k:'sp',l:'spacing',t:'rng',min:0,max:20,v:10},
+ {k:'exp',l:'children are Expanded',t:'chk',v:true}],
 render(s,st,g){
- const v=s.dir==='vertical',items=[['A','a',60,40],['B','b',80,56],['C','c',64,48]];
- g.innerHTML=`<div class="fill" style="flex-direction:${v?'column':'row'}${s.rev?'-reverse':''};justify-content:${AX[s.ma]};align-items:flex-start;gap:${s.sp}px">${items.map(i=>box(i[0],i[1],`width:${i[2]}px;height:${i[3]}px`)).join('')}</div>`;
- return {code:`Flex(\n  direction: Axis.${s.dir},\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  spacing: ${s.sp},\n${s.rev?`  ${v?'verticalDirection: VerticalDirection.up':'textDirection: TextDirection.rtl'},\n`:''}  children: [A(), B(), C()],\n)`,hint:`Same as ${v?'Column':'Row'}(...). Flex just lets you pick the direction yourself.`};
+ const auto=s.auto;
+ const horiz=auto?(+s.w>=+s.bp):(s.dir==='horizontal');
+ const AX2={start:'flex-start',center:'center',spaceBetween:'space-between',spaceEvenly:'space-evenly',stretch:'stretch'};
+ const kids=[['Sidebar','a'],['Content','b'],['Aside','c']].map(([t,c],i)=>`<div class="fb ${c}" style="${s.exp?'flex:1 1 0;':'flex:none;'}${horiz?(s.ca==='stretch'?'':'height:54px;'):'height:46px;'}${horiz&&!s.exp?'width:78px;':''}border-radius:9px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body)">${t}</div>`).join('');
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><div style="width:${Math.round((+s.w)*0.55)}px;max-width:100%;height:150px;border:1.5px dashed var(--c3);padding:8px;box-sizing:border-box"><div style="display:flex;flex-direction:${horiz?'row':'column'};height:100%;gap:${s.sp}px;justify-content:${AX2[s.ma]};align-items:${AX2[s.ca]}">${kids}</div></div></div>`;
+ const L=[`direction: ${auto?`width >= ${s.bp} ? Axis.horizontal : Axis.vertical`:`Axis.${horiz?'horizontal':'vertical'}`},`,
+  `mainAxisAlignment: MainAxisAlignment.${s.ma},`,
+  `crossAxisAlignment: CrossAxisAlignment.${s.ca},`];
+ if(+s.sp)L.push(`spacing: ${s.sp},`);
+ L.push(`children: const [\n    ${s.exp?'Expanded(child: Sidebar()),\n    Expanded(child: Content()),\n    Expanded(child: Aside()),':'Sidebar(),\n    Content(),\n    Aside(),'}\n  ],`);
+ const code=auto
+  ?`LayoutBuilder(\n  builder: (context, constraints) => Flex(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n)`
+  :`Flex(\n${L.map(x=>'  '+x).join('\n')}\n)\n\n// the same thing, written the usual way\n${horiz?'Row':'Column'}(\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  crossAxisAlignment: CrossAxisAlignment.${s.ca},\n  children: const [...],\n)`;
+ const notes=[];
+ if(auto)notes.push(`The width is ${s.w} and the breakpoint is ${s.bp}, so the direction is ${horiz?'horizontal':'vertical'}. One widget, two layouts.`);
+ else notes.push('When the axis is fixed, Row and Column read better than Flex. Reach for Flex only when the direction is a variable.');
+ if(s.ca==='stretch'&&horiz)notes.push('stretch makes every child fill the cross axis, which is why they are all the same height here.');
+ if(!s.exp)notes.push('Without Expanded the children keep their own size and the alignment decides the gaps.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'limited-box',name:'LimitedBox',tags:'unbounded maxwidth maxheight horizontal list scroll view constrainedbox difference',h:320,
@@ -2993,17 +3044,39 @@ render(s,st,g){
  return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'constraints-transform-box',name:'ConstraintsTransformBox',tags:'constraints transform unconstrained width height overflow modify',h:240,
-blurb:'ConstraintsTransformBox changes the constraints it receives before they reach its child. Its named constructors remove the limit on one axis or both, which UnconstrainedBox does for both axes at once.',
-use:'Letting a child grow past its parent on one axis only, for example a long label that may be wider than its slot but must keep the slot\'s height.',
-watch:'Like UnconstrainedBox, it reports a debug overflow warning when the child no longer fits. Add a ClipRect or a scroll view if that is not what you want.',
-ctl:[{k:'m',l:'constructor',t:'sel',o:['(none)','widthUnconstrained','heightUnconstrained','unconstrained'],v:'widthUnconstrained'}],
+def({cat:'Layout',id:'constraints-transform-box',name:'ConstraintsTransformBox',tags:'constraints transform unconstrained unbounded maxwidth clip debug overflow',h:330,
+blurb:'ConstraintsTransformBox rewrites the constraints before they reach the child. You pass a function from the incoming BoxConstraints to new ones, and the ready-made transforms cover the common cases.',
+use:'Letting a child escape one limit while keeping the others, usually so it can be its natural size on one axis.',
+watch:'Freeing a constraint often makes the child bigger than its slot, so set clipBehavior or expect the overflow stripes. UnconstrainedBox is this widget with the unconstrained transform.',
+ctl:[{k:'t',l:'constraintsTransform',t:'sel',o:['unmodified','unconstrained','widthUnconstrained','heightUnconstrained','maxWidthUnconstrained','custom (maxHeight: infinity)'],v:'widthUnconstrained'},
+ {k:'clip',l:'clipBehavior',t:'sel',o:['none','hardEdge'],v:'none'},
+ {k:'al',l:'alignment',t:'sel',o:['center','topLeft','centerLeft'],v:'center'},
+ {k:'child',l:'child wants',t:'sel',o:['300 x 60','120 x 170','300 x 170'],v:'300 x 60'}],
 render(s,st,g){
- const PW=150,PH=90,cw=230,ch=130,wu=s.m==='widthUnconstrained'||s.m==='unconstrained',hu=s.m==='heightUnconstrained'||s.m==='unconstrained';
- const w=wu?cw:PW,h=hu?ch:PH,over=(w>PW)||(h>PH);
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:${PW}px;height:${PH}px;border:1.5px solid var(--c3);background:var(--c3s)"><div class="fb a" style="position:absolute;left:${(PW-w)/2-1.5}px;top:${(PH-h)/2-1.5}px;width:${w}px;height:${h}px;opacity:.9">child wants ${cw} × ${ch}<br>gets ${w} × ${h}</div>${over?'<div class="ovf"><span>OVERFLOWED</span></div>':''}</div></div>`;
- const wrap=s.m==='(none)'?'// no wrapper: the tight parent forces 150 x 90':`ConstraintsTransformBox(\n    constraintsTransform: ConstraintsTransformBox.${s.m},\n    child: Container(width: ${cw}, height: ${ch}),\n  )`;
- return {code:s.m==='(none)'?`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: Container(width: ${cw}, height: ${ch}), // clamped to ${PW} x ${PH}\n)`:`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: ${wrap},\n)`,hint:{'(none)':'Without it the parent\'s tight constraints win.','widthUnconstrained':'Width is free, height is still limited to 90.','heightUnconstrained':'Height is free, width is still limited to 150.','unconstrained':'Both limits are removed, like UnconstrainedBox.'}[s.m]};
+ const pw=200,ph=110;
+ const [cwWant,chWant]=s.child.split(' x ').map(Number);
+ const t=s.t;
+ let cw=Math.min(cwWant,pw),ch=Math.min(chWant,ph);
+ if(t==='unconstrained'){cw=cwWant;ch=chWant}
+ else if(t==='widthUnconstrained'||t==='maxWidthUnconstrained')cw=cwWant;
+ else if(t==='heightUnconstrained')ch=chWant;
+ else if(t.startsWith('custom'))ch=chWant;
+ const over=cw>pw||ch>ph;
+ const AP={center:['center','center'],topLeft:['flex-start','flex-start'],centerLeft:['flex-start','center']}[s.al];
+ const clipped=s.clip==='hardEdge';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="position:relative;width:${pw}px;height:${ph}px;border:1.5px dashed var(--c3);display:flex;justify-content:${AP[0]};align-items:${AP[1]};${clipped?'overflow:hidden':''}"><div class="fb ${over&&!clipped?'d':'c'}" style="width:${cw}px;height:${ch}px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);flex:none">${cw} x ${ch}</div>${over&&!clipped?'<div style="position:absolute;right:-8px;top:0;bottom:0;width:9px;background:repeating-linear-gradient(45deg,#000,#000 5px,#ffd400 5px,#ffd400 10px)"></div>':''}</div></div>`;
+ const transform=t.startsWith('custom')
+  ?'(constraints) => constraints.copyWith(maxHeight: double.infinity)'
+  :`ConstraintsTransformBox.${t}`;
+ const notes=[];
+ if(t==='unmodified')notes.push('unmodified passes the constraints straight through, so the child is clamped as usual.');
+ if(t==='unconstrained')notes.push('unconstrained removes every limit, so the child is exactly the size it asked for.');
+ if(t==='widthUnconstrained')notes.push('Only the width is freed; the height is still clamped by the parent.');
+ if(t==='maxWidthUnconstrained')notes.push('Only the maximum width is removed, so any minimum width still applies.');
+ if(over&&!clipped)notes.push('The child now overflows. Set clipBehavior, or make sure the parent can take the extra size.');
+ if(clipped&&over)notes.push('clipBehavior: hardEdge cuts the child back to the box, so the stripes are gone but the content is still hidden.');
+ notes.push('UnconstrainedBox is this widget with the unconstrained transform plus a debug warning when the child overflows.');
+ return {code:`ConstraintsTransformBox(\n  constraintsTransform: ${transform},\n  alignment: Alignment.${s.al},\n  clipBehavior: Clip.${s.clip},\n  child: child,\n)\n\n// the simpler form for the common case\nUnconstrainedBox(\n${t==='widthUnconstrained'||t==='heightUnconstrained'?`  constrainedAxis: Axis.${t==='widthUnconstrained'?'vertical':'horizontal'},   // keep the OTHER axis limited\n`:''}  child: child,\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'fractional-translation',name:'FractionalTranslation',tags:'offset fraction translate badge slide transition hit test size independent',h:320,
@@ -3100,46 +3173,55 @@ render(s,st,g){
  return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Display',id:'custom-paint',name:'CustomPaint',tags:'canvas painter custompainter draw path paint drawcircle drawline freehand shapes wave',h:280,
-blurb:'CustomPaint gives you a Canvas to draw on. You write a CustomPainter, and its paint method receives the Canvas and the widget\'s Size. Anything Flutter cannot do with widgets, such as charts, gauges and drawing pads, can be painted.',
-use:'Charts, progress rings, custom shapes, signatures and games.',
-watch:'Return true from shouldRepaint only when the painter\'s data changed, otherwise it repaints every frame. A CustomPaint with no child and no size is 0 × 0, so give it a size.',
-ctl:[{k:'m',l:'painter',t:'sel',o:['Shapes','Wave','Freehand (draw here)'],v:'Shapes'},{k:'sw',l:'strokeWidth',t:'rng',min:1,max:12,v:4},{k:'cl',l:'color',t:'sel',o:['blue','pink','teal'],v:'blue'},{k:'am',l:'wave amplitude',t:'rng',min:5,max:60,v:30},{k:'fl',l:'fill shapes',t:'chk',v:true}],
+def({cat:'Painting and effects',id:'custom-paint',name:'CustomPaint',tags:'canvas painter path arc gradient shouldrepaint stroke fill chart progress signature repaintboundary',h:340,
+blurb:'CustomPaint hands you a Canvas and a Size. You draw with Paint objects and Path geometry, and shouldRepaint decides when it runs again.',
+use:'Charts, progress rings, signatures, badges, decorations no widget covers.',
+watch:'Return the right value from shouldRepaint: returning true always repaints every frame. With no child and no size, CustomPaint collapses to zero.',
+ctl:[{k:'what',l:'drawing',t:'sel',o:['progress ring','sparkline','bar chart','wave','dashed border'],v:'progress ring'},
+ {k:'v',l:'value',t:'rng',min:0,max:100,step:5,v:70},
+ {k:'sw',l:'strokeWidth',t:'rng',min:2,max:24,v:12},
+ {k:'cap',l:'strokeCap',t:'sel',o:['butt','round'],v:'round'},
+ {k:'grad',l:'shader (gradient)',t:'chk',v:false},
+ {k:'fg',l:'foregroundPainter instead',t:'chk',v:false},
+ {k:'rb',l:'wrap in RepaintBoundary',t:'chk',v:false}],
 render(s,st,g){
- const col={blue:'var(--c1)',pink:'var(--c4)',teal:'var(--c2)'}[s.cl],fillc={blue:'var(--c1s)',pink:'var(--c4s)',teal:'var(--c2s)'}[s.cl];
- const free=s.m.startsWith('Freehand');
- if(st.mode!==s.m){
-  st.mode=s.m;
-  g.innerHTML=`<svg id="cpv" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:${free?'crosshair':'default'}"><g id="cpg"></g><path id="cpp" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>${free?'<button class="btn k-Outlined btm" data-a="clear" type="button" style="padding:6px 16px">Clear</button>':''}`;
-  if(free){
-   const svg=g.querySelector('#cpv');
-   const pt=e=>{const m=svg.getScreenCTM&&svg.getScreenCTM();if(m&&svg.createSVGPoint){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(m.inverse());return [q.x,q.y]}const r=svg.getBoundingClientRect();return [(e.clientX-r.left)/r.width*300,(e.clientY-r.top)/r.height*200]};
-   let down=false;
-   svg.addEventListener('pointerdown',e=>{down=true;try{svg.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);st.d=(st.d||'')+`M${p[0].toFixed(1)} ${p[1].toFixed(1)}L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;g.querySelector('#cpp').setAttribute('d',st.d)});
-   svg.addEventListener('pointermove',e=>{if(!down)return;const p=pt(e);st.d+=`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;g.querySelector('#cpp').setAttribute('d',st.d)});
-   const up=()=>{down=false};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
-  }
+ const v=+s.v,sw=+s.sw,round=s.cap==='round';
+ const stroke=s.grad?'url(#cpg)':'var(--accent)';
+ let svg='';
+ if(s.what==='progress ring'){
+  const r=52,c=2*Math.PI*r;
+  svg=`<svg viewBox="0 0 140 140" width="150" height="150"><defs><linearGradient id="cpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs><circle cx="70" cy="70" r="${r}" fill="none" stroke="var(--line)" stroke-width="${sw}"/><circle cx="70" cy="70" r="${r}" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="${s.cap}" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-v/100)}" transform="rotate(-90 70 70)"/><text x="70" y="78" text-anchor="middle" font-size="24" font-weight="700" fill="currentColor">${v}%</text></svg>`;
+ } else if(s.what==='sparkline'){
+  const pts=[8,24,16,38,30,52,44,66,58,40,72,56,86,30,100,46,114,22,128,34];
+  const d=pts.reduce((a,_,i)=>i%2?a:a+(i?' L':'M')+pts[i]+' '+(100-pts[i+1]*(v/70)),'');
+  svg=`<svg viewBox="0 0 140 100" width="220" height="130"><defs><linearGradient id="cpg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs><path d="${d}" fill="none" stroke="${stroke}" stroke-width="${sw/3}" stroke-linecap="${s.cap}" stroke-linejoin="round"/></svg>`;
+ } else if(s.what==='bar chart'){
+  const bars=[0.4,0.75,0.55,1,0.3,0.65];
+  svg=`<svg viewBox="0 0 160 100" width="230" height="130"><defs><linearGradient id="cpg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs>${bars.map((b,i)=>{const h=b*(v/100)*90;return `<rect x="${i*26+6}" y="${96-h}" width="${Math.min(18,sw*1.5)}" height="${h}" rx="${round?Math.min(9,sw/2):0}" fill="${stroke}"/>`}).join('')}</svg>`;
+ } else if(s.what==='wave'){
+  const a=(v/100)*22;
+  svg=`<svg viewBox="0 0 160 90" width="230" height="130"><defs><linearGradient id="cpg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs><path d="M0 50 Q 20 ${50-a} 40 50 T 80 50 T 120 50 T 160 50 L160 90 L0 90 Z" fill="${stroke}" opacity=".75"/></svg>`;
+ } else {
+  svg=`<svg viewBox="0 0 160 100" width="230" height="140"><defs><linearGradient id="cpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs><rect x="8" y="8" width="144" height="84" rx="14" fill="none" stroke="${stroke}" stroke-width="${sw/3}" stroke-dasharray="${6+v/14} ${4+v/22}" stroke-linecap="${s.cap}"/><text x="80" y="56" text-anchor="middle" font-size="13" fill="currentColor" opacity=".6">drop files</text></svg>`;
  }
- const grp=g.querySelector('#cpg'),path=g.querySelector('#cpp');
- let code;
- path.setAttribute('stroke',col);path.setAttribute('stroke-width',s.sw);
- if(s.m==='Shapes'){
-  grp.innerHTML=`<circle cx="95" cy="100" r="50" fill="${s.fl?fillc:'none'}" stroke="${col}" stroke-width="${s.sw}"/><rect x="170" y="55" width="100" height="80" rx="8" fill="${s.fl?fillc:'none'}" stroke="${col}" stroke-width="${s.sw}"/><line x1="30" y1="170" x2="270" y2="170" stroke="${col}" stroke-width="${s.sw}" stroke-linecap="round"/>`;
-  path.setAttribute('d','');
-  code=`class ShapesPainter extends CustomPainter {\n  @override\n  void paint(Canvas canvas, Size size) {\n    final paint = Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..style = PaintingStyle.${s.fl?'fill':'stroke'};\n    canvas.drawCircle(Offset(95, 100), 50, paint);\n    canvas.drawRRect(\n      RRect.fromLTRBR(170, 55, 270, 135, Radius.circular(8)),\n      paint,\n    );\n    canvas.drawLine(Offset(30, 170), Offset(270, 170), paint);\n  }\n\n  @override\n  bool shouldRepaint(ShapesPainter old) => false;\n}`;
- }else if(!free){
-  let d='M0 100';for(let x=0;x<=300;x+=4)d+=`L${x} ${(100+s.am*Math.sin(x/300*Math.PI*4)).toFixed(1)}`;
-  grp.innerHTML=`<line x1="0" y1="100" x2="300" y2="100" stroke="var(--line)" stroke-dasharray="4 4"/>`;
-  path.setAttribute('d',d);
-  code=`class WavePainter extends CustomPainter {\n  WavePainter(this.amplitude);\n  final double amplitude;\n\n  @override\n  void paint(Canvas canvas, Size size) {\n    final path = Path()..moveTo(0, size.height / 2);\n    for (double x = 0; x <= size.width; x += 4) {\n      path.lineTo(x,\n        size.height / 2 + amplitude * sin(x / size.width * 4 * pi));\n    }\n    canvas.drawPath(path, Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..style = PaintingStyle.stroke);\n  }\n\n  @override\n  bool shouldRepaint(WavePainter old) =>\n      old.amplitude != amplitude; // amplitude = ${s.am}\n}`;
- }else{
-  grp.innerHTML='';path.setAttribute('d',st.d||'');
-  code=`class DrawingPainter extends CustomPainter {\n  DrawingPainter(this.points);\n  final List<Offset> points; // filled in onPanUpdate\n\n  @override\n  void paint(Canvas canvas, Size size) {\n    final path = Path()..moveTo(points.first.dx, points.first.dy);\n    for (final p in points.skip(1)) {\n      path.lineTo(p.dx, p.dy);\n    }\n    canvas.drawPath(path, Paint()\n      ..color = Colors.${s.cl}\n      ..strokeWidth = ${s.sw}\n      ..strokeCap = StrokeCap.round\n      ..style = PaintingStyle.stroke);\n  }\n\n  @override\n  bool shouldRepaint(DrawingPainter old) => true;\n}`;
- }
- return {code:code+`\n\nCustomPaint(\n  size: Size(300, 200),\n  painter: ${s.m==='Shapes'?'ShapesPainter()':s.m==='Wave'?`WavePainter(${s.am})`:'DrawingPainter(points)'},\n)`,hint:free?'Drag across the stage to draw.':s.m==='Wave'?'The painter repaints because the amplitude changed.':'Everything here is drawn with Canvas calls inside paint().'};
-},
-act(a,st){if(a==='clear')st.d=''}});
-
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px;color:var(--fg)">${svg}</div>`;
+ const paintSetup=`    final paint = Paint()\n      ..style = PaintingStyle.stroke\n      ..strokeWidth = ${sw}\n      ..strokeCap = StrokeCap.${s.cap}\n${s.grad?'      ..shader = const LinearGradient(\n        colors: [Colors.blue, Colors.red],\n      ).createShader(Offset.zero & size)':'      ..color = Colors.blue'};`;
+ const bodies={
+  'progress ring':`    final rect = Rect.fromCircle(\n      center: size.center(Offset.zero),\n      radius: size.shortestSide / 2 - ${sw},\n    );\n    canvas.drawArc(rect, 0, 2 * math.pi, false, track);\n    canvas.drawArc(\n      rect,\n      -math.pi / 2,              // start at the top\n      2 * math.pi * progress,    // sweep\n      false,\n      paint,\n    );`,
+  'sparkline':`    final path = Path();\n    for (var i = 0; i < points.length; i++) {\n      final x = i / (points.length - 1) * size.width;\n      final y = size.height - points[i] * size.height;\n      i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);\n    }\n    canvas.drawPath(path, paint);`,
+  'bar chart':`    final w = size.width / bars.length;\n    for (var i = 0; i < bars.length; i++) {\n      final h = bars[i] * size.height * progress;\n      canvas.drawRRect(\n        RRect.fromRectAndRadius(\n          Rect.fromLTWH(i * w + 4, size.height - h, w - 8, h),\n          const Radius.circular(${round?6:0}),\n        ),\n        paint..style = PaintingStyle.fill,\n      );\n    }`,
+  'wave':`    final path = Path()..moveTo(0, size.height / 2);\n    for (var x = 0.0; x <= size.width; x += size.width / 4) {\n      path.quadraticBezierTo(\n        x + size.width / 8, size.height / 2 - amplitude,\n        x + size.width / 4, size.height / 2,\n      );\n    }\n    path\n      ..lineTo(size.width, size.height)\n      ..lineTo(0, size.height)\n      ..close();\n    canvas.drawPath(path, paint..style = PaintingStyle.fill);`,
+  'dashed border':`    final rrect = RRect.fromRectAndRadius(\n      Offset.zero & size,\n      const Radius.circular(14),\n    );\n    final dashed = _dashPath(Path()..addRRect(rrect), dash: ${6+Math.round(v/14)}, gap: ${4+Math.round(v/22)});\n    canvas.drawPath(dashed, paint);`}[s.what];
+ let code=`class _Painter extends CustomPainter {\n  _Painter({required this.progress}) ;\n\n  final double progress;\n\n  @override\n  void paint(Canvas canvas, Size size) {\n${paintSetup}\n\n${bodies}\n  }\n\n  @override\n  bool shouldRepaint(_Painter old) => old.progress != progress;   // not just true\n}\n\nCustomPaint(\n  size: const Size(150, 150),\n  ${s.fg?'foregroundPainter':'painter'}: _Painter(progress: ${(v/100).toFixed(2)}),\n  child: ${s.fg?'const Content()':'null'},\n)`;
+ if(s.rb)code=`RepaintBoundary(\n  child: ${code.split('\n').slice(-5).join('\n  ')}\n)\n\n// the painter class is unchanged`;
+ const notes=[];
+ if(s.fg)notes.push('foregroundPainter draws over the child instead of behind it, which is how you add a badge or a scrim.');
+ if(s.grad)notes.push('A shader is built from the paint bounds, so pass Offset.zero & size rather than fixed numbers.');
+ if(s.rb)notes.push('A RepaintBoundary stops an animated painting forcing the rest of the screen to repaint with it.');
+ notes.push('Angles are radians and 0 points right, which is why an arc that should start at the top begins at -pi/2.');
+ notes.push('To animate without rebuilding, pass an Animation to the painter super constructor as repaint.');
+ return {code,hint:notes.join(' ')};
+}});
 /* ---- Animation ---- */
 def({cat:'Animation and motion',id:'animated-fractionally-sized-box',name:'AnimatedFractionallySizedBox',tags:'progress bar fraction widthfactor heightfactor reveal panel implicit animation',h:320,
 blurb:'A FractionallySizedBox whose factors animate. Because the size is a fraction of the parent, it is the shortest way to write a progress bar or a panel that slides open, with no controller at all.',
@@ -3405,22 +3487,65 @@ const ERRDOC='https://docs.flutter.dev/testing/common-errors';
 Object.assign(IC,{close:'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',handle:'M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z',search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',cal:'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V9h14v11z',clock:'M12 2a10 10 0 100 20 10 10 0 000-20zm1 11h-5V7h2v4h3v2z',share:'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 10-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 006 9a3 3 0 100 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a2.92 2.92 0 102.92-2.92z'});
 const NAMES=['Alpha','Bravo','Charlie','Delta','Echo','Foxtrot','Golf','Hotel','India','Juliet','Kilo','Lima'];
 
-def({cat:'Accessibility',id:'semantics',name:'Semantics, MergeSemantics & ExcludeSemantics',tags:'screen reader talkback voiceover accessibility label button merge exclude a11y',h:310,
-blurb:'Semantics describes a widget to assistive technology such as TalkBack and VoiceOver. A screen reader moves through the semantics tree one stop at a time. MergeSemantics joins several nodes into one stop, and ExcludeSemantics hides decoration.',
-use:'Naming icon-only buttons, grouping a title and a price into one reading, and hiding purely decorative images.',
-watch:'Many widgets already add their own semantics (Text, buttons, Image with semanticLabel). Add Semantics only where something is missing, and do not hide controls the user needs.',
-ctl:[{k:'lab',l:'label on the icon button',t:'chk',v:false},{k:'merge',l:'MergeSemantics on the card',t:'chk',v:false},{k:'ex',l:'ExcludeSemantics on the image',t:'chk',v:false}],
+def({cat:'Accessibility',id:'semantics',name:'Semantics, MergeSemantics & ExcludeSemantics',tags:'screen reader talkback voiceover label hint button header image live region merge exclude order',h:340,
+blurb:'The semantics tree is what TalkBack and VoiceOver read. Most widgets fill it in for you; Semantics is how you fix the cases they cannot know about, such as an icon-only button or a decorative image.',
+use:'Icon buttons, custom controls built from GestureDetector, status messages, and anything whose meaning is only visual.',
+watch:'A screen reader reads what the tree says, not what the pixels show. An icon with no label is announced as nothing at all.',
+ctl:[{k:'case',l:'example',t:'sel',o:['icon-only button','a rating row','decorative image','a custom slider','a status message'],v:'icon-only button'},
+ {k:'fix',l:'semantics added',t:'chk',v:true},
+ {k:'merge',l:'MergeSemantics',t:'chk',v:false},
+ {k:'order',l:'force reading order with sortKey',t:'chk',v:false}],
 render(s,st,g){
- const stops=[];
- if(!s.ex)stops.push('Image');
- if(s.merge)stops.push('Chair, $24'+(s.lab?', Add to favourites':'')+', button');
- else{stops.push('Chair');stops.push('$24');stops.push(s.lab?'Add to favourites, button':'button (no label)')}
- g.innerHTML=`<div style="position:absolute;left:16px;right:16px;top:14px;display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--c1);border-radius:12px;background:var(--surface);${s.merge?'outline:2px dashed var(--c2);outline-offset:3px':''}"><div class="fb ${s.ex?'d':'c'}" style="width:48px;height:48px;opacity:${s.ex?.45:1}">img</div><div style="flex:1"><b>Chair</b><div style="color:var(--muted)">$24</div></div><div style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--muted);display:flex;align-items:center;justify-content:center;color:var(--c4)">${ic('favorite',22)}</div></div><div style="position:absolute;left:16px;right:16px;top:112px;font:600 11px var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)">Screen reader reads</div><ol style="position:absolute;left:16px;right:16px;top:134px;margin:0;padding:0;list-style:none;display:grid;gap:6px">${stops.map((t,i)=>`<li style="display:flex;gap:10px;align-items:center;padding:7px 12px;border-radius:8px;background:${/no label/.test(t)?'rgba(200,40,63,.12)':'var(--accent-soft)'};color:var(--fg);font-size:14px"><span style="font:500 11px var(--f-mono);color:var(--muted)">${i+1}</span>${esc(t)}</li>`).join('')}</ol>`;
- let btn='IconButton(\n  icon: Icon(Icons.favorite),\n  onPressed: toggle,\n)';
- if(s.lab)btn=`Semantics(\n  label: 'Add to favourites',\n  button: true,\n  child: ${btn.replace(/\n/g,'\n  ')},\n)`;
- const img=s.ex?'ExcludeSemantics(child: Image.asset(\'chair.png\'))':"Image.asset('chair.png')";
- const row=`Row(children: [\n  ${img},\n  Column(children: [Text('Chair'), Text('\\$24')]),\n  ${btn.replace(/\n/g,'\n  ')},\n])`;
- return {code:s.merge?`MergeSemantics(\n  child: ${row.replace(/\n/g,'\n  ')},\n)`:row,hint:/no label/.test(stops.join())?'An icon button with no label is read as just "button". The user cannot tell what it does.':'Each line is one swipe for a screen reader user. Fewer, clearer stops make the card faster to use.'};
+ const fix=s.fix;
+ let visual,spoken;
+ if(s.case==='icon-only button'){
+  visual=`<div style="display:flex;gap:12px">${['favorite','star','delete'].map(i=>`<div style="width:44px;height:44px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--accent)">${ic(i,20)}</div>`).join('')}</div>`;
+  spoken=fix?['"Add to favourites, button"','"Rate, button"','"Delete, button"']:['(nothing announced)','(nothing announced)','(nothing announced)'];
+ } else if(s.case==='a rating row'){
+  visual=`<div style="display:flex;align-items:center;gap:4px">${[1,2,3,4].map(i=>`<span style="color:${i<=4?'var(--c3)':'var(--line)'}">${ic('star',20)}</span>`).join('')}<span style="margin-left:6px;font:600 14px var(--f-body)">4.5</span></div>`;
+  spoken=fix?['"Rated 4.5 out of 5 stars"']:['"star"','"star"','"star"','"star"','"4.5"'];
+ } else if(s.case==='decorative image'){
+  visual=`<div style="display:flex;align-items:center;gap:12px"><img alt="" src="${PIC}" style="width:76px;height:50px;object-fit:cover;border-radius:8px"><span style="font:14px var(--f-body)">Mountain trip</span></div>`;
+  spoken=fix?['"Mountain trip"  (the image is skipped)']:['"image"','"Mountain trip"'];
+ } else if(s.case==='a custom slider'){
+  visual=`<div style="width:200px"><div style="height:6px;border-radius:999px;background:var(--line);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:60%;background:var(--accent);border-radius:999px"></div><div style="position:absolute;left:60%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:var(--accent)"></div></div></div>`;
+  spoken=fix?['"Volume, 60 percent, slider"','swipe up: "65 percent"','swipe down: "55 percent"']:['(nothing: it is a GestureDetector on a Container)'];
+ } else {
+  visual=`<div style="padding:10px 14px;border-radius:9px;background:#dcfce7;color:#15803d;font:600 13.5px var(--f-body)">Saved just now</div>`;
+  spoken=fix?['announced automatically when it changes']:['only read if the user moves focus to it'];
+ }
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px">
+   <div>${visual}</div>
+   <div style="width:100%;max-width:300px;border:1.3px solid ${fix?'var(--line)':'var(--danger)'};border-radius:10px;background:var(--surface);padding:10px 12px">
+     <div class="cap" style="margin:0 0 6px">what the screen reader says</div>
+     ${spoken.map(t=>`<div style="font:12.5px var(--f-mono);color:${fix?'var(--fg)':'var(--danger)'};line-height:1.6">${t}</div>`).join('')}
+   </div>
+ </div>`;
+ let code;
+ if(s.case==='icon-only button')code=fix
+  ?`IconButton(\n  tooltip: 'Add to favourites',   // tooltip doubles as the label\n  icon: const Icon(Icons.favorite),\n  onPressed: toggleFavourite,\n)\n\n// or, on a plain Icon\nconst Icon(Icons.favorite, semanticLabel: 'Add to favourites')`
+  :`IconButton(\n  icon: const Icon(Icons.favorite),   // no tooltip, no label\n  onPressed: toggleFavourite,\n)   // announced as nothing`;
+ else if(s.case==='a rating row')code=fix
+  ?`Semantics(\n  label: 'Rated 4.5 out of 5 stars',\n  excludeSemantics: true,   // hide the individual stars\n  child: Row(children: [...stars, const Text('4.5')]),\n)`
+  :`Row(children: [...stars, const Text('4.5')])\n// each star is announced on its own: "star, star, star, star, 4.5"`;
+ else if(s.case==='decorative image')code=fix
+  ?`Image.network(\n  url,\n  excludeFromSemantics: true,   // purely decorative\n)\n\n// if it carries meaning, label it instead\nImage.network(url, semanticLabel: 'Snow on the summit')`
+  :`Image.network(url)   // announced as "image", which tells the user nothing`;
+ else if(s.case==='a custom slider')code=fix
+  ?`Semantics(\n  slider: true,\n  label: 'Volume',\n  value: '\${(volume * 100).round()} percent',\n  increasedValue: '\${(volume * 100).round() + 5} percent',\n  decreasedValue: '\${(volume * 100).round() - 5} percent',\n  onIncrease: () => setState(() => volume += 0.05),\n  onDecrease: () => setState(() => volume -= 0.05),\n  child: GestureDetector(onPanUpdate: ..., child: CustomPaint(...)),\n)`
+  :`GestureDetector(\n  onPanUpdate: ...,\n  child: CustomPaint(painter: SliderPainter(volume)),\n)   // invisible to a screen reader`;
+ else code=fix
+  ?`Semantics(\n  liveRegion: true,   // announced when the text changes\n  child: Text(statusMessage),\n)`
+  :`Text(statusMessage)   // silent until the user moves focus here`;
+ if(s.merge)code+=`\n\n// read an icon and its label as one item\nMergeSemantics(\n  child: Row(\n    children: [Icon(Icons.wifi), Text('Connected')],\n  ),\n)`;
+ if(s.order)code+=`\n\n// force the reading order\nSemantics(sortKey: const OrdinalSortKey(1), child: title),\nSemantics(sortKey: const OrdinalSortKey(2), child: summary),`;
+ const notes=[];
+ if(!fix)notes.push('This is what a screen reader user actually gets today.');
+ if(s.case==='a status message'&&fix)notes.push('liveRegion announces changes without the user moving focus. Use it sparingly: every change interrupts.');
+ if(s.merge)notes.push('MergeSemantics turns a subtree into one node, so an icon and its label are read together.');
+ if(s.order)notes.push('OrdinalSortKey overrides the default reading order, which follows the visual layout.');
+ notes.push('Check your work with the SemanticsDebugger widget, or assert it in tests with matchesSemantics.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Scrolling',id:'reorderable-list-view',name:'ReorderableListView',tags:'drag reorder handle onreorderitem key proxydecorator header footer builder index fix',h:340,
@@ -3589,19 +3714,40 @@ render(s,st,g){
  return {code:`DefaultTabController(\n  length: 3,\n  child: NestedScrollView(\n${s.float?'    floatHeaderSlivers: true,\n':''}    headerSliverBuilder: (context, innerBoxIsScrolled) => [\n${s.absorb?'      SliverOverlapAbsorber(\n        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),\n        sliver: ':'      '}SliverAppBar(\n          expandedHeight: ${exp},\n          pinned: true,\n          forceElevated: innerBoxIsScrolled,\n          flexibleSpace: const FlexibleSpaceBar(title: Text('Profile')),\n          bottom: const TabBar(tabs: [Tab(text: 'Posts'), Tab(text: 'Media'), Tab(text: 'Likes')]),\n        )${s.absorb?',\n      ),':','}\n    ],\n    body: const TabBarView(\n      children: [PostsTab(), MediaTab(), LikesTab()],\n    ),\n  ),\n)\n\n// inside each tab\nCustomScrollView(\n${s.keep?"  key: const PageStorageKey('posts'),\n":''}  slivers: [\n${s.absorb?'    SliverOverlapInjector(\n      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),\n    ),\n':''}    SliverList.builder(\n      itemCount: posts.length,\n      itemBuilder: (context, i) => ListTile(title: Text(posts[i])),\n    ),\n  ],\n)`,hint:notes.join(' ')};
 }});
 /* ---- Layout ---- */
-def({cat:'Layout',id:'table',name:'Table',tags:'grid rows columns tablerow tablecell columnwidths border flexcolumnwidth fixedcolumnwidth intrinsic',h:300,
-blurb:'Table lays children out in rows and columns where each column has one width for all rows. You choose how column widths are decided with columnWidths.',
-use:'Small grids of aligned data, such as a spec sheet or a price list. For long data use DataTable or ListView.',
-watch:'Table does not scroll and does not lazy-load. IntrinsicColumnWidth measures every cell in the column, so it is the most expensive choice on big tables.',
-ctl:[{k:'w',l:'columnWidths',t:'sel',o:['FlexColumnWidth (equal)','IntrinsicColumnWidth','FixedColumnWidth(80) first column'],v:'FlexColumnWidth (equal)'},{k:'b',l:'TableBorder.all',t:'chk',v:true},{k:'va',l:'defaultVerticalAlignment',t:'sel',o:['top','middle','bottom'],v:'middle'}],
+def({cat:'Layout',id:'table',name:'Table',tags:'columns rows columnwidths flexcolumnwidth intrinsic fixed border tablerow tablecell datatable align',h:340,
+blurb:'Table lays out a real grid where columns line up across every row. You control each column with a TableColumnWidth: flexible, fixed, intrinsic or a fraction.',
+use:'Spec sheets, comparison tables, key-and-value lists where the values must align.',
+watch:'Every row must have the same number of cells. Table is not scrollable and lays out every row at once, so wrap it in a scroll view and think twice for long data.',
+ctl:[{k:'c0',l:'column 0 width',t:'sel',o:['IntrinsicColumnWidth','FlexColumnWidth(1)','FixedColumnWidth(90)','FractionColumnWidth(0.3)'],v:'IntrinsicColumnWidth'},
+ {k:'c1',l:'column 1 width',t:'sel',o:['FlexColumnWidth(1)','FlexColumnWidth(2)','IntrinsicColumnWidth','FixedColumnWidth(80)'],v:'FlexColumnWidth(2)'},
+ {k:'border',l:'border',t:'sel',o:['none','all','horizontal only'],v:'all'},
+ {k:'align',l:'defaultVerticalAlignment',t:'sel',o:['top','middle','bottom','baseline'],v:'middle'},
+ {k:'stripe',l:'striped rows (TableRow decoration)',t:'chk',v:true},
+ {k:'head',l:'header row',t:'chk',v:true},
+ {k:'long',l:'one cell has long text',t:'chk',v:true}],
 render(s,st,g){
- const rows=[['Name','Size','Notes'],['Row','1D','Lays out children horizontally'],['Stack','Layers','Overlap'],['Table','2D','Aligned columns, no scroll']];
- const fx=s.w.startsWith('Flex'),it=s.w.startsWith('Intr');
- const colg=fx?'<col><col><col>':it?'':'<col style="width:80px"><col><col>';
- const va={top:'top',middle:'middle',bottom:'bottom'}[s.va];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><table style="border-collapse:collapse;font-size:13.5px;${it?'':'width:100%;table-layout:fixed;'}${s.b?'':''}">${colg}${rows.map((r,i)=>`<tr style="height:${i===3?64:i===0?30:44}px">${r.map(c=>`<td style="vertical-align:${va};padding:6px 10px;${s.b?'border:1px solid var(--muted);':''}${i===0?'font-weight:700;background:var(--c1s);color:var(--c1t)':''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</table></div>`;
- const cw=fx?'// default: FlexColumnWidth(1.0) for every column':it?'columnWidths: {\n    0: IntrinsicColumnWidth(),\n    1: IntrinsicColumnWidth(),\n    2: IntrinsicColumnWidth(),\n  },':'columnWidths: {\n    0: FixedColumnWidth(80),\n    1: FlexColumnWidth(),\n    2: FlexColumnWidth(),\n  },';
- return {code:`Table(\n  ${cw}\n${s.b?'  border: TableBorder.all(),\n':''}  defaultVerticalAlignment:\n      TableCellVerticalAlignment.${s.va},\n  children: [\n    TableRow(children: [Text('Name'), Text('Size'), Text('Notes')]),\n    // more TableRow(...) widgets\n  ],\n)`,hint:'The last row is taller so you can see the vertical alignment setting.'};
+ const W={'IntrinsicColumnWidth':'max-content','FlexColumnWidth(1)':'1fr','FlexColumnWidth(2)':'2fr','FixedColumnWidth(90)':'90px','FixedColumnWidth(80)':'80px','FractionColumnWidth(0.3)':'30%'};
+ const cols=`${W[s.c0]} ${W[s.c1]} 1fr`;
+ const b=s.border;
+ const cellB=b==='all'?'border:1px solid var(--line);':b==='horizontal only'?'border-bottom:1px solid var(--line);':'';
+ const AV={top:'flex-start',middle:'center',bottom:'flex-end',baseline:'baseline'}[s.align];
+ const rows=[['Display','6.1 inch OLED, 2556 x 1179','120 Hz'],['Battery',s.long?'3349 mAh, up to 20 hours of video playback on a single charge':'3349 mAh','20 W'],['Weight','171 g','-']];
+ const cell=(t,i,hdr)=>`<div style="${cellB}padding:8px 10px;display:flex;align-items:${AV};font:${hdr?'600 12px var(--f-mono)':'13px var(--f-body)'};${hdr?'letter-spacing:.05em;color:var(--muted);text-transform:uppercase;':''}line-height:1.4">${t}</div>`;
+ const head=s.head?`<div style="display:contents">${['Spec','Value','Note'].map((t,i)=>cell(t,i,true)).join('')}</div>`:'';
+ const body=rows.map((r,ri)=>`<div style="display:contents">${r.map((t,i)=>`<div style="${cellB}padding:8px 10px;display:flex;align-items:${AV};font:13px var(--f-body);line-height:1.4;${s.stripe&&ri%2===1?'background:var(--accent-soft);':''}">${t}</div>`).join('')}</div>`).join('');
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px;overflow:auto"><div style="width:100%;max-width:330px;display:grid;grid-template-columns:${cols};${b==='all'?'':''}">${head}${body}</div></div>`;
+ const L=[`columnWidths: const {\n    0: ${s.c0},\n    1: ${s.c1},\n  },`];
+ if(b!=='none')L.push(b==='all'?'border: TableBorder.all(color: Colors.black12),':'border: const TableBorder(horizontalInside: BorderSide(color: Colors.black12)),');
+ if(s.align!=='top')L.push(`defaultVerticalAlignment: TableCellVerticalAlignment.${s.align},`);
+ if(s.align==='baseline')L.push('textBaseline: TextBaseline.alphabetic,   // required for baseline');
+ const rowsCode=`  children: [\n${s.head?"    const TableRow(\n      decoration: BoxDecoration(color: Color(0x11000000)),\n      children: [HeaderCell('Spec'), HeaderCell('Value'), HeaderCell('Note')],\n    ),\n":''}    for (final (i, spec) in specs.indexed)\n      TableRow(\n${s.stripe?"        decoration: BoxDecoration(\n          color: i.isOdd ? Colors.black.withValues(alpha: 0.03) : null,\n        ),\n":''}        children: [\n          Text(spec.name),\n          Text(spec.value),\n          Text(spec.note),\n        ],\n      ),\n  ],`;
+ const notes=[];
+ if(s.c0==='IntrinsicColumnWidth')notes.push('IntrinsicColumnWidth makes the column as wide as its widest cell. It is accurate but measures everything, so it is slow on big tables.');
+ if(s.c1.startsWith('Flex'))notes.push('FlexColumnWidth shares the leftover space, like Expanded does in a Row.');
+ if(s.c0.startsWith('Fraction'))notes.push('FractionColumnWidth is a share of the whole table width.');
+ if(s.long)notes.push('A long cell is what makes the column rules visible: flexible columns absorb it, fixed ones wrap.');
+ notes.push('For sortable headers, selectable rows and Material styling, use DataTable instead. For scrolling data, a ListView of Rows is usually better.');
+ return {code:`Table(\n${L.map(x=>'  '+x).join('\n')}\n${rowsCode}\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'baseline',name:'Baseline',tags:'text alignment alphabetic ideographic crossaxisalignment row mixed font sizes',h:320,
@@ -3636,18 +3782,47 @@ render(s,st,g){
  return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'flow',name:'Flow',tags:'flowdelegate paintchildren transform matrix4 radial menu fan custom layout performance',h:300,
-blurb:'Flow positions its children with a FlowDelegate that paints each child with a transform. Because it only changes the paint transform and does not re-run layout, it is efficient for animated layouts such as a fan menu.',
-use:'Custom animated arrangements, for example a floating action button that fans out its actions.',
-watch:'Flow does not size itself to its children, so give it a size. Children are laid out once, and the delegate only moves them, so they cannot change each other\'s size.',
-ctl:[{k:'n',l:'items',t:'rng',min:3,max:8,v:5},{k:'r',l:'radius',t:'rng',min:50,max:120,step:5,v:95}],
-render(s,st,g){
- if(!st.built){st.built=true;st.open=false;g.innerHTML='<div class="flw" style="position:absolute;left:50%;bottom:36px;width:0;height:0"></div>'}
- const host=g.querySelector('.flw'),n=s.n,icons=['home','star','favorite','person','menu','add','back','check'];
- host.innerHTML=Array.from({length:n},(_,i)=>{const a=Math.PI*(i/(n-1)),x=-Math.cos(a)*s.r,y=-Math.sin(a)*s.r;return `<div class="fb ${['a','b','c','d'][i%4]}" style="position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;transition:transform .35s cubic-bezier(.2,.8,.2,1);transform:${st.open?`translate(${x}px,${y}px)`:'translate(0,0)'};z-index:1">${ic(icons[i],20)}</div>`}).join('')+`<button class="fab" data-a="tog" type="button" aria-label="Toggle flow menu" style="left:-24px;top:-24px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);z-index:2;transition:transform .3s;transform:rotate(${st.open?45:0}deg)">${ic('add',26)}</button>`;
- return {code:`class FanDelegate extends FlowDelegate {\n  FanDelegate(this.progress) : super(repaint: progress);\n  final Animation<double> progress;\n\n  @override\n  void paintChildren(FlowPaintingContext context) {\n    final n = context.childCount - 1; // last child is the button\n    for (var i = 0; i < n; i++) {\n      final angle = pi * i / (${n}-1);\n      context.paintChild(i,\n        transform: Matrix4.translationValues(\n          -cos(angle) * ${s.r} * progress.value,\n          -sin(angle) * ${s.r} * progress.value, 0));\n    }\n    context.paintChild(n);\n  }\n\n  @override\n  bool shouldRepaint(FanDelegate old) => progress != old.progress;\n}`,hint:'Press the + button. Flow only repaints children at new transforms, so no layout runs.'};
-},
-act(a,st){if(a==='tog')st.open=!st.open}});
+def({cat:'Layout',id:'flow',name:'Flow',tags:'flowdelegate paintchildren matrix4 radial menu animation performance transform repaint',h:330,
+blurb:'Flow positions its children at paint time through a matrix, not at layout time. Moving them costs no layout, which is why it suits menus and carousels that animate every frame.',
+use:'Radial or arc menus, custom carousels, anything where positions change continuously.',
+watch:'You must write a FlowDelegate. Because children are moved at paint time, hit testing follows the transform only if your delegate is consistent, so test taps at the edges.',
+ctl:[{k:'shape',l:'arrangement',t:'sel',o:['arc menu','circle','fan','row with scale'],v:'arc menu'},
+ {k:'n',l:'children',t:'rng',min:3,max:7,v:5},
+ {k:'t',l:'animation value',t:'rng',min:0,max:1,step:.05,v:1},
+ {k:'r',l:'radius',t:'rng',min:50,max:120,v:92},
+ {k:'auto',l:'animate',t:'chk',v:false}],
+render(s,st,g,d){
+ const n=+s.n;
+ let t=+s.t;
+ if(s.auto)t=st.on?1:0.05;
+ const R=(+s.r)*t;
+ const items=[...Array(n)].map((_,i)=>{
+  let x=0,y=0,sc=1,op=1;
+  if(s.shape==='arc menu'){const a=(-90-i*(95/(n-1)))*Math.PI/180;const rr=R*(1+i*0.1);x=Math.cos(a)*rr;y=Math.sin(a)*rr}
+  else if(s.shape==='circle'){const a=(i*(360/n)-90)*Math.PI/180;x=Math.cos(a)*R;y=Math.sin(a)*R}
+  else if(s.shape==='fan'){const a=(-90+(i-(n-1)/2)*22)*Math.PI/180;x=Math.cos(a)*R;y=Math.sin(a)*R}
+  else {x=(i-(n-1)/2)*44*t;y=0;sc=1-Math.abs(i-(n-1)/2)*0.13*t}
+  op=t;
+  return `<div class="fb ${'abcd'[i%4]}" style="position:absolute;left:50%;top:${s.shape==='row with scale'?'50%':'72%'};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 13px var(--f-body);transform:translate(calc(-50% + ${x.toFixed(1)}px),calc(-50% + ${y.toFixed(1)}px)) scale(${sc.toFixed(2)});opacity:${op.toFixed(2)};transition:${s.auto?'transform .45s cubic-bezier(.34,1.4,.64,1),opacity .3s':'none'}">${i+1}</div>`;
+ }).join('');
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">${items}<div style="position:absolute;left:50%;top:${s.shape==='row with scale'?'50%':'72%'};transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center">${ic('add',24)}</div></div></div>`;
+ if(s.auto){clearTimeout(st.t);st.t=setTimeout(()=>{st.on=!st.on;d.draw()},900)}
+ else clearTimeout(st.t);
+ const math=s.shape==='arc menu'?'      final angle = -math.pi / 2 - i * (95 * math.pi / 180) / (count - 1);'
+  :s.shape==='circle'?'      final angle = i * 2 * math.pi / count - math.pi / 2;'
+  :s.shape==='fan'?'      final angle = -math.pi / 2 + (i - (count - 1) / 2) * 0.38;'
+  :'      final dx = (i - (count - 1) / 2) * 44 * animation.value;';
+ const paint=s.shape==='row with scale'
+  ? '      final scale = 1 - (i - (count - 1) / 2).abs() * 0.13 * animation.value;\n      context.paintChild(\n        i,\n        transform: Matrix4.identity()\n          ..translate(dx, 0.0)\n          ..scale(scale),\n      );'
+  : '      final r = radius * animation.value;\n      context.paintChild(\n        i,\n        transform: Matrix4.translationValues(\n          math.cos(angle) * r,\n          math.sin(angle) * r,\n          0,\n        ),\n      );';
+ const code=`class MenuFlowDelegate extends FlowDelegate {\n  MenuFlowDelegate({required this.animation, this.radius = ${s.r}})\n      : super(repaint: animation);   // repaint without rebuilding\n\n  final Animation<double> animation;\n  final double radius;\n\n  @override\n  void paintChildren(FlowPaintingContext context) {\n    final count = context.childCount;\n    for (var i = 0; i < count; i++) {\n${math}\n${paint}\n    }\n  }\n\n  @override\n  bool shouldRepaint(MenuFlowDelegate old) => animation != old.animation;\n}\n\nFlow(\n  delegate: MenuFlowDelegate(animation: _controller),\n  children: const [FabItem(1), FabItem(2), FabItem(3)],\n)`;
+ const notes=[];
+ notes.push('Children are laid out once and then painted through a matrix, so animating their positions costs no layout.');
+ notes.push('Passing the animation as repaint to the super constructor is what lets it repaint without a rebuild.');
+ if(s.shape==='row with scale')notes.push('A carousel where items scale as they pass the centre is the other classic Flow use.');
+ notes.push('For a static set of chips use Wrap instead: it is far simpler and does real layout.');
+ return {code,hint:notes.join(' ')};
+}});
 
 def({cat:'Layout',id:'safe-area',name:'SafeArea',tags:'notch status bar home indicator padding mediaquery insets minimum keyboard sliversafearea',h:330,
 blurb:'SafeArea is a Padding fed by MediaQuery: it keeps its child clear of the status bar, the notch, the home indicator and rounded corners.',
