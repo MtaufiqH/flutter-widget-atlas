@@ -54,6 +54,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -1232,15 +1233,52 @@ render(s,st,g){
  return {code:`Icon(Icons.${s.ic}, size: ${s.sz}, color: Colors.${s.col}),\n\nCircleAvatar(\n  radius: ${s.rad},\n  backgroundColor: Colors.${s.col}.shade100,\n  child: Text('AB'),\n)`,hint:'CircleAvatar radius is half the diameter.'};
 }});
 
-def({cat:'Display',id:'card-list-tile',name:'Card & ListTile',tags:'material elevation shape divider leading trailing subtitle',
-blurb:'Card is a Material surface with rounded corners and a shadow. ListTile is a ready-made row with leading, title, subtitle and trailing slots, so you rarely have to build a list row by hand.',
-use:'Grouped content, settings rows and list items.',
-watch:'Card has a default margin of 4. ListTile needs a bounded width, so it cannot sit directly in an unconstrained Row.',
-ctl:[{k:'el',l:'elevation',t:'rng',min:0,max:12,v:4},{k:'r',l:'corner radius',t:'rng',min:0,max:28,v:12},{k:'ld',l:'leading',t:'chk',v:true},{k:'tr',l:'trailing',t:'chk',v:true},{k:'dv',l:'Divider between',t:'chk',v:true}],
+def({cat:'Display',id:'card-list-tile',name:'Card & ListTile',tags:'material elevation shape divider leading trailing subtitle dense selected tilecolor contentpadding threeline filled outlined clipbehavior',h:340,
+blurb:'Card is a Material surface with elevation and rounded corners. ListTile is the standard row: a leading widget, one or two lines of text and a trailing widget, with the Material spacing already right.',
+use:'Lists of items, settings screens and anything that groups a few rows together.',
+watch:'Put the InkWell inside the Card, not around it, or the ripple paints over the rounded corners. A Card has a default margin of 4, which you often want to clear in a list that has its own padding.',
+ctl:[{k:'var',l:'Card variant',t:'sel',o:['Card','Card.filled','Card.outlined'],v:'Card'},
+ {k:'el',l:'elevation',t:'rng',min:0,max:12,v:4},
+ {k:'r',l:'shape: borderRadius',t:'rng',min:0,max:28,v:12},
+ {k:'mg',l:'margin',t:'rng',min:0,max:20,v:4},
+ {k:'cp',l:'contentPadding (horizontal)',t:'rng',min:0,max:32,v:16},
+ {k:'ld',l:'leading',t:'chk',v:true},
+ {k:'tr',l:'trailing',t:'chk',v:true},
+ {k:'sub',l:'subtitle',t:'chk',v:true},
+ {k:'three',l:'isThreeLine',t:'chk',v:false},
+ {k:'dense',l:'dense',t:'chk',v:false},
+ {k:'sel',l:'selected',t:'chk',v:false},
+ {k:'dv',l:'Divider between',t:'chk',v:true}],
 render(s,st,g){
- const tile=(t,sub)=>`<div class="lt">${s.ld?`<div class="fb a" style="width:36px;height:36px;border-radius:50%;margin-right:12px">${t[0]}</div>`:''}<div style="flex:1;min-width:0"><div style="font-weight:600">${t}</div><div class="cap" style="margin:0">${sub}</div></div>${s.tr?ic('chevron',22,'var(--muted)'):''}</div>`;
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:280px;background:var(--surface);border-radius:${s.r}px;box-shadow:0 ${s.el}px ${s.el*2.2}px rgba(20,30,80,${(.1+s.el*.012).toFixed(3)});border:1px solid var(--line);overflow:hidden">${tile('Wi-Fi','Connected')}${s.dv?'<div style="height:1px;background:var(--line)"></div>':''}${tile('Bluetooth','Off')}</div></div>`;
- return {code:`Card(\n  elevation: ${s.el},\n  shape: RoundedRectangleBorder(\n    borderRadius: BorderRadius.circular(${s.r}),\n  ),\n  child: Column(children: [\n    ListTile(\n${s.ld?"      leading: CircleAvatar(child: Text('W')),\n":''}      title: Text('Wi-Fi'),\n      subtitle: Text('Connected'),\n${s.tr?'      trailing: Icon(Icons.chevron_right),\n':''}    ),\n${s.dv?'    Divider(height: 1),\n':''}    ListTile(title: Text('Bluetooth'), subtitle: Text('Off')),\n  ]),\n)`,hint:''};
+ const out=s.var==='Card.outlined',fill=s.var==='Card.filled';
+ const el=out||fill?0:s.el;
+ const pv=s.dense?6:(s.three?14:10);
+ const tile=(t,sub,i)=>`<div style="display:flex;align-items:${s.three?'flex-start':'center'};gap:${Math.max(8,s.cp-4)}px;padding:${pv}px ${s.cp}px;${s.sel?'background:var(--accent-soft);':''}">${s.ld?`<div class="fb ${'ab'[i%2]}" style="width:${s.dense?34:40}px;height:${s.dense?34:40}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none">${'AB'[i%2]}</div>`:''}<div style="flex:1;min-width:0"><div style="font:${s.dense?'600 13.5px':'600 15px'} var(--f-body);${s.sel?'color:var(--accent);':''}">${t}</div>${s.sub?`<div style="font-size:${s.dense?12:13}px;color:var(--muted);line-height:1.35">${sub}</div>`:''}</div>${s.tr?`<div style="color:var(--muted);flex:none">${ic('chevron',20)}</div>`:''}</div>`;
+ const rows=tile('Wi-Fi',s.three?'Connected to Home-5G<br>Strong signal, 120 Mbps':'Connected to Home-5G',0)+(s.dv?'<div style="height:1px;background:var(--line);margin-left:'+(s.ld?s.cp+ (s.dense?34:40) + Math.max(8,s.cp-4):s.cp)+'px"></div>':'')+tile('Bluetooth',s.three?'2 devices paired<br>Headphones, Watch':'2 devices paired',1);
+ const card=`<div style="margin:${s.mg}px;border-radius:${s.r}px;overflow:hidden;background:${fill?'var(--accent-soft)':'var(--surface)'};${out?'border:1.2px solid var(--line);':''}${el?`box-shadow:0 ${Math.round(el/2)}px ${el*2.2}px rgba(20,30,80,.22);`:''}">${rows}</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:10px"><div style="width:100%;max-width:330px">${card}</div></div>`;
+ const cl=[];
+ if(s.var==='Card')cl.push(`elevation: ${s.el},`);
+ cl.push(`margin: const EdgeInsets.all(${s.mg}),`);
+ cl.push(`shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(${s.r})),`);
+ cl.push('clipBehavior: Clip.antiAlias,   // so children follow the corners');
+ const tl=[];
+ if(s.ld)tl.push("leading: const CircleAvatar(child: Text('A')),");
+ tl.push("title: const Text('Wi-Fi'),");
+ if(s.sub)tl.push("subtitle: const Text('Connected to Home-5G'),");
+ if(s.tr)tl.push('trailing: const Icon(Icons.chevron_right),');
+ if(s.three)tl.push('isThreeLine: true,');
+ if(s.dense)tl.push('dense: true,');
+ if(s.sel)tl.push('selected: true,');
+ if(s.cp!==16)tl.push(`contentPadding: const EdgeInsets.symmetric(horizontal: ${s.cp}),`);
+ tl.push('onTap: () {},');
+ const sepa=s.dv?'\n      const Divider(height: 1, indent: 72),':'';
+ const notes=[];
+ if(out||fill)notes.push(s.var+' ignores elevation: it uses an outline or a tinted surface instead.');
+ if(s.three)notes.push('isThreeLine makes room for a second subtitle line and moves the leading widget to the top.');
+ if(s.sel)notes.push('selected recolours the text and icons. Pair it with selectedTileColor for a background.');
+ if(s.dense)notes.push('dense shrinks the text and the row height, for settings-style lists.');
+ return {code:`${s.var}(\n${cl.map(x=>'  '+x).join('\n')}\n  child: Column(\n    mainAxisSize: MainAxisSize.min,\n    children: [\n      ListTile(\n${tl.map(x=>'        '+x).join('\n')}\n      ),${sepa}\n      // ... more tiles\n    ],\n  ),\n)`,hint:notes.join(' ')||'Card plus a Column of ListTiles is the standard grouped list.'};
 }});
 
 def({cat:'Display',id:'opacity',name:'Opacity',tags:'transparent alpha fade withopacity',
@@ -1268,20 +1306,60 @@ render(s,st,g){
 }});
 
 /* ================= INPUT ================= */
-def({cat:'Input',id:'buttons',name:'Buttons',tags:'elevatedbutton filledbutton outlinedbutton textbutton iconbutton onpressed disabled',
-blurb:'Material 3 has several button styles with different emphasis: FilledButton and ElevatedButton for primary actions, OutlinedButton and TextButton for secondary ones, and IconButton for a single glyph.',
-use:'Any tap target that triggers an action.',
-watch:'A button is disabled when onPressed is null. There is no separate enabled flag.',
-ctl:[{k:'kind',l:'Widget',t:'sel',o:['FilledButton','ElevatedButton','OutlinedButton','TextButton','IconButton'],v:'FilledButton'},{k:'en',l:'onPressed set',t:'chk',v:true},{k:'icn',l:'.icon variant',t:'chk',v:false}],
+def({cat:'Input',id:'buttons',name:'Buttons',tags:'elevatedbutton filledbutton outlinedbutton textbutton iconbutton onpressed styleFrom buttonstyle shape padding minimumsize elevation icon alignment disabled',h:330,
+blurb:'Material gives you five button widgets that differ only in emphasis. They share the same arguments, and everything about the look comes from style, which you normally build with the matching styleFrom helper.',
+use:'Any tap target with a label. Pick the type by how important the action is.',
+watch:'onPressed: null is what disables a button, and it is also why a button sometimes looks grey for no reason. Keep tapTargetSize padded so the touch area stays 48 pixels even on a small button.',
+ctl:[{k:'kind',l:'Widget',t:'sel',o:['FilledButton','ElevatedButton','OutlinedButton','TextButton','IconButton'],v:'FilledButton'},
+ {k:'bg',l:'backgroundColor',t:'sel',o:['theme','blue','green','red'],v:'theme'},
+ {k:'r',l:'shape: borderRadius',t:'rng',min:0,max:28,v:20},
+ {k:'ph',l:'padding: horizontal',t:'rng',min:8,max:40,v:24},
+ {k:'pv',l:'padding: vertical',t:'rng',min:6,max:26,v:12},
+ {k:'el',l:'elevation',t:'rng',min:0,max:12,v:2},
+ {k:'wide',l:'minimumSize: full width',t:'chk',v:false},
+ {k:'icn',l:'.icon variant',t:'chk',v:false},
+ {k:'ia',l:'iconAlignment',t:'sel',o:['start','end'],v:'start'},
+ {k:'en',l:'onPressed set',t:'chk',v:true}],
 render(s,st,g){
- const k=s.kind.replace('Button',''),isI=s.kind==='IconButton',dis=s.en?'':' disabled';
- const inner=isI?ic('favorite',22):(s.icn?ic('add',18)+' ':'')+'Save';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;flex-direction:column;gap:18px"><button class="btn k-${isI?'Icon':k}"${dis} data-a="press">${inner}</button><div class="cap" style="margin:0">onPressed fired ${st.n||0} time${(st.n||0)===1?'':'s'}</div></div>`;
+ const isI=s.kind==='IconButton',dis=!s.en;
+ const C={theme:['var(--accent)','var(--accent-ink)'],blue:['#2563eb','#fff'],green:['#15803d','#fff'],red:['#b91c1c','#fff']}[s.bg];
+ const filled=s.kind==='FilledButton'||s.kind==='ElevatedButton';
+ let css=`display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:${s.r}px;padding:${s.pv}px ${s.ph}px;font:600 14.5px var(--f-body);cursor:${dis?'not-allowed':'pointer'};border:0;`;
+ if(dis)css+='background:var(--line);color:var(--muted);';
+ else if(filled)css+=`background:${C[0]};color:${C[1]};`+(s.kind==='ElevatedButton'&&s.el?`box-shadow:0 ${Math.round(s.el/2)}px ${s.el*2}px rgba(20,30,80,.3);`:'');
+ else if(s.kind==='OutlinedButton')css+=`background:transparent;color:${C[0]};border:1.4px solid ${dis?'var(--line)':C[0]};`;
+ else css+=`background:transparent;color:${C[0]};`;
+ if(s.wide&&!isI)css+='width:100%;';
+ const icon=s.icn||isI?ic(isI?'favorite':'add',20):'';
+ const label=isI?'':'<span>Save</span>';
+ const inner=isI?icon:(s.ia==='end'?label+icon:icon+label);
+ const btn=isI
+  ?`<button style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:0;background:transparent;color:${dis?'var(--muted)':C[0]};cursor:${dis?'not-allowed':'pointer'}">${icon}</button>`
+  :`<button style="${css}">${inner}</button>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:20px"><div style="width:100%;display:flex;justify-content:center">${btn}</div></div>`;
  const cb=s.en?'() {}':'null';
- const code=isI?`IconButton(\n  onPressed: ${cb},\n  icon: Icon(Icons.favorite),\n)`:s.icn?`${s.kind}.icon(\n  onPressed: ${cb},\n  icon: Icon(Icons.add),\n  label: Text('Save'),\n)`:`${s.kind}(\n  onPressed: ${cb},\n  child: Text('Save'),\n)`;
- return {code,hint:s.en?'Press the button.':'onPressed is null, so the button is disabled and ignores taps.'};
+ const L=[];
+ if(s.bg!=='theme')L.push(`backgroundColor: Colors.${s.bg},`,'foregroundColor: Colors.white,');
+ L.push(`padding: const EdgeInsets.symmetric(horizontal: ${s.ph}, vertical: ${s.pv}),`);
+ L.push(`shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(${s.r})),`);
+ if(s.kind==='ElevatedButton')L.push(`elevation: ${s.el},`);
+ if(s.wide)L.push('minimumSize: const Size.fromHeight(48),   // full width');
+ if(s.icn&&s.ia==='end')L.push('iconAlignment: IconAlignment.end,');
+ const styleArg=L.length?`\n  style: ${s.kind}.styleFrom(\n${L.map(x=>'    '+x).join('\n')}\n  ),`:'';
+ const code=isI
+  ?`IconButton(\n  onPressed: ${cb},\n  icon: const Icon(Icons.favorite),\n  tooltip: 'Save',\n)`
+  :s.icn
+   ?`${s.kind}.icon(\n  onPressed: ${cb},\n  icon: const Icon(Icons.add),\n  label: const Text('Save'),${styleArg}\n)`
+   :`${s.kind}(\n  onPressed: ${cb},${styleArg}\n  child: const Text('Save'),\n)`;
+ const notes=[];
+ if(dis)notes.push('onPressed is null, so the button is disabled and ignores taps.');
+ if(s.wide)notes.push('Size.fromHeight sets the height and leaves the width to the parent, which is how you get a full-width button.');
+ if(s.kind!=='ElevatedButton'&&s.el)notes.push('Only ElevatedButton shows elevation by default; the others sit flat.');
+ if(isI)notes.push('IconButton keeps a 48 pixel tap target. Always give it a tooltip, which is what a screen reader reads.');
+ return {code,hint:notes.join(' ')||'Everything here comes from styleFrom, which builds a ButtonStyle for you.'};
 },
 act(a,st){if(a==='press')st.n=(st.n||0)+1}});
+
 
 def({cat:'Input',id:'text-field',name:'TextField',tags:'input form textformfield decoration inputdecoration label hint obscure password error',h:300,
 blurb:'TextField takes typed input. The InputDecoration object controls how it looks: label or hint, icons, helper and error text, and the character counter.',
