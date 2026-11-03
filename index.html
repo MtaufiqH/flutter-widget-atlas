@@ -51,6 +51,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -767,19 +768,35 @@ render(s,st,g){
   hint:s.bk==='Flexible'?'Flexible keeps B at its own size. The dashed outline is the share it was offered.':s.bk==='Expanded'?'Expanded forces B to fill its whole share. Free space is divided by the flex ratio.':'A fixed SizedBox takes its width first. The flexible children share what remains.'};
 }});
 
-def({cat:'Layout',id:'stack-positioned',name:'Stack & Positioned',tags:'overlay absolute layer badge',
-blurb:'Stack paints its children on top of each other. Wrap a child in Positioned to pin it by distance from the Stack\'s edges. Children without Positioned follow the Stack\'s alignment.',
+def({cat:'Layout',id:'stack-positioned',name:'Stack & Positioned',tags:'overlay absolute layer badge stackfit clipbehavior positioned fill alignment',h:330,
+blurb:'Stack paints its children on top of each other, last one on top. Wrap a child in Positioned to pin it by distance from the edges. Children without Positioned follow the alignment, and fit decides how big they are.',
 use:'Badges, captions over images, floating buttons and any other overlap.',
-watch:'Positioned only works as a direct child of Stack. Anything outside the Stack\'s bounds is clipped unless clipBehavior is Clip.none.',
-ctl:[{k:'pos',l:'Positioned at',t:'sel',o:['topLeft','topRight','bottomLeft','bottomRight','fill'],v:'topRight'},{k:'off',l:'offset',t:'rng',min:-20,max:40,v:12},{k:'al',l:'Stack alignment',t:'sel',o:['topStart','center'],v:'topStart'},{k:'clip',l:'clipBehavior hardEdge',t:'chk',v:true}],
+watch:'Positioned only works as a direct child of Stack. Anything outside the bounds is clipped unless clipBehavior is Clip.none. Setting left, right and width together on one axis throws.',
+ctl:[{k:'pos',l:'Positioned at',t:'sel',o:['topLeft','topRight','bottomLeft','bottomRight','fill','stretch left+right'],v:'topRight'},
+ {k:'off',l:'offset',t:'rng',min:-20,max:40,v:12},
+ {k:'al',l:'Stack alignment',t:'sel',o:['topStart','center','bottomEnd'],v:'topStart'},
+ {k:'fit',l:'fit',t:'sel',o:['loose','expand','passthrough'],v:'loose'},
+ {k:'clip',l:'clipBehavior',t:'sel',o:['hardEdge','none','antiAlias'],v:'hardEdge'},
+ {k:'dir',l:'textDirection',t:'sel',o:['ltr','rtl'],v:'ltr'}],
 render(s,st,g){
- const o=s.off;
- const P={topLeft:`left:${o}px;top:${o}px`,topRight:`right:${o}px;top:${o}px`,bottomLeft:`left:${o}px;bottom:${o}px`,bottomRight:`right:${o}px;bottom:${o}px`,fill:`inset:${o}px`}[s.pos];
- const L={topLeft:`top: ${o},\n      left: ${o},`,topRight:`top: ${o},\n      right: ${o},`,bottomLeft:`bottom: ${o},\n      left: ${o},`,bottomRight:`bottom: ${o},\n      right: ${o},`,fill:`top: ${o}, left: ${o},\n      right: ${o}, bottom: ${o},`}[s.pos];
- const un=s.al==='center'?'left:50%;top:50%;transform:translate(-50%,-50%)':'left:0;top:0';
- g.innerHTML=`<div style="position:absolute;inset:34px 44px;border:1.5px dashed var(--c3);${s.clip?'overflow:hidden':''}"><div class="fb a" style="position:absolute;inset:0;border-radius:0;opacity:.55">Stack</div><div class="fb c" style="position:absolute;${un};width:96px;height:34px">no Positioned</div><div class="fb d" style="position:absolute;${P};${s.pos==='fill'?'':'width:76px;height:30px'}">Positioned</div></div>`;
- return {code:`Stack(\n  alignment: ${s.al==='center'?'Alignment.center':'AlignmentDirectional.topStart'},\n  clipBehavior: ${s.clip?'Clip.hardEdge':'Clip.none'},\n  children: [\n    Container(color: Colors.blue),\n    Positioned(\n      ${L}\n      child: Badge(),\n    ),\n  ],\n)`,
-  hint:'Set two opposite edges (left and right) and Positioned stretches the child between them.'};
+ const o=s.off,rtl=s.dir==='rtl';
+ const P={topLeft:`left:${o}px;top:${o}px`,topRight:`right:${o}px;top:${o}px`,bottomLeft:`left:${o}px;bottom:${o}px`,bottomRight:`right:${o}px;bottom:${o}px`,fill:`inset:${o}px`,'stretch left+right':`left:${o}px;right:${o}px;top:${o}px`}[s.pos];
+ const L={topLeft:`top: ${o},\n      left: ${o},`,topRight:`top: ${o},\n      right: ${o},`,bottomLeft:`bottom: ${o},\n      left: ${o},`,bottomRight:`bottom: ${o},\n      right: ${o},`,fill:`top: ${o}, left: ${o},\n      right: ${o}, bottom: ${o},`,'stretch left+right':`top: ${o},\n      left: ${o},\n      right: ${o},`}[s.pos];
+ const AP={topStart:rtl?'right:0;top:0':'left:0;top:0',center:'left:50%;top:50%;transform:translate(-50%,-50%)',bottomEnd:rtl?'left:0;bottom:0':'right:0;bottom:0'}[s.al];
+ const expand=s.fit==='expand';
+ const un=expand?'inset:0;width:auto;height:auto':AP+';width:96px;height:34px';
+ const clip=s.clip==='none'?'visible':'hidden';
+ g.innerHTML=`<div style="position:absolute;inset:34px 44px;border:1.5px dashed var(--c3);overflow:${clip}"><div class="fb a" style="position:absolute;inset:0;border-radius:0;opacity:.55">Stack</div><div class="fb c" style="position:absolute;${un};display:flex;align-items:center;justify-content:center;font-size:12px">no Positioned</div><div class="fb d" style="position:absolute;${P};${s.pos==='fill'||s.pos==='stretch left+right'?'':'width:72px;'}height:30px;display:flex;align-items:center;justify-content:center;font-size:12px">Positioned</div></div>`;
+ const notes=[];
+ if(expand)notes.push('StackFit.expand forces every child without Positioned to fill the Stack.');
+ if(s.fit==='passthrough')notes.push('passthrough hands the parent constraints straight down, so the child decides for itself.');
+ if(s.fit==='loose')notes.push('loose lets each unpositioned child be its own size and places it with alignment.');
+ if(s.clip==='none')notes.push('With Clip.none a child may hang outside the Stack, which is how a badge sits on a corner.');
+ if(s.pos==='stretch left+right')notes.push('Giving left and right together stretches the child between both edges, so you do not need a width.');
+ if(rtl)notes.push('In rtl, topStart means the top right corner.');
+ const fitLine=s.fit==='loose'?'':`  fit: StackFit.${s.fit},\n`;
+ const dirLine=rtl?'  textDirection: TextDirection.rtl,\n':'';
+ return {code:`Stack(\n  alignment: ${s.al==='center'?'Alignment.center':'AlignmentDirectional.'+s.al},\n${fitLine}${dirLine}  clipBehavior: Clip.${s.clip},\n  children: [\n    Container(color: Colors.blue),\n    Positioned(\n      ${L}\n      child: Badge(),\n    ),\n  ],\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'align-center',name:'Align & Center',tags:'alignment position',
@@ -877,15 +894,36 @@ render(s,st,g){
   hint:rb?'RotatedBox snaps to quarter turns. Its dashed layout box changes shape, so A and B move.':'The dashed layout box never changes. A and B stay put no matter the angle.'};
 }});
 
-def({cat:'Layout',id:'wrap',name:'Wrap',tags:'chips flow tags runs spacing',
-blurb:'Wrap lays children out in a line like Row or Column, but starts a new run when it runs out of space instead of overflowing.',
-use:'Tag lists, chips and filter buttons whose count and width vary.',
-watch:'Wrap has no scrolling. A Wrap with many runs can still overflow vertically, so put it in a scroll view if the list can be long.',
-ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},{k:'sp',l:'spacing',t:'rng',min:0,max:24,v:8},{k:'rsp',l:'runSpacing',t:'rng',min:0,max:24,v:8},{k:'al',l:'alignment',t:'sel',o:['start','center','end','spaceBetween'],v:'start'}],
+def({cat:'Layout',id:'wrap',name:'Wrap',tags:'chips tags flow wrap runspacing alignment runalignment crossaxisalignment direction vertical',h:320,
+blurb:'Wrap lays children out one after another and starts a new run when the line is full. A Row with too many children overflows; a Wrap moves them to the next line instead.',
+use:'Chips, tags, filter buttons and any set of items whose number you do not know.',
+watch:'Wrap sizes itself to its children, so inside a Column it takes only the height it needs. Unlike Row it has no Expanded: children keep their own size.',
+ctl:[{k:'n',l:'children',t:'rng',min:3,max:14,v:8},
+ {k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},
+ {k:'sp',l:'spacing',t:'rng',min:0,max:24,v:8},
+ {k:'rs',l:'runSpacing',t:'rng',min:0,max:24,v:8},
+ {k:'al',l:'alignment',t:'sel',o:['start','center','end','spaceBetween','spaceAround','spaceEvenly'],v:'start'},
+ {k:'ra',l:'runAlignment',t:'sel',o:['start','center','end','spaceBetween'],v:'start'},
+ {k:'ca',l:'crossAxisAlignment',t:'sel',o:['start','center','end'],v:'start'},
+ {k:'vary',l:'children have different heights',t:'chk',v:false}],
 render(s,st,g){
- const tags=['Flutter','Dart','Widget','State','Row','Column','Stack','Wrap','Animation','Hot reload','Sliver'],v=s.dir==='vertical';
- g.innerHTML=`<div class="fill"><div style="display:flex;flex-wrap:wrap;flex-direction:${v?'column':'row'};gap:${v?s.sp+'px '+s.rsp+'px':s.rsp+'px '+s.sp+'px'};justify-content:${AX[s.al]};align-content:flex-start;width:100%;height:100%">${tags.map((t,i)=>`<span class="chip c${i%4}">${t}</span>`).join('')}</div></div>`;
- return {code:`Wrap(\n  direction: Axis.${s.dir},\n  spacing: ${s.sp},\n  runSpacing: ${s.rsp},\n  alignment: WrapAlignment.${s.al},\n  children: [for (final t in tags) Chip(label: Text(t))],\n)`,hint:'spacing is the gap between children in a run. runSpacing is the gap between runs.'};
+ const horiz=s.dir==='horizontal',n=+s.n;
+ const AW={start:'flex-start',center:'center',end:'flex-end',spaceBetween:'space-between',spaceAround:'space-around',spaceEvenly:'space-evenly'};
+ const words=['Flutter','Dart','Widget','State','Layout','Theme','Route','Build','Async','Stream','Isolate','Sliver','Hero','Focus'];
+ const kids=[];
+ for(let i=0;i<n;i++){const hh=s.vary?[28,40,52][i%3]:32;
+  kids.push(`<div class="fb ${'abcd'[i%4]}" style="padding:0 12px;height:${hh}px;display:flex;align-items:center;border-radius:999px;font:600 12.5px var(--f-body);flex:none">${words[i%words.length]}</div>`)}
+ g.innerHTML=`<div class="fill" style="padding:10px"><div style="display:flex;flex-wrap:wrap;box-sizing:border-box;width:100%;${horiz?'':'height:100%;flex-direction:column;'}column-gap:${horiz?s.sp:s.rs}px;row-gap:${horiz?s.rs:s.sp}px;justify-content:${AW[s.al]};align-content:${AW[s.ra]};align-items:${AW[s.ca]};border:1.5px dashed var(--c3);padding:6px">${kids.join('')}</div></div>`;
+ const L=[`spacing: ${s.sp},`,`runSpacing: ${s.rs},`];
+ if(!horiz)L.unshift('direction: Axis.vertical,');
+ if(s.al!=='start')L.push(`alignment: WrapAlignment.${s.al},`);
+ if(s.ra!=='start')L.push(`runAlignment: WrapAlignment.${s.ra},`);
+ if(s.ca!=='start')L.push(`crossAxisAlignment: WrapCrossAlignment.${s.ca},`);
+ const notes=['spacing is the gap inside a run, runSpacing the gap between runs.'];
+ if(!horiz)notes.push('With direction vertical the runs are columns, so spacing is vertical and runSpacing horizontal.');
+ if(s.vary)notes.push('crossAxisAlignment lines up children of different heights inside their run.');
+ if(s.ra!=='start')notes.push('runAlignment only shows when there is spare space on the cross axis.');
+ return {code:`Wrap(\n${L.map(x=>'  '+x).join('\n')}\n  children: [for (final t in tags) Chip(label: Text(t))],\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'aspect-ratio',name:'AspectRatio',tags:'ratio 16:9 video',
@@ -5950,6 +5988,271 @@ setp('date-time-picker',[
 'DateFormat (intl package)|class|-|Formatting for display. DateFormat.yMMMd(locale).format(date). Dart itself has no date formatting.',
 'showTimePicker result|TimeOfDay?|-|Combine it with a date yourself: DateTime(d.year, d.month, d.day, t.hour, t.minute).'],
 'anchorPoint · textDirection · switchToInputEntryModeIcon · switchToCalendarEntryModeIcon','material/showDatePicker.html');
+
+setp('decorated-box',[
+'## DecoratedBox',
+'decoration|Decoration|required|What to paint, almost always a BoxDecoration.',
+'position|DecorationPosition|background|background paints behind the child, foreground paints over it.',
+'child|Widget?|null|What sits inside.',
+'## BoxDecoration',
+'color|Color?|null|Flat background colour. Cannot be used together with gradient.',
+'gradient|Gradient?|null|LinearGradient, RadialGradient or SweepGradient. Takes the place of color.',
+'border|BoxBorder?|null|Border.all(width:, color:) or Border(top:, bottom: ...) for one side only.',
+'borderRadius|BorderRadiusGeometry?|null|Rounded corners. Not allowed when shape is circle.',
+'boxShadow|List<BoxShadow>?|null|One or more shadows: BoxShadow(color:, blurRadius:, spreadRadius:, offset:). Several make a soft, layered shadow.',
+'image|DecorationImage?|null|A background picture, with its own fit, alignment, opacity and colorFilter.',
+'shape|BoxShape|rectangle|rectangle or circle. With circle you cannot set borderRadius.',
+'backgroundBlendMode|BlendMode?|null|How the colour or gradient blends with what is already painted.',
+'## Gradients worth knowing',
+'LinearGradient(begin:, end:, colors:, stops:)|class|-|A straight fade. begin and end are Alignments.',
+'RadialGradient(center:, radius:, colors:)|class|-|A circular fade from a point.',
+'SweepGradient(center:, startAngle:, endAngle:, colors:)|class|-|A fade around a circle, used for ring charts.',
+'## Other decorations',
+'ShapeDecoration|class|-|Takes a ShapeBorder, so you can use StadiumBorder, CircleBorder or a custom shape. Prefer it when the shape is unusual.',
+'UnderlineTabIndicator / BoxDecoration on TabBar|class|-|Decorations are also what you pass to a TabBar indicator.',
+'## Good to know',
+'DecoratedBox vs Container|choice|-|Container wraps a DecoratedBox plus padding, margin and sizing. Use DecoratedBox when you only need the painting.',
+'Border does not clip|rule|-|A rounded border does not cut off the child. Add a ClipRRect, or use a Container with clipBehavior.',
+'Shadow cost|performance|-|Large blurRadius values are expensive on older phones. Keep blur under about 24 in long lists.'],
+'key','widgets/DecoratedBox-class.html · painting/BoxDecoration-class.html');
+
+setp('opacity',[
+'## Opacity',
+'opacity|double|required|0.0 is invisible, 1.0 is normal. Values in between fade the child and everything inside it as one layer.',
+'child|Widget?|null|What is faded.',
+'alwaysIncludeSemantics|bool|false|Keep the child readable by screen readers even at opacity 0. Usually leave it false, so invisible content is also invisible to them.',
+'## Cheaper ways to do the same thing',
+'Color.withValues(alpha:)|method|-|Fading one colour costs nothing. Prefer it over wrapping a widget in Opacity.',
+'AnimatedOpacity|widget|-|Same idea with duration and curve. Still uses a layer while animating.',
+'FadeTransition(opacity: animation)|widget|-|The cheapest animated fade, because it repaints without rebuilding.',
+'Visibility(visible:)|widget|-|Removes the child from the tree instead of painting it transparently. Use this when the widget should not be there at all.',
+'Offstage(offstage:)|widget|-|Keeps the child alive and laid out but does not paint it.',
+'## Good to know',
+'Cost|performance|-|Any opacity between 0 and 1 forces Flutter to paint the child into an offscreen buffer. In a list or an animation that shows up on the devtools timeline.',
+'opacity: 0 still lays out|rule|-|The child still takes its space and still handles taps. Wrap it in IgnorePointer if it should not.',
+'Nested opacity|rule|-|Opacity multiplies down the tree, so 0.5 inside 0.5 paints at 0.25.'],
+'key','widgets/Opacity-class.html');
+
+setp('clip',[
+'## ClipRRect',
+'borderRadius|BorderRadiusGeometry|BorderRadius.zero|The rounded corners. BorderRadius.circular(12), .only(topLeft:), or .vertical(top:).',
+'child|Widget?|null|What gets cut.',
+'clipBehavior|Clip|antiAlias|antiAlias gives smooth edges. hardEdge is cheaper but shows jagged corners. antiAliasWithSaveLayer is the slowest and is rarely needed.',
+'clipper|CustomClipper<RRect>?|null|Compute the rounded rectangle yourself, for example from the child size.',
+'## ClipOval and ClipPath',
+'ClipOval(child:)|widget|-|Cuts to an ellipse that fills the box. A square child becomes a circle.',
+'ClipPath(clipper:, child:)|widget|-|Any shape. Write a CustomClipper<Path> and return a Path from getClip(size).',
+'ClipPath.shape(shape:)|constructor|-|Clip to a ShapeBorder, such as StadiumBorder, without writing a clipper.',
+'ClipRect(child:, clipper:)|widget|-|A plain rectangle clip. Needed to stop a child painting outside, for example with Align and a size factor.',
+'## Picking the right one',
+'Rounded image|pattern|-|ClipRRect(borderRadius:, child: Image...) is the usual way. A BoxDecoration radius alone does not clip the child.',
+'Container clipBehavior|alternative|-|Container with a decoration and clipBehavior: Clip.antiAlias does the same in one widget.',
+'Card|alternative|-|A Card already clips to its shape when you set clipBehavior.',
+'## Cost',
+'Clipping is not free|performance|-|Each clip adds a layer. In a long list, prefer a rounded image produced once, or a decoration with a border radius where you can.',
+'antiAliasWithSaveLayer|value|-|Only needed when the child paints right up to the edge and you see seams. It is the most expensive option.'],
+'key','widgets/ClipRRect-class.html');
+
+setp('backdrop-filter',[
+'## BackdropFilter',
+'filter|ImageFilter|required|What to do to the pixels behind. ImageFilter.blur(sigmaX:, sigmaY:) is the usual frosted glass.',
+'child|Widget?|null|Painted on top of the blurred background, usually a translucent Container.',
+'blendMode|BlendMode|srcOver|How the filtered background is composited back.',
+'enabled|bool|true|Turn the filter off without removing the widget, for example on a low-end device.',
+'backdropGroupKey|BackdropKey?|null|Share one backdrop between several filters so the blur is computed once.',
+'## ImageFilter options',
+'ImageFilter.blur(sigmaX:, sigmaY:, tileMode:)|class|-|Gaussian blur. Sigma 8 to 20 reads as frosted glass.',
+'ImageFilter.matrix(Matrix4.storage)|class|-|Scale, rotate or skew what is behind.',
+'ImageFilter.compose(outer:, inner:)|class|-|Chain two filters.',
+'## Rules that catch people out',
+'Needs something behind it|rule|-|BackdropFilter blurs what is already painted, so it must sit over other content, normally inside a Stack.',
+'Always clip it|rule|-|The blur spreads to the whole layer. Wrap it in a ClipRRect or ClipRect, or the whole screen goes soft.',
+'Cost|performance|-|It is one of the most expensive widgets in Flutter. Keep the area small and avoid it inside scrolling lists.',
+'## Where it is used',
+'Frosted app bar|pattern|-|A translucent AppBar over a scrolling list, with extendBodyBehindAppBar: true on the Scaffold.',
+'Dialog background|pattern|-|Blur the page behind a dialog or a bottom sheet.',
+'ImageFiltered|widget|-|Blurs the child itself rather than the background, and is cheaper.'],
+'key · filterConfig','widgets/BackdropFilter-class.html');
+
+setp('shader-mask',[
+'## ShaderMask',
+'shaderCallback|ShaderCallback|required|Given the bounds Rect, return a Shader. Usually a gradient: LinearGradient(...).createShader(bounds).',
+'blendMode|BlendMode|modulate|How the shader is applied. srcIn keeps the child only where the shader is opaque, which is the usual choice for a fade.',
+'child|Widget?|null|What the mask is applied to.',
+'## The two patterns people use',
+'Fade out an edge|pattern|-|A LinearGradient from white to transparent with BlendMode.dstIn fades the bottom of a list or the end of a line of text.',
+'Gradient text or icon|pattern|-|A colourful gradient with BlendMode.srcIn paints the glyphs with the gradient.',
+'## Useful blend modes here',
+'srcIn|BlendMode|-|Keep the child where the shader is opaque, drop it where the shader is clear.',
+'dstIn|BlendMode|-|Keep the child where the shader is opaque, but keep the child colours. The one for fades.',
+'modulate|BlendMode|default|Multiply the two, which tints the child.',
+'## Good to know',
+'bounds|Rect|-|The callback receives the child size, so build gradients from bounds.width and bounds.height rather than fixed numbers.',
+'Cost|performance|-|It needs an offscreen layer, like Opacity. Fine for one header, not for every row of a list.',
+'Related|widget|-|ImageFiltered applies a filter to the child, ColorFiltered applies a colour matrix or blend.'],
+'key','widgets/ShaderMask-class.html');
+
+setp('animated-container',[
+'## What makes it animate',
+'duration|Duration|required|How long a change takes. The animation starts whenever you rebuild with a different value.',
+'curve|Curve|Curves.linear|The pacing. Curves.easeInOut is the usual choice; linear looks mechanical.',
+'onEnd|VoidCallback?|null|Called when the animation finishes. Use it to chain a second change.',
+'## Everything Container has, now animated',
+'width / height|double?|null|Animated size.',
+'color|Color?|null|Animated background colour. Not allowed together with decoration.',
+'decoration|Decoration?|null|Animated BoxDecoration: colour, border, radius, gradient and shadow all tween.',
+'foregroundDecoration|Decoration?|null|The same, painted over the child.',
+'padding / margin|EdgeInsetsGeometry?|null|Animated spacing.',
+'alignment|AlignmentGeometry?|null|Animates the child sliding to a new spot.',
+'constraints|BoxConstraints?|null|Animated size limits.',
+'transform / transformAlignment|Matrix4? / AlignmentGeometry?|null|Animated rotation, scale or translation.',
+'clipBehavior|Clip|Clip.none|Clipping, not animated.',
+'child|Widget?|null|The child itself is not animated, only the box around it.',
+'## What does not animate',
+'A changed child|rule|-|Swapping the child widget is instant. Use AnimatedSwitcher for that.',
+'A gradient to a flat colour|rule|-|Two decorations only tween when they are the same kind. Use a gradient on both sides.',
+'A null to a value|rule|-|Going from no decoration to one jumps. Give both states the same shape.',
+'## The rest of the implicit family',
+'AnimatedOpacity / AnimatedAlign / AnimatedPadding / AnimatedPositioned|widget|-|One property each, and cheaper than a whole AnimatedContainer.',
+'AnimatedDefaultTextStyle|widget|-|Animates font size, weight and colour of the text below it.',
+'AnimatedScale / AnimatedRotation / AnimatedSlide|widget|-|Transform animations with a simple API.',
+'TweenAnimationBuilder|widget|-|When you need a value no built-in widget animates.',
+'AnimatedSize|widget|-|Animates the size of a child that changes its own size.'],
+'key','widgets/AnimatedContainer-class.html');
+
+setp('animated-switcher',[
+'## AnimatedSwitcher',
+'child|Widget?|null|The widget to show now. The old one animates out as the new one animates in.',
+'duration|Duration|required|How long the swap takes.',
+'reverseDuration|Duration?|duration|A different length for the outgoing child.',
+'switchInCurve / switchOutCurve|Curve|linear|Pacing of the incoming and outgoing child.',
+'transitionBuilder|AnimatedSwitcherTransitionBuilder|fade|How each child appears. Return ScaleTransition, SlideTransition or your own combination.',
+'layoutBuilder|AnimatedSwitcherLayoutBuilder|Stack, centred|How the old and new children are arranged while both are on screen.',
+'## The key rule',
+'Different keys|rule|-|AnimatedSwitcher only animates when the new child has a different key or runtimeType. Two Text widgets with different strings but no key look identical to it, so nothing happens. Give each a ValueKey.',
+'## Common transitions',
+'Fade|default|-|AnimatedSwitcher.defaultTransitionBuilder.',
+'Scale|pattern|-|transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child).',
+'Slide|pattern|-|Wrap in SlideTransition with a Tween<Offset>, for a counter that rolls up.',
+'Size and fade|pattern|-|Combine SizeTransition and FadeTransition for an expanding card.',
+'## Related',
+'AnimatedCrossFade|widget|-|Cross-fades between exactly two children and animates the size between them. Takes firstChild, secondChild and crossFadeState.',
+'PageTransitionSwitcher (animations package)|widget|-|Material motion patterns such as shared axis and fade through.'],
+'key','widgets/AnimatedSwitcher-class.html');
+
+setp('tween-animation-builder',[
+'## TweenAnimationBuilder',
+'tween|Tween<T>|required|The target. Change the end value and it animates from where it is now. Tween<double>(begin:, end:), ColorTween, Tween<Offset> and so on.',
+'duration|Duration|required|How long the animation runs.',
+'builder|ValueWidgetBuilder<T>|required|(context, value, child) and returns a widget built from value. It runs on every frame.',
+'curve|Curve|Curves.linear|The pacing.',
+'onEnd|VoidCallback?|null|Called when it finishes.',
+'child|Widget?|null|A widget built once and handed to the builder. Put anything expensive that does not depend on the value here, so it is not rebuilt 60 times a second.',
+'## When to use it',
+'No built-in widget fits|reason|-|Animating a number, a progress arc, a chart value or a custom painter.',
+'One-off animation|reason|-|It needs no State class, no controller and no dispose.',
+'## What it cannot do',
+'No control|limit|-|You cannot pause, reverse or repeat it. For that you need an AnimationController.',
+'Starts on first build|behaviour|-|It animates from tween.begin to tween.end as soon as it appears. Set begin equal to end when you do not want that.',
+'## Tweens you will use',
+'Tween<double> / IntTween|class|-|Numbers.',
+'ColorTween|class|-|Colours. Note its type is Color?.',
+'Tween<Offset> / RectTween / SizeTransition|class|-|Positions, rectangles and sizes.',
+'TweenSequence|class|-|Several tweens one after another, each with a weight.',
+'CurveTween|class|-|Used with chain() to apply a curve inside a tween chain.'],
+'key','widgets/TweenAnimationBuilder-class.html');
+
+setp('explicit-animations',[
+'## AnimationController',
+'vsync|TickerProvider|required|Usually this, with SingleTickerProviderStateMixin on your State. It stops the animation when the screen is not visible.',
+'duration|Duration?|null|How long a full run takes.',
+'reverseDuration|Duration?|duration|A different length when running backwards.',
+'value|double?|lowerBound|Where it starts.',
+'lowerBound / upperBound|double|0.0 / 1.0|The range. Normally leave them and map the value with a Tween.',
+'animationBehavior|AnimationBehavior|normal|What happens when the user has turned animations off in accessibility settings.',
+'debugLabel|String?|null|A name shown in debug output.',
+'## Driving it',
+'forward({from})|TickerFuture|-|Run towards upperBound. Await it to know when it ended.',
+'reverse({from})|TickerFuture|-|Run back towards lowerBound.',
+'repeat({reverse:, period:, count:})|TickerFuture|-|Loop. reverse: true gives a back-and-forth pulse.',
+'animateTo(target, {duration, curve})|TickerFuture|-|Go to any value.',
+'fling({velocity})|TickerFuture|-|Spring to one end, used after a drag.',
+'stop() / reset()|void|-|Freeze where it is, or jump back to the start.',
+'dispose()|void|-|Always call it in State.dispose, or the ticker leaks.',
+'## Reading it',
+'value|double|-|The current number, between lowerBound and upperBound.',
+'status|AnimationStatus|-|dismissed, forward, reverse or completed. Listen with addStatusListener to chain animations.',
+'isAnimating|bool|-|Whether it is running now.',
+'addListener|method|-|Called every frame. Prefer AnimatedBuilder over calling setState here.',
+'## Shaping the value',
+'CurvedAnimation(parent:, curve:, reverseCurve:)|class|-|Applies easing.',
+'Tween(begin:, end:).animate(controller)|method|-|Maps 0 to 1 onto real values: colours, offsets, sizes.',
+'TweenSequence|class|-|Several stages in one run.',
+'Interval(begin, end, curve: ...)|class|-|Stagger: this part only animates during a slice of the run.',
+'## Rebuilding efficiently',
+'AnimatedBuilder(animation:, builder:, child:)|widget|-|Rebuilds only the builder, not the whole widget. Pass the static part as child.',
+'ListenableBuilder|widget|-|The general version for any Listenable.',
+'FadeTransition / ScaleTransition / SlideTransition / RotationTransition / SizeTransition|widget|-|Prebuilt transitions that repaint without rebuilding. Prefer them where they fit.'],
+'','animation/AnimationController-class.html');
+
+setp('hero',[
+'## Hero',
+'tag|Object|required|The link between the two screens. The same tag must appear on exactly one Hero on each route. A String or an item id works; use a unique value per list row.',
+'child|Widget|required|What flies. Both sides usually hold the same picture or card.',
+'createRectTween|CreateRectTween?|MaterialRectArcTween|How the bounds travel. The Material default curves the path. Use RectTween for a straight line.',
+'flightShuttleBuilder|HeroFlightShuttleBuilder?|null|Build a different widget for the flight itself, for example to cross-fade between two different layouts.',
+'placeholderBuilder|HeroPlaceholderBuilder?|null|What is left behind in the old screen while the hero is in the air. Usually an empty box of the same size.',
+'transitionOnUserGestures|bool|false|Animate during an iOS back swipe too. Worth turning on.',
+'curve / reverseCurve|Curve / Curve?|fastOutSlowIn|Pacing out and back.',
+'## Rules that make it work',
+'One tag per route|rule|-|Two Heroes with the same tag on screen at once throws. In a list, use the item id.',
+'Both routes need it|rule|-|No Hero on the destination means no animation, and no error either.',
+'Text needs Material|rule|-|A flying Text can render with yellow underlines. Wrap the child in a Material with a transparent colour.',
+'Size changes|rule|-|The child is briefly laid out at both sizes, so avoid children that overflow at either end.',
+'## Related motion',
+'PageRouteBuilder|class|-|Custom route transitions, which you can combine with a Hero.',
+'Material motion (animations package)|package|-|OpenContainer gives a card-to-page transform that often looks better than a Hero.',
+'HeroMode(enabled: false)|widget|-|Turn hero animations off for a subtree.'],
+'key','widgets/Hero-class.html');
+
+setp('future-builder',[
+'## FutureBuilder',
+'future|Future<T>?|null|The work to watch. Create it once in initState or a field, never inline in build, or every rebuild starts a new request.',
+'builder|AsyncWidgetBuilder<T>|required|(context, snapshot) and returns a widget. Called on every state change.',
+'initialData|T?|null|A value to show before the future completes, so the first frame is not empty.',
+'## The snapshot',
+'snapshot.connectionState|ConnectionState|-|none when future is null, waiting while it runs, done when it finished. (active is only used by StreamBuilder.)',
+'snapshot.hasData / snapshot.data|bool / T?|-|Whether a value arrived, and the value.',
+'snapshot.hasError / snapshot.error / snapshot.stackTrace|bool / Object? / StackTrace?|-|The failure, if the future threw. Always handle this branch.',
+'## The shape of a correct builder',
+'Order of checks|pattern|-|Check connectionState == waiting first, then hasError, then hasData, and only then use data!. Checking hasData first hides errors.',
+'Future created in build|mistake|-|The classic bug: a new Future on every rebuild means an endless loading spinner. Store it in a field of your State.',
+'Keyboard or theme rebuilds|note|-|Anything that rebuilds the parent rebuilds this too, which is why the future must be stable.',
+'## Alternatives',
+'FutureProvider / AsyncValue (riverpod)|package|-|Caching, retries and one source of truth, which FutureBuilder does not give you.',
+'ValueListenableBuilder|widget|-|For a value you already hold rather than work in flight.',
+'setState with async/await|pattern|-|For a one-off load, a loading flag in State is often simpler and easier to test.'],
+'key','widgets/FutureBuilder-class.html');
+
+setp('stream-builder',[
+'## StreamBuilder',
+'stream|Stream<T>?|null|The stream to listen to. Create it once: a stream made inside build is resubscribed on every rebuild.',
+'builder|AsyncWidgetBuilder<T>|required|(context, snapshot) and returns a widget. It runs for every value.',
+'initialData|T?|null|What to show before the first value arrives.',
+'## The snapshot',
+'snapshot.connectionState|ConnectionState|-|none, waiting before the first value, active once values are flowing, done when the stream closes.',
+'snapshot.hasData / snapshot.data|bool / T?|-|The latest value. StreamBuilder keeps only the most recent one.',
+'snapshot.hasError / snapshot.error|bool / Object?|-|An error the stream emitted. The stream may keep going afterwards.',
+'## Things to watch',
+'Single-subscription streams|rule|-|A StreamBuilder listens once. Two builders on the same plain stream throw "already listened to". Use a broadcast stream, or one builder high up.',
+'Rebuild cost|rule|-|Every value rebuilds the builder subtree. Keep it small, and pass unchanging widgets outside the builder.',
+'Missed values|rule|-|A broadcast stream does not replay. A listener that starts late misses what came before, so seed it with initialData or use a replay controller.',
+'## What it pairs with',
+'Firestore snapshots / web sockets|source|-|The classic uses: live documents and live feeds.',
+'BLoC and rxdart|package|-|A stream of state with a StreamBuilder at the top of the screen.',
+'ValueListenableBuilder / ListenableBuilder|widget|-|Lighter when the source is a ValueNotifier rather than a real stream.',
+'AsyncNotifier (riverpod)|package|-|Handles loading, data and error states without writing the switch yourself.'],
+'key','widgets/StreamBuilder-class.html');
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
