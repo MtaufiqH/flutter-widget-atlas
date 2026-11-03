@@ -53,6 +53,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -6475,6 +6476,133 @@ setp('navigator',[
 'PopScope|widget|-|Replaces WillPopScope. Use canPop: false with onPopInvokedWithResult to confirm before leaving.',
 'Deep links and the web|advice|-|go_router or auto_route handle URLs, guards and nesting far better than hand-rolled named routes.'],
 'initialRoute · restorablePush · transitionDelegate · requestFocus · clipBehavior','widgets/Navigator-class.html');
+
+setp('custom-paint',[
+'## CustomPaint',
+'painter|CustomPainter?|null|Draws behind the child.',
+'foregroundPainter|CustomPainter?|null|Draws over the child.',
+'size|Size|Size.zero|The size to ask for when there is no child. With a child, the child decides.',
+'child|Widget?|null|Normal widgets drawn between the two painters.',
+'isComplex|bool|false|Hint that the drawing is expensive, so Flutter should cache the raster.',
+'willChange|bool|false|Hint that it will change next frame, so caching is pointless.',
+'## CustomPainter',
+'paint(Canvas canvas, Size size)|method|required|Where you draw. The origin is the top left of the box.',
+'shouldRepaint(oldDelegate)|method|required|Return true when any field changed. Returning true always repaints every frame and wastes work.',
+'repaint (constructor argument)|Listenable?|null|Pass an Animation or a ValueNotifier to the super constructor, and the painter repaints without rebuilding the widget. This is the efficient way to animate a painting.',
+'shouldRebuildSemantics / semanticsBuilder|method / getter|-|Describe what you drew for screen readers.',
+'hitTest(Offset position)|method|null|Decide whether a tap at that point counts as hitting your drawing.',
+'## Canvas, the drawing calls',
+'drawLine / drawRect / drawRRect / drawCircle / drawOval|method|-|The basic shapes.',
+'drawPath(Path, Paint)|method|-|Any outline. Build it with moveTo, lineTo, quadraticBezierTo, cubicTo, arcTo and close.',
+'drawArc(rect, startAngle, sweepAngle, useCenter, paint)|method|-|Pie slices and progress rings. Angles are radians, and 0 points right.',
+'drawShadow / drawImage / drawPicture|method|-|Shadows, bitmaps and recorded pictures.',
+'save / restore / translate / rotate / scale / clipRect|method|-|Move the canvas instead of recomputing coordinates. Always restore what you save.',
+'drawParagraph|method|-|Text. Build it with TextPainter, which is easier than the raw API.',
+'## Paint',
+'style|PaintingStyle|fill|fill or stroke.',
+'strokeWidth / strokeCap / strokeJoin|double / StrokeCap / StrokeJoin|0 / butt / miter|Line thickness and how ends and corners look.',
+'color / shader|Color / Shader?|black|Flat colour, or a gradient built with createShader(rect).',
+'maskFilter|MaskFilter?|null|MaskFilter.blur for a glow.',
+'blendMode / isAntiAlias|BlendMode / bool|srcOver / true|How it mixes with what is below, and edge smoothing.',
+'## Good to know',
+'Size with no child|rule|-|CustomPaint with no child and no size collapses to zero. Give it a size or wrap it in a SizedBox.',
+'Repaint boundary|performance|-|Wrap an animated CustomPaint in a RepaintBoundary so it does not force the rest of the screen to repaint.'],
+'key','widgets/CustomPaint-class.html · rendering/CustomPainter-class.html');
+
+setp('indexed-stack',[
+'## IndexedStack',
+'index|int?|0|Which child is shown. null shows none.',
+'children|List<Widget>|const []|All of them are built and kept alive; only one is painted.',
+'sizing|StackFit|loose|How the children are sized. Note the name is sizing here, not fit.',
+'alignment|AlignmentGeometry|topStart|Where children sit.',
+'clipBehavior|Clip|hardEdge|Whether anything outside is cut.',
+'textDirection|TextDirection?|null|Resolves start and end.',
+'## Why it matters',
+'Keeps state|reason|-|Switching tabs with IndexedStack keeps each page scrolled where it was, keeps text in fields and does not re-run initState. A plain if or a PageView with no keep-alive does not.',
+'Everything is built|cost|-|All children are built at once, so three heavy pages cost three builds on first open. For many or expensive pages, a PageView with AutomaticKeepAliveClientMixin or a lazy IndexedStack is kinder.',
+'Size|rule|-|The stack is as big as its largest child, even when a smaller one is showing.',
+'## Alternatives',
+'PageView|widget|-|Swipeable, lazy, and keeps state only with a keep-alive mixin.',
+'Offstage|widget|-|Hide one subtree while keeping it alive.',
+'Visibility(maintainState: true)|widget|-|Finer control over what is kept: state, animation, size and semantics.',
+'Navigator per tab|pattern|-|A nested Navigator in each tab, which is what most production apps do for bottom navigation.'],
+'key','widgets/IndexedStack-class.html');
+
+setp('autocomplete',[
+'## Autocomplete',
+'optionsBuilder|AutocompleteOptionsBuilder<T>|required|(TextEditingValue value) returning the matches. Return an empty list for an empty query, or every option shows at once. It can be async: return a Future.',
+'onSelected|AutocompleteOnSelected<T>?|null|Called with the chosen option.',
+'displayStringForOption|AutocompleteOptionToString<T>|toString|How an option is written into the field once picked. Needed for any class other than String.',
+'initialValue|TextEditingValue?|null|What the field starts with.',
+'## Building the parts yourself',
+'fieldViewBuilder|AutocompleteFieldViewBuilder|a plain TextField|(context, controller, focusNode, onFieldSubmitted). Use it to add an InputDecoration, a prefix icon or validation.',
+'optionsViewBuilder|AutocompleteOptionsViewBuilder<T>?|a Material list|(context, onSelected, options). Use it for avatars, two-line rows or highlighting the matched text.',
+'optionsMaxHeight|double|200.0|How tall the dropdown may be.',
+'optionsViewOpenDirection|OptionsViewOpenDirection|down|down or up, for a field near the bottom of the screen.',
+'textEditingController / focusNode|TextEditingController? / FocusNode?|null|Supply your own. If you pass one you must pass both, and dispose them yourself.',
+'## RawAutocomplete',
+'RawAutocomplete|widget|-|The same without Material styling, when you want a completely custom look.',
+'## Practical notes',
+'Network suggestions|pattern|-|optionsBuilder may be async, but it is called on every keystroke, so debounce the request and cancel the old one.',
+'Inside a Form|pattern|-|Use fieldViewBuilder to return a TextFormField so validation works.',
+'Filtering|pattern|-|Lowercase both sides and use contains, not startsWith, for friendlier matching.',
+'## Related',
+'DropdownMenu|widget|-|Looks similar but picks from a fixed list, with filtering built in.',
+'SearchAnchor / SearchBar|widget|-|The Material 3 search experience with a full-screen view and suggestions.'],
+'key','material/Autocomplete-class.html');
+
+setp('colored-box',[
+'## ColoredBox',
+'color|Color|required|The colour that fills the whole box.',
+'child|Widget?|null|What sits inside. With no child it fills whatever space it is given.',
+'## Why it exists',
+'Cheapest possible fill|reason|-|It paints one rectangle and nothing else. Container with a colour creates a DecoratedBox with a BoxDecoration, which is more work for the same result.',
+'const friendly|reason|-|const ColoredBox(color: Colors.white, child: ...) can be built once and reused, which Container with a colour cannot always do.',
+'## The alternatives, in order of cost',
+'ColoredBox|widget|-|Flat colour only.',
+'DecoratedBox|widget|-|Colour plus border, radius, gradient or shadow.',
+'Container(color:)|widget|-|Convenience: it becomes a ColoredBox internally when you only set a colour, but with extra layers around it.',
+'Material(color:)|widget|-|Use when you also need ink ripples, elevation or a shape.',
+'## Good to know',
+'No size of its own|rule|-|ColoredBox takes the size its parent offers, or the size of its child. Pair it with SizedBox when you need dimensions.',
+'Behind a list|pattern|-|A ColoredBox around a ListView is cheaper than giving every row its own coloured Container.'],
+'key','widgets/ColoredBox-class.html');
+
+setp('semantics',[
+'## What the screen reader says',
+'label|String?|null|The description read aloud. Give one to every icon-only button and meaningful image.',
+'value|String?|null|The current state or content, such as "40 percent" or the text in a field.',
+'hint|String?|null|What happens if you act on it, such as "double tap to open".',
+'tooltip|String?|null|A short message, also used by hover and long press.',
+'textDirection|TextDirection?|ambient|Reading direction for the label.',
+'## What kind of thing it is',
+'button / link / header / image / textField|bool?|null|Role flags. A screen reader announces "button" or "heading", and some platforms change the gesture set.',
+'role|SemanticsRole?|null|Richer roles such as dialog, alert, tab or list, for platforms that use them.',
+'checked / selected / enabled|bool?|null|State of a checkbox, a chip or a disabled control.',
+'readOnly|bool?|null|A field that is shown but not editable.',
+'focusable / focused|bool?|null|Whether accessibility focus can land here, and whether it is here now.',
+'liveRegion|bool?|false|Announce changes automatically, without the user moving focus. Use for a status line or a countdown, sparingly.',
+'## Actions from the screen reader',
+'onTap / onLongPress|VoidCallback?|null|Called when the assistive technology asks for a tap. Needed when you built your own control from a GestureDetector.',
+'onIncrease / onDecrease|VoidCallback?|null|Volume-key or swipe adjustments for a custom slider.',
+'increasedValue / decreasedValue|String?|null|What the value will become, read out during the adjustment.',
+'## Shaping the tree',
+'container|bool|false|Make this a node of its own instead of merging into the parent.',
+'explicitChildNodes|bool|false|Keep children as separate nodes rather than merging them into one.',
+'excludeSemantics|bool|false|Drop everything below and use this node instead.',
+'sortKey|SemanticsSortKey?|null|Force the reading order with OrdinalSortKey(1), OrdinalSortKey(2) and so on.',
+'identifier|String?|null|A stable id for integration tests and some platform tools.',
+'## The helper widgets',
+'MergeSemantics|widget|-|Merge a subtree into one node, so an icon and its label are read as one item instead of two.',
+'ExcludeSemantics|widget|-|Hide decorative content from screen readers entirely.',
+'BlockSemantics|widget|-|Hide everything painted behind, which is what a modal does.',
+'IndexedSemantics|widget|-|Give list items an index so "item 3 of 20" is announced.',
+'Semantics.fromProperties|constructor|-|Pass a SemanticsProperties object instead of many arguments.',
+'## Checking your work',
+'SemanticsDebugger|widget|-|Wrap your app in it to see the semantics tree on screen.',
+'flutter test with semantics|tool|-|tester.getSemantics and matchesSemantics assert what a screen reader will say.',
+'Contrast and target size|rule|-|Material asks for a 48 by 48 tap target and 4.5:1 text contrast. Semantics does not fix those.'],
+'key · obscured · multiline · slider · expanded · inMutuallyExclusiveGroup · hidden · namesRoute · scopesRoute · toggled · onScrollLeft and other scroll actions · onCopy · onCut · onPaste · onDismiss · onSetText · customSemanticsActions · attributedLabel and other attributed strings','widgets/Semantics-class.html');
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
