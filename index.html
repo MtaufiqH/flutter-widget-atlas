@@ -46,6 +46,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -4054,6 +4055,244 @@ render(s,st,g,d){
  return {code:'// Edit and run code inside DartPad above.\n// Pick a starting sample, or keep the default app.\n// The sample comes from the official Flutter docs, so it may not match the name exactly.',hint:'Pick a start, press Run in DartPad, then edit the code on the left.'};
 }});
 
+/* ================= v16: asynchronous Dart in depth ================= */
+const DA='Dart language';
+const chip=(t,c,on)=>`<span style="display:inline-block;margin:2px 3px 2px 0;padding:3px 8px;border-radius:7px;font:600 11.5px var(--f-mono);border:1.5px solid ${c};background:${on?c:'transparent'};color:${on?'#fff':'var(--fg)'}">${esc(t)}</span>`;
+const panel=(title,body,c)=>`<div style="flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 9px;min-height:84px"><div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:${c||'var(--muted)'};margin-bottom:5px">${title}</div>${body||'<span style="font-size:12px;color:var(--muted)">empty</span>'}</div>`;
+
+/* ---------- event loop ---------- */
+const EL={
+ 'Sync, microtask, event':{code:["import 'dart:async';","","void main() {","  print('1 main start');","  Future(() => print('4 event queue'));","  scheduleMicrotask(() => print('3 microtask'));","  print('2 main end');","}"],
+  items:[{o:1,q:'sync',l:'1 main start'},{o:2,q:'sync',l:'2 main end'},{o:3,q:'micro',l:'3 microtask'},{o:4,q:'event',l:'4 event queue'}],
+  note:'main runs to the end first. Then every microtask runs. Only after that does the loop take one item from the event queue.'},
+ 'await splits a function':{code:["Future<void> load() async {","  print('2 load starts');          // runs right now","  await Future.value(1);","  print('4 after the await');      // runs later, as a microtask","}","","void main() {","  print('1 before');","  load();                           // not awaited","  print('3 after the call');","}"],
+  items:[{o:1,q:'sync',l:'1 before'},{o:2,q:'sync',l:'2 load starts'},{o:3,q:'sync',l:'3 after the call'},{o:4,q:'micro',l:'4 after the await'}],
+  note:'An async function runs like normal code until its first await. Then it returns to the caller. The rest continues later.'},
+ 'Timer vs microtask':{code:["void main() {","  Timer(Duration.zero, () => print('4 Timer'));","  Future.delayed(Duration.zero, () => print('5 Future.delayed'));","  Future.microtask(() => print('2 Future.microtask'));","  Future.value(1).then((_) => print('3 then'));","  print('1 sync');","}"],
+  items:[{o:1,q:'sync',l:'1 sync'},{o:2,q:'micro',l:'2 Future.microtask'},{o:3,q:'micro',l:'3 then'},{o:4,q:'event',l:'4 Timer'},{o:5,q:'event',l:'5 Future.delayed'}],
+  note:'Duration.zero does not mean now. A Timer is an event, so every microtask goes first. Then callbacks on a completed Future also run as microtasks.'},
+ 'Blocking the loop':{code:["void main() {","  Timer(Duration.zero, () => print('2 timer'));","  final end = DateTime.now().add(const Duration(seconds: 2));","  while (DateTime.now().isBefore(end)) {}   // busy loop, 2 seconds","  print('1 loop done');","}","// While the loop runs, no frame is drawn and no tap is handled."],
+  items:[{o:1,q:'sync',l:'1 loop done (after 2 s)'},{o:2,q:'event',l:'2 timer (2 s late)'}],
+  note:'Dart runs your code on one thread. A long synchronous loop blocks the event loop, so the UI freezes. Use await for waiting and an isolate for heavy work.'}};
+def({cat:DA,id:'event-loop',name:'Event loop and microtasks: the order things run',tags:'event loop microtask queue scheduleMicrotask timer future order single thread dart async await frame block ui freeze',h:380,
+blurb:'Dart runs your code on one thread with an event loop. Plain code runs first. Then the microtask queue is emptied. Then the loop takes one event, such as a Timer, a tap or a network reply, and the cycle repeats. This explains most "why did this print first" questions.',
+use:'Understand the order of print lines, why a UI freezes, and why await does not block the app.',
+watch:'Microtasks always finish before the next event, so a never-ending chain of microtasks starves the UI. Waiting (await, Future.delayed) is free, but a long synchronous loop blocks everything. Use an isolate for heavy work.',
+ctl:[{k:'sc',l:'example',t:'sel',o:Object.keys(EL),v:'Sync, microtask, event'},{k:'step',l:'step',t:'sel',o:['0','1','2','3','4','5'],v:'0'}],
+render(s,st,g){
+ const E=EL[s.sc],n=Math.min(+s.step,E.items.length),all=E.items.length;
+ const col={sync:'var(--c1)',micro:'var(--ok)',event:'var(--c3,#d97706)'};
+ const pend=q=>E.items.filter(i=>i.q===q&&i.o>n).map(i=>chip(i.l.replace(/^\d+ /,''),col[q],false)).join('');
+ const done=E.items.filter(i=>i.o<=n).map(i=>`<div style="font:12.5px var(--f-mono)"><span style="color:${col[i.q]}">&#9679;</span> ${esc(i.l)}</div>`).join('');
+ g.innerHTML=nbx(`<div style="display:flex;gap:6px">${panel('1 RUN NOW',E.items.filter(i=>i.q==='sync'&&i.o>n).length?pend('sync'):'',col.sync)}${panel('2 MICROTASKS',pend('micro'),col.micro)}${panel('3 EVENT QUEUE',pend('event'),col.event)}</div><div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)">CONSOLE (step ${n} of ${all})</div><div style="border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px;min-height:${22*all+14}px">${done||'<span style="font-size:12px;color:var(--muted)">Nothing printed yet. Raise the step.</span>'}</div><div style="font-size:12.5px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface)">${esc(E.note)}</div>`);
+ return {code:E.code.join('\n'),hint:'Raise the step number to run one line at a time and watch the three queues empty in order.'};
+}});
+
+/* ---------- Future in depth ---------- */
+const FD={
+ 'then / catchError chain':{ok:["print('2 then: user')","print('3 whenComplete')"],bad:["(then skipped)","print('2 catchError: Exception')","print('3 whenComplete')"],code:(f)=>["fetchUser()","  .then((user) => print('2 then: $user'))","  .catchError((e) => print('2 catchError: $e'))","  .whenComplete(() => print('3 whenComplete'));","print('1 started');   // prints first","","// then returns a new Future, so you can chain.","// whenComplete is like finally."]},
+ 'try / catch with await':{ok:["user = 'Ana'","(finally) loading = false"],bad:["catch (e): show error","(finally) loading = false"],code:(f)=>["try {","  final user = await fetchUser();","  setState(() => name = user);","} on TimeoutException {","  showError('Too slow');","} catch (e) {","  showError('$e');","} finally {","  setState(() => loading = false);   // always runs","}","","// Prefer await with try/catch. It reads top to bottom."]},
+ 'Future.wait and errors':{ok:["results = [a, b, c]"],bad:["throws the first error","other futures keep running","(eagerError: true throws at once)"],code:(f)=>["try {","  final r = await Future.wait(","    [fetchA(), fetchB(), fetchC()],","    eagerError: true,   // stop waiting at the first error","  );","} catch (e) {","  // the first failure ends up here","}","","// Dart 3: typed results with a record","final (a, b) = await (fetchA(), fetchB()).wait;"]},
+ 'timeout':{ok:["value arrives in time"],bad:["TimeoutException after 3 s","the request itself keeps running"],code:(f)=>["try {","  final data = await fetch().timeout(","    const Duration(seconds: 3),","    // onTimeout: () => cachedValue,   // optional fallback","  );","} on TimeoutException {","  showError('Server is slow');","}","","// timeout stops WAITING. It does not cancel the request.","// To cancel, use a client that supports it (Dio CancelToken)."]},
+ 'Completer':{ok:["completer.complete(value)","every awaiter gets the value"],bad:["completer.completeError(e)","every awaiter gets the error"],code:(f)=>["final completer = Completer<String>();","","// 1. give the Future to callers","Future<String> get ready => completer.future;","","// 2. complete it later, once, from a callback","void onNativeResult(String v) {","  if (!completer.isCompleted) completer.complete(v);","}","void onNativeError(Object e) {","  if (!completer.isCompleted) completer.completeError(e);","}","","// Use it to turn callbacks into a Future."]}};
+def({cat:DA,id:'future-deep',name:'Future in depth: then, errors, timeout, Completer',tags:'future then catchError whenComplete try catch await timeout timeoutexception completer completeError future.wait eagerError unawaited error handling',h:340,
+blurb:'A Future is in one of three states: pending, completed with a value, or completed with an error. then, catchError and await only differ in how you react to the two completed states. Every Future needs its error handled somewhere.',
+use:'Chain calls, handle failures, stop waiting after a limit, and wrap callback APIs in a Future.',
+watch:'An error in a Future nobody awaits is reported as unhandled. Never mix then and await in the same function. timeout stops waiting but does not cancel the work behind it. A Completer may be completed only once.',
+ctl:[{k:'tp',l:'topic',t:'sel',o:Object.keys(FD),v:'try / catch with await'},{k:'fail',l:'the Future fails',t:'chk',v:false}],
+render(s,st,g){
+ const D=FD[s.tp],bad=s.fail,out=bad?D.bad:D.ok;
+ const state=(t,on,c)=>`<div style="flex:1;text-align:center;padding:9px 4px;border-radius:10px;border:2px solid ${on?c:'var(--line)'};background:${on?c:'var(--surface)'};color:${on?'#fff':'var(--fg)'};font:700 12px var(--f-mono)">${t}</div>`;
+ g.innerHTML=nbx(`<div style="display:flex;gap:6px;align-items:center">${state('pending',false,'var(--muted)')}<span style="font-size:18px;color:var(--muted)">&rarr;</span>${state('value',!bad,'var(--ok)')}${state('error',bad,'var(--danger)')}</div><div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)">WHAT HAPPENS</div><div style="border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px">${out.map(x=>`<div style="font:12.5px var(--f-mono);margin:2px 0">${esc(x)}</div>`).join('')}</div>`);
+ return {code:D.code(bad).join('\n'),hint:'Pick a topic, then tick "the Future fails" to see the error path.'};
+}});
+
+/* ---------- Streams in depth ---------- */
+const SOPS={'none':{f:v=>v,c:'',l:'no operator'},'where (keep even)':{f:v=>v%2===0?v:null,c:'.where((v) => v.isEven)',l:'keeps even values'},'map (x * 10)':{f:v=>v*10,c:'.map((v) => v * 10)',l:'changes every value'},'take (first 3)':{f:null,c:'.take(3)',l:'completes after 3 values'},'skip (first 2)':{f:null,c:'.skip(2)',l:'ignores the first 2 values'}};
+def({cat:DA,id:'streams-deep',name:'Streams in depth: single, broadcast, StreamController, operators',tags:'stream streamcontroller broadcast single subscription listen cancel async* yield map where take skip transform asyncmap sink close bad state already listened',h:400,
+blurb:'A Stream delivers many values over time. A normal stream has one listener. A broadcast stream allows many. A StreamController is a stream you push values into yourself. Operators such as where, map and take reshape the values before they reach you.',
+use:'Live data: chat, location, sensors, Firestore snapshots, and state that changes over time.',
+watch:'Listening twice to a single-subscription stream throws "Bad state: Stream has already been listened to". Always cancel the subscription and close the controller in dispose. A broadcast stream does not remember old values: a late listener misses them.',
+ctl:[{k:'kind',l:'stream type',t:'sel',o:['single-subscription','broadcast'],v:'single-subscription'},{k:'lis',l:'listeners',t:'sel',o:['1','2'],v:'1'},{k:'op',l:'operator',t:'sel',o:Object.keys(SOPS),v:'none'},{k:'src',l:'source',t:'sel',o:['StreamController','async* generator'],v:'StreamController'}],
+render(s,st,g){
+ const src=[1,2,3,4,5,6],O=SOPS[s.op],two=s.lis==='2',bc=s.kind==='broadcast',fail=two&&!bc;
+ let res;if(s.op.startsWith('take'))res=src.slice(0,3);else if(s.op.startsWith('skip'))res=src.slice(2);else res=src.map(O.f).filter(v=>v!==null);
+ const dots=(arr,c)=>arr.map((v,i)=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin:2px 3px 2px 0;border-radius:50%;background:${c};color:#fff;font:700 12px var(--f-mono)">${v}</span>`).join('');
+ const row=(t,body)=>`<div style="display:flex;align-items:center;gap:8px"><div style="width:84px;font:700 10.5px var(--f-mono);letter-spacing:.05em;color:var(--muted)">${t}</div><div style="flex:1;min-width:0;border-bottom:2px solid var(--line);padding-bottom:3px">${body}</div></div>`;
+ const L2=fail?`<div style="font:600 12px var(--f-mono);color:var(--danger)">Bad state: Stream has already been listened to</div>`:dots(res,'var(--c1)');
+ g.innerHTML=nbx(`${row('SOURCE',dots(src,'var(--muted)'))}${s.op!=='none'?row('AFTER',`<span style="font:12px var(--f-mono);color:var(--muted)">${esc(s.op.split(' ')[0])}: ${esc(O.l)}</span>`):''}${row('LISTENER 1',dots(res,'var(--c1)'))}${two?row('LISTENER 2',L2):''}<div style="font-size:12.5px;border:1.5px solid ${fail?'var(--danger)':'var(--line)'};border-radius:8px;padding:8px 10px;background:var(--surface)">${fail?'A single-subscription stream accepts one listener. Switch to broadcast, or create one stream per listener.':bc?'Broadcast: every listener gets each value from the moment it starts listening. Nothing is replayed.':'Single-subscription: one listener, and it receives every value from the start.'}</div>`);
+ const pipe=O.c?'\n    '+O.c:'';
+ const sourceCode=s.src==='StreamController'?["final controller = StreamController<int>"+(bc?".broadcast":"")+"();","","void start() {","  for (var i = 1; i <= 6; i++) {","    controller.add(i);          // push a value","  }","  controller.close();           // end of stream","}","@override","void dispose() {","  controller.close();           // free resources","  super.dispose();","}"]:["Stream<int> numbers() async* {","  for (var i = 1; i <= 6; i++) {","    await Future.delayed(const Duration(milliseconds: 200));","    yield i;                    // one value","  }","}","final stream = numbers()"+(bc?".asBroadcastStream()":"")+";"];
+ const sv=s.src==='StreamController'?'controller.stream':'stream';
+ const listen=["final sub1 = "+sv+pipe+"\n    .listen((v) => print('1: $v'),\n      onError: (e) => print('error $e'),\n      onDone: () => print('done'));"];
+ if(two)listen.push("final sub2 = "+sv+pipe+"\n    .listen((v) => print('2: $v'));"+(fail?"   // throws: single-subscription":""));
+ listen.push("","// stop listening (do this in dispose)","await sub1.cancel();"+(two&&!fail?"\nawait sub2.cancel();":""));
+ listen.push("","// pause and resume, if you need them","// sub1.pause(); sub1.resume();");
+ return {code:sourceCode.join('\n')+'\n\n'+listen.join('\n'),hint:'Choose broadcast and 2 listeners, then switch back to single-subscription to see the error.'};
+}});
+
+/* ---------- Isolates ---------- */
+const IW={'Small JSON (2 KB)':{ms:2,d:'A few thousand characters. Takes about 2 ms.'},'Large JSON (5 MB)':{ms:180,d:'Thousands of objects. Takes about 180 ms on a mid-range phone.'},'Heavy loop (image filter)':{ms:900,d:'Millions of calculations. Takes about 900 ms.'}};
+def({cat:DA,id:'isolates',name:'Isolates: move heavy work off the UI thread',tags:'isolate compute isolate.run spawn sendport receiveport background thread jank frame heavy json parse performance main isolate worker',h:400,
+blurb:'An isolate is a separate worker with its own memory. It shares nothing with your UI isolate, so heavy work there cannot freeze the screen. Async code does not help with heavy calculation, because await only waits. An isolate really runs code at the same time.',
+use:'Parse a big JSON, resize an image, encrypt or compress a file, run a long calculation.',
+watch:'Anything under about 16 ms is not worth an isolate. The closure you pass must not capture widgets, BuildContext or sockets. Data is copied between isolates, so sending a huge object has a cost. Plugins need the root isolate, so call them from the main isolate or use the background isolate setup.',
+ctl:[{k:'w',l:'work',t:'sel',o:Object.keys(IW),v:'Large JSON (5 MB)'},{k:'m',l:'run it with',t:'sel',o:['main isolate','Isolate.run','compute (Flutter)','Isolate.spawn + ports'],v:'main isolate'}],
+render(s,st,g){
+ const W=IW[s.w],main=s.m==='main isolate',ms=W.ms,frames=24,fr=16;
+ const dropped=main?Math.max(0,Math.floor(ms/fr)):0;
+ const start=4,cells=[];
+ for(let i=0;i<frames;i++){const bad=main&&i>=start&&i<start+dropped;cells.push(`<div title="frame ${i}" style="flex:1;height:34px;border-radius:3px;background:${bad?'var(--danger)':'var(--ok)'};opacity:${bad?1:.8}"></div>`)}
+ const worker=main?'':`<div style="display:flex;gap:2px;margin-top:3px"><div style="flex:0 0 ${(start/frames)*100}%"></div><div style="flex:0 0 ${Math.max(4,Math.min(60,(ms/fr)/frames*100))}%;height:16px;border-radius:4px;background:var(--c1)"></div></div>`;
+ const verdict=main?(dropped>0?`${dropped} frame${dropped>1?'s':''} dropped: the app freezes for about ${ms} ms.`:'Too small to notice. 60 frames per second stay smooth.'):(ms<16?'It works, but an isolate is overkill here. Copying the data costs more than the work.':'The UI isolate keeps drawing every frame. The worker does the job and sends the result back.');
+ g.innerHTML=nbx(`<div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)">UI ISOLATE: ONE BOX PER 16 ms FRAME</div><div style="display:flex;gap:2px">${cells.join('')}</div><div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)">WORKER ISOLATE</div><div style="border:1.5px dashed var(--line);border-radius:8px;min-height:24px;padding:3px">${worker||'<span style="font-size:12px;color:var(--muted)">not used</span>'}</div><div style="font-size:12.5px;border:1.5px solid ${main&&dropped?'var(--danger)':'var(--line)'};border-radius:8px;padding:8px 10px;background:var(--surface)"><b>${esc(s.w)}:</b> ${esc(W.d)}<br>${esc(verdict)}</div>`);
+ const f={'main isolate':["// runs on the UI isolate: frames are dropped","final data = jsonDecode(body);                  // blocks","final items = (data as List).map(Item.fromJson).toList();"],
+  'Isolate.run':["import 'dart:isolate';","","// Dart 2.19 and later. One call, one result.","final items = await Isolate.run(() {","  final data = jsonDecode(body) as List;        // body is copied in","  return data.map(Item.fromJson).toList();      // list is copied back","});"],
+  'compute (Flutter)':["import 'package:flutter/foundation.dart';","","// top-level or static function only","List<Item> parseItems(String body) {","  final data = jsonDecode(body) as List;","  return data.map(Item.fromJson).toList();","}","","final items = await compute(parseItems, body);","// compute now calls Isolate.run. Prefer Isolate.run in new code."],
+  'Isolate.spawn + ports':["import 'dart:isolate';","","Future<void> start() async {","  final receive = ReceivePort();","  await Isolate.spawn(_worker, receive.sendPort);","  final sendToWorker = await receive.first as SendPort;","  final reply = ReceivePort();","  sendToWorker.send([body, reply.sendPort]);","  final items = await reply.first;     // result from the worker","}","","void _worker(SendPort toMain) {","  final inbox = ReceivePort();","  toMain.send(inbox.sendPort);","  inbox.listen((msg) {","    final result = heavy(msg[0] as String);","    (msg[1] as SendPort).send(result);","  });","}","// use this when the worker must stay alive for many jobs"]};
+ return {code:f[s.m].join('\n'),hint:'Start with the main isolate on the large work: red frames are dropped frames. Then pick Isolate.run.'};
+}});
+
+/* ================= v17: functional programming and OOP in Dart ================= */
+const FN={double:['double','(x) => x * 2',x=>x*2],addOne:['addOne','(x) => x + 1',x=>x+1],square:['square','(x) => x * x',x=>x*x]};
+const kv=(rows)=>`<div style="border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px">${rows.map(r=>`<div style="display:flex;gap:10px;font:12.5px var(--f-mono);margin:3px 0"><span style="flex:0 0 46%;min-width:0;color:var(--muted)">${esc(r[0])}</span><span style="flex:1;min-width:0;font-weight:700;color:${r[2]||'var(--fg)'}">${esc(r[1])}</span></div>`).join('')}</div>`;
+const lab=t=>`<div style="font:700 10.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)">${t}</div>`;
+const note=(t,c)=>`<div style="font-size:12.5px;border:1.5px solid ${c||'var(--line)'};border-radius:8px;padding:8px 10px;background:var(--surface)">${esc(t)}</div>`;
+
+/* ---------- functional ideas ---------- */
+def({cat:DA,id:'fp-core',name:'Functional ideas: pure functions, closures, higher-order, copyWith',tags:'functional programming pure function side effect closure higher-order function composition compose immutable immutability copyWith first-class function typedef lambda arrow',h:380,
+blurb:'Functional programming means building programs from small functions. A pure function gives the same output for the same input and changes nothing outside. Functions are values: you can store them, pass them in and return them. Immutable data means you copy instead of changing.',
+use:'Make code easier to test and reason about. State management, widget builders and stream operators all use these ideas.',
+watch:'A closure keeps the variable alive, not a copy of its value. Functions that read or change global state are not pure, so they are hard to test. With mutable objects, two names can point to the same object and one change shows up in both.',
+ctl:[{k:'tp',l:'idea',t:'sel',o:['Pure vs impure','Closure (private state)','Higher-order function','Composition','Immutability and copyWith'],v:'Pure vs impure'},{k:'n',l:'number of calls',t:'sel',o:['1','2','3'],v:'3'},{k:'f',l:'function f',t:'sel',o:Object.keys(FN),v:'double'},{k:'g',l:'function g (compose)',t:'sel',o:Object.keys(FN),v:'addOne'},{k:'mut',l:'mutate in place',t:'chk',v:false}],
+render(s,st,g){
+ const n=+s.n,f=FN[s.f],h=FN[s.g];let ui,code,hint;
+ if(s.tp==='Pure vs impure'){
+  let t=0;const rows=[];for(let i=1;i<=n;i++){t+=5;rows.push(['call '+i+':  pureAdd(2, 3)','5','var(--ok)']);rows.push(['call '+i+':  impureAdd(2)','total = '+t,'var(--danger)'])}
+  ui=lab('SAME INPUT, EVERY CALL')+kv(rows)+note('pureAdd always returns 5 and touches nothing. impureAdd changes a global, so its result depends on history. Pure functions are trivial to test.');
+  code=["// pure: output depends only on input","int pureAdd(int a, int b) => a + b;","","// impure: reads and changes state outside","int total = 0;","int impureAdd(int a) {","  total += a;            // side effect","  return total;          // different on every call","}","","// Make impure code small and keep it at the edges:","// API calls, storage and setState live there."];
+  hint='Raise the number of calls: the pure result never changes.';
+ }else if(s.tp==='Closure (private state)'){
+  const a=[],b=[];for(let i=1;i<=n;i++)a.push(i);b.push(1);
+  ui=lab('TWO COUNTERS MADE BY THE SAME FUNCTION')+kv([['a() called '+n+' time(s)',a.join(', '),'var(--c1)'],['b() called 1 time',b.join(', '),'var(--ok)']])+note('Each call to makeCounter creates its own private count. The returned function remembers it. Nothing else can touch count.');
+  code=["int Function() makeCounter() {","  var count = 0;                 // captured by the closure","  return () => ++count;          // a function that remembers count","}","","final a = makeCounter();","final b = makeCounter();","a(); a(); a();                   // 1, 2, 3","b();                             // 1: its own count","","// Closures are everywhere in Flutter:","onPressed: () => setState(() => taps++),  // captures taps"];
+  hint='a and b share code but not state.';
+ }else if(s.tp==='Higher-order function'){
+  const r=f[2](f[2](3));
+  ui=lab('applyTwice(f, 3)')+kv([['f = '+f[0],f[1]],['f(3)',String(f[2](3))],['f(f(3))',String(r),'var(--ok)']])+note('applyTwice does not know what f does. It only knows f takes an int and returns an int. Passing behaviour as an argument is what lists do with map, where and sort.');
+  code=["// a function that takes a function","int applyTwice(int Function(int) f, int x) => f(f(x));","","final "+f[0]+" = "+f[1]+";","print(applyTwice("+f[0]+", 3));        // "+r,"","// typedef gives the type a name","typedef IntOp = int Function(int);","IntOp makeAdder(int n) => (x) => x + n;   // returns a function","","// built-in examples","[3, 1, 2].sort((a, b) => a.compareTo(b));","button.onPressed = () => save();"];
+  hint='Change function f and watch applyTwice give a new result with the same code.';
+ }else if(s.tp==='Composition'){
+  const r=f[2](h[2](3));
+  ui=lab('compose(f, g)(3) = f(g(3))')+kv([['g = '+h[0],h[1]],['g(3)',String(h[2](3))],['f = '+f[0],f[1]],['f(g(3))',String(r),'var(--ok)']])+note('Composition joins two small functions into a new one. Order matters: compose(f, g) runs g first, then f.');
+  code=["// join two functions into one","T Function(T) compose<T>(T Function(T) f, T Function(T) g) =>","    (x) => f(g(x));","","final "+f[0]+" = "+f[1]+";","final "+h[0]+" = "+h[1]+";","final both = compose("+f[0]+", "+h[0]+");","print(both(3));          // "+r,"","// Dart has no pipe operator, but extensions give a similar feel","extension Pipe<T> on T {","  R pipe<R>(R Function(T) f) => f(this);","}","3.pipe("+h[0]+").pipe("+f[0]+");     // "+r];
+  hint='Swap f and g. The result changes, because composition is not commutative.';
+ }else{
+  const m=s.mut;
+  ui=lab(m?'ONE OBJECT, TWO NAMES':'TWO SEPARATE OBJECTS')+kv(m?[['a = User(name: "Ana")','a.name = "Ana"'],['b = a','same object as a'],['b.name = "Budi"','a.name is now "Budi"','var(--danger)'],['bug','a changed without being touched','var(--danger)']]:[['a = User(name: "Ana")','a.name = "Ana"'],['b = a.copyWith(name: "Budi")','a new User object'],['a.name','"Ana"  (unchanged)','var(--ok)'],['b.name','"Budi"','var(--ok)']])+note(m?'With mutable fields, changing b also changes a. In Flutter this breaks setState and Provider, because the framework cannot see that anything changed.':'With immutable data you never change an object. You make a changed copy. State management packages compare old and new objects, so this is how they notice changes.',m?'var(--danger)':'');
+  code=m?["class User {","  String name;            // mutable","  User(this.name);","}","final a = User('Ana');","final b = a;              // same object","b.name = 'Budi';","print(a.name);            // Budi: surprise"]:["class User {","  final String name;      // immutable","  const User({required this.name});","","  User copyWith({String? name}) => User(name: name ?? this.name);","}","final a = const User(name: 'Ana');","final b = a.copyWith(name: 'Budi');","print(a.name);            // Ana","","// freezed or Dart records can write copyWith for you"];
+  hint='Tick "mutate in place" to see the shared-object bug.';
+ }
+ g.innerHTML=nbx(ui);return {code:code.join('\n'),hint};
+}});
+
+/* ---------- functional pipeline ---------- */
+const PW={'none':[v=>true,''],'even only':[v=>v%2===0,'.where((n) => n.isEven)'],'odd only':[v=>v%2===1,'.where((n) => n.isOdd)'],'greater than 5':[v=>v>5,'.where((n) => n > 5)']};
+const PM={'none':[v=>v,''],'square':[v=>v*v,'.map((n) => n * n)'],'double':[v=>v*2,'.map((n) => n * 2)'],'plus 1':[v=>v+1,'.map((n) => n + 1)']};
+def({cat:DA,id:'fp-pipeline',name:'Functional style: where, map, take and reduce pipelines',tags:'functional where map take skip reduce fold sum any every expand iterable lazy pipeline chain imperative loop tolist',h:420,
+blurb:'Instead of a loop with a counter and an if, chain small steps: where keeps, map changes, take limits, and fold or reduce combines into one value. Each step does one thing and the chain reads like a sentence.',
+use:'Filter and transform lists of data, totals, search results, and anything you would write a for loop for.',
+watch:'Iterable methods are lazy: nothing runs until you call toList, sum, or loop over the result. Do not forget toList() when a widget needs a List. fold needs a start value and works on an empty list, while reduce throws on an empty one.',
+ctl:[{k:'w',l:'where',t:'sel',o:Object.keys(PW),v:'even only'},{k:'m',l:'map',t:'sel',o:Object.keys(PM),v:'square'},{k:'t',l:'take',t:'sel',o:['all','first 3'],v:'all'},{k:'r',l:'finish with',t:'sel',o:['toList','fold: sum','fold: product','reduce: max','any (> 50)'],v:'toList'},{k:'sty',l:'code style',t:'sel',o:['functional chain','imperative loop'],v:'functional chain'}],
+render(s,st,g){
+ const src=[1,2,3,4,5,6,7,8,9,10];
+ const a=src.filter(PW[s.w][0]),b=a.map(PM[s.m][0]),c=s.t==='all'?b:b.slice(0,3);
+ let fin,fcode;
+ if(s.r==='toList'){fin='['+c.join(', ')+']';fcode='.toList()'}
+ else if(s.r==='fold: sum'){fin=String(c.reduce((x,y)=>x+y,0));fcode='.fold(0, (sum, n) => sum + n)'}
+ else if(s.r==='fold: product'){fin=String(c.reduce((x,y)=>x*y,1));fcode='.fold(1, (p, n) => p * n)'}
+ else if(s.r==='reduce: max'){fin=c.length?String(Math.max(...c)):'StateError: no element';fcode='.reduce((a, b) => a > b ? a : b)'}
+ else{fin=String(c.some(v=>v>50));fcode='.any((n) => n > 50)'}
+ const row=(t,arr,col)=>`<div style="display:flex;align-items:center;gap:8px"><div style="width:62px;font:700 10.5px var(--f-mono);color:var(--muted)">${t}</div><div style="flex:1;min-width:0">${arr.length?arr.map(v=>`<span style="display:inline-block;min-width:26px;text-align:center;margin:2px 3px 2px 0;padding:3px 5px;border-radius:7px;background:${col};color:#fff;font:700 12px var(--f-mono)">${v}</span>`).join(''):'<span style="font:12px var(--f-mono);color:var(--muted)">empty list</span>'}</div></div>`;
+ g.innerHTML=nbx(row('source',src,'var(--muted)')+row('where',a,'var(--c1)')+row('map',b,'var(--c2,#7c3aed)')+row('take',c,'var(--ok)')+`<div style="display:flex;gap:8px;align-items:center"><div style="width:62px;font:700 10.5px var(--f-mono);color:var(--muted)">result</div><div style="font:700 16px var(--f-mono)">${esc(fin)}</div></div>`+note('Each row is the output of the step above it.'));
+ const w=PW[s.w][1],m=PM[s.m][1],tk=s.t==='all'?'':'.take(3)';
+ const chain="final result = numbers"+[w,m,tk,fcode].filter(Boolean).map(x=>'\n    '+x).join('')+';';
+ const loop=["final out = <int>[];","for (final n in numbers) {",...(s.w!=='none'?["  if (!("+PW[s.w][1].replace(/.*\(n\) => /,'').replace(/\)$/,'')+")) continue;"]:[]),"  var v = n;",...(s.m!=='none'?["  v = "+PM[s.m][1].replace(/.*\(n\) => /,'').replace(/\)$/,'')+";"]:[]),"  out.add(v);",...(s.t!=='all'?["  if (out.length == 3) break;"]:[]),"}",...(s.r==='toList'?["// result is out"]:s.r==='fold: sum'?["var result = 0;","for (final v in out) { result += v; }"]:s.r==='fold: product'?["var result = 1;","for (final v in out) { result *= v; }"]:s.r==='reduce: max'?["var result = out.first;","for (final v in out) { if (v > result) result = v; }"]:["var result = false;","for (final v in out) { if (v > 50) { result = true; break; } }"])].join('\n');
+ return {code:'final numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n'+(s.sty==='functional chain'?chain+'\n\n// where, map, take are lazy: nothing runs until toList or fold':loop),hint:'Change one step at a time. Then flip the code style to compare the loop with the chain.'};
+}});
+
+/* ---------- OOP basics ---------- */
+def({cat:DA,id:'oop-basics',name:'OOP in Dart: classes, constructors and encapsulation',tags:'oop object oriented class object constructor named constructor initializer list factory const private underscore getter setter encapsulation this field instance static',h:400,
+blurb:'A class is a blueprint and an object is one thing made from it. Constructors build objects: a default one, named ones, factories and const ones. Encapsulation hides the inside: a name starting with an underscore is private to its file, and getters and setters guard the value.',
+use:'Model your data and logic: User, Product, Repository, ViewModel. Almost every Flutter widget is a class.',
+watch:'Private in Dart means private to the library (usually the file), not to the class. Initialise final fields in the constructor, using this.name or an initializer list, because the body runs too late. A factory constructor may return an existing object. Mark classes const when all fields are final.',
+ctl:[{k:'ct',l:'constructor',t:'sel',o:['Default','Named','Initializer list','Factory','const'],v:'Default'},{k:'priv',l:'private field (_x)',t:'chk',v:false},{k:'acc',l:'access',t:'sel',o:['plain field','getter only','getter + setter with check'],v:'plain field'}],
+render(s,st,g){
+ const C={'Default':{call:'Point(3, 4)',res:'Point(x: 3, y: 4)',txt:'The usual one. this.x copies the argument straight into the field.',code:['  Point(this.x, this.y);']},
+ 'Named':{call:'Point.origin()',res:'Point(x: 0, y: 0)',txt:'Named constructors give a clear name to a way of building: Point.origin(), Point.fromJson(map).',code:['  Point(this.x, this.y);','  Point.origin() : x = 0, y = 0;','  Point.fromJson(Map<String, dynamic> j) : x = j[\'x\'], y = j[\'y\'];']},
+ 'Initializer list':{call:'Point.polar(5, 0)',res:'Point(x: 5, y: 0)',txt:'After the colon you can compute fields and assert values before the body runs. Final fields must be set here or in the parameters.',code:['  Point.polar(double r, double angle)','      : x = r * cos(angle),','        y = r * sin(angle),','        assert(r >= 0);']},
+ 'Factory':{call:'Point(3, 4)   // second call',res:'same object as the first call (cached)',txt:'A factory constructor may return an existing object or a subtype. It has no this. Use it for caches, singletons and JSON with variants.',code:['  static final _cache = <String, Point>{};','  factory Point(double x, double y) =>','      _cache.putIfAbsent(\'$x,$y\', () => Point._(x, y));','  Point._(this.x, this.y);']},
+ 'const':{call:'const Point(3, 4)',res:'one shared object, built at compile time',txt:'A const constructor needs every field to be final. Two const objects with the same values are the same object, so Flutter can skip rebuilding const widgets.',code:['  const Point(this.x, this.y);   // all fields final']}};
+ const c=C[s.ct],P=s.priv?'_':'';
+ const acc=s.acc;
+ const fld=acc==='plain field'?[`  double ${P}x;`]:acc==='getter only'?[`  final double _x;`,'  double get x => _x;']:[`  double _x;`,'  double get x => _x;','  set x(double v) {','    if (v < 0) throw ArgumentError(\'x must be >= 0\');','    _x = v;','  }'];
+ const outside=s.priv&&acc==='plain field'?['p._x','Error: _x is private to this file','var(--danger)']:acc==='plain field'?['p.x = -5','allowed: x is -5','var(--c1)']:acc==='getter only'?['p.x = -5','Error: no setter for x','var(--danger)']:['p.x = -5','ArgumentError: x must be >= 0','var(--ok)'];
+ const own=s.ct==='const'&&acc!=='plain field';
+ g.innerHTML=nbx(lab('MAKE AN OBJECT')+kv([['code',c.call],['you get',c.res,'var(--ok)']])+note(c.txt)+lab('FROM ANOTHER FILE')+kv([['you write',outside[0]],['result',outside[1],outside[2]]])+(own?note('Note: a const constructor cannot have a setter that changes a final field. Use immutable data with copyWith instead.','var(--danger)'):''));
+ const fieldsInit=acc==='plain field'?'':'';
+ const ctor=c.code.map(l=>acc==='plain field'?l:l.replace(/this\.x/g,'this._x').replace(/x = /g,'_x = '));
+ const code=['class Point {',...(s.ct==='const'?['  final double x;','  final double y;']:fld.concat([`  double y;`])),...ctor,'','  @override','  String toString() => \'Point(x: $x, y: $y)\';','}','',"// in another file:",'final p = '+(c.call.split('   //')[0])+';',outside[0]+';   // '+outside[1]];
+ return {code:code.join('\n'),hint:'Pick a constructor, then try private and getter or setter to see what other files may do.'};
+}});
+
+/* ---------- OOP: inheritance ---------- */
+def({cat:DA,id:'oop-inherit',name:'OOP in Dart: extends, implements, with, abstract and polymorphism',tags:'inheritance extends implements with mixin abstract class interface polymorphism override super subclass superclass is-a interface speak animal',h:420,
+blurb:'extends reuses code from a parent and creates an is-a link. implements promises to provide every member of another class, with no code reuse. with adds a mixin, a piece of behaviour you can add to many classes. abstract classes describe what must exist without saying how.',
+use:'Share behaviour between related classes, program against an interface so you can swap implementations (Repository, fake for tests), and add reusable features with mixins.',
+watch:'A class can extend only one class, but it can implement many interfaces and use many mixins. Prefer composition (a field holding another object) when the relation is "has a" and not "is a". Always add @override. Call super in the body only when you still want the parent behaviour.',
+ctl:[{k:'rel',l:'relationship',t:'sel',o:['extends','implements','with (mixin)','abstract + extends'],v:'extends'},{k:'ob',l:'object',t:'sel',o:['Dog','Cat','Robot'],v:'Dog'},{k:'sup',l:'call super.speak()',t:'chk',v:false}],
+render(s,st,g){
+ const o=s.ob,rel=s.rel,sup=s.sup;
+ const R={
+ 'extends':{Dog:['Woof'+(sup?'  (after super: "...")':''),true,'Dog overrides speak().'],Cat:['...',true,'Cat does not override speak(), so it inherits the parent version.'],Robot:['Beep',false,'Robot extends Machine, not Animal. It is not an Animal.']},
+ 'implements':{Dog:['Woof',true,'Dog implements Speaker and writes speak() itself.'],Cat:['Meow',true,'Cat implements Speaker and writes speak() itself.'],Robot:['Beep',true,'Robot implements Speaker too. Unrelated classes can share one interface.']},
+ 'with (mixin)':{Dog:['Woof'+(sup?'  (after super: "...")':''),true,'Dog uses the Speaks mixin and overrides speak().'],Cat:['...',true,'Cat gets speak() from the mixin.'],Robot:['...',true,'Robot also gets speak() from the mixin, with no shared parent.']},
+ 'abstract + extends':{Dog:['Woof',true,'Dog must implement the abstract speak().'],Cat:['Meow',true,'Cat must implement the abstract speak().'],Robot:['Beep',false,'Robot is a Machine, not an Animal. Animal() itself cannot be created.']}};
+ const r=R[rel][o];
+ const noSuper=rel==='implements'||rel==='abstract + extends';
+ const poly=rel==='implements'?['Speaker','List<Speaker> all = [Dog(), Cat(), Robot()]','all of them fit']:rel==='with (mixin)'?['Speaks','List<Speaks> all = [Dog(), Cat(), Robot()]','all of them fit']:['Animal','List<Animal> zoo = [Dog(), Cat()]','Robot does not fit'];
+ g.innerHTML=nbx(lab('CALL  '+o.toLowerCase()+'.speak()')+kv([[o+'().speak()',r[0],'var(--ok)'],['is '+poly[0]+'?',r[1]?'yes':'no',r[1]?'var(--ok)':'var(--danger)']])+note(r[2]+(sup&&noSuper?' (super.speak() is not available here: an interface or abstract method has no body.)':''))+lab('POLYMORPHISM')+kv([[poly[1],poly[2]],['for (a in list) a.speak()','each object runs its own speak()']]));
+ const sp=sup?"    "+"super.speak();\n    ":"    ";
+ const CODE={
+ 'extends':["class Animal {","  String speak() => '...';","}","class Dog extends Animal {","  @override","  String speak() {","    "+(sup?"final base = super.speak();   // '...'\n    return 'Woof';":"return 'Woof';")+"","  }","}","class Cat extends Animal {}          // inherits speak()","class Machine { }","class Robot extends Machine {","  String speak() => 'Beep';          // not an Animal","}"],
+ 'implements':["abstract interface class Speaker {","  String speak();","}","class Dog implements Speaker {","  @override String speak() => 'Woof';   // must write it","}","class Cat implements Speaker {","  @override String speak() => 'Meow';","}","class Robot implements Speaker {","  @override String speak() => 'Beep';","}","// implements gives the shape only: no code is reused"],
+ 'with (mixin)':["mixin Speaks {","  String speak() => '...';","}","class Dog with Speaks {","  @override","  String speak() "+(sup?"=> '${super.speak()} Woof';":"=> 'Woof';"),"}","class Cat with Speaks {}              // uses the mixin as is","class Robot with Speaks {}            // no parent needed","// mixin on Base { }  limits the mixin to subclasses of Base"],
+ 'abstract + extends':["abstract class Animal {","  String speak();                     // no body: subclasses must write it","  void breathe() => print('in, out'); // shared code is allowed too","}","class Dog extends Animal {","  @override String speak() => 'Woof';","}","class Cat extends Animal {","  @override String speak() => 'Meow';","}","// final a = Animal();   // error: abstract classes cannot be created"]};
+ return {code:CODE[rel].join('\n'),hint:'Change the relationship and the object. Notice which ones may be put in the same list.'};
+}});
+
+/* ---------- Dart 3 class modifiers ---------- */
+const CM={
+ 'class':{i:1,e:1,m:1,x:0,n:'The default. Anyone can create it, extend it or implement it.',c:'class Logger {}'},
+ 'abstract class':{i:0,e:1,m:1,x:0,n:'Cannot be created. A base for subclasses. It may have bodies or not.',c:'abstract class Shape {\n  double area();\n}'},
+ 'base class':{i:1,e:1,m:0,x:0,n:'May be extended but not implemented. Subclasses must be base, final or sealed. Protects the parent from fake copies.',c:'base class Repository {}'},
+ 'interface class':{i:1,e:0,m:1,x:0,n:'May be implemented but not extended outside its library. Forces others to write every member.',c:'interface class Storage {\n  void save(String s) {}\n}'},
+ 'final class':{i:1,e:0,m:0,x:0,n:'Closed. Outside the library it cannot be extended or implemented. Only creation is allowed.',c:'final class Config {}'},
+ 'sealed class':{i:0,e:0,m:0,x:1,n:'Abstract and closed to other libraries. The compiler knows all subtypes, so a switch must handle each one.',c:'sealed class Result {}\nclass Ok extends Result {}\nclass Err extends Result {}'},
+ 'mixin class':{i:1,e:1,m:1,x:0,n:'Works as a class and as a mixin. It cannot have extends or with clauses.',c:'mixin class Walks {\n  void walk() {}\n}'},
+ 'abstract interface class':{i:0,e:0,m:1,x:0,n:'A pure interface. Cannot be created or extended. It can only be implemented.',c:'abstract interface class Repo {\n  Future<void> load();\n}'}};
+def({cat:DA,id:'class-modifiers',name:'Dart 3 class modifiers: abstract, base, interface, final, sealed',tags:'dart 3 class modifiers sealed final base interface abstract mixin class exhaustive switch extend implement instantiate library restriction',h:420,
+blurb:'Dart 3 lets a class declare what other code may do with it. abstract blocks creating it. base, interface and final limit extending and implementing. sealed closes the set of subtypes, so a switch can check you covered every case.',
+use:'Design safe APIs, such as results (Ok, Err), UI state and repository contracts.',
+watch:'These rules apply to code outside the library where the class is declared. In the same file, anything is allowed. A subclass of a base class must itself be base, final or sealed. Plain class stays the best choice when you have no reason to limit it.',
+ctl:[{k:'mod',l:'declaration',t:'sel',o:Object.keys(CM),v:'sealed class'}],
+render(s,st,g){
+ const M=CM[s.mod],cell=(t,y)=>`<div style="flex:1;text-align:center;border-radius:10px;padding:10px 4px;border:2px solid ${y?'var(--ok)':'var(--danger)'};background:var(--surface)"><div style="font:700 20px var(--f-mono);color:${y?'var(--ok)':'var(--danger)'}">${y?'✓':'✗'}</div><div style="font:600 11px var(--f-mono);margin-top:3px">${t}</div></div>`;
+ g.innerHTML=nbx(lab('WHAT OTHER FILES MAY DO WITH <b>'+esc(s.mod)+'</b>')+`<div style="display:flex;gap:6px">${cell('create it',M.i)}${cell('extends',M.e)}${cell('implements',M.m)}${cell('exhaustive switch',M.x)}</div>`+note(M.n));
+ const sw=M.x?'\n\nString show(Result r) => switch (r) {\n  Ok() => \'fine\',\n  Err() => \'failed\',   // remove one line: compile error\n};':'';
+ return {code:M.c+sw,hint:'Pick each declaration and compare the four boxes.'};
+}});
+
 /* ================= v5: DOCS-STYLE CATEGORIES + LEARNING PATH ================= */
 const RECAT={};
 const put=(cat,ids)=>ids.split(' ').forEach(i=>{RECAT[i]=cat});
@@ -4423,6 +4662,37 @@ Object.assign(LINKS,{
 });
 [['release-android','github-actions'],['release-ios','github-actions'],['release-android','fastlane'],['release-ios','fastlane'],['permissions-flow','platform-channels'],['android-concepts','background-work']].forEach(([a,b])=>{if(META[a]&&META[a].r&&META[a].r.indexOf(b)<0)META[a].r.push(b)});
 {const m=PATH.find(p=>p.t==='Ship it');if(m){m.s.push(['github-actions','Run checks on every pull request and build on a tag.'],['fastlane','Upload to Play and TestFlight with one command.'])}}
+/* v16 props, links, path for async Dart pages */
+Object.assign(META,{
+'event-loop':{p:['main()|function|-|Runs first, to the end, before any queue.','microtask queue|queue|-|Emptied completely before the next event. Filled by scheduleMicrotask and completed Futures.','event queue|queue|-|Timers, taps, I/O and network replies. One item per turn.','scheduleMicrotask(fn)|function|-|Run fn before the next event. Rarely needed.','Timer(Duration.zero, fn)|class|-|Run fn as an event, after the microtasks.','await|keyword|-|Splits the function. The rest continues as a microtask or event.'],r:['dart-async','future-deep','isolates']},
+'future-deep':{p:['future.then(onValue)|Future<R>|-|Run code on success. Returns a new Future.','future.catchError(handler)|Future<T>|-|Handle an error. Must return a value or throw.','future.whenComplete(fn)|Future<T>|-|Like finally: runs after a value or an error.','future.timeout(duration, onTimeout:)|Future<T>|-|Throws TimeoutException, or returns onTimeout. Does not cancel the work.','Future.wait(list, eagerError:)|Future<List<T>>|false|Wait for all. eagerError: true fails at the first error.','Future.value / Future.error|Future<T>|-|An already completed Future.','Completer<T>|class|-|Make a Future you complete yourself, once, with complete or completeError.','unawaited(future)|function|-|Say on purpose that you will not wait for it.'],r:['dart-async','event-loop','streams-deep']},
+'streams-deep':{p:['Stream<T>|class|-|Many values over time. Single-subscription by default.','stream.listen(onData, onError:, onDone:, cancelOnError:)|StreamSubscription|-|Start receiving values.','subscription.cancel() / pause() / resume()|Future / void|-|Stop, hold or continue. Cancel in dispose.','StreamController<T>() / .broadcast()|class|-|A stream you push into with add, addError and close.','asBroadcastStream()|Stream<T>|-|Allow many listeners on a single-subscription stream.','where / map / take / skip / distinct|Stream<T>|-|Operators that reshape values. They are lazy.','asyncMap / expand|Stream<R>|-|Async transform: do an await per value.','async* and yield|keywords|-|Write a stream like a loop. await for reads one.','StreamBuilder|widget|-|Show the latest value in the UI.'],r:['stream-builder','dart-async','future-deep']},
+'isolates':{p:['Isolate.run(fn)|Future<R>|-|Run fn on a new isolate and return its result. Dart 2.19+.','compute(fn, message)|Future<R>|-|Flutter helper. Same idea, one argument.','Isolate.spawn(entry, message)|Future<Isolate>|-|Start a long-lived worker.','ReceivePort / SendPort|class|-|Message lines between isolates. Data is copied.','Isolate.exit(port, result)|void|-|Return a result without copying it (used by Isolate.run).','RootIsolateToken|class|-|Lets a background isolate call plugins.','What can be sent|rules|-|Numbers, strings, lists, maps, records and your plain classes. Not closures over UI, sockets or native handles.'],r:['dart-async','event-loop','background-work']}
+});
+Object.assign(LINKS,{
+'event-loop':[['The event loop and Dart','https://dart.dev/language/concurrency'],['Asynchronous programming','https://dart.dev/libraries/async/async-await']],
+'future-deep':[['Future class','https://api.dart.dev/stable/dart-async/Future-class.html'],['Asynchronous programming: futures','https://dart.dev/libraries/async/futures-async-await']],
+'streams-deep':[['Streams','https://dart.dev/libraries/async/using-streams'],['Creating streams','https://dart.dev/libraries/async/creating-streams']],
+'isolates':[['Isolates','https://dart.dev/language/isolates'],['Concurrency in Flutter','https://docs.flutter.dev/perf/isolates']]
+});
+['dart-async'].forEach(a=>{if(META[a]&&META[a].r){['event-loop','future-deep','streams-deep','isolates'].forEach(x=>{if(!META[a].r.includes(x))META[a].r.push(x)})}});
+{const m=PATH.find(p=>p.t==='Know Dart');if(m){m.s.push(['event-loop','See why code runs in a surprising order.'],['future-deep','Handle errors, timeouts and callbacks with Futures.'],['streams-deep','Work with many values over time.'],['isolates','Keep heavy work from freezing the UI.'])}}
+
+Object.assign(META,{
+'fp-core':{p:['Function type|R Function(A)|-|A function is a value you can store, pass and return.','typedef Name = R Function(A)|typedef|-|Give a function type a name.','closure|concept|-|A function that keeps the variables around it alive.','pure function|concept|-|Same input gives same output, no side effects.','final fields + const|keywords|-|Immutable data. Change by copying.','copyWith(...)|method|-|Return a changed copy. freezed can generate it.','records (a, b)|Dart 3|-|Lightweight immutable value to return several things.'],r:['fp-pipeline','dart-collections','dart-classes']},
+'fp-pipeline':{p:['where(test)|Iterable<E>|-|Keep items that pass. Lazy.','map(transform)|Iterable<R>|-|Change each item. Lazy.','take(n) / skip(n)|Iterable<E>|-|First n, or all but the first n.','fold(start, combine)|T|-|Combine into one value. Works on an empty list.','reduce(combine)|E|-|Like fold, starting from the first item. Throws on empty.','any / every|bool|-|Does at least one / every item pass.','expand(toIterable)|Iterable<R>|-|Flatten: each item becomes many.','toList() / toSet()|List / Set|-|Run the chain and collect the result.'],r:['dart-collections','fp-core','list-view']},
+'oop-basics':{p:['class / this|keyword|-|Blueprint and the current object.','Name(this.a, this.b)|constructor|-|Shorthand that copies arguments into fields.','Name.named()|named constructor|-|Another way to create the object.',': field = value|initializer list|-|Set fields and assert before the body runs.','factory Name(...)|constructor|-|May return a cached or subtype object.','const Name(...)|constructor|-|Compile-time object. All fields must be final.','_name|private|-|Private to the library (the file), not to the class.','get / set|accessors|-|Compute or guard a value behind a property.','static|keyword|-|Belongs to the class, not to an object.'],r:['oop-inherit','class-modifiers','dart-classes']},
+'oop-inherit':{p:['extends|keyword|-|One parent. Reuses its code. Creates an is-a link.','implements|keyword|-|Many interfaces. Must write every member. No code reuse.','with|keyword|-|Add one or more mixins.','mixin Name on Base|declaration|-|Reusable behaviour. on limits which classes may use it.','abstract class|declaration|-|Cannot be created. May hold abstract members.','@override|annotation|-|Say you replace a parent member. The analyzer checks it.','super.member / super(...)|keyword|-|Use the parent version or constructor.','is / as|operators|-|Test or cast a type at run time.'],r:['oop-basics','class-modifiers','dart-classes']},
+'class-modifiers':{p:['abstract|modifier|-|Cannot be instantiated.','base|modifier|-|Extend only, not implement. Subclasses must be base, final or sealed.','interface|modifier|-|Implement only, not extend, outside the library.','final|modifier|-|No extending or implementing outside the library.','sealed|modifier|-|Abstract and closed. Enables exhaustive switch.','mixin class|modifier|-|Both a class and a mixin.','Combinations|rule|-|abstract interface class is a pure interface. sealed already means abstract.'],r:['dart-classes','oop-inherit','oop-basics']}
+});
+Object.assign(LINKS,{
+'fp-core':[['Functions','https://dart.dev/language/functions'],['Closures (Dart tour)','https://dart.dev/language/functions#lexical-closures']],
+'fp-pipeline':[['Iterable collections','https://dart.dev/libraries/dart-core#collections'],['Iterable class','https://api.dart.dev/stable/dart-core/Iterable-class.html']],
+'oop-basics':[['Classes','https://dart.dev/language/classes'],['Constructors','https://dart.dev/language/constructors']],
+'oop-inherit':[['Extend a class','https://dart.dev/language/extend'],['Mixins','https://dart.dev/language/mixins']],
+'class-modifiers':[['Class modifiers','https://dart.dev/language/class-modifiers'],['Class modifiers for API maintainers','https://dart.dev/language/class-modifiers-for-apis']]
+});
+{const m=PATH.find(p=>p.t==='Know Dart');if(m){m.s.push(['oop-basics','Write classes, constructors and private members.'],['oop-inherit','Use extends, implements, with and abstract.'],['class-modifiers','Use sealed and the other Dart 3 modifiers.'],['fp-core','Use pure functions, closures and copyWith.'],['fp-pipeline','Replace loops with where, map and fold.'])}}
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
