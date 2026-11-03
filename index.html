@@ -58,6 +58,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -575,6 +576,13 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .scr.h{overflow-x:auto;overflow-y:hidden}
 .scr.h .in{display:flex;height:100%;align-items:center}
 .li.hz{display:flex;align-items:center;justify-content:center;height:70px;margin:0 4px;border-radius:9px;background:var(--c1s);color:var(--fg);font:600 12.5px var(--f-mono)}
+@keyframes swin{from{opacity:0}to{opacity:1;transform:none}}
+@keyframes kfop{from{opacity:.15}to{opacity:1}}
+@keyframes kfsc{from{transform:scale(.6)}to{transform:scale(1.25)}}
+@keyframes kfrot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes kfsl{from{transform:translateX(-34px)}to{transform:translateX(34px)}}
+@keyframes kfsz{from{height:14px}to{height:72px}}
+@keyframes kfst{from{opacity:.15;transform:translateY(10px)}to{opacity:1;transform:none}}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -1927,47 +1935,85 @@ after(g,st,s,draw){
 }});
 
 /* ================= ANIMATION ================= */
-def({cat:'Animation',id:'animated-container',name:'AnimatedContainer',tags:'implicit animation duration curve tween transition',
-blurb:'AnimatedContainer is an implicit animation widget. Change any of its properties in setState and it animates from the old value to the new one over the given duration and curve, with no AnimationController.',
-use:'Simple property animations: size, colour, radius, padding and alignment.',
-watch:'It only animates when a property changes between builds. Building it once with final values shows no animation.',
-ctl:[{k:'du',l:'duration (ms)',t:'rng',min:100,max:2000,step:100,v:800},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','easeOutCubic','bounceOut','elasticOut'],v:'bounceOut'}],
-render(s,st,g){
- if(!st.box){g.innerHTML='<div class="fill" style="align-items:center;justify-content:center"><div class="fb a" id="acb" style="width:100px;height:100px;border-radius:8px"></div></div><button class="btn k-Filled btm" data-a="go">Toggle state</button>';st.box=g.querySelector('#acb')}
- const CV={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',easeOutCubic:'cubic-bezier(.215,.61,.355,1)',bounceOut:lin(bounce),elasticOut:lin(elastic)};
- const b=st.box,on=!!st.on;
- b.style.transition=`all ${s.du}ms ${CV[s.cv]}`;
- b.style.width=on?'240px':'100px';b.style.height=on?'64px':'100px';b.style.borderRadius=on?'32px':'8px';
- b.style.background=on?'var(--c4s)':'var(--c1s)';b.style.borderColor=on?'var(--c4)':'var(--c1)';b.style.color=on?'var(--c4t)':'var(--c1t)';
- b.textContent=on?'selected':'idle';
- return {code:`AnimatedContainer(\n  duration: Duration(milliseconds: ${s.du}),\n  curve: Curves.${s.cv},\n  width: ${on?240:100},\n  height: ${on?64:100},\n  decoration: BoxDecoration(\n    color: ${on?'Colors.pink.shade50':'Colors.blue.shade50'},\n    borderRadius: BorderRadius.circular(${on?32:8}),\n  ),\n)`,hint:'Press the button. Size, colour and radius all animate together using the chosen curve.'};
-},
-act(a,st){if(a==='go')st.on=!st.on}});
+def({cat:'Animation and motion',id:'animated-container',name:'AnimatedContainer',tags:'implicit animation duration curve tween size color padding alignment transform onend',h:330,
+blurb:'AnimatedContainer takes the same arguments as Container, plus a duration. Rebuild it with different values and it animates from the old ones to the new ones. No controller, no State machinery.',
+use:'Selection states, expanding cards, colour changes and anything that should move rather than jump.',
+watch:'It animates the box, not the child. Swapping the child widget is instant: use AnimatedSwitcher for that. Two decorations only tween when they are the same kind.',
+ctl:[{k:'ms',l:'duration (ms)',t:'rng',min:100,max:1600,step:50,v:500},
+ {k:'curve',l:'curve',t:'sel',o:['linear','easeInOut','easeOutBack','elasticOut','bounceOut'],v:'easeInOut'},
+ {k:'what',l:'what changes',t:'sel',o:['size + colour','padding + radius','alignment','transform: rotate','everything'],v:'size + colour'},
+ {k:'auto',l:'keep toggling',t:'chk',v:true},
+ {k:'cmp',l:'show a plain Container beside it',t:'chk',v:false}],
+render(s,st,g,d){
+ const on=!!st.on,ms=+s.ms;
+ const CB={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',easeOutBack:'cubic-bezier(.34,1.56,.64,1)',elasticOut:'cubic-bezier(.22,1.4,.36,1)',bounceOut:'cubic-bezier(.17,.89,.32,1.49)'}[s.curve];
+ const w=s.what;
+ const big=on;
+ const sz=(w==='size + colour'||w==='everything')?(big?[200,120]:[110,80]):[160,100];
+ const col=(w==='size + colour'||w==='everything')?(big?'var(--c4)':'var(--c1)'):'var(--c1)';
+ const pad=(w==='padding + radius'||w==='everything')?(big?28:8):14;
+ const rad=(w==='padding + radius'||w==='everything')?(big?44:8):14;
+ const al=(w==='alignment'||w==='everything')?(big?'flex-end':'flex-start'):'center';
+ const rot=(w==='transform: rotate'||w==='everything')?(big?12:-12):0;
+ const anim=`transition:all ${ms}ms ${CB};`;
+ const boxHtml=(animate)=>`<div style="${animate?anim:''}width:${sz[0]}px;height:${sz[1]}px;background:${col};border-radius:${rad}px;padding:${pad}px;display:flex;align-items:center;justify-content:${al};transform:rotate(${rot}deg);box-sizing:border-box"><span style="${animate?anim:''}background:rgba(255,255,255,.9);border-radius:6px;padding:5px 9px;font:600 12px var(--f-mono);color:#10203f">child</span></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:26px;padding:14px">${s.cmp?`<div style="text-align:center"><div class="cap" style="margin:0 0 8px">Container (jumps)</div>${boxHtml(false)}</div>`:''}<div style="text-align:center">${s.cmp?'<div class="cap" style="margin:0 0 8px">AnimatedContainer</div>':''}${boxHtml(true)}</div></div>`;
+ if(s.auto){clearTimeout(st.t);st.t=setTimeout(()=>{st.on=!st.on;d.draw()},ms+450)}
+ else clearTimeout(st.t);
+ const L=[`duration: const Duration(milliseconds: ${ms}),`,`curve: Curves.${s.curve},`];
+ if(w==='size + colour'||w==='everything')L.push('width: selected ? 200 : 110,','height: selected ? 120 : 80,','color: selected ? Colors.red : Colors.blue,');
+ if(w==='padding + radius'||w==='everything')L.push('padding: EdgeInsets.all(selected ? 28 : 8),','decoration: BoxDecoration(\n    color: Colors.blue,\n    borderRadius: BorderRadius.circular(selected ? 44 : 8),\n  ),');
+ if(w==='alignment'||w==='everything')L.push('alignment: selected ? Alignment.centerRight : Alignment.centerLeft,');
+ if(w==='transform: rotate'||w==='everything')L.push('transform: Matrix4.rotationZ(selected ? 0.21 : -0.21),','transformAlignment: Alignment.center,');
+ L.push("onEnd: () => debugPrint('done'),","child: const Text('child'),");
+ const notes=[];
+ notes.push('Nothing here holds the animation: a rebuild with a different value is what starts it.');
+ if(s.cmp)notes.push('The plain Container snaps to the new values on the same rebuild.');
+ if(w==='padding + radius'||w==='everything')notes.push('color and decoration cannot both be set, so the radius example moves the colour inside BoxDecoration.');
+ if(s.curve==='elasticOut'||s.curve==='bounceOut')notes.push('Springy curves overshoot, which only looks right on size and position, not colour.');
+ return {code:`AnimatedContainer(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
+}});
 
-def({cat:'Animation',id:'animated-switcher',name:'AnimatedSwitcher',tags:'transition crossfade key valuekey fade scale slide',
-blurb:'AnimatedSwitcher animates between an old child and a new one whenever the child changes. You choose the transition with transitionBuilder.',
-use:'Swapping content such as a counter, an icon or a loading and loaded state.',
-watch:'The new child must be distinguishable from the old one, usually by giving it a different Key such as ValueKey(count). Same type and same key means no animation.',
-ctl:[{k:'tr',l:'transition',t:'sel',o:['FadeTransition','ScaleTransition','SlideTransition'],v:'ScaleTransition'},{k:'du',l:'duration (ms)',t:'rng',min:100,max:1000,step:50,v:400},{k:'key',l:'child has a new Key',t:'chk',v:true}],
-render(s,st,g){
- const mk=n=>{const e=document.createElement('div');e.className='fb b';e.style.cssText='position:absolute;inset:0;font-size:36px;border-radius:12px';e.textContent=n;return e};
- if(!st.host){st.n=0;g.innerHTML='<div class="fill" style="align-items:center;justify-content:center"><div id="swh" style="position:relative;width:120px;height:90px"></div></div><button class="btn k-Filled btm" data-a="inc">Increment</button>';st.host=g.querySelector('#swh');st.cur=mk(0);st.host.appendChild(st.cur);st.shown=0}
- if(st.shown!==st.n){
-  if(!s.key){st.cur.textContent=st.n}
-  else{
-   const old=st.cur,nw=mk(st.n),d=+s.du;st.host.appendChild(nw);
-   const K={FadeTransition:[[{opacity:0},{opacity:1}],[{opacity:1},{opacity:0}]],ScaleTransition:[[{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1}],[{transform:'scale(1)',opacity:1},{transform:'scale(0)',opacity:0}]],SlideTransition:[[{transform:'translateX(80px)',opacity:0},{transform:'translateX(0)',opacity:1}],[{transform:'translateX(0)',opacity:1},{transform:'translateX(-80px)',opacity:0}]]}[s.tr];
-   anim(nw,K[0],{duration:d,easing:'ease-out'});
-   const oa=anim(old,K[1],{duration:d,easing:'ease-in',fill:'forwards'});
-   if(oa)oa.onfinish=()=>old.remove();else old.remove();
-   st.cur=nw;
-  }
-  st.shown=st.n;
- }
- return {code:`AnimatedSwitcher(\n  duration: Duration(milliseconds: ${s.du}),\n  transitionBuilder: (child, animation) =>\n      ${s.tr}(${s.tr==='SlideTransition'?'position: offsetTween.animate(animation)':s.tr==='ScaleTransition'?'scale: animation':'opacity: animation'}, child: child),\n  child: Text(\n    '${st.n}',\n${s.key?`    key: ValueKey(${st.n}),\n`:''}  ),\n)`,hint:s.key?'Each press swaps in a new keyed child, so the switcher animates old out and new in.':'Without a new Key the switcher sees the same widget and updates in place. No animation runs.'};
-},
-act(a,st){if(a==='inc')st.n++}});
-
+def({cat:'Animation and motion',id:'animated-switcher',name:'AnimatedSwitcher',tags:'transition fade scale slide key child swap crossfade layoutbuilder duration',h:330,
+blurb:'AnimatedSwitcher animates when its child is replaced: the old one plays out while the new one plays in. It only notices the swap when the new child has a different key or a different type.',
+use:'A counter that rolls, a loading state turning into content, an icon that changes on tap.',
+watch:'Two Text widgets with different strings but no key look identical to AnimatedSwitcher, so nothing animates. Give each child a ValueKey.',
+ctl:[{k:'ms',l:'duration (ms)',t:'rng',min:150,max:1200,step:50,v:400},
+ {k:'tr',l:'transitionBuilder',t:'sel',o:['fade (default)','scale','slide up','rotation','fade + scale'],v:'fade (default)'},
+ {k:'curve',l:'switchInCurve',t:'sel',o:['linear','easeOut','easeInOutBack'],v:'easeOut'},
+ {k:'key',l:'children have different keys',t:'chk',v:true},
+ {k:'what',l:'content',t:'sel',o:['a number','an icon','a whole card'],v:'a number'},
+ {k:'auto',l:'keep swapping',t:'chk',v:true}],
+render(s,st,g,d){
+ const i=st.i||0,ms=+s.ms;
+ const CB={linear:'linear',easeOut:'cubic-bezier(0,0,.2,1)',easeInOutBack:'cubic-bezier(.68,-.3,.32,1.3)'}[s.curve];
+ const items=s.what==='a number'?['1','2','3']:s.what==='an icon'?['favorite','star','home']:['Inbox','Drafts','Sent'];
+ const cur=items[i%items.length];
+ let inner;
+ if(s.what==='a number')inner=`<div style="font:800 64px var(--f-display);color:var(--accent)">${cur}</div>`;
+ else if(s.what==='an icon')inner=`<div style="color:var(--accent)">${ic(cur,64)}</div>`;
+ else inner=`<div class="fb ${'abc'[i%3]}" style="padding:20px 26px;border-radius:14px;font:600 16px var(--f-body)">${cur}</div>`;
+ const T={'fade (default)':'opacity','scale':'scale','slide up':'slide','rotation':'rot','fade + scale':'both'}[s.tr];
+ const from=T==='scale'?'transform:scale(.7);opacity:0':T==='slide'?'transform:translateY(26px);opacity:0':T==='rot'?'transform:rotate(-25deg) scale(.8);opacity:0':T==='both'?'transform:scale(.8);opacity:0':'opacity:0';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><div style="position:relative;display:flex;align-items:center;justify-content:center"><div class="swch" style="${s.key?from:''};animation:swin ${ms}ms ${CB} forwards">${inner}</div></div></div>`;
+ if(s.auto){clearTimeout(st.t);st.t=setTimeout(()=>{st.i=(st.i||0)+1;d.draw()},ms+700)}
+ else clearTimeout(st.t);
+ const builders={'fade (default)':'',
+  'scale':'  transitionBuilder: (child, animation) => ScaleTransition(\n    scale: animation,\n    child: child,\n  ),\n',
+  'slide up':'  transitionBuilder: (child, animation) => SlideTransition(\n    position: Tween(begin: const Offset(0, 0.3), end: Offset.zero).animate(animation),\n    child: FadeTransition(opacity: animation, child: child),\n  ),\n',
+  'rotation':'  transitionBuilder: (child, animation) => RotationTransition(\n    turns: Tween(begin: -0.08, end: 0.0).animate(animation),\n    child: FadeTransition(opacity: animation, child: child),\n  ),\n',
+  'fade + scale':'  transitionBuilder: (child, animation) => FadeTransition(\n    opacity: animation,\n    child: ScaleTransition(scale: Tween(begin: 0.8, end: 1.0).animate(animation), child: child),\n  ),\n'}[s.tr];
+ const childCode=s.what==='a number'
+  ?`Text(\n    '\$count',\n    key: ${s.key?'ValueKey(count)':'null   // no key: the swap is invisible to AnimatedSwitcher'},\n    style: const TextStyle(fontSize: 64, fontWeight: FontWeight.w800),\n  )`
+  :s.what==='an icon'
+   ?`Icon(\n    icons[index],\n    key: ${s.key?'ValueKey(index)':'null'},\n    size: 64,\n  )`
+   :`Card(\n    key: ${s.key?'ValueKey(folder)':'null'},\n    child: Padding(padding: const EdgeInsets.all(20), child: Text(folder)),\n  )`;
+ const notes=[];
+ if(!s.key)notes.push('Without a key the new child looks the same to AnimatedSwitcher, so it skips the animation entirely. This is the most common mistake with this widget.');
+ if(s.tr!=='fade (default)')notes.push('transitionBuilder runs for both the incoming and the outgoing child: the animation plays forward for one and in reverse for the other.');
+ notes.push('AnimatedCrossFade is the better fit when there are exactly two children and the size changes too.');
+ return {code:`AnimatedSwitcher(\n  duration: const Duration(milliseconds: ${ms}),\n  switchInCurve: Curves.${s.curve},\n${builders}  child: ${childCode},\n)`,hint:notes.join(' ')};
+}});
 /* ================= NAVIGATION & STATE ================= */
 const PAGES=['Home','Details','Settings','Profile','Help'];
 def({cat:'Navigation & state',id:'navigator',name:'Navigator',tags:'push pop route materialpageroute stack routes screens go_router',h:290,
@@ -2003,21 +2049,44 @@ act(a,st,s){
  else if(a==='rst'){st.n=0;st.pb=1;st.cb=1}
 }});
 
-def({cat:'Navigation & state',id:'future-builder',name:'FutureBuilder',tags:'async future snapshot connectionstate loading error await http',h:280,
-blurb:'FutureBuilder rebuilds when a Future moves from pending to completed. Its builder receives an AsyncSnapshot that tells you the connection state, the data and any error.',
-use:'Showing a spinner, then data or an error, for a single async call.',
-watch:'Never create the Future inside build. Every rebuild would restart the request. Create it once in initState and store it in a field.',
-ctl:[{k:'dl',l:'delay (ms)',t:'rng',min:300,max:2500,step:100,v:1200},{k:'fail',l:'future throws',t:'chk',v:false}],
+def({cat:'Async',id:'future-builder',name:'FutureBuilder',tags:'async snapshot connectionstate waiting done haserror hasdata initialdata loading error rebuild',h:340,
+blurb:'FutureBuilder watches one Future and rebuilds as its state changes. Your builder reads the snapshot and returns a widget for waiting, for an error and for data.',
+use:'Loading one thing when a screen opens: a profile, a settings record, a single API call.',
+watch:'Create the Future once, in initState or a field. A Future created inside build starts again on every rebuild, which is the classic endless spinner.',
+ctl:[{k:'state',l:'state',t:'sel',o:['waiting','done with data','done with error','done with empty data'],v:'waiting'},
+ {k:'init',l:'initialData given',t:'chk',v:false},
+ {k:'order',l:'builder checks',t:'sel',o:['waiting, error, data (correct)','data first (hides errors)'],v:'waiting, error, data (correct)'},
+ {k:'where',l:'Future created',t:'sel',o:['in initState (correct)','inside build (bug)'],v:'in initState (correct)'},
+ {k:'rebuild',l:'parent rebuilt (keyboard, theme)',t:'chk',v:false}],
 render(s,st,g){
- const ph=st.ph||'idle';
- const body=ph==='waiting'?'<div class="spin" role="status" aria-label="Loading"></div><div class="cap" style="margin:0">ConnectionState.waiting</div>':ph==='done'?'<div style="font:600 20px var(--f-display);color:var(--ok)">Loaded 3 items</div><div class="cap" style="margin:0">hasData = true</div>':ph==='error'?'<div style="font:600 20px var(--f-display);color:var(--danger)">Something went wrong</div><div class="cap" style="margin:0">hasError = true</div>':'<div class="cap" style="margin:0">ConnectionState.none: nothing started yet</div>';
- g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px">${body}<button class="btn k-Filled" data-a="load"${ph==='waiting'?' disabled':''}>${ph==='idle'?'Start request':'Run again'}</button></div>`;
- return {code:`late final Future<List<Item>> _future = fetchItems();\n\nFutureBuilder<List<Item>>(\n  future: _future, // created once, not in build\n  builder: (context, snapshot) {\n    if (snapshot.connectionState == ConnectionState.waiting) {\n      return CircularProgressIndicator();\n    }\n    if (snapshot.hasError) {\n      return Text('Something went wrong');\n    }\n    return Text('Loaded \${snapshot.data!.length} items');\n  },\n)`,hint:'The simulated request takes '+s.dl+' ms'+(s.fail?' and then fails.':'.')};
-},
-act(a,st,s){
- if(a!=='load')return;
- st.ph='waiting';clearTimeout(st.tm);
- st.tm=setTimeout(()=>{st.ph=s.fail?'error':'done';this.draw()},+s.dl);
+ const bug=s.where==='inside build (bug)'&&s.rebuild;
+ let state=s.state;
+ if(bug)state='waiting';
+ const cs=state==='waiting'?'waiting':'done';
+ const hasData=state==='done with data'||state==='done with empty data'||(s.init&&state==='waiting');
+ const hasErr=state==='done with error';
+ const empty=state==='done with empty data';
+ const wrong=s.order==='data first (hides errors)';
+ let shown;
+ if(wrong&&hasErr)shown='<div style="font:600 14px var(--f-body);color:var(--muted)">No data</div><div class="cap" style="margin:6px 0 0">the error branch was never reached</div>';
+ else if(cs==='waiting'&&!(s.init&&!wrong))shown='<div class="spin"></div><div class="cap" style="margin:10px 0 0">ConnectionState.waiting</div>';
+ else if(hasErr)shown=`<div style="color:var(--danger);display:flex;flex-direction:column;align-items:center;gap:8px">${ic('close',30)}<span style="font:600 14px var(--f-body)">Could not load</span></div><div class="cap" style="margin:8px 0 0">snapshot.error</div>`;
+ else if(empty)shown='<div style="color:var(--muted);font:600 14px var(--f-body)">Nothing here yet</div><div class="cap" style="margin:6px 0 0">hasData is true, but the list is empty</div>';
+ else shown=`<div style="display:flex;flex-direction:column;gap:7px;width:200px">${[1,2,3].map(i=>`<div style="display:flex;align-items:center;gap:10px"><div class="fb ${'abc'[i%3]}" style="width:28px;height:28px;border-radius:50%;flex:none"></div><div style="flex:1"><div style="height:9px;border-radius:4px;background:var(--line);width:${70+i*8}%"></div></div></div>`).join('')}</div><div class="cap" style="margin:10px 0 0">${s.init&&cs==='waiting'?'initialData, shown before the Future finishes':'snapshot.data'}</div>`;
+ const chip=(t,on)=>`<span style="padding:4px 9px;border-radius:999px;font:600 11px var(--f-mono);background:${on?'var(--accent)':'var(--line)'};color:${on?'var(--accent-ink)':'var(--muted)'}">${t}</span>`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px"><div style="display:flex;gap:6px">${chip('none',false)}${chip('waiting',cs==='waiting')}${chip('done',cs==='done')}</div><div style="display:flex;flex-direction:column;align-items:center">${shown}</div></div>`;
+ const builderBody=wrong
+  ? "    if (snapshot.hasData) return UserList(snapshot.data!);\n    if (snapshot.hasError) return ErrorView(snapshot.error!);   // never reached for an error with initialData\n    return const Center(child: CircularProgressIndicator());"
+  : "    if (snapshot.connectionState == ConnectionState.waiting) {\n      return const Center(child: CircularProgressIndicator());\n    }\n    if (snapshot.hasError) {\n      return ErrorView(snapshot.error!, onRetry: _reload);\n    }\n    final users = snapshot.data ?? const [];\n    if (users.isEmpty) return const EmptyState();\n    return UserList(users);";
+ const code=s.where==='inside build (bug)'
+  ?`// BUG: a new Future on every build\n@override\nWidget build(BuildContext context) {\n  return FutureBuilder<List<User>>(\n    future: api.fetchUsers(),   // <- runs again on every rebuild\n    builder: (context, snapshot) {\n${builderBody}\n    },\n  );\n}`
+  :`late Future<List<User>> _future;\n\n@override\nvoid initState() {\n  super.initState();\n  _future = api.fetchUsers();   // created once\n}\n\nvoid _reload() => setState(() => _future = api.fetchUsers());\n\n@override\nWidget build(BuildContext context) {\n  return FutureBuilder<List<User>>(\n    future: _future,\n${s.init?'    initialData: const [],\n':''}    builder: (context, snapshot) {\n${builderBody}\n    },\n  );\n}`;
+ const notes=[];
+ if(bug)notes.push('The parent rebuilt and the Future was recreated, so it is back to waiting. This is the endless spinner bug.');
+ if(wrong)notes.push('Checking hasData before hasError swallows failures, especially with initialData, where hasData is true from the very first frame.');
+ if(s.init&&cs==='waiting'&&!wrong)notes.push('initialData gives the builder something to show immediately, so there is no empty first frame.');
+ if(empty)notes.push('hasData only means the Future completed. An empty list is still data, so handle it separately.');
+ return {code,hint:notes.join(' ')||'Switch the state to walk through every branch your builder must handle.'};
 }});
 
 /* ================= NEW IN v2 ================= */
@@ -2249,34 +2318,53 @@ act(a,st){
 }});
 
 /* ---- Animation ---- */
-def({cat:'Animation',id:'implicit-animations',name:'Animated* widgets (implicit)',tags:'animatedopacity animatedscale animatedrotation animatedslide animatedpositioned animatedalign animatedpadding implicit duration curve',h:260,
-blurb:'Flutter ships a family of ready-made implicit animations. Each one animates a single property when you change it: opacity, scale, rotation, slide offset, position, alignment or padding.',
-use:'A simple one-property change that does not justify a full AnimatedContainer or an AnimationController.',
-watch:'They animate when a value changes between builds, not on first build. AnimatedPositioned must be a direct child of a Stack.',
-ctl:[{k:'w',l:'Widget',t:'sel',o:['AnimatedOpacity','AnimatedScale','AnimatedRotation','AnimatedSlide','AnimatedPositioned','AnimatedAlign','AnimatedPadding'],v:'AnimatedScale'},{k:'du',l:'duration (ms)',t:'rng',min:100,max:2000,step:100,v:700},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','easeOutCubic','bounceOut','elasticOut'],v:'easeInOut'}],
-render(s,st,g){
- if(st.kind!==s.w){
-  st.kind=s.w;st.on=false;
-  const box='<div class="fb a" id="anb" style="width:70px;height:70px;border-radius:12px">box</div>';
-  const pos=s.w==='AnimatedPositioned'||s.w==='AnimatedAlign';
-  const body=s.w==='AnimatedPadding'?`<div id="anp" style="position:absolute;left:30px;right:30px;top:20px;bottom:62px;border:1.5px dashed var(--c3);display:flex"><div class="fb a" id="anb" style="flex:1;border-radius:4px">child</div></div>`:pos?`<div id="anb" class="fb a" style="position:absolute;left:12px;top:60px;width:70px;height:70px;border-radius:12px">box</div>`:`<div class="fill" style="align-items:center;justify-content:center;padding-bottom:48px">${box}</div>`;
-  g.innerHTML=body+'<button class="btn k-Filled btm" data-a="go" type="button">Toggle state</button>';
- }
- const b=g.querySelector('#anb'),p=g.querySelector('#anp'),on=st.on,t=`${s.du}ms ${CV2[s.cv]}`;
- let code,prop;
- switch(s.w){
-  case'AnimatedOpacity':b.style.transition='opacity '+t;b.style.opacity=on?.2:1;prop=`opacity: ${on?0.2:1.0},`;break;
-  case'AnimatedScale':b.style.transition='transform '+t;b.style.transform=`scale(${on?1.6:1})`;prop=`scale: ${on?1.6:1.0},`;break;
-  case'AnimatedRotation':b.style.transition='transform '+t;b.style.transform=`rotate(${on?90:0}deg)`;prop=`turns: ${on?0.25:0}, // quarter turns`;break;
-  case'AnimatedSlide':b.style.transition='transform '+t;b.style.transform=`translateX(${on?100:0}%)`;prop=`offset: Offset(${on?1:0}, 0), // x 1 = one box width`;break;
-  case'AnimatedPositioned':b.style.transition='left '+t;b.style.left=on?'calc(100% - 82px)':'12px';prop=`left: ${on?'null, right: 12':'12'},`;break;
-  case'AnimatedAlign':b.style.transition='left '+t+', transform '+t;b.style.left=on?'100%':'0';b.style.transform=on?'translateX(-100%)':'none';b.style.marginLeft=on?'-12px':'12px';prop=`alignment: Alignment.${on?'centerRight':'centerLeft'},`;break;
-  case'AnimatedPadding':p.style.transition='padding '+t;p.style.padding=on?'36px':'4px';prop=`padding: EdgeInsets.all(${on?36:4}),`;break;
- }
- const bx=s.w==='AnimatedPadding'?'child: Box(),':'child: Box(),';
- return {code:`${s.w}(\n  duration: Duration(milliseconds: ${s.du}),\n  curve: Curves.${s.cv},\n  ${prop}\n  ${bx}\n)`,hint:s.w==='AnimatedPositioned'?'Used inside a Stack, with the Stack bounded by the dashed region.':'Press the button to change the value and watch it animate.'};
-},
-act(a,st){if(a==='go')st.on=!st.on}});
+def({cat:'Animation and motion',id:'implicit-animations',name:'Animated* widgets (implicit)',tags:'animatedopacity animatedalign animatedpadding animatedpositioned animatedsize animatedscale animatedrotation animatedslide animateddefaulttextstyle crossfade',h:330,
+blurb:'The implicit animation widgets all work the same way: give them a duration, rebuild with a different value, and they animate. Each one animates a single property, so they are cheaper and clearer than a whole AnimatedContainer.',
+use:'Almost every small motion in an app: fades, moves, resizes, text style changes.',
+watch:'They animate only when the value changes between builds. The first build is just the starting state. For repeat, reverse or a gesture-driven animation you need a controller.',
+ctl:[{k:'w',l:'widget',t:'sel',o:['AnimatedOpacity','AnimatedAlign','AnimatedPadding','AnimatedScale','AnimatedRotation','AnimatedSlide','AnimatedSize','AnimatedDefaultTextStyle','AnimatedCrossFade'],v:'AnimatedAlign'},
+ {k:'ms',l:'duration (ms)',t:'rng',min:150,max:1600,step:50,v:450},
+ {k:'curve',l:'curve',t:'sel',o:['linear','easeInOut','easeOutBack','elasticOut'],v:'easeInOut'},
+ {k:'auto',l:'keep toggling',t:'chk',v:true}],
+render(s,st,g,d){
+ const on=!!st.on,ms=+s.ms;
+ const CB={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',easeOutBack:'cubic-bezier(.34,1.56,.64,1)',elasticOut:'cubic-bezier(.22,1.5,.36,1)'}[s.curve];
+ const tr=`transition:all ${ms}ms ${CB};`;
+ const chip=(extra='')=>`<div class="fb c" style="${tr}${extra}display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body)">box</div>`;
+ let demo;
+ const w=s.w;
+ if(w==='AnimatedOpacity')demo=`<div style="width:100%;display:flex;justify-content:center">${chip(`width:120px;height:72px;opacity:${on?1:0.15};`)}</div>`;
+ else if(w==='AnimatedAlign')demo=`<div style="position:relative;width:100%;height:110px;border:1.5px dashed var(--c3)"><div style="${tr}position:absolute;top:50%;left:${on?'calc(100% - 92px)':'8px'};transform:translateY(-50%)">${chip('width:84px;height:54px;')}</div></div>`;
+ else if(w==='AnimatedPadding')demo=`<div style="border:1.5px dashed var(--c3);${tr}padding:${on?34:6}px">${chip('height:60px;')}</div>`;
+ else if(w==='AnimatedScale')demo=`<div style="width:100%;display:flex;justify-content:center">${chip(`width:110px;height:70px;transform:scale(${on?1.35:0.7});`)}</div>`;
+ else if(w==='AnimatedRotation')demo=`<div style="width:100%;display:flex;justify-content:center">${chip(`width:110px;height:70px;transform:rotate(${on?90:0}deg);`)}</div>`;
+ else if(w==='AnimatedSlide')demo=`<div style="position:relative;width:100%;height:110px;border:1.5px dashed var(--c3);display:flex;align-items:center;justify-content:center">${chip(`width:100px;height:62px;transform:translate(${on?44:-44}px,${on?14:-14}px);`)}</div>`;
+ else if(w==='AnimatedSize')demo=`<div style="display:flex;justify-content:center"><div style="${tr}overflow:hidden;width:${on?210:110}px;height:${on?104:56}px;border:1.5px dashed var(--c3);display:flex;align-items:center;justify-content:center"><span style="font:600 13px var(--f-body);white-space:nowrap">content grows</span></div></div>`;
+ else if(w==='AnimatedDefaultTextStyle')demo=`<div style="width:100%;display:flex;justify-content:center"><span style="${tr}font-size:${on?34:17}px;font-weight:${on?800:500};color:${on?'var(--c4)':'var(--c1)'};letter-spacing:${on?1.5:0}px">Flutter</span></div>`;
+ else demo=`<div style="position:relative;width:100%;height:100px;display:flex;align-items:center;justify-content:center"><div style="${tr}position:absolute;opacity:${on?0:1};transform:scale(${on?.92:1})">${chip('width:120px;height:66px;')}</div><div style="${tr}position:absolute;opacity:${on?1:0};transform:scale(${on?1:.92})"><div class="fb d" style="width:150px;height:84px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body)">second child</div></div></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="width:100%;max-width:300px">${demo}</div></div>`;
+ if(s.auto){clearTimeout(st.t);st.t=setTimeout(()=>{st.on=!st.on;d.draw()},ms+500)}
+ else clearTimeout(st.t);
+ const dur=`duration: const Duration(milliseconds: ${ms}),`,cv=`curve: Curves.${s.curve},`;
+ const C={
+  AnimatedOpacity:`AnimatedOpacity(\n  opacity: selected ? 1 : 0.15,\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedAlign:`AnimatedAlign(\n  alignment: selected ? Alignment.centerRight : Alignment.centerLeft,\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedPadding:`AnimatedPadding(\n  padding: EdgeInsets.all(selected ? 34 : 6),\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedScale:`AnimatedScale(\n  scale: selected ? 1.35 : 0.7,\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedRotation:`AnimatedRotation(\n  turns: selected ? 0.25 : 0,   // turns, not radians\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedSlide:`AnimatedSlide(\n  offset: selected ? const Offset(0.4, 0.2) : const Offset(-0.4, -0.2),   // fractions of the child size\n  ${dur}\n  ${cv}\n  child: child,\n)`,
+  AnimatedSize:`AnimatedSize(\n  ${dur}\n  ${cv}\n  alignment: Alignment.center,\n  child: child,   // animates to whatever size the child becomes\n)`,
+  AnimatedDefaultTextStyle:`AnimatedDefaultTextStyle(\n  style: TextStyle(\n    fontSize: selected ? 34 : 17,\n    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,\n    color: selected ? Colors.red : Colors.blue,\n  ),\n  ${dur}\n  ${cv}\n  child: const Text('Flutter'),\n)`,
+  AnimatedCrossFade:`AnimatedCrossFade(\n  crossFadeState: selected ? CrossFadeState.showSecond : CrossFadeState.showFirst,\n  ${dur}\n  firstChild: const FirstCard(),\n  secondChild: const SecondCard(),\n  // it also animates the size between the two\n)`}[w];
+ const notes=[];
+ if(w==='AnimatedRotation')notes.push('turns is a fraction of a full circle, so 0.25 is 90 degrees. Transform.rotate takes radians instead.');
+ if(w==='AnimatedSlide')notes.push('offset is in fractions of the child size, not pixels.');
+ if(w==='AnimatedSize')notes.push('AnimatedSize watches the child and animates its own size to match. The child itself is not animated.');
+ if(w==='AnimatedCrossFade')notes.push('AnimatedCrossFade needs exactly two children and a CrossFadeState, and it tweens the size between them.');
+ if(s.curve==='elasticOut')notes.push('Springy curves overshoot the target, which suits position and scale but looks wrong on opacity.');
+ notes.push('Each of these animates one property, which is cheaper and easier to read than one AnimatedContainer doing everything.');
+ return {code:C,hint:notes.join(' ')};
+}});
 
 /* ================= PROPERTIES + RELATED ================= */
 const META={
@@ -2462,21 +2550,44 @@ render(s,st,g){
 act(a,st){if(a==='clear')st.d=''}});
 
 /* ---- Animation ---- */
-def({cat:'Animation',id:'animated-fractionally-sized-box',name:'AnimatedFractionallySizedBox',tags:'animate percent width factor height factor alignment implicit progress bar',h:240,
-blurb:'AnimatedFractionallySizedBox is FractionallySizedBox with an implicit animation. When widthFactor, heightFactor or alignment change, the child glides to the new size or position.',
-use:'Progress bars, expanding panels and sheets that open to a percentage of the screen.',
-watch:'Like all implicit animations it only runs when a value changes between builds. It also needs a bounded parent, the same as FractionallySizedBox.',
-ctl:[{k:'du',l:'duration (ms)',t:'rng',min:100,max:2000,step:100,v:700},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','easeOutCubic','bounceOut','elasticOut'],v:'easeOutCubic'}],
-render(s,st,g){
- if(!st.box){g.innerHTML='<div class="fill" style="align-items:center;justify-content:center;padding-bottom:50px"><div style="position:relative;width:280px;max-width:100%;height:130px;border:1.5px dashed var(--c3)"><div class="fb a" id="afb" style="position:absolute;left:0;top:0;width:30%;height:40%"></div></div></div><button class="btn k-Filled btm" data-a="go" type="button">Toggle state</button>';st.box=g.querySelector('#afb')}
- const on=!!st.on,b=st.box;
- b.style.transition=`all ${s.du}ms ${CV2[s.cv]}`;
- b.style.width=on?'90%':'30%';b.style.height=on?'80%':'40%';b.style.left=on?'10%':'0';b.style.top=on?'20%':'0';
- b.textContent=on?'90% × 80%':'30% × 40%';
- return {code:`AnimatedFractionallySizedBox(\n  duration: Duration(milliseconds: ${s.du}),\n  curve: Curves.${s.cv},\n  alignment: Alignment.${on?'bottomRight':'topLeft'},\n  widthFactor: ${on?0.9:0.3},\n  heightFactor: ${on?0.8:0.4},\n  child: Box(),\n)`,hint:'Press Toggle state to animate the factors and the alignment together.'};
-},
-act(a,st){if(a==='go')st.on=!st.on}});
-
+def({cat:'Animation and motion',id:'animated-fractionally-sized-box',name:'AnimatedFractionallySizedBox',tags:'progress bar fraction widthfactor heightfactor reveal panel implicit animation',h:320,
+blurb:'A FractionallySizedBox whose factors animate. Because the size is a fraction of the parent, it is the shortest way to write a progress bar or a panel that slides open, with no controller at all.',
+use:'Progress bars, meters, reveal panels and simple bar charts.',
+watch:'A fraction of infinity is undefined, so the parent must have a real size. A null factor leaves that axis alone, which lets you animate the width only.',
+ctl:[{k:'wf',l:'widthFactor',t:'rng',min:0,max:1,step:.05,v:.65},
+ {k:'hf',l:'heightFactor',t:'sel',o:['null','0.5','1.0'],v:'1.0'},
+ {k:'al',l:'alignment',t:'sel',o:['centerLeft','center','centerRight','bottomCenter'],v:'centerLeft'},
+ {k:'ms',l:'duration (ms)',t:'rng',min:150,max:1600,step:50,v:600},
+ {k:'curve',l:'curve',t:'sel',o:['linear','easeOut','easeInOutCubic','elasticOut'],v:'easeOut'},
+ {k:'kind',l:'looks like',t:'sel',o:['progress bar','reveal panel','bar chart'],v:'progress bar'},
+ {k:'auto',l:'keep animating',t:'chk',v:false}],
+render(s,st,g,d){
+ const ms=+s.ms;
+ const CB={linear:'linear',easeOut:'cubic-bezier(0,0,.2,1)',easeInOutCubic:'cubic-bezier(.65,0,.35,1)',elasticOut:'cubic-bezier(.22,1.5,.36,1)'}[s.curve];
+ let wf=+s.wf;
+ if(s.auto){wf=(st.on?0.9:0.2)}
+ const hf=s.hf==='null'?1:+s.hf;
+ const AJ={centerLeft:'flex-start',center:'center',centerRight:'flex-end',bottomCenter:'center'}[s.al];
+ const AV=s.al==='bottomCenter'?'flex-end':'center';
+ const tr=`transition:all ${ms}ms ${CB};`;
+ let demo;
+ if(s.kind==='bar chart'){
+  demo=`<div style="display:flex;align-items:flex-end;gap:12px;height:132px">${[1,.72,.45].map((m,i)=>`<div style="width:46px;height:100%;background:var(--line);border-radius:8px;display:flex;align-items:flex-end"><div class="fb ${'abc'[i]}" style="${tr}width:100%;height:${Math.round(wf*m*100)}%;border-radius:8px"></div></div>`).join('')}</div>`;
+ } else if(s.kind==='reveal panel'){
+  demo=`<div style="width:240px;height:120px;border:1.5px dashed var(--c3);display:flex;align-items:${AV};justify-content:${AJ};overflow:hidden"><div class="fb c" style="${tr}width:${wf*100}%;height:${hf*100}%;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);overflow:hidden;white-space:nowrap">panel content</div></div>`;
+ } else {
+  demo=`<div style="width:260px"><div style="height:16px;border-radius:999px;background:var(--line);display:flex;align-items:center;justify-content:${AJ};overflow:hidden"><div style="${tr}width:${wf*100}%;height:100%;border-radius:999px;background:var(--accent)"></div></div><div class="cap" style="margin:10px 0 0;text-align:center">widthFactor ${wf.toFixed(2)}</div></div>`;
+ }
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px">${demo}</div>`;
+ if(s.auto){clearTimeout(st.t);st.t=setTimeout(()=>{st.on=!st.on;d.draw()},ms+450)}
+ else clearTimeout(st.t);
+ const notes=[];
+ notes.push('The parent must have a real width, because the factor is a share of it.');
+ if(s.hf==='null')notes.push('A null heightFactor leaves the height to the parent, so only the width animates.');
+ if(s.kind==='progress bar')notes.push('This is the whole widget: no controller, no State class, no dispose.');
+ if(s.curve==='elasticOut')notes.push('elasticOut overshoots past the target, which looks wrong on a progress bar but fine on a reveal.');
+ return {code:`AnimatedFractionallySizedBox(\n  widthFactor: ${wf.toFixed(2)},   // change this and it animates\n${s.hf==='null'?'':`  heightFactor: ${hf.toFixed(1)},\n`}  alignment: Alignment.${s.al},\n  duration: const Duration(milliseconds: ${ms}),\n  curve: Curves.${s.curve},\n  child: const ColoredBox(color: Colors.blue),\n)`,hint:notes.join(' ')};
+}});
 /* ---- props and related for the new widgets, plus cross links ---- */
 Object.assign(META,{
 'flex':{p:['direction|Axis|required|Axis.horizontal behaves like Row, Axis.vertical like Column.','mainAxisAlignment|MainAxisAlignment|start|How children are placed along the main axis.','crossAxisAlignment|CrossAxisAlignment|center|How children line up across the main axis.','spacing|double|0|Gap between children (Flutter 3.27 and later).','verticalDirection, textDirection|enum|down / ltr|Reverse the order of children.'],r:['row-column','expanded','layout-builder']},
@@ -2909,151 +3020,156 @@ render(s,st,g){
 /* ================= v6 GROUP B: animation, async, input ================= */
 const alive=g=>g&&g.isConnected;
 
-def({cat:'Animation and motion',id:'explicit-animations',name:'AnimationController & transitions',tags:'animationcontroller vsync forward reverse repeat fadetransition slidetransition rotationtransition scaletransition animatedbuilder tween ticker',h:300,
-blurb:'An explicit animation is driven by an AnimationController, which counts from 0.0 to 1.0 over a duration. A transition widget such as FadeTransition listens to it and rebuilds only itself on every frame. You choose when to play, reverse or repeat.',
-use:'Looping or repeating motion, animations the user can pause or scrub, and several properties that must move together.',
-watch:'The State needs SingleTickerProviderStateMixin as the vsync, and you must call controller.dispose(). If a built-in implicit widget can do the job, it is less code.',
-ctl:[{k:'w',l:'transition widget',t:'sel',o:['FadeTransition','ScaleTransition','RotationTransition','SlideTransition'],v:'FadeTransition'},{k:'du',l:'duration (ms)',t:'rng',min:300,max:2500,step:100,v:1200},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','bounceOut'],v:'linear'}],
+def({cat:'Animation and motion',id:'explicit-animations',name:'AnimationController & transitions',tags:'controller vsync forward reverse repeat curvedanimation tween animatedbuilder fadetransition interval stagger status',h:340,
+blurb:'An AnimationController produces a number from 0 to 1 over a duration, and you decide what to do with it. That is what gives you repeat, reverse, pause and gesture control, which implicit animations cannot do.',
+use:'Looping animations, staggered sequences, anything driven by a drag, and animations you must stop.',
+watch:'Create it in initState with a vsync, and dispose it. Prefer AnimatedBuilder or a *Transition widget over calling setState in a listener: those repaint without rebuilding.',
+ctl:[{k:'run',l:'running',t:'chk',v:true},
+ {k:'mode',l:'driving method',t:'sel',o:['repeat()','repeat(reverse: true)','forward()','fling()'],v:'repeat(reverse: true)'},
+ {k:'ms',l:'duration (ms)',t:'rng',min:300,max:3000,step:100,v:1200},
+ {k:'curve',l:'CurvedAnimation curve',t:'sel',o:['linear','easeInOut','elasticOut','bounceOut'],v:'easeInOut'},
+ {k:'use',l:'what it drives',t:'sel',o:['FadeTransition','ScaleTransition','RotationTransition','SlideTransition','SizeTransition','staggered (Interval)'],v:'RotationTransition'},
+ {k:'tw',l:'wrap in a Tween',t:'chk',v:true}],
 render(s,st,g,d){
- st.hintHost=d.hintEl;st.s=s;
- if(!st.box){
-  st.v=0;st.dir=0;st.rep=false;st.t0=0;
-  g.innerHTML=`<div style="position:absolute;left:0;right:0;top:0;height:170px;display:flex;align-items:center;justify-content:center;overflow:hidden"><div class="xb fb a" style="width:80px;height:80px;border-radius:14px;font-size:14px">child</div></div><div style="position:absolute;left:18px;right:18px;top:176px"><div style="height:6px;border-radius:3px;background:var(--line);overflow:hidden"><div class="xv" style="height:100%;background:var(--c1);width:0"></div></div><div class="xl" style="font:600 12px var(--f-mono);color:var(--muted);margin-top:5px">controller.value = 0.00</div></div><div style="position:absolute;left:0;right:0;bottom:10px;display:flex;gap:8px;justify-content:center"><button class="btn k-Filled" data-a="fwd" style="padding:6px 12px">forward</button><button class="btn k-Outlined" data-a="rev" style="padding:6px 12px">reverse</button><button class="btn k-Outlined" data-a="rep" style="padding:6px 12px">repeat</button><button class="btn k-Outlined" data-a="stop" style="padding:6px 12px">stop</button></div>`;
-  st.box=g.querySelector('.xb');st.bar=g.querySelector('.xv');st.lab=g.querySelector('.xl');
-  const tick=ts=>{
-   if(!alive(g))return;
-   if(st.dir!==0){
-    if(!st.t0)st.t0=ts;
-    const dt=(ts-st.t0)/st.s.du;st.t0=ts;
-    st.v+=st.dir*dt;
-    if(st.dir>0&&st.v>=1){st.v=1;if(st.rep)st.dir=-1;else st.dir=0}
-    else if(st.dir<0&&st.v<=0){st.v=0;if(st.rep)st.dir=1;else st.dir=0}
-    if(st.dir===0)st.t0=0;
-   }
-   paint();requestAnimationFrame(tick);
-  };
-  const cv={linear:x=>x,easeInOut:x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,bounceOut:bounce};
-  const paint=()=>{
-   const c=cv[st.s.cv]||cv.linear,t=c(Math.max(0,Math.min(1,st.v))),w=st.s.w,b=st.box;
-   b.style.opacity=w==='FadeTransition'?t:1;
-   b.style.transform=w==='ScaleTransition'?`scale(${(.3+.7*t).toFixed(3)})`:w==='RotationTransition'?`rotate(${(t*360).toFixed(1)}deg)`:w==='SlideTransition'?`translateX(${((t-.5)*160).toFixed(1)}px)`:'none';
-   st.bar.style.width=(st.v*100)+'%';st.lab.textContent='controller.value = '+st.v.toFixed(2);
-  };
-  st.paint=paint;requestAnimationFrame(tick);
- }
- st.paint();
- const w=s.w,cur=s.cv==='linear'?'_controller':'_animation';
- const anim2=s.cv==='linear'?'':`late final _animation = CurvedAnimation(\n  parent: _controller,\n  curve: Curves.${s.cv},\n);\n\n`;
- const child={FadeTransition:`FadeTransition(\n  opacity: ${cur},`,ScaleTransition:`ScaleTransition(\n  scale: ${cur},`,RotationTransition:`RotationTransition(\n  turns: ${cur},`,SlideTransition:`SlideTransition(\n  position: Tween(\n    begin: Offset(-0.5, 0),\n    end: Offset(0.5, 0),\n  ).animate(${cur}),`}[w];
- const code=`class _BoxState extends State<Box>\n    with SingleTickerProviderStateMixin {\n  late final _controller = AnimationController(\n    vsync: this,\n    duration: Duration(milliseconds: ${s.du}),\n  );\n${anim2?'  '+anim2.trim().replace(/\n/g,'\n  ')+'\n':''}\n  @override\n  Widget build(BuildContext context) {\n    return ${child.replace(/\n/g,'\n    ')}\n      child: MyBox(),\n    );\n  }\n\n  @override\n  void dispose() {\n    _controller.dispose();\n    super.dispose();\n  }\n}\n// _controller.forward();   _controller.reverse();\n// _controller.repeat(reverse: true);`;
- return {code,hint:'Press the buttons. The bar is the controller value. A '+w+' reads it on every frame, and nothing else on the screen rebuilds.'};
-},
-act(a,st){
- if(a==='fwd'){st.rep=false;st.dir=1;st.t0=0;if(st.v>=1)st.v=0}
- else if(a==='rev'){st.rep=false;st.dir=-1;st.t0=0;if(st.v<=0)st.v=1}
- else if(a==='rep'){st.rep=true;st.dir=st.v>=1?-1:1;st.t0=0}
- else if(a==='stop'){st.dir=0;st.rep=false;st.t0=0}
+ const ms=+s.ms,run=s.run,rev=s.mode==='repeat(reverse: true)';
+ const CB={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',elasticOut:'cubic-bezier(.22,1.5,.36,1)',bounceOut:'cubic-bezier(.17,.89,.32,1.49)'}[s.curve];
+ const dir=rev?'alternate':'normal';
+ const anim=run?`animation:ctl ${ms}ms ${CB} ${s.mode.startsWith('repeat')?'infinite':'1'} ${dir} forwards;`:'';
+ const u=s.use;
+ const kf={FadeTransition:'op',ScaleTransition:'sc',RotationTransition:'rot',SlideTransition:'sl',SizeTransition:'sz','staggered (Interval)':'st'}[u];
+ const box=`<div class="fb c" style="width:110px;height:72px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);${anim.replace('ctl','kf'+kf)}"></div>`;
+ const stag=u==='staggered (Interval)'
+  ?`<div style="display:flex;gap:10px">${[0,1,2].map(i=>`<div class="fb ${'abc'[i]}" style="width:56px;height:70px;border-radius:10px;${run?`animation:kfst ${ms}ms ${CB} ${s.mode.startsWith('repeat')?'infinite':'1'} ${dir} forwards;animation-delay:${i*ms*0.18}ms;`:''}"></div>`).join('')}</div>`
+  :'';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px">${u==='staggered (Interval)'?stag:`<div style="display:flex;align-items:center;justify-content:center;width:160px;height:110px;overflow:hidden">${box}</div>`}</div>`;
+ const drive={'repeat()':'controller.repeat();','repeat(reverse: true)':'controller.repeat(reverse: true);','forward()':'controller.forward();','fling()':'controller.fling(velocity: 2);'}[s.mode];
+ const curved=`late final Animation<double> _curved = CurvedAnimation(\n    parent: controller,\n    curve: Curves.${s.curve},\n  );`;
+ const tweened=s.tw?`\n  late final Animation<double> _value =\n      Tween<double>(begin: 0.6, end: 1.0).animate(_curved);`:'';
+ const widget={
+  FadeTransition:'FadeTransition(\n      opacity: _value,\n      child: child,\n    )',
+  ScaleTransition:'ScaleTransition(\n      scale: _value,\n      child: child,\n    )',
+  RotationTransition:'RotationTransition(\n      turns: _value,\n      child: child,\n    )',
+  SlideTransition:'SlideTransition(\n      position: Tween(begin: Offset.zero, end: const Offset(0.4, 0))\n          .animate(_curved),\n      child: child,\n    )',
+  SizeTransition:'SizeTransition(\n      sizeFactor: _value,\n      axis: Axis.vertical,\n      child: child,\n    )',
+  'staggered (Interval)':'Column(\n      children: [\n        for (var i = 0; i < 3; i++)\n          FadeTransition(\n            opacity: CurvedAnimation(\n              parent: controller,\n              curve: Interval(i * 0.2, 0.6 + i * 0.2, curve: Curves.${s.curve}),\n            ),\n            child: Bar(i),\n          ),\n      ],\n    )'}[u].replace('${s.curve}',s.curve);
+ const code=`class _DemoState extends State<Demo> with SingleTickerProviderStateMixin {\n  late final AnimationController controller = AnimationController(\n    vsync: this,\n    duration: const Duration(milliseconds: ${ms}),\n  );\n\n  ${curved}${tweened}\n\n  @override\n  void initState() {\n    super.initState();\n    ${drive}\n  }\n\n  @override\n  void dispose() {\n    controller.dispose();   // always\n    super.dispose();\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return ${widget};\n  }\n}`;
+ const notes=[];
+ if(s.mode==='repeat(reverse: true)')notes.push('repeat(reverse: true) runs forward then backward for ever, which is the usual pulse.');
+ if(s.mode==='fling()')notes.push('fling drives the controller with a spring, which is what you call when a drag ends.');
+ if(u==='staggered (Interval)')notes.push('One controller plus an Interval per item gives a staggered sequence that stays perfectly in sync.');
+ notes.push('A *Transition widget listens to the animation and repaints without rebuilding the subtree, which is why it beats setState in a listener.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Animation and motion',id:'tween-animation-builder',name:'TweenAnimationBuilder',tags:'tween animation builder implicit custom begin end lerp colortween duration',h:270,
-blurb:'TweenAnimationBuilder is an implicit animation you build yourself. Give it a Tween and a duration. Whenever the end value changes, it animates from the old value to the new one and calls your builder every frame.',
-use:'Animating one custom value, such as a corner radius, an angle or a colour, when no ready-made AnimatedFoo widget exists and you do not want a controller.',
-watch:'It animates from the current value only when the tween end changes. A new begin value is ignored until the next change. For several values, use an AnimationController.',
-ctl:[{k:'p',l:'animated value',t:'sel',o:['double (angle)','double (size)','Color'],v:'double (angle)'},{k:'du',l:'duration (ms)',t:'rng',min:200,max:2500,step:100,v:900},{k:'cv',l:'curve',t:'sel',o:['linear','easeInOut','bounceOut','elasticOut'],v:'easeInOut'}],
+def({cat:'Animation and motion',id:'tween-animation-builder',name:'TweenAnimationBuilder',tags:'tween builder value animate double color offset onend child curve no controller',h:330,
+blurb:'TweenAnimationBuilder animates any value with no controller and no State class. Change the tween end value and it animates from where it is now to the new target, calling your builder on every frame.',
+use:'Animating a number, a progress arc, a chart value or anything no built-in widget covers.',
+watch:'It cannot pause, reverse or repeat. The child argument exists so expensive widgets are built once instead of on every frame.',
+ctl:[{k:'kind',l:'tween type',t:'sel',o:['Tween<double> (progress)','ColorTween','Tween<Offset>','IntTween (counter)'],v:'Tween<double> (progress)'},
+ {k:'target',l:'end value',t:'rng',min:0,max:100,step:5,v:70},
+ {k:'ms',l:'duration (ms)',t:'rng',min:200,max:2000,step:100,v:800},
+ {k:'curve',l:'curve',t:'sel',o:['linear','easeOut','easeInOutCubic','elasticOut'],v:'easeOut'},
+ {k:'auto',l:'animate on change',t:'chk',v:true}],
 render(s,st,g,d){
- st.hintHost=d.hintEl;
- if(!st.box){
-  st.on=false;
-  g.innerHTML=`<div style="position:absolute;inset:0 0 54px;display:flex;align-items:center;justify-content:center"><div class="tb fb a" style="width:90px;height:90px;border-radius:14px;font-size:13px">child</div></div><div style="position:absolute;left:0;right:0;bottom:10px;text-align:center"><button class="btn k-Filled" data-a="go" style="padding:7px 18px">Change end value</button></div>`;
-  st.box=g.querySelector('.tb');
+ const t=+s.target,ms=+s.ms;
+ const CB={linear:'linear',easeOut:'cubic-bezier(0,0,.2,1)',easeInOutCubic:'cubic-bezier(.65,0,.35,1)',elasticOut:'cubic-bezier(.22,1.5,.36,1)'}[s.curve];
+ const tr=s.auto?`transition:all ${ms}ms ${CB};`:'';
+ let demo;
+ if(s.kind==='ColorTween'){
+  const c=`hsl(${Math.round(210+ t*1.4)} 80% ${55-t*0.12}%)`;
+  demo=`<div style="${tr}width:150px;height:110px;border-radius:18px;background:${c}"></div>`;
+ } else if(s.kind==='Tween<Offset>'){
+  demo=`<div style="position:relative;width:230px;height:110px;border:1.5px dashed var(--c3)"><div class="fb c" style="${tr}position:absolute;left:${t*0.72}%;top:${t*0.4}%;width:56px;height:40px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body)">box</div></div>`;
+ } else if(s.kind==='IntTween (counter)'){
+  demo=`<div style="font:800 58px var(--f-display);color:var(--accent)">${Math.round(t)}</div>`;
+ } else {
+  const deg=t*3.6;
+  demo=`<div style="position:relative;width:132px;height:132px;border-radius:50%;background:conic-gradient(var(--accent) ${deg}deg, var(--line) 0);${tr}display:flex;align-items:center;justify-content:center"><div style="width:96px;height:96px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 22px var(--f-display)">${Math.round(t)}%</div></div>`;
  }
- const c={linear:'linear',easeInOut:'ease-in-out',bounceOut:lin(bounce),elasticOut:lin(elastic)}[s.cv];
- const b=st.box;b.style.transition=`transform ${s.du}ms ${c}, width ${s.du}ms ${c}, height ${s.du}ms ${c}, background-color ${s.du}ms ${c}`;
- const on=st.on;
- b.style.transform=s.p.includes('angle')?`rotate(${on?180:0}deg)`:'none';
- b.style.width=b.style.height=(s.p.includes('size')?(on?140:60):90)+'px';
- b.style.backgroundColor=s.p==='Color'?(on?'#d9476a':'#2f6bff'):'';
- b.style.color=s.p==='Color'?'#fff':'';
- const k=s.p.includes('angle')?{t:'double',b:'0',e:'math.pi',f:'Transform.rotate(\n      angle: value,\n      child: child,\n    )'}:s.p.includes('size')?{t:'double',b:'60',e:'140',f:'SizedBox(\n      width: value,\n      height: value,\n      child: child,\n    )'}:{t:'Color?',b:'Colors.blue',e:'Colors.pink',f:'ColorFiltered(\n      colorFilter: ColorFilter.mode(value!, BlendMode.srcIn),\n      child: child,\n    )'};
- const tw=s.p==='Color'?`ColorTween(\n    begin: ${k.b},\n    end: ${k.e},\n  )`:`Tween<double>(\n    begin: ${k.b},\n    end: ${k.e},\n  )`;
- const cr=s.cv==='linear'?'':`\n  curve: Curves.${s.cv},`;
- const code=`TweenAnimationBuilder<${k.t}>(\n  tween: ${s.p==='Color'?`ColorTween(\n    begin: Colors.blue,\n    end: ${on?'Colors.pink':'Colors.blue'},\n  )`:`Tween<double>(\n    begin: 0,\n    end: ${s.p.includes('angle')?(on?'math.pi':'0'):(on?'140':'60')},\n  )`},\n  duration: Duration(milliseconds: ${s.du}),${cr}\n  builder: (context, value, child) {\n    return ${k.f};\n  },\n  child: MyBox(), // not rebuilt every frame\n)`;
- return {code,hint:'End value is now '+(on?'the second':'the first')+' one. Press the button to change it. The widget animates from wherever it currently is.'};
-},
-act(a,st){if(a==='go')st.on=!st.on}});
-
-def({cat:'Animation and motion',id:'hero',name:'Hero',tags:'hero shared element transition tag navigator route flight page image fly',h:310,
-blurb:'A Hero marks a widget that appears on two routes with the same tag. When you navigate, Flutter flies the widget from its old position and size to its new one while the new page fades in.',
-use:'Thumbnail to full-size photo, a list item opening a detail page, any shared element between two screens.',
-watch:'Every tag must be unique on a page, and the same tag must exist on both routes. Heroes only fly during a Navigator push or pop, not when you swap widgets with setState.',
-ctl:[{k:'du',l:'flight time (ms)',t:'rng',min:200,max:1500,step:50,v:500},{k:'tag',l:'tag matches on both pages',t:'chk',v:true}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;st.s=s;
- if(!st.box){
-  st.open=-1;
-  const tiles=[0,1,2].map(i=>`<div class="ht" data-a="open${i}" style="width:84px;height:84px;border-radius:10px;overflow:hidden;cursor:pointer;border:1.5px solid var(--line);flex:none"><img draggable="false" src="${PIC}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;filter:hue-rotate(${i*70}deg)"></div>`).join('');
-  g.innerHTML=`<div class="hl1" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px">${tiles}</div><div class="hd" style="position:absolute;inset:0;background:var(--surface);display:none"><div style="position:absolute;left:0;right:0;top:0;height:40px;display:flex;align-items:center;gap:8px;padding:0 8px;border-bottom:1px solid var(--line);font-weight:600;font-size:14px"><span data-a="close" style="cursor:pointer;display:inline-flex">${ic('back',22)}</span>Detail page</div><img class="hi" draggable="false" src="${PIC}" style="position:absolute;left:50%;top:56px;width:260px;margin-left:-130px;height:130px;object-fit:cover;border-radius:10px;pointer-events:none"><div style="position:absolute;left:0;right:0;top:200px;text-align:center;font-size:13px;color:var(--muted)">Tap the arrow to fly back</div></div>`;
-  st.det=g.querySelector('.hd');st.big=g.querySelector('.hi');st.g=g;st.box=true;
- }
- const tag=s.tag?"'photo-0'":"'photo-0' // other page: 'photo-1'";
- const code=`// list page\nGestureDetector(\n  onTap: () => Navigator.push(context,\n    MaterialPageRoute(builder: (_) => Detail()),\n  ),\n  child: Hero(\n    tag: ${s.tag?"'photo-0'":"'photo-0'"},\n    child: Image.asset('photo.png'),\n  ),\n)\n\n// detail page\nHero(\n  tag: ${s.tag?"'photo-0'":"'photo-1'"},${s.tag?'':'  // does not match, so no flight'}\n  child: Image.asset('photo.png'),\n)`;
- return {code,hint:s.tag?'Tap a picture. The big image flies from the thumbnail you tapped. Duration only changes this demo, in Flutter it is the route transition time.':'The tags differ, so Flutter finds no pair and nothing flies. The page simply appears.'};
-},
-act(a,st,s,t){
- const g=st.g;
- if(a.startsWith('open')){
-  const i=+a.slice(4),tile=g.querySelectorAll('.ht')[i];
-  st.open=i;st.det.style.display='block';st.det.style.opacity='1';
-  st.big.style.filter=`hue-rotate(${i*70}deg)`;
-  if(!s.tag){anim(st.det,[{opacity:0},{opacity:1}],{duration:s.du/2});return}
-  const gr=g.getBoundingClientRect(),a1=tile.getBoundingClientRect(),b1=st.big.getBoundingClientRect();
-  const sx=a1.width/b1.width,sy=a1.height/b1.height,dx=a1.left-b1.left,dy=a1.top-b1.top;
-  tile.style.visibility='hidden';
-  anim(st.det,[{opacity:0},{opacity:1}],{duration:s.du/2});
-  const f=anim(st.big,[{transformOrigin:'0 0',transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`},{transformOrigin:'0 0',transform:'none'}],{duration:s.du,easing:'cubic-bezier(.4,0,.2,1)'});
- }else if(a==='close'&&st.open>=0){
-  const tile=g.querySelectorAll('.ht')[st.open];
-  const done=()=>{st.det.style.display='none';g.querySelectorAll('.ht').forEach(x=>x.style.visibility='')};
-  if(!s.tag){done();return}
-  const a1=tile.getBoundingClientRect(),b1=st.big.getBoundingClientRect();
-  const sx=a1.width/b1.width,sy=a1.height/b1.height,dx=a1.left-b1.left,dy=a1.top-b1.top;
-  anim(st.det,[{opacity:1},{opacity:0}],{duration:s.du,fill:'forwards'});
-  const f=anim(st.big,[{transformOrigin:'0 0',transform:'none'},{transformOrigin:'0 0',transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`}],{duration:s.du,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
-  if(f)f.onfinish=()=>{done();f.cancel()};else done();
-  st.open=-1;
- }
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px">${demo}</div>`;
+ const K=s.kind;
+ let tween,body;
+ if(K==='ColorTween'){tween=`ColorTween(begin: Colors.blue, end: ${t>50?'Colors.purple':'Colors.blue'})`;body='Container(\n    width: 150,\n    height: 110,\n    decoration: BoxDecoration(\n      color: value,\n      borderRadius: BorderRadius.circular(18),\n    ),\n  )'}
+ else if(K==='Tween<Offset>'){tween=`Tween<Offset>(begin: Offset.zero, end: const Offset(${(t/100).toFixed(2)}, ${(t/250).toFixed(2)}))`;body='FractionalTranslation(\n    translation: value,\n    child: child,   // built once, not every frame\n  )'}
+ else if(K==='IntTween (counter)'){tween=`IntTween(begin: 0, end: ${Math.round(t)})`;body="Text('\$value', style: const TextStyle(fontSize: 58, fontWeight: FontWeight.w800))"}
+ else {tween=`Tween<double>(begin: 0, end: ${(t/100).toFixed(2)})`;body='CircularProgressIndicator(\n    value: value,\n    strokeWidth: 12,\n  )'}
+ const notes=[];
+ notes.push('Change the end value and it animates from wherever it is now, not from begin.');
+ if(K==='IntTween (counter)')notes.push('IntTween rounds between frames, which is what gives a counter that ticks rather than blurs.');
+ if(K==='Tween<Offset>')notes.push('The child argument is built once and passed into the builder, so nothing expensive is rebuilt 60 times a second.');
+ notes.push('For pause, reverse or repeat you need an AnimationController instead.');
+ return {code:`TweenAnimationBuilder<${K.startsWith('Color')?'Color?':K.startsWith('IntTween')?'int':K.includes('Offset')?'Offset':'double'}>(\n  tween: ${tween},\n  duration: const Duration(milliseconds: ${ms}),\n  curve: Curves.${s.curve},\n  onEnd: () => debugPrint('finished'),\n  child: const Text('box'),\n  builder: (context, value, child) => ${body},\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Async',id:'stream-builder',name:'StreamBuilder',tags:'stream snapshot connectionstate async data error done listen asyncsnapshot realtime firebase',h:300,
-blurb:'StreamBuilder rebuilds every time a Stream emits a new value. Unlike FutureBuilder, which answers once, a stream can send many values, then an error, then close. The snapshot tells you which of these just happened.',
-use:'Live data: chat messages, sensor readings, a countdown, Firestore or WebSocket updates.',
-watch:'Create the Stream once (in initState or a field), not inside build, or every rebuild subscribes to a new stream. Always handle snapshot.hasError.',
-ctl:[{k:'iv',l:'emit every (ms)',t:'rng',min:300,max:2000,step:100,v:800}],
+def({cat:'Animation and motion',id:'hero',name:'Hero',tags:'shared element transition tag flight route push pop placeholder shuttle rect tween',h:330,
+blurb:'A Hero flies from one screen to the next during a route change. Put the same tag on a widget in both routes and Flutter animates the bounds between them while the rest of the page transitions normally.',
+use:'A thumbnail opening into a full picture, a list row expanding into a detail screen.',
+watch:'Exactly one Hero per tag may be on screen at a time, so in a list use the item id. Text inside a flying Hero needs a Material ancestor or it renders with yellow underlines.',
+ctl:[{k:'stage',l:'stage',t:'sel',o:['list screen','mid flight','detail screen'],v:'list screen'},
+ {k:'tag',l:'tags match',t:'chk',v:true},
+ {k:'ms',l:'transition duration (ms)',t:'rng',min:150,max:1200,step:50,v:400},
+ {k:'arc',l:'createRectTween',t:'sel',o:['MaterialRectArcTween (curved)','RectTween (straight)'],v:'MaterialRectArcTween (curved)'},
+ {k:'ph',l:'placeholderBuilder',t:'chk',v:false},
+ {k:'gest',l:'transitionOnUserGestures',t:'chk',v:true},
+ {k:'play',l:'play the flight',t:'chk',v:true}],
 render(s,st,g,d){
- st.s=s;st.d=d;
- if(!st.box){
-  st.cs='none';st.data=null;st.err=null;st.n=0;st.log=[];
-  g.innerHTML=`<div class="sb" style="position:absolute;left:14px;right:14px;top:12px;bottom:56px;display:flex;flex-direction:column;gap:8px"></div><div style="position:absolute;left:0;right:0;bottom:10px;display:flex;gap:8px;justify-content:center"><button class="btn k-Filled" data-a="listen" style="padding:6px 14px">Listen</button><button class="btn k-Outlined" data-a="err" style="padding:6px 14px">addError()</button><button class="btn k-Outlined" data-a="close" style="padding:6px 14px">close()</button></div>`;
-  st.box=g.querySelector('.sb');st.g=g;
+ const stage=s.stage,match=s.tag;
+ const pos=stage==='list screen'?0:stage==='mid flight'?0.5:1;
+ const p=match?pos:(stage==='detail screen'?1:0);
+ const x=12+p*(s.arc.startsWith('Material')?0:0);
+ const left=12+p*96, top=14+p*8, w=64+p*170, h=48+p*92;
+ const arcLift=s.arc.startsWith('Material')?Math.sin(p*Math.PI)*-22:0;
+ const thumb=`<div style="position:absolute;left:${left}px;top:${top+arcLift}px;width:${w}px;height:${h}px;border-radius:${12-p*4}px;overflow:hidden;box-shadow:0 ${4+p*8}px ${10+p*16}px rgba(10,20,60,.3);transition:none"><img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`;
+ const listRows=[0,1,2].map(i=>`<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;opacity:${stage==='list screen'?1:(stage==='mid flight'?.45:.12)}"><div style="width:64px;height:48px;border-radius:12px;background:${i===0?(s.ph&&stage!=='list screen'?'var(--line)':'transparent'):'var(--c2s)'}"></div><div><div style="font:600 13.5px var(--f-body)">Item ${i+1}</div><div style="font-size:12px;color:var(--muted)">subtitle</div></div></div>`).join('');
+ const detail=`<div style="position:absolute;inset:0;opacity:${stage==='detail screen'?1:(stage==='mid flight'?.5:0)};transition:opacity ${s.ms}ms"><div style="height:124px"></div><div style="padding:14px"><div style="font:700 17px var(--f-display);margin-bottom:6px">Item 1</div><div style="font-size:13px;color:var(--muted);line-height:1.5">The detail screen fades in while the picture flies into place.</div></div></div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden;background:var(--surface)"><div style="padding-top:6px">${listRows}</div>${detail}${thumb}</div></div>`;
+ const notes=[];
+ if(!match)notes.push('With different tags there is no Hero at all: the picture simply appears on the new screen, and Flutter gives no warning.');
+ if(s.arc.startsWith('Material'))notes.push('The Material default curves the path, which is why the picture lifts as it travels.');
+ else notes.push('RectTween moves in a straight line, which can look more mechanical but is sometimes what you want.');
+ if(s.ph)notes.push('placeholderBuilder leaves a grey box in the old screen so the layout does not jump while the Hero is in the air.');
+ if(s.gest)notes.push('transitionOnUserGestures makes the animation run during an iOS back swipe too.');
+ return {code:`// list screen\nHero(\n  tag: 'photo-\${item.id}',${s.ph?"\n  placeholderBuilder: (context, size, child) => SizedBox.fromSize(\n    size: size,\n    child: const ColoredBox(color: Colors.black12),\n  ),":''}${s.gest?'\n  transitionOnUserGestures: true,':''}${s.arc.startsWith('Rect')?'\n  createRectTween: (begin, end) => RectTween(begin: begin, end: end),':''}\n  child: Image.network(item.thumb, width: 64, height: 48, fit: BoxFit.cover),\n)\n\n// detail screen: same tag${match?'':'   <- these do not match, so nothing flies'}\nHero(\n  tag: '${match?'photo-\${item.id}':'something-else'}',\n  child: Image.network(item.full, height: 240, fit: BoxFit.cover),\n)\n\nNavigator.push(\n  context,\n  MaterialPageRoute(builder: (_) => DetailPage(item: item)),\n);`,hint:notes.join(' ')};
+}});
+
+def({cat:'Async',id:'stream-builder',name:'StreamBuilder',tags:'stream snapshot active done listen broadcast single subscription initialdata live updates error',h:340,
+blurb:'StreamBuilder listens to a stream and rebuilds for every value. The snapshot carries only the most recent one, plus the connection state and any error the stream emitted.',
+use:'Live data: chat messages, a location feed, Firestore snapshots, a countdown.',
+watch:'Create the stream once. A stream built inside build is resubscribed on every rebuild. A plain stream allows one listener, so two StreamBuilders on the same one throw.',
+ctl:[{k:'state',l:'state',t:'sel',o:['waiting (no value yet)','active','error emitted','done (stream closed)'],v:'active'},
+ {k:'n',l:'values received',t:'rng',min:1,max:6,v:3},
+ {k:'init',l:'initialData given',t:'chk',v:false},
+ {k:'kind',l:'stream type',t:'sel',o:['single-subscription','broadcast'],v:'single-subscription'},
+ {k:'two',l:'two StreamBuilders on it',t:'chk',v:false},
+ {k:'live',l:'keep emitting',t:'chk',v:true}],
+render(s,st,g,d){
+ const broken=s.two&&s.kind==='single-subscription';
+ let n=+s.n;
+ if(s.live&&s.state==='active'){n=((st.n||0)%6)+1}
+ const cs=s.state.startsWith('waiting')?'waiting':s.state==='done (stream closed)'?'done':'active';
+ const chip=(t,on)=>`<span style="padding:4px 9px;border-radius:999px;font:600 11px var(--f-mono);background:${on?'var(--accent)':'var(--line)'};color:${on?'var(--accent-ink)':'var(--muted)'}">${t}</span>`;
+ let body;
+ if(broken)body=`<div style="color:var(--danger);text-align:center;font:600 13px var(--f-mono);line-height:1.5">Bad state:<br>Stream has already been listened to</div>`;
+ else if(s.state==='error emitted')body=`<div style="color:var(--danger);display:flex;flex-direction:column;align-items:center;gap:7px">${ic('close',26)}<span style="font:600 13.5px var(--f-body)">snapshot.error</span></div><div class="cap" style="margin:7px 0 0">the stream may keep going afterwards</div>`;
+ else if(cs==='waiting'&&!s.init)body='<div class="spin"></div><div class="cap" style="margin:10px 0 0">waiting: no value yet</div>';
+ else {
+  const vals=[...Array(n)].map((_,i)=>i+1);
+  body=`<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center">${vals.map((v,i)=>`<span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 13px var(--f-mono);background:${i===vals.length-1?'var(--accent)':'var(--line)'};color:${i===vals.length-1?'var(--accent-ink)':'var(--muted)'}">${v}</span>`).join('')}</div><div class="cap" style="margin:10px 0 0">snapshot.data is only the latest: <b>${cs==='waiting'?'0 (initialData)':n}</b></div>`;
  }
- const cs=st.cs;
- const col=cs==='active'?'var(--ok)':cs==='done'?'var(--muted)':cs==='waiting'?'var(--c3)':'var(--muted)';
- const shown=st.err?`<span style="color:var(--danger)">Error: ${esc(st.err)}</span>`:st.data==null?'<span style="color:var(--muted)">no data yet</span>':'<b style="font-size:26px">'+st.data+'</b>';
- st.box.innerHTML=`<div style="font:600 12px var(--f-mono);color:var(--muted)">snapshot.connectionState</div><div style="font:700 15px var(--f-mono);color:${col}">ConnectionState.${cs}</div><div style="font:600 12px var(--f-mono);color:var(--muted);margin-top:4px">snapshot.data / hasError</div><div style="min-height:36px;display:flex;align-items:center">${shown}</div><div style="font:12px var(--f-mono);color:var(--muted);margin-top:auto">${st.log.slice(-3).map(esc).join('<br>')||'press Listen'}</div>`;
- const code=`final Stream<int> _ticks = Stream.periodic(\n  Duration(milliseconds: ${s.iv}),\n  (n) => n + 1,\n);\n\nStreamBuilder<int>(\n  stream: _ticks,\n  builder: (context, snapshot) {\n    if (snapshot.hasError) {\n      return Text('Error: \${snapshot.error}');\n    }\n    switch (snapshot.connectionState) {\n      case ConnectionState.none:\n        return Text('No stream');\n      case ConnectionState.waiting:\n        return CircularProgressIndicator();\n      case ConnectionState.active:\n        return Text('\${snapshot.data}');\n      case ConnectionState.done:\n        return Text('Done: \${snapshot.data}');\n    }\n  },\n)`;
- return {code,hint:'Listen subscribes. Each tick is one emit. addError() sends an error and the stream keeps going. close() ends it and the state becomes done.'};
-},
-act(a,st,s){
- const stop=()=>{if(st.tm){clearInterval(st.tm);st.tm=null}};
- if(a==='listen'){
-  stop();st.n=0;st.data=null;st.err=null;st.cs='waiting';st.log=['listen()'];
-  st.tm=setInterval(()=>{
-   if(!alive(st.g)){stop();return}
-   st.n++;st.data=st.n;st.err=null;st.cs='active';st.log.push('emit '+st.n);
-   if(st.d)st.d.draw();
-  },st.s.iv);
- }else if(a==='err'&&st.tm){st.err='bad packet';st.log.push('addError()')}
- else if(a==='close'&&(st.tm||st.cs==='active')){stop();st.cs='done';st.log.push('close()')}
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px"><div style="display:flex;gap:6px">${chip('waiting',cs==='waiting')}${chip('active',cs==='active')}${chip('done',cs==='done')}</div><div style="display:flex;flex-direction:column;align-items:center">${body}</div>${s.two&&!broken?'<div class="cap" style="margin:0">a broadcast stream feeds both builders</div>':''}</div>`;
+ if(s.live&&s.state==='active'&&!broken){clearTimeout(st.t);st.t=setTimeout(()=>{st.n=(st.n||0)+1;d.draw()},900)}
+ else clearTimeout(st.t);
+ const src=s.kind==='broadcast'
+  ?"late final Stream<int> _stream = _controller.stream;   // from StreamController.broadcast()"
+  :"late final Stream<int> _stream = api.watchCount();   // one listener only";
+ const code=`${src}\n\n@override\nvoid dispose() {\n  _controller.close();   // or cancel your subscription\n  super.dispose();\n}\n\n@override\nWidget build(BuildContext context) {\n  return StreamBuilder<int>(\n    stream: _stream,\n${s.init?'    initialData: 0,\n':''}    builder: (context, snapshot) {\n      if (snapshot.hasError) return ErrorView(snapshot.error!);\n      if (snapshot.connectionState == ConnectionState.waiting) {\n        return const Center(child: CircularProgressIndicator());\n      }\n      final value = snapshot.data!;\n      return Text('\$value');\n    },\n  );\n}${s.two?`\n\n// a second builder on the same stream\nStreamBuilder<int>(stream: _stream, builder: ...)${broken?'   // throws: already listened to':'   // fine: broadcast allows many listeners'}`:''}`;
+ const notes=[];
+ if(broken)notes.push('A single-subscription stream accepts one listener. Switch it to broadcast, or keep one StreamBuilder high in the tree and pass the value down.');
+ if(s.kind==='broadcast')notes.push('A broadcast stream does not replay: a listener that starts late misses everything before it. Seed it with initialData or use a replay controller.');
+ if(s.state==='error emitted')notes.push('An error on a stream does not always end it. Handle hasError and keep listening.');
+ if(cs==='done')notes.push('done means the stream closed. The last value stays in the snapshot.');
+ notes.push('Only the most recent value is kept, so accumulate the history yourself if you need it.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Input',id:'form',name:'Form & TextFormField validation',tags:'form validator formkey validate autovalidatemode textformfield submit error email password save',h:330,
