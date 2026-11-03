@@ -61,6 +61,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -1440,15 +1441,48 @@ render(s,st,g){
  return {code:`Image.network(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')||'The picture is 300 x 150 and the box is '+s.bw+' x '+s.bh+'.'};
 }});
 
-def({cat:'Display',id:'icon-avatar',name:'Icon & CircleAvatar',tags:'icons material avatar profile picture initials',
-blurb:'Icon draws a glyph from an icon font at a given size and colour. CircleAvatar is a circle with a background colour and a child such as initials or an image.',
-use:'Toolbar glyphs, list leading widgets and user avatars.',
-watch:'Icon sizes are logical pixels, and the default is 24. Color is optional and falls back to the ambient IconTheme.',
-ctl:[{k:'ic',l:'Icons.',t:'sel',o:['favorite','star','home','person'],v:'favorite'},{k:'sz',l:'size',t:'rng',min:16,max:64,v:36},{k:'col',l:'color',t:'sel',o:['blue','teal','red','amber'],v:'blue'},{k:'rad',l:'radius',t:'rng',min:16,max:48,v:30}],
+def({cat:'Assets, images, and icons',id:'icon-avatar',name:'Icon & CircleAvatar',tags:'icons material symbols size color fill weight grade applytextscaling avatar radius backgroundimage initials',h:330,
+blurb:'Icon draws a glyph from a font. CircleAvatar is a coloured circle holding initials, an icon or a picture, used everywhere in lists and app bars.',
+use:'Toolbar glyphs, list leading widgets, user avatars.',
+watch:'Give an icon-only control a semanticLabel or a tooltip, or a screen reader announces nothing. CircleAvatar radius is half the diameter.',
+ctl:[{k:'ic',l:'Icons.',t:'sel',o:['favorite','star','home','person'],v:'favorite'},
+ {k:'sz',l:'size',t:'rng',min:16,max:72,v:36},
+ {k:'col',l:'color',t:'sel',o:['blue','teal','red','amber'],v:'blue'},
+ {k:'fill',l:'fill (variable font)',t:'rng',min:0,max:1,step:.25,v:0},
+ {k:'wt',l:'weight',t:'rng',min:100,max:700,step:100,v:400},
+ {k:'shadow',l:'shadows',t:'chk',v:false},
+ {k:'scale',l:'applyTextScaling',t:'chk',v:false},
+ {k:'av',l:'CircleAvatar content',t:'sel',o:['initials','image','icon'],v:'initials'},
+ {k:'rad',l:'radius',t:'rng',min:16,max:52,v:30}],
 render(s,st,g){
- const C={blue:['var(--c1)','var(--c1s)','var(--c1t)'],teal:['var(--c2)','var(--c2s)','var(--c2t)'],red:['var(--c4)','var(--c4s)','var(--c4t)'],amber:['var(--c3)','var(--c3s)','var(--c3t)']}[s.col];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:36px"><div style="text-align:center">${ic(s.ic,+s.sz,C[0])}<div class="cap">Icon</div></div><div style="text-align:center"><div class="fb" style="width:${s.rad*2}px;height:${s.rad*2}px;border-radius:50%;background:${C[1]};color:${C[2]};font-size:${Math.round(s.rad*.6)}px;margin:0 auto">AB</div><div class="cap">CircleAvatar</div></div></div>`;
- return {code:`Icon(Icons.${s.ic}, size: ${s.sz}, color: Colors.${s.col}),\n\nCircleAvatar(\n  radius: ${s.rad},\n  backgroundColor: Colors.${s.col}.shade100,\n  child: Text('AB'),\n)`,hint:'CircleAvatar radius is half the diameter.'};
+ const C={blue:['var(--c1)','var(--c1s)'],teal:['var(--c2)','var(--c2s)'],red:['var(--c4)','var(--c4s)'],amber:['var(--c3)','var(--c3s)']}[s.col];
+ const sz=+s.sz*(s.scale?1.3:1);
+ const iconStyle=`color:${C[0]};${s.shadow?'filter:drop-shadow(0 2px 3px rgba(10,20,60,.45));':''}opacity:${0.55+(+s.fill)*0.45};stroke-width:${(+s.wt)/300};`;
+ const r=+s.rad;
+ let avInner;
+ if(s.av==='image')avInner=`<img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover">`;
+ else if(s.av==='icon')avInner=`<span style="color:${C[0]}">${ic(s.ic,r)}</span>`;
+ else avInner=`<span style="font:600 ${Math.round(r*0.62)}px var(--f-body);color:${C[0]}">AB</span>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:40px;padding:14px">
+   <div style="text-align:center"><div style="${iconStyle}display:flex;justify-content:center">${ic(s.ic,Math.round(sz))}</div><div class="cap" style="margin:10px 0 0">Icon · ${Math.round(sz)}px${s.scale?' (scaled)':''}</div></div>
+   <div style="text-align:center"><div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:${C[1]};overflow:hidden;display:flex;align-items:center;justify-content:center">${avInner}</div><div class="cap" style="margin:10px 0 0">CircleAvatar · r ${r}</div></div>
+ </div>`;
+ const iL=[`Icons.${s.ic},`,`size: ${s.sz},`,`color: Colors.${s.col},`];
+ if(+s.fill)iL.push(`fill: ${(+s.fill).toFixed(2)},   // Material Symbols only`);
+ if(+s.wt!==400)iL.push(`weight: ${s.wt},`);
+ if(s.shadow)iL.push('shadows: const [Shadow(blurRadius: 3, offset: Offset(0, 2))],');
+ if(s.scale)iL.push('applyTextScaling: true,   // grows with the user font setting');
+ iL.push("semanticLabel: 'Favourite',");
+ const aL=[`radius: ${r},`,`backgroundColor: Colors.${s.col}.shade100,`];
+ if(s.av==='initials')aL.push(`foregroundColor: Colors.${s.col},`,"child: const Text('AB'),");
+ if(s.av==='icon')aL.push(`child: Icon(Icons.${s.ic}, color: Colors.${s.col}),`);
+ if(s.av==='image')aL.push('foregroundImage: NetworkImage(user.photoUrl),','onForegroundImageError: (e, s) => debugPrint(\'avatar failed\'),',"child: const Text('AB'),   // shown if the image fails");
+ const notes=[];
+ if(s.scale)notes.push('applyTextScaling makes the icon grow with the user font setting, which keeps it matched to text beside it.');
+ if(+s.fill)notes.push('fill, weight, grade and opticalSize only do something with a variable icon font such as Material Symbols.');
+ if(s.av==='image')notes.push('foregroundImage is tried first and falls back to the child if it fails, which gives you initials as a placeholder for free.');
+ notes.push('For a tappable icon use IconButton: it adds the ripple, the tooltip and a 48 pixel target.');
+ return {code:`Icon(\n${iL.map(x=>'  '+x).join('\n')}\n)\n\nCircleAvatar(\n${aL.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Display',id:'card-list-tile',name:'Card & ListTile',tags:'material elevation shape divider leading trailing subtitle dense selected tilecolor contentpadding threeline filled outlined clipbehavior',h:340,
@@ -2465,23 +2499,37 @@ render(s,st,g){
  return {code:kids[s.m],hint:s.m==='none (default)'?'The parent\'s limit wins and the child is clamped to 150.':s.m==='OverflowBox'?'The child keeps its width and bleeds out on both sides with no warning.':warn?'UnconstrainedBox lets the child grow and flags the overflow in debug mode.':'The child fits, so there is nothing to report.'};
 }});
 
-def({cat:'Layout',id:'indexed-stack',name:'IndexedStack',tags:'tabs keep state bottom navigation pages preserve switch visible index',h:250,
-blurb:'IndexedStack lays out all of its children but paints only the one at index. The hidden children stay alive, so they keep their state.',
-use:'Bottom navigation tabs that should not reset when the user switches away: scroll positions, form input and counters all survive.',
-watch:'Every child is built up front and stays in memory, so many heavy pages cost real memory. For on-demand tabs, build the visible child yourself.',
-ctl:[{k:'m',l:'Approach',t:'sel',o:['IndexedStack','Swap the child (state lost)'],v:'IndexedStack'}],
+def({cat:'Layout',id:'indexed-stack',name:'IndexedStack',tags:'tabs keep state index sizing offstage visibility pageview lazy bottom navigation',h:330,
+blurb:'IndexedStack builds every child and paints only one. That is what keeps each tab scrolled where the user left it, and what makes the first build cost all of them.',
+use:'Bottom navigation and tabs where each page should keep its state.',
+watch:'All children are built at once, so three heavy pages cost three builds up front. The stack is as big as its largest child, even while a smaller one is showing.',
+ctl:[{k:'i',l:'index',t:'sel',o:['0','1','2','null'],v:'0'},
+ {k:'alt',l:'compare with',t:'sel',o:['IndexedStack','if / else (rebuilds)','PageView'],v:'IndexedStack'},
+ {k:'sizing',l:'sizing',t:'sel',o:['loose','expand'],v:'loose'},
+ {k:'typed',l:'user typed in tab 1',t:'chk',v:true},
+ {k:'scrolled',l:'user scrolled tab 2',t:'chk',v:true}],
 render(s,st,g){
- if(!st.c){st.c=[0,0,0];st.i=0}
- const names=['Home','Search','Profile'];
- g.innerHTML=`<div class="nvp" style="margin-left:-120px;height:200px"><div class="tabs">${names.map((n,i)=>`<button class="tab${i===st.i?' on':''}" data-a="t${i}" type="button" style="flex:1;padding:10px 4px">${n}</button>`).join('')}</div><div class="nvbody" style="align-items:center;justify-content:center;flex:1;flex-direction:column"><div style="font:600 15px var(--f-display)">${names[st.i]} page</div><button class="btn k-Filled" data-a="inc" type="button" style="padding:8px 18px">Count: ${st.c[st.i]}</button></div></div>`;
- return {code:s.m==='IndexedStack'?`IndexedStack(\n  index: currentIndex,\n  children: [HomePage(), SearchPage(), ProfilePage()],\n)`:`// a new State is created each time the tab changes\n[HomePage(), SearchPage(), ProfilePage()][currentIndex]`,
-  hint:'Tap the counter on a page, switch tabs, then come back.'};
-},
-act(a,st,s){
- if(a==='inc')st.c[st.i]++;
- else if(a[0]==='t'){const prev=st.i;st.i=+a[1];if(s.m!=='IndexedStack')st.c[prev]=0}
+ const idx=s.i==='null'?null:+s.i;
+ const keeps=s.alt==='IndexedStack';
+ const pages=[
+  {t:'Home',body:`<div style="padding:14px"><div style="font:600 14px var(--f-body);margin-bottom:8px">Home</div><div style="font-size:12.5px;color:var(--muted)">Nothing to keep here.</div></div>`},
+  {t:'Search',body:`<div style="padding:14px"><div style="font:600 14px var(--f-body);margin-bottom:8px">Search</div><div style="border:1.3px solid var(--line);border-radius:8px;padding:10px 12px;font:14px var(--f-body);color:${(s.typed&&keeps)?'var(--fg)':'var(--muted)'}">${(s.typed&&keeps)?'flutter layout':'type here'}</div><div class="cap" style="margin:8px 0 0">${s.typed?(keeps?'text survived the switch':'text was lost on rebuild'):''}</div></div>`},
+  {t:'Feed',body:`<div style="padding:0;height:100%;overflow:hidden"><div style="transform:translateY(${(s.scrolled&&keeps)?-46:0}px)">${[...Array(6)].map((_,i)=>`<div style="padding:11px 14px;border-bottom:1px solid var(--line);font:13.5px var(--f-body)">Post ${i+1}</div>`).join('')}</div><div class="cap" style="margin:6px 14px">${s.scrolled?(keeps?'scroll position kept':'scrolled back to the top'):''}</div></div>`}];
+ const body=idx===null?'<div class="cap" style="margin:0;padding:20px;text-align:center">index is null, so nothing is painted</div>':pages[idx].body;
+ g.innerHTML=`<div class="fill" style="padding:0;flex-direction:column"><div style="flex:1;overflow:hidden;background:var(--surface)">${body}</div><div style="height:52px;border-top:1px solid var(--line);display:flex;background:var(--surface)">${pages.map((p,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:${i===idx?'var(--accent)':'var(--muted)'};font:600 11px var(--f-body)">${ic(['home','star','person'][i],19)}${p.t}</div>`).join('')}</div></div>`;
+ let code;
+ if(s.alt==='IndexedStack')code=`Scaffold(\n  body: IndexedStack(\n    index: ${s.i==='null'?'null':'index'},\n${s.sizing==='expand'?'    sizing: StackFit.expand,\n':''}    children: const [HomeTab(), SearchTab(), FeedTab()],\n  ),\n  bottomNavigationBar: NavigationBar(\n    selectedIndex: index,\n    onDestinationSelected: (i) => setState(() => index = i),\n    destinations: destinations,\n  ),\n)\n\n// every child is built once and kept alive;\n// only the one at index is painted`;
+ else if(s.alt==='if / else (rebuilds)')code=`// the page is thrown away and rebuilt on every switch\nScaffold(\n  body: switch (index) {\n    0 => const HomeTab(),\n    1 => const SearchTab(),   // text fields reset\n    _ => const FeedTab(),     // scroll jumps to the top\n  },\n  bottomNavigationBar: ...,\n)`;
+ else code=`// swipeable, and lazy, but state needs a keep-alive\nPageView(\n  controller: _pageController,\n  onPageChanged: (i) => setState(() => index = i),\n  children: const [HomeTab(), SearchTab(), FeedTab()],\n)\n\nclass _SearchTabState extends State<SearchTab>\n    with AutomaticKeepAliveClientMixin {\n  @override\n  bool get wantKeepAlive => true;   // without this the state is dropped\n\n  @override\n  Widget build(BuildContext context) {\n    super.build(context);   // required by the mixin\n    return ...;\n  }\n}`;
+ const notes=[];
+ if(keeps)notes.push('Every page is built once and kept alive, so the field keeps its text and the list keeps its offset.');
+ else if(s.alt==='if / else (rebuilds)')notes.push('Rebuilding on each switch is the cheapest to start and loses everything the user did.');
+ else notes.push('PageView is lazy and swipeable, but a page only keeps its state with AutomaticKeepAliveClientMixin.');
+ if(s.i==='null')notes.push('A null index paints nothing while keeping every child alive.');
+ if(s.sizing==='expand')notes.push('sizing is the IndexedStack name for StackFit: expand forces every child to fill the stack.');
+ notes.push('For many or heavy pages, a nested Navigator per tab is what most production apps use.');
+ return {code,hint:notes.join(' ')};
 }});
-
 /* ---- Display ---- */
 def({cat:'Painting and effects',id:'clip-rect',name:'ClipRect',tags:'overflow align widthfactor clipper rect half image scale transform',h:320,
 blurb:'ClipRect cuts a child back to its own layout box. It matters when a child paints outside that box: a scaled Transform, an Align with a size factor, or a widget that overflows on purpose.',
@@ -2840,18 +2888,48 @@ render(s,st,g){
  return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Display',id:'text-rich',name:'Text.rich & RichText',tags:'textspan span style bold italic link underline inline paragraph widgetspan textscaler',h:230,
-blurb:'Text.rich shows one paragraph made of several TextSpan pieces, each with its own style. RichText does the same job at a lower level, and it needs you to supply the base style and text scaling yourself.',
-use:'Mixed styles inside one paragraph: a bold word, a coloured link, a smaller footnote. Text.rich is the usual way to write it.',
-watch:'RichText does not read DefaultTextStyle and defaults to no text scaling. Text.rich handles both, so the user\'s system font size is respected.',
-ctl:[{k:'w',l:'widget',t:'sel',o:['Text.rich','RichText'],v:'Text.rich'},{k:'b',l:'bold word',t:'chk',v:true},{k:'col',l:'coloured word',t:'chk',v:true},{k:'ul',l:'underlined link',t:'chk',v:true},{k:'sc',l:'system text scale',t:'rng',min:1,max:2,step:.25,v:1.5}],
+def({cat:'Text',id:'text-rich',name:'Text.rich & RichText',tags:'textspan widgetspan inline style recognizer link mixed fonts selectable spans',h:330,
+blurb:'Text.rich draws one paragraph made of several spans, each with its own style. A WidgetSpan puts a real widget inline, and a recognizer makes one span tappable.',
+use:'A sentence with a bold word, a price with a small currency symbol, inline links, text with an icon in the middle.',
+watch:'Prefer Text.rich over RichText: RichText does not scale with the user font setting by default. A TapGestureRecognizer must be disposed.',
+ctl:[{k:'what',l:'example',t:'sel',o:['mixed styles','inline link','WidgetSpan icon','price with units','selectable'],v:'mixed styles'},
+ {k:'size',l:'base fontSize',t:'rng',min:13,max:26,v:16},
+ {k:'align',l:'textAlign',t:'sel',o:['start','center','justify'],v:'start'},
+ {k:'max',l:'maxLines',t:'sel',o:['null','1','2'],v:'null'},
+ {k:'sa',l:'WidgetSpan alignment',t:'sel',o:['middle','baseline','top'],v:'middle'},
+ {k:'widget',l:'use RichText instead',t:'chk',v:false}],
 render(s,st,g){
- const rt=s.w==='RichText',sc=rt?1:s.sc;
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><p style="margin:0;max-width:300px;font:400 ${16*sc}px/1.4 var(--f-body);color:var(--fg)">Flutter is <span style="${s.b?'font-weight:700;':''}">fast</span>, <span style="${s.col?'color:var(--c4);':''}">expressive</span> and <span style="${s.ul?'color:var(--accent);text-decoration:underline;':''}">open source</span>.</p></div>`;
- const sp=(t,style)=>style?`      TextSpan(\n        text: '${t}',\n        style: TextStyle(${style}),\n      ),\n`:`      TextSpan(text: '${t}'),\n`;
- const inner=`    children: [\n${sp('fast',s.b?'fontWeight: FontWeight.bold':'')}${sp('expressive',s.col?'color: Colors.pink':'')}${sp('open source',s.ul?'color: Colors.blue, decoration: TextDecoration.underline':'')}    ],`;
- const code=rt?`RichText(\n  textScaler: TextScaler.noScaling, // the default\n  text: TextSpan(\n    style: TextStyle(color: Colors.black, fontSize: 16), // set it yourself\n    text: 'Flutter is ',\n${inner.replace(/^/gm,'  ')}\n  ),\n)`:`Text.rich(\n  TextSpan(\n    text: 'Flutter is ',\n${inner.replace(/^/gm,'  ')}\n  ),\n)`;
- return {code,hint:rt?'RichText ignores the scale slider, so large-text users would see small text.':`Text.rich follows the system text scale (${s.sc}×).`};
+ const fs=+s.size;
+ const clamp=s.max==='null'?'':`display:-webkit-box;-webkit-line-clamp:${s.max};-webkit-box-orient:vertical;overflow:hidden;`;
+ const base=`width:250px;font-size:${fs}px;line-height:1.5;text-align:${s.align};${clamp}`;
+ let content;
+ if(s.what==='mixed styles')content=`Flutter draws <b>every pixel</b> itself, which is why a <span style="font-family:var(--f-mono);font-size:${fs-1}px;background:var(--accent-soft);padding:1px 4px;border-radius:4px">TextSpan</span> can change <span style="color:var(--c4);font-style:italic">style</span> mid sentence.`;
+ else if(s.what==='inline link')content=`By continuing you agree to the <span style="color:var(--accent);text-decoration:underline;cursor:pointer">terms of service</span> and the <span style="color:var(--accent);text-decoration:underline;cursor:pointer">privacy policy</span>.`;
+ else if(s.what==='WidgetSpan icon')content=`Tap <span style="display:inline-flex;vertical-align:${s.sa==='middle'?'middle':s.sa==='top'?'top':'baseline'};color:var(--accent)">${ic('star',fs+2)}</span> to save this article, then find it under <span style="display:inline-flex;vertical-align:${s.sa==='middle'?'middle':s.sa==='top'?'top':'baseline'};background:var(--c2s);border-radius:5px;padding:1px 6px;font-size:${fs-3}px;font-weight:600">Saved</span>.`;
+ else if(s.what==='price with units')content=`<span style="font-size:${fs-4}px;vertical-align:${s.sa==='baseline'?'baseline':'super'};color:var(--muted)">Rp</span><span style="font-size:${fs*2}px;font-weight:800">149</span><span style="font-size:${fs-3}px;color:var(--muted)">.000 / month</span>`;
+ else content=`This paragraph is inside a <b>SelectionArea</b>, so the user can drag across it and copy any part, including the <span style="color:var(--c4)">styled</span> spans.`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="${base}${s.what==='selectable'?'background:linear-gradient(transparent 60%, var(--accent-soft) 0);':''}">${content}</div></div>`;
+ const head=s.widget?'RichText(\n  text: TextSpan(':'Text.rich(\n  TextSpan(';
+ const tail=s.widget?'\n  ),\n)':'\n  ),\n)';
+ let spans;
+ if(s.what==='mixed styles')spans=`    style: DefaultTextStyle.of(context).style.copyWith(fontSize: ${fs}),\n    children: const [\n      TextSpan(text: 'Flutter draws '),\n      TextSpan(text: 'every pixel', style: TextStyle(fontWeight: FontWeight.bold)),\n      TextSpan(text: ' itself, which is why a '),\n      TextSpan(text: 'TextSpan', style: TextStyle(fontFamily: 'monospace', backgroundColor: Color(0x1A2563EB))),\n      TextSpan(text: ' can change '),\n      TextSpan(text: 'style', style: TextStyle(color: Colors.red, fontStyle: FontStyle.italic)),\n      TextSpan(text: ' mid sentence.'),\n    ],`;
+ else if(s.what==='inline link')spans=`    children: [\n      const TextSpan(text: 'By continuing you agree to the '),\n      TextSpan(\n        text: 'terms of service',\n        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),\n        recognizer: _termsTap,   // created in initState, disposed in dispose\n      ),\n      const TextSpan(text: ' and the privacy policy.'),\n    ],`;
+ else if(s.what==='WidgetSpan icon')spans=`    children: [\n      const TextSpan(text: 'Tap '),\n      WidgetSpan(\n        alignment: PlaceholderAlignment.${s.sa},\n${s.sa==='baseline'?'        baseline: TextBaseline.alphabetic,\n':''}        child: Icon(Icons.star, size: ${fs+2}),\n      ),\n      const TextSpan(text: ' to save this article, then find it under '),\n      const WidgetSpan(child: Chip(label: Text('Saved'))),\n      const TextSpan(text: '.'),\n    ],`;
+ else if(s.what==='price with units')spans=`    children: const [\n      TextSpan(text: 'Rp', style: TextStyle(fontSize: ${fs-4}, color: Colors.grey)),\n      TextSpan(text: '149', style: TextStyle(fontSize: ${fs*2}, fontWeight: FontWeight.w800)),\n      TextSpan(text: '.000 / month', style: TextStyle(fontSize: ${fs-3}, color: Colors.grey)),\n    ],`;
+ else spans=`    children: const [\n      TextSpan(text: 'This paragraph is inside a '),\n      TextSpan(text: 'SelectionArea', style: TextStyle(fontWeight: FontWeight.bold)),\n      TextSpan(text: ', so the user can copy any part of it.'),\n    ],`;
+ const extras=[];
+ if(s.align!=='start')extras.push(`  textAlign: TextAlign.${s.align},`);
+ if(s.max!=='null')extras.push(`  maxLines: ${s.max},`,'  overflow: TextOverflow.ellipsis,');
+ let code=head+'\n'+spans+tail;
+ if(extras.length)code=code.replace(/\n\)$/,'\n'+extras.join('\n')+'\n)');
+ if(s.what==='inline link')code=`late final TapGestureRecognizer _termsTap = TapGestureRecognizer()\n  ..onTap = () => openTerms();\n\n@override\nvoid dispose() {\n  _termsTap.dispose();   // recognizers must be disposed\n  super.dispose();\n}\n\n`+code;
+ if(s.what==='selectable')code=`SelectionArea(\n  child: ${code.split('\n').join('\n  ')},\n)`;
+ const notes=[];
+ if(s.widget)notes.push('RichText does not apply the user text scale by default, so a large-font user sees no change. Text.rich does.');
+ if(s.what==='inline link')notes.push('Only a TextSpan can take a recognizer. Create it once and dispose it, or you leak a gesture recognizer per build.');
+ if(s.what==='WidgetSpan icon')notes.push('PlaceholderAlignment.baseline needs a baseline argument too, or it asserts.');
+ if(s.what==='selectable')notes.push('Wrap a screen in SelectionArea and all the text inside becomes selectable, including rich spans.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Display',id:'custom-paint',name:'CustomPaint',tags:'canvas painter custompainter draw path paint drawcircle drawline freehand shapes wave',h:280,
@@ -3589,113 +3667,178 @@ render(s,st,g,d){
  return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Input',id:'form',name:'Form & TextFormField validation',tags:'form validator formkey validate autovalidatemode textformfield submit error email password save',h:330,
-blurb:'A Form groups form fields. Each TextFormField has a validator that returns an error message, or null when the value is fine. Calling formKey.currentState.validate() runs every validator at once and shows the messages.',
-use:'Sign-in and sign-up screens, checkout, any screen where several fields must be correct before you submit.',
-watch:'You need a GlobalKey<FormState> and it must stay the same across rebuilds. autovalidateMode decides when errors appear: never, after the user types, or immediately.',
-ctl:[{k:'am',l:'autovalidateMode',t:'sel',o:['disabled','onUserInteraction','always'],v:'onUserInteraction'}],
-render(s,st,g,d){
- st.s=s;st.hintHost=d.hintEl;
- if(!st.box){
-  st.touched={};
-  g.innerHTML=`<form class="ff" novalidate style="position:absolute;left:16px;right:16px;top:10px;bottom:8px;display:flex;flex-direction:column;gap:2px;font-size:14px"><label style="font-weight:600;font-size:12px;color:var(--muted)">Email</label><input name="e" type="text" autocomplete="off" placeholder="you@example.com" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit"><div class="e1" style="min-height:18px;font-size:12px;color:var(--danger)"></div><label style="font-weight:600;font-size:12px;color:var(--muted)">Password</label><input name="p" type="password" autocomplete="off" placeholder="at least 6 characters" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit"><div class="e2" style="min-height:18px;font-size:12px;color:var(--danger)"></div><button class="btn k-Filled" type="submit" style="align-self:flex-start;padding:7px 20px">Submit</button><div class="fr" style="font-size:12.5px;margin-top:6px;color:var(--muted)"></div></form>`;
-  st.box=true;const f=g.querySelector('form'),ie=f.querySelector('[name=e]'),ip=f.querySelector('[name=p]');
-  const ve=v=>!v?'Please enter an email':!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)?'Enter a valid email':null;
-  const vp=v=>!v?'Please enter a password':v.length<6?'At least 6 characters':null;
-  const show=(el,box,fn,key,force)=>{const m=st.s.am,on=force||m==='always'||(m==='onUserInteraction'&&st.touched[key]);box.textContent=on?(fn(el.value)||''):'';el.style.borderColor=on&&fn(el.value)?'var(--danger)':''};
-  const all=force=>{show(ie,f.querySelector('.e1'),ve,'e',force);show(ip,f.querySelector('.e2'),vp,'p',force)};
-  st.refresh=()=>all(false);
-  ie.addEventListener('input',()=>{st.touched.e=1;all(false)});ip.addEventListener('input',()=>{st.touched.p=1;all(false)});
-  f.addEventListener('submit',e=>{e.preventDefault();all(true);const ok=!ve(ie.value)&&!vp(ip.value);const r=f.querySelector('.fr');r.style.color=ok?'var(--ok)':'var(--danger)';r.textContent=ok?'validate() returned true. The form is saved.':'validate() returned false. Fix the red messages.'});
- }
- st.touched={};st.refresh();
- const code=`final _formKey = GlobalKey<FormState>();\n\nForm(\n  key: _formKey,\n  autovalidateMode: AutovalidateMode.${s.am},\n  child: Column(children: [\n    TextFormField(\n      decoration: InputDecoration(labelText: 'Email'),\n      validator: (v) {\n        if (v == null || v.isEmpty) return 'Please enter an email';\n        if (!v.contains('@')) return 'Enter a valid email';\n        return null; // null means valid\n      },\n    ),\n    TextFormField(\n      obscureText: true,\n      validator: (v) =>\n          (v ?? '').length < 6 ? 'At least 6 characters' : null,\n    ),\n    FilledButton(\n      onPressed: () {\n        if (_formKey.currentState!.validate()) {\n          // all fields are valid\n        }\n      },\n      child: Text('Submit'),\n    ),\n  ]),\n)`;
- return {code,hint:s.am==='disabled'?'Nothing is checked until you press Submit.':s.am==='always'?'Errors show at once, even before you type.':'Type in a field and leave it wrong. Its error appears while the other field stays quiet.'};
+def({cat:'Input',id:'form',name:'Form & TextFormField validation',tags:'globalkey formstate validate save reset autovalidatemode validator errortext focus next submit',h:340,
+blurb:'A Form groups fields so you can validate and save them together through a GlobalKey<FormState>. Each TextFormField adds validator, onSaved and initialValue on top of everything TextField has.',
+use:'Sign-in, sign-up, checkout, settings: anywhere several fields are submitted at once.',
+watch:'Create the GlobalKey as a field, never inside build. autovalidateMode: onUserInteraction is the kind default, because always shows red errors before the user has typed anything.',
+ctl:[{k:'mode',l:'autovalidateMode',t:'sel',o:['disabled','onUserInteraction','always'],v:'onUserInteraction'},
+ {k:'touched',l:'user has typed',t:'chk',v:false},
+ {k:'email',l:'email value',t:'sel',o:['empty','not an email','valid'],v:'empty'},
+ {k:'pw',l:'password value',t:'sel',o:['empty','too short','valid'],v:'empty'},
+ {k:'submit',l:'pressed Submit',t:'chk',v:false},
+ {k:'server',l:'server rejected the email',t:'chk',v:false},
+ {k:'action',l:'textInputAction: next',t:'chk',v:true}],
+render(s,st,g){
+ const show=s.mode==='always'||(s.mode==='onUserInteraction'&&s.touched)||s.submit;
+ const eErr=s.email==='empty'?'Email is required':s.email==='not an email'?'Enter a valid email':s.server?'That email is already registered':'';
+ const pErr=s.pw==='empty'?'Password is required':s.pw==='too short'?'At least 8 characters':'';
+ const eVal=s.email==='empty'?'':s.email==='not an email'?'taufiq@':'taufiq@example.com';
+ const pVal=s.pw==='empty'?'':s.pw==='too short'?'abc':'••••••••••';
+ const field=(label,val,err,showErr)=>`<div style="margin-bottom:${showErr&&err?6:14}px"><div style="border:1.4px solid ${showErr&&err?'var(--danger)':'var(--line)'};border-radius:8px;padding:11px 12px;background:var(--surface);display:flex;align-items:center;gap:8px"><span style="color:${showErr&&err?'var(--danger)':'var(--muted)'};font-size:12.5px;min-width:68px">${label}</span><span style="flex:1;font:14px var(--f-body);color:${val?'var(--fg)':'var(--muted)'}">${val||'required'}</span></div>${showErr&&err?`<div style="color:var(--danger);font-size:12px;margin:4px 0 0 12px">${err}</div>`:''}</div>`;
+ const ok=!eErr&&!pErr;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="width:100%;max-width:300px">${field('Email',eVal,eErr,show)}${field('Password',pVal,pErr,show)}<button style="width:100%;padding:11px;border:0;border-radius:999px;background:${ok&&s.submit?'#15803d':'var(--accent)'};color:#fff;font:600 14px var(--f-body);cursor:pointer">${s.submit?(ok?'Submitted':'Fix the errors'):'Submit'}</button>${s.submit?`<div class="cap" style="margin:10px 0 0;text-align:center">validate() returned <b>${ok}</b></div>`:''}</div></div>`;
+ const code=`final _formKey = GlobalKey<FormState>();   // a field, not inside build\nString? _email, _password;\n\n@override\nWidget build(BuildContext context) {\n  return Form(\n    key: _formKey,\n    autovalidateMode: AutovalidateMode.${s.mode},\n    child: Column(\n      children: [\n        TextFormField(\n          decoration: const InputDecoration(labelText: 'Email'),\n          keyboardType: TextInputType.emailAddress,\n          autofillHints: const [AutofillHints.email],\n${s.action?"          textInputAction: TextInputAction.next,\n":''}${s.server?"          forceErrorText: _serverEmailError,   // an error from the server\n":''}          validator: (value) {\n            if (value == null || value.isEmpty) return 'Email is required';\n            if (!value.contains('@')) return 'Enter a valid email';\n            return null;   // null means valid\n          },\n          onSaved: (value) => _email = value,\n        ),\n        TextFormField(\n          decoration: const InputDecoration(labelText: 'Password'),\n          obscureText: true,\n          autofillHints: const [AutofillHints.newPassword],\n          textInputAction: TextInputAction.done,\n          validator: (value) =>\n              (value?.length ?? 0) < 8 ? 'At least 8 characters' : null,\n          onSaved: (value) => _password = value,\n        ),\n        FilledButton(\n          onPressed: _submit,\n          child: const Text('Submit'),\n        ),\n      ],\n    ),\n  );\n}\n\nFuture<void> _submit() async {\n  if (!_formKey.currentState!.validate()) return;   // shows the errors\n  _formKey.currentState!.save();                    // runs every onSaved\n  await api.signUp(_email!, _password!);\n}`;
+ const notes=[];
+ if(s.mode==='always'&&!s.touched)notes.push('always shows every error on the very first frame, before the user has done anything. It reads as hostile.');
+ if(s.mode==='disabled'&&!s.submit)notes.push('disabled means nothing is checked until you call validate() yourself.');
+ if(s.mode==='onUserInteraction')notes.push('onUserInteraction waits until the user has touched a field, which is the kind default.');
+ if(s.server)notes.push('forceErrorText puts a field into an error state without running the validator, which is how you show what the server said.');
+ if(s.action)notes.push('textInputAction: next plus onFieldSubmitted and FocusScope.of(context).nextFocus() moves between fields from the keyboard.');
+ notes.push('validate() returns true only when every validator returned null.');
+ return {code,hint:notes.join(' ')};
 }});
-
 const FRUIT=['Apple','Apricot','Avocado','Banana','Blueberry','Cherry','Coconut','Grape','Guava','Kiwi','Lemon','Lime','Mango','Melon','Orange','Papaya','Peach','Pear','Pineapple','Plum'];
-def({cat:'Input',id:'autocomplete',name:'Autocomplete',tags:'autocomplete suggestions search optionsbuilder typeahead dropdown filter onselected',h:300,
-blurb:'Autocomplete shows a text field and a list of suggestions that updates as the user types. You write optionsBuilder, which receives the current text and returns the options that match.',
-use:'Search boxes, tag pickers, address and country fields, anywhere a list is too long for a dropdown.',
-watch:'optionsBuilder must be fast and return an empty list when nothing matches. For server lookups, debounce the call. Use displayStringForOption when your option is an object, not a String.',
-ctl:[{k:'m',l:'matching',t:'sel',o:['startsWith','contains'],v:'contains'},{k:'mx',l:'optionsMaxHeight',t:'rng',min:80,max:200,step:20,v:160}],
-render(s,st,g,d){
- st.s=s;st.hintHost=d.hintEl;
- if(!st.box){
-  g.innerHTML=`<div style="position:absolute;left:16px;right:16px;top:12px"><input class="ai" type="text" autocomplete="off" placeholder="Type a fruit" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--c1);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit;font-size:14px"><div class="ao" style="margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 14px rgba(20,30,80,.2);overflow:auto;display:none"></div></div>`;
-  st.box=g.querySelector('.ai');st.op=g.querySelector('.ao');
-  const upd=()=>{
-   const q=st.box.value.toLowerCase(),m=st.s.m;
-   const r=q?FRUIT.filter(o=>m==='contains'?o.toLowerCase().includes(q):o.toLowerCase().startsWith(q)):[];
-   st.op.style.display=r.length?'block':'none';st.op.style.maxHeight=st.s.mx+'px';
-   st.op.innerHTML=r.map(o=>`<div class="aop" data-o="${o}" style="padding:9px 12px;cursor:pointer;font-size:14px">${o}</div>`).join('');
-  };
-  st.upd=upd;
-  st.box.addEventListener('input',upd);
-  st.op.addEventListener('pointerdown',e=>{const o=e.target.closest('.aop');if(!o)return;e.preventDefault();st.box.value=o.dataset.o;st.op.style.display='none';st.hintHost.textContent='onSelected: '+o.dataset.o});
- }
- st.upd();
- const test=s.m==='contains'?'option.toLowerCase().contains(\n          value.text.toLowerCase())':'option.toLowerCase().startsWith(\n          value.text.toLowerCase())';
- const code=`const _fruits = ['Apple', 'Apricot', 'Banana', /* ... */];\n\nAutocomplete<String>(\n  optionsMaxHeight: ${s.mx},\n  optionsBuilder: (TextEditingValue value) {\n    if (value.text.isEmpty) {\n      return const Iterable<String>.empty();\n    }\n    return _fruits.where((option) =>\n        ${test});\n  },\n  onSelected: (String choice) {\n    debugPrint('You picked $choice');\n  },\n)`;
- return {code,hint:'Type "a" or "an". With contains, "an" also finds Banana and Mango. With startsWith it does not.'};
+def({cat:'Input',id:'autocomplete',name:'Autocomplete',tags:'suggestions optionsbuilder onselected fieldviewbuilder optionsviewbuilder filter async debounce search',h:340,
+blurb:'Autocomplete shows a dropdown of matches as the user types. You supply optionsBuilder, which returns the matches for the current text, and onSelected, which receives the chosen one.',
+use:'Picking a known value quickly: a city, a tag, a contact.',
+watch:'Return an empty list for empty input, or every option appears the moment the field is focused. optionsBuilder runs on every keystroke, so debounce any network call.',
+ctl:[{k:'q',l:'typed text',t:'sel',o:['(empty)','b','ban','x'],v:'ban'},
+ {k:'empty',l:'empty query returns everything',t:'chk',v:false},
+ {k:'match',l:'matching',t:'sel',o:['contains','startsWith'],v:'contains'},
+ {k:'h',l:'optionsMaxHeight',t:'rng',min:80,max:260,step:20,v:200},
+ {k:'dir',l:'optionsViewOpenDirection',t:'sel',o:['down','up'],v:'down'},
+ {k:'rich',l:'custom optionsViewBuilder',t:'chk',v:false},
+ {k:'deco',l:'custom fieldViewBuilder',t:'chk',v:true},
+ {k:'async',l:'options come from the network',t:'chk',v:false}],
+render(s,st,g){
+ const all=['Bandung','Jakarta','Bali','Surabaya','Banjarmasin','Yogyakarta','Medan','Balikpapan'];
+ const q=s.q==='(empty)'?'':s.q;
+ let opts;
+ if(!q)opts=s.empty?all:[];
+ else opts=all.filter(o=>s.match==='contains'?o.toLowerCase().includes(q.toLowerCase()):o.toLowerCase().startsWith(q.toLowerCase()));
+ const rowH=s.rich?44:36;
+ const list=opts.length?`<div style="max-height:${Math.min(+s.h,opts.length*rowH+8)}px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(10,20,60,.18);margin-${s.dir==='down'?'top':'bottom'}:4px">${opts.map((o,i)=>s.rich
+  ?`<div style="display:flex;align-items:center;gap:10px;padding:7px 11px;${i?'border-top:1px solid var(--line);':''}"><span class="fb ${'abcd'[i%4]}" style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px var(--f-body);flex:none">${o[0]}</span><div><div style="font:600 13px var(--f-body)">${q?o.replace(new RegExp('('+q+')','ig'),'<b style="color:var(--accent)">$1</b>'):o}</div><div style="font-size:11px;color:var(--muted)">Indonesia</div></div></div>`
+  :`<div style="padding:9px 12px;font:14px var(--f-body);${i?'border-top:1px solid var(--line);':''}">${o}</div>`).join('')}</div>`
+  :(q?`<div style="margin-top:4px;padding:10px 12px;font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:8px">${s.async?'searching...':'no matches'}</div>`:'');
+ const field=`<div style="display:flex;align-items:center;gap:9px;padding:${s.deco?'12px':'9px'} 12px;border:1.4px solid var(--accent);border-radius:${s.deco?8:4}px;background:var(--surface)">${s.deco?ic('star',18):''}<span style="flex:1;font:14.5px var(--f-body);color:${q?'var(--fg)':'var(--muted)'}">${q||'Search a city'}</span><span style="width:1.5px;height:17px;background:var(--accent)"></span></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:${s.dir==='down'?'flex-start':'flex-end'};justify-content:center;padding:16px"><div style="width:100%;max-width:290px;display:flex;flex-direction:column">${s.dir==='down'?field+list:list+field}</div></div>`;
+ const builder=s.async
+  ?`  optionsBuilder: (TextEditingValue value) async {\n    if (value.text.isEmpty) return const Iterable<String>.empty();\n    await Future.delayed(const Duration(milliseconds: 250));   // debounce\n    return api.searchCities(value.text);\n  },`
+  :`  optionsBuilder: (TextEditingValue value) {\n    if (value.text.isEmpty) return ${s.empty?'cities':'const Iterable<String>.empty()'};\n    return cities.where(\n      (c) => c.toLowerCase().${s.match}(value.text.toLowerCase()),\n    );\n  },`;
+ const L=[builder,'  onSelected: (city) => setState(() => selected = city),'];
+ if(+s.h!==200)L.push(`  optionsMaxHeight: ${s.h},`);
+ if(s.dir==='up')L.push('  optionsViewOpenDirection: OptionsViewOpenDirection.up,');
+ if(s.deco)L.push("  fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {\n    return TextFormField(\n      controller: controller,\n      focusNode: focusNode,\n      decoration: const InputDecoration(\n        labelText: 'Search a city',\n        prefixIcon: Icon(Icons.search),\n        border: OutlineInputBorder(),\n      ),\n      validator: (v) => v == null || v.isEmpty ? 'Pick a city' : null,\n    );\n  },");
+ if(s.rich)L.push("  optionsViewBuilder: (context, onSelected, options) {\n    return Material(\n      elevation: 4,\n      child: ListView(\n        shrinkWrap: true,\n        children: [\n          for (final o in options)\n            ListTile(\n              leading: CircleAvatar(child: Text(o[0])),\n              title: Text(o),\n              subtitle: const Text('Indonesia'),\n              onTap: () => onSelected(o),\n            ),\n        ],\n      ),\n    );\n  },");
+ const notes=[];
+ if(!q&&s.empty)notes.push('Returning everything for an empty query dumps the whole list as soon as the field is focused. Usually you want an empty Iterable.');
+ if(s.match==='startsWith')notes.push('startsWith is stricter: typing "ban" no longer matches a city with "ban" in the middle.');
+ if(s.async)notes.push('An async optionsBuilder is allowed, but it runs on every keystroke, so debounce and cancel the previous request.');
+ if(s.rich)notes.push('optionsViewBuilder gives you the raw list, so you can show avatars, two lines or highlight the matched part.');
+ if(s.deco)notes.push('fieldViewBuilder is how you get a decorated field, or a TextFormField that takes part in a Form.');
+ return {code:`Autocomplete<String>(\n${L.join('\n')}\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Input',id:'date-time-picker',name:'showDatePicker & showTimePicker',tags:'date picker time picker calendar showdatepicker showtimepicker timeofday firstdate lastdate dialog',h:340,
-blurb:'showDatePicker and showTimePicker open a ready-made Material dialog and return a Future. The date picker returns a DateTime (or null if cancelled). The time picker returns a TimeOfDay.',
-use:'Birthdays, bookings, reminders, alarm times, and any field where typing a date is error-prone.',
-watch:'Always check the result for null (the user may cancel). initialDate must be between firstDate and lastDate or Flutter throws. After an await, check context.mounted before using context again.',
-ctl:[{k:'k',l:'dialog',t:'sel',o:['showDatePicker','showTimePicker'],v:'showDatePicker'},{k:'rg',l:'lastDate (day of the month)',t:'rng',min:8,max:28,v:20},{k:'h24',l:'alwaysUse24HourFormat',t:'chk',v:false}],
-render(s,st,g,d){
- st.s=s;st.hintHost=d.hintEl;
- const now=new Date(),y=now.getFullYear(),mo=now.getMonth(),today=5,dim=new Date(y,mo+1,0).getDate();
- if(st.sel==null)st.sel=12;if(st.sel>s.rg)st.sel=s.rg;if(st.h==null){st.h=9;st.mi=30}
- const MN=['January','February','March','April','May','June','July','August','September','October','November','December'][mo];
- const first=new Date(y,mo,1).getDay();
+def({cat:'Input',id:'date-time-picker',name:'showDatePicker & showTimePicker',tags:'calendar date time range entrymode selectabledaypredicate firstdate lastdate locale intl dateformat',h:340,
+blurb:'showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and showDateRangePicker for a range.',
+use:'Birthdays, booking dates, reminders, filters over a period.',
+watch:'initialDate must sit inside firstDate to lastDate and pass selectableDayPredicate, or it throws. Dart has no date formatting of its own: use DateFormat from the intl package.',
+ctl:[{k:'which',l:'picker',t:'sel',o:['showDatePicker','showTimePicker','showDateRangePicker'],v:'showDatePicker'},
+ {k:'entry',l:'initialEntryMode',t:'sel',o:['calendar','input','calendarOnly','inputOnly'],v:'calendar'},
+ {k:'mode',l:'initialDatePickerMode',t:'sel',o:['day','year'],v:'day'},
+ {k:'pred',l:'selectableDayPredicate (no weekends)',t:'chk',v:false},
+ {k:'h24',l:'24 hour time',t:'chk',v:true},
+ {k:'help',l:'custom helpText',t:'chk',v:false}],
+render(s,st,g){
+ const w=s.which;
  let body;
- if(s.k==='showDatePicker'){
-  let cells='';for(let i=0;i<first;i++)cells+='<span></span>';
-  for(let dd=1;dd<=dim;dd++){const ok=dd>=today&&dd<=s.rg;cells+=`<span data-a="day${dd}" style="${ok?'cursor:pointer;':'opacity:.3;pointer-events:none;'}height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;${dd===st.sel?'background:var(--c1);color:#fff;font-weight:700;':''}">${dd}</span>`}
-  body=`<div style="font:600 15px var(--f-body);margin-bottom:6px">${MN} ${y}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;color:var(--muted);margin-bottom:2px">${'SMTWTFS'.split('').map(c=>`<span>${c}</span>`).join('')}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">${cells}</div>`;
- }else{
-  const hh=s.h24?String(st.h).padStart(2,'0'):String(((st.h+11)%12)+1),mm=String(st.mi).padStart(2,'0');
-  const ap=st.h<12?'AM':'PM';
-  const stp=(a,l)=>`<span data-a="${a}" style="cursor:pointer;display:inline-flex;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);align-items:center;justify-content:center;font-weight:700">${l}</span>`;
-  body=`<div style="font:600 13px var(--f-body);margin-bottom:10px">Select time</div><div style="display:flex;align-items:center;justify-content:center;gap:12px"><div style="text-align:center">${stp('hp','+')}<div style="font:700 40px var(--f-mono);padding:4px 10px;background:var(--c1s);border-radius:10px;margin:6px 0">${hh}</div>${stp('hm','−')}</div><div style="font:700 36px var(--f-mono)">:</div><div style="text-align:center">${stp('mp','+')}<div style="font:700 40px var(--f-mono);padding:4px 10px;background:var(--c1s);border-radius:10px;margin:6px 0">${mm}</div>${stp('mm','−')}</div>${s.h24?'':`<div data-a="ap" style="cursor:pointer;font:700 15px var(--f-mono);padding:8px 10px;border:1.5px solid var(--c1);border-radius:8px">${ap}</div>`}</div>`;
+ if(w==='showTimePicker'){
+  const dial=s.entry.startsWith('input')?`<div style="display:flex;gap:10px;align-items:center;justify-content:center;padding:20px 0"><div style="width:62px;height:56px;border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font:700 26px var(--f-display);color:var(--accent)">${s.h24?'14':'02'}</div><span style="font:700 24px var(--f-display)">:</span><div style="width:62px;height:56px;border:1.5px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font:700 26px var(--f-display)">30</div>${s.h24?'':'<div style="display:flex;flex-direction:column;gap:2px;margin-left:6px"><div style="padding:4px 8px;border:1px solid var(--accent);border-radius:5px 5px 0 0;font:600 11px var(--f-body);color:var(--accent);background:var(--accent-soft)">PM</div><div style="padding:4px 8px;border:1px solid var(--line);border-radius:0 0 5px 5px;font:600 11px var(--f-body);color:var(--muted)">AM</div></div>'}</div>`
+   :`<div style="display:flex;justify-content:center;padding:10px 0"><div style="position:relative;width:132px;height:132px;border-radius:50%;background:var(--accent-soft)">${[...Array(12)].map((_,i)=>{const a=(i*30-90)*Math.PI/180;const r=52;return `<span style="position:absolute;left:${66+Math.cos(a)*r-9}px;top:${66+Math.sin(a)*r-9}px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font:600 11px var(--f-mono);color:${i===1?'#fff':'var(--fg)'};background:${i===1?'var(--accent)':'transparent'};border-radius:50%">${s.h24?(i===0?'12':i):(i===0?12:i)}</span>`}).join('')}<span style="position:absolute;left:66px;top:66px;width:2px;height:48px;background:var(--accent);transform-origin:top;transform:rotate(145deg)"></span></div></div>`;
+  body=`<div style="font:600 11px var(--f-mono);color:var(--muted);letter-spacing:.07em;padding:14px 16px 0">${s.help?'PICK A START TIME':'SELECT TIME'}</div>${dial}`;
+ } else {
+  const range=w==='showDateRangePicker';
+  const days=['M','T','W','T','F','S','S'];
+  const cells=[...Array(35)].map((_,i)=>{
+   const d=i-2;const valid=d>=1&&d<=31;
+   const weekend=i%7>=5;
+   const disabled=s.pred&&weekend;
+   const inRange=range&&d>=12&&d<=19;
+   const sel=range?(d===12||d===19):d===15;
+   return `<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font:12.5px var(--f-body);border-radius:${inRange&&!sel?'0':'50%'};background:${sel?'var(--accent)':inRange?'var(--accent-soft)':'transparent'};color:${sel?'#fff':disabled?'var(--line)':valid?'var(--fg)':'transparent'}">${valid?d:''}</div>`;
+  }).join('');
+  const grid=s.entry.startsWith('input')
+   ?`<div style="padding:18px 16px"><div style="border:1.5px solid var(--accent);border-radius:8px;padding:12px;font:15px var(--f-body)">15/06/2026</div><div style="font-size:11.5px;color:var(--muted);margin-top:6px">dd/mm/yyyy</div></div>`
+   :s.mode==='year'
+    ?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 14px">${[...Array(9)].map((_,i)=>`<div style="padding:9px 0;text-align:center;border-radius:999px;font:13px var(--f-body);background:${i===4?'var(--accent)':'transparent'};color:${i===4?'#fff':'var(--fg)'}">${2022+i}</div>`).join('')}</div>`
+    :`<div style="padding:8px 12px 12px"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">${days.map(d=>`<div style="text-align:center;font:600 10.5px var(--f-mono);color:var(--muted)">${d}</div>`).join('')}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${cells}</div></div>`;
+  body=`<div style="font:600 11px var(--f-mono);color:var(--muted);letter-spacing:.07em;padding:14px 16px 2px">${s.help?'WHEN DOES IT START?':(range?'SELECT RANGE':'SELECT DATE')}</div><div style="font:700 19px var(--f-display);padding:0 16px 8px">${range?'12 Jun - 19 Jun':'Mon, 15 Jun'}</div>${grid}`;
  }
- g.innerHTML=`<div style="position:absolute;left:50%;top:10px;margin-left:-135px;width:270px;box-sizing:border-box;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(20,30,80,.2);${s.k==='showDatePicker'?'':'min-height:200px'}">${body}<div style="display:flex;justify-content:flex-end;gap:14px;margin-top:10px;font:600 13px var(--f-body);color:var(--accent)"><span data-a="cancel" style="cursor:pointer">Cancel</span><span data-a="ok" style="cursor:pointer">OK</span></div></div>`;
- const res=s.k==='showDatePicker'?`${y}-${String(mo+1).padStart(2,'0')}-${String(st.sel).padStart(2,'0')}`:`${String(st.h).padStart(2,'0')}:${String(st.mi).padStart(2,'0')}`;
- const code=s.k==='showDatePicker'?`final DateTime? picked = await showDatePicker(\n  context: context,\n  initialDate: DateTime(${y}, ${mo+1}, ${st.sel}),\n  firstDate: DateTime(${y}, ${mo+1}, 5),\n  lastDate: DateTime(${y}, ${mo+1}, ${s.rg}),\n);\nif (picked == null) return; // user cancelled\nsetState(() => _date = picked);`:`final TimeOfDay? picked = await showTimePicker(\n  context: context,\n  initialTime: TimeOfDay(hour: ${st.h}, minute: ${st.mi}),\n  ${s.h24?'builder: (context, child) => MediaQuery(\n    data: MediaQuery.of(context)\n        .copyWith(alwaysUse24HourFormat: true),\n    child: child!,\n  ),':'// builder: ... alwaysUse24HourFormat: true'}\n);\nif (picked == null) return; // user cancelled\nsetState(() => _time = picked);`;
- return {code,hint:'Selected so far: '+res+'. In this demo firstDate is the 5th. Days outside firstDate and lastDate are greyed out and cannot be tapped.'};
-},
-act(a,st,s){
- if(a.startsWith('day'))st.sel=+a.slice(3);
- else if(a==='hp')st.h=(st.h+1)%24;else if(a==='hm')st.h=(st.h+23)%24;
- else if(a==='mp')st.mi=(st.mi+5)%60;else if(a==='mm')st.mi=(st.mi+55)%60;
- else if(a==='ap')st.h=(st.h+12)%24;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;background:rgba(10,20,50,.4);padding:10px"><div style="width:min(300px,100%);background:var(--surface);border-radius:26px;overflow:hidden;box-shadow:0 10px 32px rgba(10,20,60,.35)">${body}<div style="display:flex;justify-content:flex-end;gap:6px;padding:8px 14px 14px"><span style="padding:7px 12px;font:600 13px var(--f-body);color:var(--accent)">CANCEL</span><span style="padding:7px 12px;font:600 13px var(--f-body);color:var(--accent)">OK</span></div></div></div>`;
+ let code;
+ if(w==='showTimePicker')code=`final time = await showTimePicker(\n  context: context,\n  initialTime: TimeOfDay.now(),\n  initialEntryMode: TimePickerEntryMode.${s.entry.startsWith('input')?'input':'dial'},\n${s.help?"  helpText: 'Pick a start time',\n":''}${s.h24?"  builder: (context, child) => MediaQuery(\n    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),\n    child: child!,\n  ),\n":''});\nif (time == null) return;   // cancelled\n\n// combine with a date yourself\nfinal when = DateTime(d.year, d.month, d.day, time.hour, time.minute);`;
+ else if(w==='showDateRangePicker')code=`final range = await showDateRangePicker(\n  context: context,\n  firstDate: DateTime(2020),\n  lastDate: DateTime(2030),\n  initialDateRange: DateTimeRange(\n    start: DateTime.now(),\n    end: DateTime.now().add(const Duration(days: 7)),\n  ),\n${s.help?"  helpText: 'When does it start?',\n":''});\nif (range == null) return;\nprint('\${range.start} to \${range.end}');`;
+ else code=`final date = await showDatePicker(\n  context: context,\n  initialDate: DateTime.now(),\n  firstDate: DateTime(2020),\n  lastDate: DateTime(2030),\n  initialEntryMode: DatePickerEntryMode.${s.entry},\n  initialDatePickerMode: DatePickerMode.${s.mode},\n${s.pred?"  selectableDayPredicate: (day) =>\n      day.weekday != DateTime.saturday && day.weekday != DateTime.sunday,\n":''}${s.help?"  helpText: 'When does it start?',\n  confirmText: 'Choose',\n":''});\nif (date == null) return;   // the user cancelled\n\n// formatting needs the intl package\nfinal label = DateFormat.yMMMd().format(date);`;
+ const notes=[];
+ if(s.pred)notes.push('selectableDayPredicate greys out days. initialDate must also pass it, or the picker throws.');
+ if(s.entry==='inputOnly'||s.entry==='calendarOnly')notes.push('The Only variants hide the switch button, so the user cannot change entry mode.');
+ if(s.h24&&w==='showTimePicker')notes.push('24 hour time is forced by wrapping the picker in a MediaQuery with alwaysUse24HourFormat.');
+ if(s.help)notes.push('Every label here is translatable: helpText, confirmText, cancelText, fieldLabelText and the error messages.');
+ notes.push('Add localizationsDelegates and supportedLocales to MaterialApp or the picker stays English.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Input',id:'segmented-button',name:'SegmentedButton',tags:'segmented button toggle single multi selection segments choice selected icon material3',h:270,
-blurb:'SegmentedButton shows two to five related options in one row. By default exactly one is selected. Turn on multiSelectionEnabled to allow several, and emptySelectionAllowed to allow none.',
-use:'Switching a view (day, week, month), choosing a size, or toggling a few filters. Better than radio buttons for short, equal-weight choices.',
-watch:'selected is a Set, even for single choice, and onSelectionChanged gives you the new Set. Keep labels short. For more than five options use a dropdown.',
-ctl:[{k:'mu',l:'multiSelectionEnabled',t:'chk',v:false},{k:'em',l:'emptySelectionAllowed',t:'chk',v:false},{k:'ic',l:'showSelectedIcon',t:'chk',v:true},{k:'ico',l:'icons on segments',t:'chk',v:false}],
+def({cat:'Input',id:'segmented-button',name:'SegmentedButton',tags:'choice filter toggle multiselection selected showselectedicon buttonsegment togglebuttons vertical',h:330,
+blurb:'SegmentedButton is a row of connected choices. selected is a Set, even for a single choice, and onSelectionChanged hands you the new Set.',
+use:'A view switch, a short filter, a unit toggle. Not for navigation, which is what tabs are for.',
+watch:'Segments share the width evenly and do not scroll, so above about four short labels it gets cramped. With emptySelectionAllowed false the user cannot untick the last one.',
+ctl:[{k:'n',l:'segments',t:'rng',min:2,max:5,v:3},
+ {k:'multi',l:'multiSelectionEnabled',t:'chk',v:false},
+ {k:'empty',l:'emptySelectionAllowed',t:'chk',v:false},
+ {k:'icon',l:'showSelectedIcon',t:'chk',v:true},
+ {k:'kind',l:'segment content',t:'sel',o:['label','icon','icon + label'],v:'label'},
+ {k:'exp',l:'expandedInsets (full width)',t:'chk',v:false},
+ {k:'dir',l:'direction',t:'sel',o:['horizontal','vertical'],v:'horizontal'},
+ {k:'en',l:'onSelectionChanged set',t:'chk',v:true}],
 render(s,st,g,d){
- if(!st.set)st.set=['M'];
- if(!s.mu&&st.set.length>1)st.set=[st.set[0]];
- if(!s.em&&!st.set.length)st.set=['M'];
- const segs=['S','M','L','XL'],full={S:'Small',M:'Medium',L:'Large',XL:'XL'};
- const ico={S:'person',M:'home',L:'star',XL:'favorite'};
- const html=segs.map((k,i)=>{
-  const on=st.set.includes(k);
-  return `<div data-a="seg${k}" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 14px;height:40px;font-weight:600;font-size:14px;border:1.5px solid var(--muted);${i?'margin-left:-1.5px;':''}border-radius:${i===0?'20px 0 0 20px':i===3?'0 20px 20px 0':'0'};background:${on?'var(--c1s)':'transparent'};color:${on?'var(--c1t)':'var(--fg)'}">${on&&s.ic?ic('check',18):s.ico?ic(ico[k],18):''}${full[k]}</div>`}).join('');
- g.innerHTML=`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">${html}</div>`;
- const code=`Set<Size> _selection = {${st.set.map(x=>'Size.'+x.toLowerCase()).join(', ')}};\n\nSegmentedButton<Size>(\n  segments: [\n    ButtonSegment(value: Size.s, label: Text('Small')${s.ico?',\n      icon: Icon(Icons.person)':''}),\n    ButtonSegment(value: Size.m, label: Text('Medium')),\n    ButtonSegment(value: Size.l, label: Text('Large')),\n    ButtonSegment(value: Size.xl, label: Text('XL')),\n  ],\n  selected: _selection,${s.mu?'\n  multiSelectionEnabled: true,':''}${s.em?'\n  emptySelectionAllowed: true,':''}${s.ic?'':'\n  showSelectedIcon: false,'}\n  onSelectionChanged: (Set<Size> next) {\n    setState(() => _selection = next);\n  },\n)`;
- return {code,hint:'Selected: {'+st.set.join(', ')+'}. '+(s.mu?'Several can be on at once.':'Only one can be on, and tapping another replaces it.')};
+ const n=+s.n;
+ const names=['Day','Week','Month','Year','All'].slice(0,n);
+ const icons=['home','star','person','add','favorite'];
+ let sel=st.sel||['Week'];
+ sel=sel.filter(x=>names.includes(x));
+ if(!sel.length&&!s.empty)sel=[names[0]];
+ const vert=s.dir==='vertical';
+ const seg=(t,i)=>{
+  const on=sel.includes(t);
+  return `<div class="sg" data-t="${t}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;cursor:${s.en?'pointer':'not-allowed'};background:${on?'var(--accent-soft)':'transparent'};color:${on?'var(--accent)':'var(--fg)'};font:600 13.5px var(--f-body);border-${vert?'bottom':'right'}:${i<n-1?'1px solid var(--line)':'0'};opacity:${s.en?1:.5};white-space:nowrap">${on&&s.icon?'<span style="font-size:13px">&#10003;</span>':''}${s.kind!=='label'?ic(icons[i],17):''}${s.kind!=='icon'?`<span>${t}</span>`:''}</div>`;
+ };
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="width:${s.exp?'100%':'auto'};display:flex;flex-direction:${vert?'column':'row'};border:1.3px solid var(--line);border-radius:${vert?12:999}px;overflow:hidden;background:var(--surface)">${names.map(seg).join('')}</div></div>`;
+ const L=[`segments: [\n${names.map((t,i)=>`    ButtonSegment(value: View.${t.toLowerCase()}, ${s.kind!=='icon'?`label: const Text('${t}')`:''}${s.kind==='icon + label'?', ':''}${s.kind!=='label'?`icon: const Icon(Icons.${icons[i]})`:''}),`).join('\n')}\n  ],`,
+  `selected: ${sel.length?`{${sel.map(x=>'View.'+x.toLowerCase()).join(', ')}}`:'<View>{}'},`,
+  s.en?'onSelectionChanged: (values) => setState(() => selected = values),':'onSelectionChanged: null,   // disables the whole control'];
+ if(s.multi)L.push('multiSelectionEnabled: true,');
+ if(s.empty)L.push('emptySelectionAllowed: true,');
+ if(!s.icon)L.push('showSelectedIcon: false,');
+ if(s.exp)L.push('expandedInsets: EdgeInsets.zero,');
+ if(vert)L.push('direction: Axis.vertical,');
+ const notes=[];
+ if(s.multi)notes.push('With multiSelectionEnabled the Set can hold several values at once, which suits filters.');
+ if(!s.empty&&!s.multi)notes.push('With emptySelectionAllowed false there is always exactly one selection, like a radio group.');
+ if(n>4)notes.push('Five segments is already tight. Above four, a dropdown or tabs usually reads better.');
+ if(s.kind==='icon')notes.push('Icon-only segments need a tooltip on each ButtonSegment, or screen readers announce nothing.');
+ notes.push('Tap a segment in the demo. The Set is yours to keep in state.');
+ return {code:`SegmentedButton<View>(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
 },
-act(a,st,s){
- if(!a.startsWith('seg'))return;const k=a.slice(3),i=st.set.indexOf(k);
- if(s.mu){if(i>=0){if(st.set.length>1||s.em)st.set.splice(i,1)}else st.set.push(k)}
- else{if(i>=0){if(s.em)st.set=[]}else st.set=[k]}
+after(g,st,s,draw){
+ g.querySelectorAll('.sg').forEach(el=>el.addEventListener('click',()=>{
+  if(!s.en)return;
+  const t=el.dataset.t;let sel=st.sel||['Week'];
+  if(s.multi){sel=sel.includes(t)?sel.filter(x=>x!==t):[...sel,t]}
+  else sel=sel.includes(t)&&s.empty?[]:[t];
+  if(!sel.length&&!s.empty)sel=[t];
+  st.sel=sel;draw();
+ }));
 }});
 
 /* ================= v6 GROUP C: Material widgets and more common errors ================= */
@@ -3830,34 +3973,59 @@ render(s,st,g){
  return {code:`ScaffoldMessenger.of(context).showSnackBar(\n  SnackBar(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n);\n\n// learn what happened to it\nfinal reason = await ScaffoldMessenger.of(context)\n    .showSnackBar(bar)\n    .closed;   // action, swipe, timeout or hide`,hint:notes.join(' ')||'Tweak the controls: the code is the exact call you would write.'};
 }});
 
-def({cat:'Material',id:'chip',name:'Chip family',tags:'chip inputchip choicechip filterchip actionchip avatar delete selected tag filter label',h:300,
-blurb:'Chips are small pills that stand for an input, a choice, a filter or an action. Flutter has one widget for each job so the semantics and the look are right.',
-use:'ChoiceChip: pick one. FilterChip: toggle several filters. InputChip: tags the user added, with a delete button. ActionChip: a quick action. Chip: a plain label.',
-watch:'Choose the type by what the chip does, not by how it looks. FilterChip and ChoiceChip need you to keep the selected state and call setState in onSelected.',
-ctl:[{k:'k',l:'chip type',t:'sel',o:['ChoiceChip','FilterChip','InputChip','ActionChip','Chip'],v:'ChoiceChip'}],
+def({cat:'Material',id:'chip',name:'Chip family',tags:'actionchip filterchip choicechip inputchip rawchip avatar ondeleted selected shape elevation density',h:330,
+blurb:'All five chips share one layout: an optional avatar, a label, and an optional delete icon. They differ in what they do: Chip shows, ActionChip acts, FilterChip toggles, ChoiceChip picks one, InputChip represents a value.',
+use:'Tags, filters, recipients, short choices.',
+watch:'Chip itself is not tappable. onDeleted is what shows the delete icon. WidgetStateProperty colours win over the plain backgroundColor.',
+ctl:[{k:'kind',l:'widget',t:'sel',o:['Chip','ActionChip','FilterChip','ChoiceChip','InputChip'],v:'FilterChip'},
+ {k:'avatar',l:'avatar',t:'sel',o:['none','initials','icon'],v:'initials'},
+ {k:'del',l:'onDeleted',t:'chk',v:false},
+ {k:'shape',l:'shape',t:'sel',o:['stadium','rounded'],v:'stadium'},
+ {k:'el',l:'elevation',t:'rng',min:0,max:8,v:0},
+ {k:'dens',l:'visualDensity',t:'sel',o:['standard','compact'],v:'standard'},
+ {k:'side',l:'outline',t:'chk',v:true},
+ {k:'n',l:'how many',t:'rng',min:1,max:5,v:4}],
 render(s,st,g,d){
- st.hintHost=d.hintEl;
- const items=['Flutter','Dart','Android','iOS'];
- if(!st.sel){st.sel={ChoiceChip:'Dart',FilterChip:['Flutter'],InputChip:items.slice(),ActionChip:0}}
- const base='display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--muted);font-size:13px;font-weight:600;cursor:pointer;user-select:none;';
- let html='';
- const sel=(on,x,a)=>`<span data-a="${a}" style="${base}${on?'background:var(--c1s);border-color:var(--c1);color:var(--c1t);':'color:var(--fg);'}">${on?ic('check',16):''}${x}</span>`;
- if(s.k==='ChoiceChip')html=items.map(x=>sel(st.sel.ChoiceChip===x,x,'c'+x)).join('');
- else if(s.k==='FilterChip')html=items.map(x=>sel(st.sel.FilterChip.includes(x),x,'f'+x)).join('');
- else if(s.k==='InputChip')html=(st.sel.InputChip.length?st.sel.InputChip.map(x=>`<span style="${base}cursor:default">${x}<span data-a="d${x}" style="cursor:pointer;display:inline-flex">${ic('close',16)}</span></span>`).join(''):'<span style="color:var(--muted);font-size:13px">No tags left. Press reset.</span>')+`<span data-a="reset" style="${base}border-style:dashed">${ic('add',16)}reset</span>`;
- else if(s.k==='ActionChip')html=`<span data-a="act" style="${base}">${ic('share',16)}Share</span><span style="font-size:13px;color:var(--muted)">pressed ${st.sel.ActionChip} time${st.sel.ActionChip===1?'':'s'}</span>`;
- else html=`<span style="${base}cursor:default">${ic('person',16)}Taufiq</span><span style="${base}cursor:default">Label only</span>`;
- g.innerHTML=`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding:20px">${html}</div>`;
- const code={ChoiceChip:`ChoiceChip(\n  label: Text('Dart'),\n  selected: _picked == 'Dart',\n  onSelected: (on) {\n    setState(() => _picked = 'Dart');\n  },\n)`,FilterChip:`FilterChip(\n  label: Text('Flutter'),\n  selected: _filters.contains('Flutter'),\n  onSelected: (on) {\n    setState(() {\n      on ? _filters.add('Flutter')\n         : _filters.remove('Flutter');\n    });\n  },\n)`,InputChip:`InputChip(\n  label: Text('Flutter'),\n  onDeleted: () {\n    setState(() => _tags.remove('Flutter'));\n  },\n)`,ActionChip:`ActionChip(\n  avatar: Icon(Icons.share),\n  label: Text('Share'),\n  onPressed: () => share(),\n)`,Chip:`Chip(\n  avatar: Icon(Icons.person),\n  label: Text('Taufiq'),\n)`}[s.k];
- return {code,hint:{ChoiceChip:'Only one chip can be selected. Tapping another replaces the choice.',FilterChip:'Each chip toggles on its own. The selected list is a Set you keep.',InputChip:'Press the x on a tag. onDeleted runs and you remove it from your list.',ActionChip:'It has no selected state. It just runs onPressed.',Chip:'A Chip does nothing by itself. It is only a label with an optional avatar.'}[s.k]};
+ const n=+s.n,labels=['Design','Flutter','Dart','Mobile','Web'].slice(0,n);
+ const sel=st.sel||['Flutter'];
+ const compact=s.dens==='compact';
+ const togglable=s.kind==='FilterChip'||s.kind==='ChoiceChip'||s.kind==='InputChip';
+ const chip=(t,i)=>{
+  const on=togglable&&sel.includes(t);
+  const av=s.avatar==='initials'?`<span class="fb ${'abcd'[i%4]}" style="width:${compact?20:24}px;height:${compact?20:24}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 10.5px var(--f-body);flex:none;margin-left:-4px">${t[0]}</span>`:s.avatar==='icon'?`<span style="color:${on?'var(--accent)':'var(--muted)'};display:flex;margin-left:-2px">${ic('star',16)}</span>`:'';
+  const tick=on&&s.avatar==='none'?'<span style="font-size:13px;color:var(--accent)">&#10003;</span>':'';
+  return `<div class="chp" data-t="${t}" style="display:inline-flex;align-items:center;gap:7px;padding:${compact?'4px 10px':'6px 12px'};border-radius:${s.shape==='stadium'?'999px':'9px'};background:${on?'var(--accent-soft)':'var(--surface)'};color:${on?'var(--accent)':'var(--fg)'};border:${s.side?`1.2px solid ${on?'var(--accent)':'var(--line)'}`:'0'};font:600 ${compact?12.5:13.5}px var(--f-body);cursor:${s.kind==='Chip'?'default':'pointer'};${+s.el?`box-shadow:0 ${Math.max(1,Math.round(+s.el/2))}px ${(+s.el)*2}px rgba(20,30,80,.2);`:''}">${av}${tick}<span>${t}</span>${s.del?`<span class="del" data-t="${t}" style="display:flex;color:var(--muted);margin-right:-4px;cursor:pointer">${ic('close',15)}</span>`:''}</div>`;
+ };
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:300px">${labels.map(chip).join('')}</div></div>`;
+ const L=["label: const Text('Flutter'),"];
+ if(s.avatar==='initials')L.push("avatar: const CircleAvatar(child: Text('F')),");
+ if(s.avatar==='icon')L.push('avatar: const Icon(Icons.star, size: 18),');
+ if(s.kind==='ActionChip')L.push('onPressed: () => runAction(),');
+ if(s.kind==='FilterChip'||s.kind==='InputChip')L.push('selected: selected.contains(tag),','onSelected: (v) => setState(() => v ? selected.add(tag) : selected.remove(tag)),');
+ if(s.kind==='ChoiceChip')L.push('selected: choice == tag,','onSelected: (v) => setState(() => choice = tag),');
+ if(s.del)L.push('onDeleted: () => setState(() => tags.remove(tag)),',"deleteButtonTooltipMessage: 'Remove',");
+ if(s.shape==='rounded')L.push('shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),');
+ if(+s.el)L.push(`elevation: ${s.el},`);
+ if(compact)L.push('visualDensity: VisualDensity.compact,');
+ if(!s.side)L.push('side: BorderSide.none,');
+ const notes=[];
+ if(s.kind==='Chip')notes.push('Plain Chip has no onPressed, so it only displays. Add onDeleted to make it removable.');
+ if(s.kind==='FilterChip')notes.push('FilterChip is a multi-choice toggle: keep a Set in state.');
+ if(s.kind==='ChoiceChip')notes.push('ChoiceChip is single choice, like a radio. Each chip compares itself with one stored value.');
+ if(s.kind==='InputChip')notes.push('InputChip is for a value the user entered, such as a recipient: it can be tapped, selected and deleted at once.');
+ if(s.kind==='ActionChip')notes.push('ActionChip is a button in chip clothing: it has onPressed and no selected state.');
+ notes.push('Tap the chips in the demo. Wrap a real list in a Wrap so they flow onto new lines.');
+ return {code:`${s.kind}(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
 },
-act(a,st,s){
- const S=st.sel;
- if(a[0]==='c')S.ChoiceChip=a.slice(1);
- else if(a[0]==='f'){const x=a.slice(1),i=S.FilterChip.indexOf(x);i>=0?S.FilterChip.splice(i,1):S.FilterChip.push(x)}
- else if(a[0]==='d'){const x=a.slice(1);S.InputChip=S.InputChip.filter(y=>y!==x)}
- else if(a==='reset')S.InputChip=['Flutter','Dart','Android','iOS'];
- else if(a==='act')S.ActionChip++;
+after(g,st,s,draw){
+ g.querySelectorAll('.chp').forEach(el=>el.addEventListener('click',e=>{
+  if(e.target.closest('.del')){st.gone=[...(st.gone||[]),el.dataset.t];draw();return}
+  if(s.kind==='Chip')return;
+  const t=el.dataset.t;let sel=st.sel||['Flutter'];
+  if(s.kind==='ChoiceChip')sel=[t];
+  else sel=sel.includes(t)?sel.filter(x=>x!==t):[...sel,t];
+  st.sel=sel;draw();
+ }));
 }});
 
 def({cat:'Material',id:'drawer',name:'Drawer',tags:'navigation side panel burger enddrawer navigationdrawer header width scrim',h:340,
