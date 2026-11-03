@@ -56,6 +56,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -1416,54 +1417,191 @@ render(s,st,g){
   if(b)b.addEventListener('click',()=>{if(s.sf==='Clear button'){i.value='';st.v='';e.textContent='""';if(s.mx)c.textContent='0/20';i.focus()}else{st.show=!st.show;(rerender||(()=>{}))()}});
  }});
 
-def({cat:'Input',id:'toggles',name:'Checkbox, Switch & Radio',tags:'checkbox switch radio tristate radiogroup selection',
-blurb:'Three ways to pick a value. Checkbox is on or off (or null when tristate). Switch is an instant on/off setting. Radio chooses exactly one option from a group.',
-use:'Checkbox for lists of independent choices, Switch for settings, Radio for one-of-many.',
-watch:'None of them keeps its own state. They only report changes through onChanged, and you update the value with setState.',
-ctl:[{k:'tri',l:'Checkbox tristate',t:'chk',v:false}],
+def({cat:'Input',id:'toggles',name:'Checkbox, Switch & Radio',tags:'checkbox switch radio tristate radiogroup selection activecolor thumbicon listtile controlaffinity iserror visualdensity adaptive',h:340,
+blurb:'Three ways to pick a value. Checkbox is on or off, or null when tristate. Switch is an instant on/off setting. Radio chooses exactly one option from a group, and the group is now managed by a RadioGroup ancestor.',
+use:'Settings, filters, terms checkboxes and single-choice questions.',
+watch:'None of them store their own value. You hold it in state and set it in onChanged. Passing null to onChanged disables the control. On Radio, groupValue and onChanged are deprecated in favour of RadioGroup.',
+ctl:[{k:'which',l:'control',t:'sel',o:['all three','Checkbox','Switch','Radio'],v:'all three'},
+ {k:'col',l:'activeColor',t:'sel',o:['theme','green','red','purple'],v:'theme'},
+ {k:'dens',l:'visualDensity',t:'sel',o:['standard','compact'],v:'standard'},
+ {k:'tile',l:'wrap in a ListTile',t:'chk',v:false},
+ {k:'aff',l:'controlAffinity',t:'sel',o:['leading','trailing'],v:'trailing'},
+ {k:'tri',l:'Checkbox tristate',t:'chk',v:false},
+ {k:'err',l:'Checkbox isError',t:'chk',v:false},
+ {k:'icon',l:'Switch thumbIcon',t:'chk',v:false},
+ {k:'tog',l:'Radio toggleable',t:'chk',v:false},
+ {k:'en',l:'onChanged set',t:'chk',v:true}],
 render(s,st,g){
- if(st.cb===undefined){st.cb=true;st.sw=false;st.rd='Medium'}
- if(!s.tri&&st.cb===null)st.cb=false;
- const cbs=st.cb===null?' mid':st.cb?' on':'';
- g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;gap:16px;padding:20px 28px"><div class="trow"><button class="cbx${cbs}" data-a="cb" role="checkbox" aria-checked="${st.cb===null?'mixed':st.cb}" aria-label="Checkbox"></button><span>Checkbox: ${st.cb===null?'null':st.cb}</span></div><div class="trow"><button class="sw${st.sw?' on':''}" data-a="sw" role="switch" aria-checked="${st.sw}" aria-label="Switch"><i></i></button><span>Switch: ${st.sw}</span></div><div class="trow" style="gap:18px;flex-wrap:wrap">${['Small','Medium','Large'].map(o=>`<button class="rdo${st.rd===o?' on':''}" data-a="rd:${o}" role="radio" aria-checked="${st.rd===o}"><i></i>${o}</button>`).join('')}</div></div>`;
- return {code:`Checkbox(\n  value: ${st.cb},\n  tristate: ${!!s.tri},\n  onChanged: (v) => setState(() => checked = v),\n),\nSwitch(\n  value: ${st.sw},\n  onChanged: (v) => setState(() => enabled = v),\n),\nRadioGroup<String>(\n  groupValue: '${st.rd}',\n  onChanged: (v) => setState(() => size = v!),\n  child: Column(children: [\n    Radio<String>(value: 'Small'),\n    Radio<String>(value: 'Medium'),\n    Radio<String>(value: 'Large'),\n  ]),\n)`,hint:'Tap each control. With tristate on, the checkbox cycles false, true, null.'};
-},
-act(a,st,s){
- if(a==='cb')st.cb=s.tri?(st.cb===false?true:st.cb===true?null:false):!st.cb;
- else if(a==='sw')st.sw=!st.sw;
- else if(a.startsWith('rd:'))st.rd=a.slice(3);
-}});
-
-def({cat:'Input',id:'slider',name:'Slider',tags:'range value divisions label',
-blurb:'Slider lets the user pick a number from a continuous range, or from discrete steps when divisions is set.',
-use:'Volume, brightness, price filters and any numeric setting.',
-watch:'Slider keeps no value of its own. If you do not update value inside onChanged, the thumb will not move.',
-ctl:[{k:'mx',l:'max',t:'sel',o:['1','10','100'],v:'100'},{k:'dv',l:'divisions',t:'sel',o:['none','5','10'],v:'none'}],
-render(s,st,g){
- const mx=+s.mx,div=s.dv==='none'?0:+s.dv,step=div?mx/div:mx/200;
- let v=st.v===undefined?mx*.4:Math.min(st.v,mx);if(div)v=Math.round(v/step)*step;st.v=v;
- g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:16px;padding:20px 28px"><input id="sl" type="range" min="0" max="${mx}" step="${step}" value="${v}" style="width:100%"><div style="font:600 22px var(--f-display)"><span id="slv">${+v.toFixed(2)}</span></div></div>`;
- return {code:`Slider(\n  value: ${+v.toFixed(2)},\n  min: 0,\n  max: ${mx},\n${div?`  divisions: ${div},\n`:''}  label: value.round().toString(),\n  onChanged: (v) => setState(() => value = v),\n)`,hint:div?`With divisions: ${div} the thumb snaps to ${div+1} positions.`:'Without divisions the slider is continuous.'};
+ const C={theme:'var(--accent)',green:'#15803d',red:'#b91c1c',purple:'#7c3aed'}[s.col];
+ const on=s.en?C:'var(--line)';
+ const dim=s.en?'':'opacity:.5;';
+ const sc=s.dens==='compact'?.85:1;
+ const chk=st.chk===undefined?true:st.chk, sw=st.sw===undefined?false:st.sw, rd=st.rd||'Medium';
+ const half=s.tri&&chk===null;
+ const cbox=`<span class="tgt" data-t="chk" style="${dim}flex:none;display:inline-flex;width:${20*sc}px;height:${20*sc}px;border-radius:4px;border:2px solid ${s.err?'var(--danger)':(chk||half?on:'var(--muted)')};background:${chk&&!half?(s.err?'var(--danger)':on):'transparent'};align-items:center;justify-content:center;color:#fff;font-size:${13*sc}px;cursor:pointer">${half?'<span style="width:10px;height:2px;background:'+on+'"></span>':(chk?'&#10003;':'')}</span>`;
+ const swi=`<span class="tgt" data-t="sw" style="${dim}flex:none;display:inline-flex;align-items:center;width:${46*sc}px;height:${26*sc}px;border-radius:999px;background:${sw?on:'var(--line)'};padding:3px;cursor:pointer;transition:background .18s"><span style="width:${20*sc}px;height:${20*sc}px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transform:translateX(${sw?20*sc:0}px);transition:transform .18s;display:flex;align-items:center;justify-content:center;color:${on};font-size:12px">${s.icon?(sw?'&#10003;':'&#10005;'):''}</span></span>`;
+ const dot=o=>`<span class="tgt" data-t="rd" data-v="${o}" style="${dim}flex:none;display:inline-flex;width:${19*sc}px;height:${19*sc}px;border-radius:50%;border:2px solid ${rd===o?on:'var(--muted)'};align-items:center;justify-content:center;cursor:pointer"><span style="width:${9*sc}px;height:${9*sc}px;border-radius:50%;background:${rd===o?on:'transparent'}"></span></span>`;
+ const radio=o=>`<span class="tgt" data-t="rd" data-v="${o}" style="${dim}display:inline-flex;align-items:center;gap:7px;cursor:pointer">${dot(o)}<span style="font-size:${13.5*sc}px">${o}</span></span>`;
+ const row=(ctrl,label,sub)=>s.tile
+  ?`<div style="display:flex;align-items:center;gap:14px;padding:${sc<1?'5px':'8px'} 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line)">${s.aff==='leading'?ctrl:''}<span style="flex:1;min-width:0"><span style="display:block;font:600 13.5px var(--f-body)">${label}</span>${sub?`<span style="display:block;font-size:12px;color:var(--muted)">${sub}</span>`:''}</span>${s.aff==='trailing'?ctrl:''}</div>`
+  :`<div style="display:flex;align-items:center;gap:12px">${ctrl}<span style="font-size:14px">${label}</span></div>`;
+ const parts=[];
+ if(s.which==='all three'||s.which==='Checkbox')parts.push(row(cbox,s.tile?'Product news':'Checkbox: '+(half?'null':chk),s.tile?'Checkbox: '+(half?'null':chk):''));
+ if(s.which==='all three'||s.which==='Switch')parts.push(row(swi,s.tile?'Mobile data':'Switch: '+sw,s.tile?'Switch: '+sw:''));
+ if(s.which==='all three'||s.which==='Radio')parts.push(s.tile?['Small','Medium','Large'].map(o=>row(dot(o),o,'')).join(''):`<div style="display:flex;gap:18px">${['Small','Medium','Large'].map(radio).join('')}</div>`);
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;gap:${s.tile?8:16}px;padding:14px"><div style="width:100%;max-width:330px;display:flex;flex-direction:column;gap:${s.tile?8:16}px">${parts.join('')}</div></div>`;
+ const cb=s.en?'(v) => setState(() => value = v)':'null';
+ const common=[];
+ if(s.col!=='theme')common.push(`activeColor: Colors.${s.col},`);
+ if(s.dens==='compact')common.push('visualDensity: VisualDensity.compact,');
+ const pre=s.tile?'ListTile':'';
+ let code;
+ if(s.which==='Switch')code=`Switch${s.tile?'ListTile':''}(\n  value: enabled,\n  onChanged: ${cb},\n${s.tile?"  title: const Text('Use mobile data'),\n":''}${s.icon?'  thumbIcon: WidgetStateProperty.resolveWith((states) =>\n      Icon(states.contains(WidgetState.selected) ? Icons.check : Icons.close)),\n':''}${common.map(x=>'  '+x).join('\n')}${common.length?'\n':''})`;
+ else if(s.which==='Radio')code=`RadioGroup<String>(\n  groupValue: size,\n  onChanged: ${cb},\n  child: Column(\n    children: [\n      for (final o in ['Small', 'Medium', 'Large'])\n        Radio${s.tile?'ListTile':''}<String>(\n          value: o,${s.tog?'\n          toggleable: true,':''}${s.tile?"\n          title: Text(o),":''}\n        ),\n    ],\n  ),\n)`;
+ else code=`Checkbox${s.tile?'ListTile':''}(\n  value: checked,${s.tri?'   // bool? because tristate is on':''}\n  onChanged: ${cb},\n${s.tri?'  tristate: true,\n':''}${s.err?'  isError: true,\n':''}${s.tile?"  title: const Text('Send me product news'),\n":''}${s.tile&&s.aff==='leading'?'  controlAffinity: ListTileControlAffinity.leading,\n':''}${common.map(x=>'  '+x).join('\n')}${common.length?'\n':''})`;
+ const notes=[];
+ if(!s.en)notes.push('onChanged is null, so every control is disabled.');
+ if(s.tri)notes.push('With tristate the checkbox cycles false, true and null, and the value type becomes bool?.');
+ if(s.tile)notes.push('The ListTile versions make the whole row tappable, which is easier to hit and better for screen readers.');
+ if(s.icon)notes.push('thumbIcon takes a WidgetStateProperty, so the icon can differ when selected.');
+ if(s.tog)notes.push('toggleable lets the user tap the chosen radio again to clear it.');
+ return {code,hint:notes.join(' ')||'Tap any control. The demo keeps the value, just as your State would.'};
 },
 after(g,st,s,draw){
- const i=g.querySelector('#sl'),o=g.querySelector('#slv');
- i.addEventListener('input',()=>{st.v=+i.value;o.textContent=+(+i.value).toFixed(2)});
- i.addEventListener('change',()=>draw());
+ g.querySelectorAll('.tgt').forEach(el=>el.addEventListener('click',()=>{
+  if(!s.en)return;
+  const t=el.dataset.t;
+  if(t==='chk'){const cur=st.chk===undefined?true:st.chk;st.chk=s.tri?(cur===false?true:cur===true?null:false):!cur}
+  else if(t==='sw')st.sw=!st.sw;
+  else if(t==='rd'){const v=el.dataset.v;st.rd=(s.tog&&st.rd===v)?null:v}
+  draw();
+ }));
 }});
 
-def({cat:'Input',id:'dropdown',name:'DropdownButton',tags:'select menu picker dropdownmenu items',
-blurb:'DropdownButton shows the current choice and opens a menu of items. DropdownMenu is the newer Material 3 widget with search and a text field.',
-use:'Choosing one value from a short list.',
-watch:'The value must match exactly one item, or Flutter asserts. Set it to null to show the hint.',
-ctl:[{k:'exp',l:'isExpanded',t:'chk',v:false}],
+def({cat:'Input',id:'slider',name:'Slider',tags:'range value divisions label onchangeend rangeslider track thumb overlay semantics',h:330,
+blurb:'Slider picks a number by dragging. It holds no state of its own: you keep the value and set it in onChanged. divisions turns it into discrete steps with tick marks.',
+use:'Volume, brightness, zoom, a price filter or any bounded number.',
+watch:'Remember to set min and max: the default range is 0 to 1. onChanged fires on every pixel of the drag, so save or call an API in onChangeEnd instead.',
+ctl:[{k:'min',l:'min',t:'rng',min:0,max:50,v:0},
+ {k:'max',l:'max',t:'rng',min:60,max:200,v:100},
+ {k:'div',l:'divisions',t:'sel',o:['null','4','10'],v:'null'},
+ {k:'lab',l:'label while dragging',t:'chk',v:true},
+ {k:'col',l:'activeColor',t:'sel',o:['theme','green','red','purple'],v:'theme'},
+ {k:'th',l:'track height',t:'rng',min:2,max:16,v:4},
+ {k:'sec',l:'secondaryTrackValue',t:'chk',v:false},
+ {k:'range',l:'RangeSlider instead',t:'chk',v:false},
+ {k:'en',l:'onChanged set',t:'chk',v:true}],
 render(s,st,g){
- if(!st.v)st.v='Dart';
- g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px 28px"><select id="dd" class="dd" style="${s.exp?'width:100%':''}">${['Flutter','Dart','Widgets','Slivers'].map(o=>`<option${o===st.v?' selected':''}>${o}</option>`).join('')}</select><div class="cap" style="margin:0">onChanged received <b>"${st.v}"</b></div></div>`;
- return {code:`DropdownButton<String>(\n  value: '${st.v}',\n  isExpanded: ${!!s.exp},\n  items: [\n    for (final o in options)\n      DropdownMenuItem(value: o, child: Text(o)),\n  ],\n  onChanged: (v) => setState(() => choice = v!),\n)`,hint:s.exp?'isExpanded stretches the button to the full width of its parent.':'By default the button is only as wide as its widest item.'};
+ const mn=+s.min,mx=Math.max(+s.max,mn+10),div=s.div==='null'?0:+s.div;
+ const snap=v=>div?mn+Math.round((v-mn)/((mx-mn)/div))*((mx-mn)/div):v;
+ let v=st.v===undefined?mn+(mx-mn)*0.4:Math.min(mx,Math.max(mn,st.v));v=snap(v);
+ let a=st.a===undefined?mn+(mx-mn)*0.25:Math.min(mx,Math.max(mn,st.a));a=snap(a);
+ let b=st.b===undefined?mn+(mx-mn)*0.7:Math.min(mx,Math.max(mn,st.b));b=snap(b);
+ const C={theme:'var(--accent)',green:'#15803d',red:'#b91c1c',purple:'#7c3aed'}[s.col];
+ const on=s.en?C:'var(--muted)';
+ const pct=x=>((x-mn)/(mx-mn))*100;
+ const ticks=div?[...Array(div+1)].map((_,i)=>`<span style="position:absolute;left:${(i/div)*100}%;top:50%;width:3px;height:3px;border-radius:50%;background:var(--muted);transform:translate(-50%,-50%)"></span>`).join(''):'';
+ const bar=(lo,hi,showLo)=>`<div class="sld" style="position:relative;height:34px;${s.en?'cursor:pointer':'opacity:.5'}">
+   <div style="position:absolute;left:0;right:0;top:50%;height:${s.th}px;transform:translateY(-50%);border-radius:999px;background:var(--line)"></div>
+   ${s.sec&&!s.range?`<div style="position:absolute;left:0;width:${Math.min(100,pct(hi)+18)}%;top:50%;height:${s.th}px;transform:translateY(-50%);border-radius:999px;background:${on};opacity:.3"></div>`:''}
+   <div style="position:absolute;left:${showLo?pct(lo):0}%;width:${pct(hi)-(showLo?pct(lo):0)}%;top:50%;height:${s.th}px;transform:translateY(-50%);border-radius:999px;background:${on}"></div>
+   ${ticks}
+   ${showLo?`<span class="thb" data-k="a" style="position:absolute;left:${pct(lo)}%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:${on};box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>`:''}
+   <span class="thb" data-k="${showLo?'b':'v'}" style="position:absolute;left:${pct(hi)}%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:${on};box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+   ${s.lab&&div?`<span style="position:absolute;left:${pct(hi)}%;top:-10px;transform:translateX(-50%);background:${on};color:#fff;font:600 11px var(--f-mono);padding:2px 7px;border-radius:999px">${Math.round(hi)}</span>`:''}
+ </div>`;
+ g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;padding:22px;gap:10px"><div style="width:100%">${s.range?bar(a,b,true):bar(0,v,false)}</div><div class="cap" style="margin:0;text-align:center">${s.range?`RangeValues(${Math.round(a)}, ${Math.round(b)})`:`value: ${div?Math.round(v):v.toFixed(1)}`}&nbsp; &nbsp;min ${mn} &nbsp;max ${mx}</div></div>`;
+ const cb=s.en?'(v) => setState(() => value = v)':'null';
+ const L=[];
+ if(s.range)L.push(`values: RangeValues(${Math.round(a)}, ${Math.round(b)}),`,`onChanged: ${s.en?'(v) => setState(() => range = v)':'null'},`);
+ else L.push(`value: ${div?Math.round(v):v.toFixed(1)},`,`onChanged: ${cb},`);
+ L.push(`min: ${mn},`,`max: ${mx},`);
+ if(div)L.push(`divisions: ${div},`);
+ if(s.lab&&div)L.push(s.range?`labels: RangeLabels('${Math.round(a)}', '${Math.round(b)}'),`:`label: '\${value.round()}',`);
+ if(s.col!=='theme')L.push(`activeColor: Colors.${s.col},`);
+ if(s.sec&&!s.range)L.push('secondaryTrackValue: buffered,');
+ if(!s.range)L.push('onChangeEnd: (v) => save(v),   // not onChanged');
+ const theme=s.th!==4?`SliderTheme(\n  data: SliderTheme.of(context).copyWith(trackHeight: ${s.th}),\n  child: `:'';
+ const tail=s.th!==4?',\n)':'';
+ const notes=[];
+ if(!div)notes.push('With divisions null the value is continuous, and the label bubble never appears.');
+ if(div)notes.push('divisions snaps the value and draws tick marks. The label only shows when divisions is set.');
+ if(s.sec)notes.push('secondaryTrackValue draws a second, lighter track, used for a buffered position in a player.');
+ if(s.range)notes.push('RangeSlider takes values: RangeValues(start, end) and gives you both numbers back.');
+ return {code:theme+`${s.range?'RangeSlider':'Slider'}(\n${L.map(x=>'  '+x).join('\n')}\n)`+tail,hint:notes.join(' ')};
 },
-after(g,st,s,draw){g.querySelector('#dd').addEventListener('change',e=>{st.v=e.target.value;draw()})}});
+after(g,st,s,draw){
+ const mn=+s.min,mx=Math.max(+s.max,mn+10),div=s.div==='null'?0:+s.div;
+ const el=g.querySelector('.sld');if(!el||!s.en)return;
+ const set=(e)=>{
+  const r=el.getBoundingClientRect();
+  let p=(e.clientX-r.left)/r.width;p=Math.max(0,Math.min(1,p));
+  let val=mn+p*(mx-mn);
+  if(div)val=mn+Math.round((val-mn)/((mx-mn)/div))*((mx-mn)/div);
+  if(s.range){
+   const a=st.a===undefined?mn+(mx-mn)*0.25:st.a,b=st.b===undefined?mn+(mx-mn)*0.7:st.b;
+   if(Math.abs(val-a)<Math.abs(val-b))st.a=Math.min(val,b);else st.b=Math.max(val,a);
+  } else st.v=val;
+  draw();
+ };
+ let down=false;
+ el.addEventListener('pointerdown',e=>{down=true;el.setPointerCapture(e.pointerId);set(e)});
+ el.addEventListener('pointermove',e=>{if(down)set(e)});
+ el.addEventListener('pointerup',()=>{down=false});
+}});
 
-/* ================= STRUCTURE ================= */
+def({cat:'Input',id:'dropdown',name:'DropdownButton',tags:'select menu picker dropdownmenuitem value onchanged isexpanded dropdownmenu formfield hint',h:340,
+blurb:'DropdownButton shows the chosen value and opens a menu of DropdownMenuItems. DropdownMenu is the Material 3 version: it looks like a text field and can filter as you type.',
+use:'Choosing one value from a short, known list: a country, a size, a sort order.',
+watch:'value must equal exactly one item value or Flutter throws. With a custom class that means implementing == and hashCode. For a Form, use DropdownButtonFormField, which takes initialValue instead of value.',
+ctl:[{k:'which',l:'widget',t:'sel',o:['DropdownButton','DropdownButtonFormField','DropdownMenu'],v:'DropdownButton'},
+ {k:'exp',l:'isExpanded',t:'chk',v:false},
+ {k:'dense',l:'isDense',t:'chk',v:false},
+ {k:'hint',l:'value is null (shows hint)',t:'chk',v:false},
+ {k:'icn',l:'custom icon',t:'chk',v:false},
+ {k:'ul',l:'underline',t:'sel',o:['default line','none'],v:'default line'},
+ {k:'el',l:'menu elevation',t:'rng',min:0,max:16,v:8},
+ {k:'r',l:'menu borderRadius',t:'rng',min:0,max:20,v:4},
+ {k:'open',l:'show the menu open',t:'chk',v:false},
+ {k:'en',l:'onChanged set',t:'chk',v:true}],
+render(s,st,g){
+ const items=['Small','Medium','Large','Extra large'];
+ const val=st.v||'Medium',show=s.hint?null:val;
+ const fm=s.which!=='DropdownButton',menu3=s.which==='DropdownMenu';
+ const dis=!s.en;
+ const w=s.exp?'100%':'auto';
+ const field=menu3||fm
+  ?`<div style="display:inline-flex;align-items:center;gap:10px;width:${w};min-width:190px;box-sizing:border-box;padding:${s.dense?'8px 12px':'13px 12px'};border:1.3px solid var(--line);border-radius:${menu3?6:4}px;background:var(--surface);${dis?'opacity:.5;':''}"><span style="flex:1;font:14.5px var(--f-body);color:${show?'var(--fg)':'var(--muted)'}">${show||'Pick a size'}</span>${ic(s.icn?'star':'chevron',20)}</div>`
+  :`<div style="display:inline-flex;align-items:center;gap:10px;width:${w};min-width:150px;box-sizing:border-box;padding:${s.dense?'2px 0':'8px 0'};${s.ul==='default line'?'border-bottom:1px solid var(--muted);':''}${dis?'opacity:.5;':''}"><span style="flex:1;font:14.5px var(--f-body);color:${show?'var(--fg)':'var(--muted)'}">${show||'Pick a size'}</span>${ic(s.icn?'star':'chevron',20)}</div>`;
+ const list=s.open?`<div style="margin-top:4px;width:${s.exp?'100%':'auto'};min-width:190px;background:var(--surface);border-radius:${s.r}px;box-shadow:0 ${Math.max(1,Math.round(s.el/2))}px ${Math.max(2,s.el*2)}px rgba(20,30,80,.28);overflow:hidden;border:1px solid var(--line)">${items.map(o=>`<div style="padding:${s.dense?'8px 12px':'11px 14px'};font:14px var(--f-body);background:${o===val?'var(--accent-soft)':'transparent'};color:${o===val?'var(--accent)':'var(--fg)'}">${o}</div>`).join('')}</div>`:'';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:${s.exp?'stretch':'center'};justify-content:flex-start;padding:18px;gap:0"><div style="width:100%;display:flex;flex-direction:column;align-items:${s.exp?'stretch':'center'}">${field}${list}</div></div>`;
+ const cb=s.en?'(v) => setState(() => size = v)':'null';
+ let code;
+ if(menu3)code=`DropdownMenu<String>(\n  initialSelection: size,\n  onSelected: ${s.en?'(v) => setState(() => size = v)':'null'},\n  label: const Text('Size'),\n  enableFilter: true,\n${s.exp?'  expandedInsets: EdgeInsets.zero,\n':''}  dropdownMenuEntries: [\n    for (final o in sizes) DropdownMenuEntry(value: o, label: o),\n  ],\n)`;
+ else{
+  const L=[];
+  L.push(fm?'initialValue: size,':`value: ${s.hint?'null':'size'},`);
+  L.push(`onChanged: ${cb},`);
+  if(s.hint)L.push("hint: const Text('Pick a size'),");
+  if(s.exp)L.push('isExpanded: true,');
+  if(s.dense)L.push('isDense: true,');
+  if(s.icn)L.push('icon: const Icon(Icons.star),');
+  if(s.ul==='none'&&!fm)L.push('underline: const SizedBox.shrink(),');
+  if(s.el!==8)L.push(`elevation: ${s.el},`);
+  if(s.r)L.push(`borderRadius: BorderRadius.circular(${s.r}),`);
+  if(fm)L.push('decoration: const InputDecoration(border: OutlineInputBorder()),','validator: (v) => v == null ? \'Required\' : null,');
+  L.push('items: [\n    for (final o in sizes)\n      DropdownMenuItem(value: o, child: Text(o)),\n  ],');
+  code=`${fm?'DropdownButtonFormField':'DropdownButton'}<String>(\n${L.map(x=>'  '+x).join('\n')}\n)`;
+ }
+ const notes=[];
+ if(s.hint)notes.push('With a null value the hint shows instead. disabledHint covers the disabled case.');
+ if(s.exp)notes.push('isExpanded stretches the button to the parent width, which stops a long label overflowing.');
+ if(menu3)notes.push('DropdownMenu is a text field underneath, so it supports typing, filtering and a leading icon.');
+ if(fm)notes.push('The FormField version adds decoration, validator and onSaved, and uses initialValue rather than value.');
+ return {code,hint:notes.join(' ')||'Tick "show the menu open" to see the menu styling arguments at work.'};
+},
+after(g,st,s,draw){}});
+
 def({cat:'Structure',id:'scaffold',name:'Scaffold',tags:'appbar drawer fab floatingactionbutton bottomnavigationbar snackbar material page',h:340,
 blurb:'Scaffold is the skeleton of a Material screen. It positions an app bar, a body, a drawer, a floating action button and a bottom navigation bar, and hosts SnackBars.',
 use:'Almost every full screen in a Material app.',
@@ -1487,18 +1625,55 @@ act(a,st){
  else if(a==='fab'){st.snack=true;clearTimeout(st.tm);st.tm=setTimeout(()=>{st.snack=false;this.draw&&this.draw()},1800)}
 }});
 
-def({cat:'Structure',id:'tab-bar',name:'TabBar & TabBarView',tags:'tabs defaulttabcontroller scrollable indicator',
-blurb:'TabBar shows a row of tabs and TabBarView shows the content for the selected tab. A DefaultTabController connects the two and holds the selected index.',
-use:'Switching between a few sibling views of equal importance.',
-watch:'The number of tabs in TabBar and children in TabBarView must match the controller length, or Flutter throws.',
-ctl:[{k:'n',l:'tabs',t:'sel',o:['2','3','5'],v:'3'},{k:'sc',l:'isScrollable',t:'chk',v:false}],
+def({cat:'Material',id:'tab-bar',name:'TabBar & TabBarView',tags:'tabs controller indicator scrollable tabalignment defaulttabcontroller labelcolor divider',h:340,
+blurb:'TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State class.',
+use:'Switching between a few views of the same screen.',
+watch:'The number of tabs, the number of pages and the controller length must all match. Each tab page keeps its scroll position only if you add AutomaticKeepAliveClientMixin or a PageStorageKey.',
+ctl:[{k:'n',l:'tabs',t:'rng',min:2,max:7,v:3},
+ {k:'scr',l:'isScrollable',t:'chk',v:false},
+ {k:'al',l:'tabAlignment',t:'sel',o:['fill','start','center'],v:'fill'},
+ {k:'kind',l:'tab content',t:'sel',o:['text','icon','icon + text'],v:'text'},
+ {k:'ind',l:'indicator',t:'sel',o:['underline','pill','none'],v:'underline'},
+ {k:'iw',l:'indicatorWeight',t:'rng',min:1,max:8,v:3},
+ {k:'isz',l:'indicatorSize',t:'sel',o:['tab','label'],v:'tab'},
+ {k:'div',l:'divider under the bar',t:'chk',v:true},
+ {k:'inbar',l:'inside an AppBar',t:'chk',v:true}],
 render(s,st,g){
- const n=+s.n,names=['Chats','Status','Calls','Photos','Files'].slice(0,n);
- if(st.t===undefined||st.t>=n)st.t=0;
- g.innerHTML=`<div class="fill" style="flex-direction:column;padding:12px"><div class="tabs${s.sc?' scr2':''}">${names.map((t,i)=>`<button class="tab${st.t===i?' on':''}" data-a="tab:${i}" role="tab" aria-selected="${st.t===i}" style="${s.sc?'':'flex:1'}">${t}</button>`).join('')}</div><div class="tbody fb ${'abcd'[st.t%4]}" style="flex:1;margin-top:10px;font-size:16px;border-radius:8px">${names[st.t]} content</div></div>`;
- return {code:`DefaultTabController(\n  length: ${n},\n  child: Scaffold(\n    appBar: AppBar(\n      bottom: TabBar(\n        isScrollable: ${s.sc},\n        tabs: [${names.map(t=>`Tab(text: '${t}')`).join(', ')}],\n      ),\n    ),\n    body: TabBarView(children: [/* ${n} pages */]),\n  ),\n)`,hint:s.sc?'Scrollable tabs keep their natural width and can scroll sideways.':'Fixed tabs share the full width equally.'};
+ const n=+s.n,cur=Math.min(st.i||0,n-1);
+ const names=['Home','Chats','Calls','Status','Groups','Files','More'].slice(0,n);
+ const AJ={fill:'stretch',start:'flex-start',center:'center'}[s.al];
+ const onBar=s.inbar;
+ const tab=(t,i)=>{
+  const on=i===cur;
+  const inner=s.kind==='icon'?ic(['home','star','person','add'][i%4],20):s.kind==='icon + text'?ic(['home','star','person','add'][i%4],18)+`<span>${t}</span>`:`<span>${t}</span>`;
+  const pill=s.ind==='pill'&&on;
+  return `<div class="tb" data-i="${i}" style="${s.scr||s.al!=='fill'?'':'flex:1;'}display:flex;flex-direction:${s.kind==='icon + text'?'column':'row'};align-items:center;justify-content:center;gap:4px;padding:${s.kind==='icon + text'?'7px 16px':'12px 16px'};cursor:pointer;white-space:nowrap;font:600 13.5px var(--f-body);color:${on?(onBar?'#fff':'var(--accent)'):(onBar?'rgba(255,255,255,.7)':'var(--muted)')};${pill?'background:'+(onBar?'rgba(255,255,255,.18)':'var(--accent-soft)')+';border-radius:999px;margin:6px 4px;':''}${s.ind==='underline'&&on?`box-shadow:inset 0 -${s.iw}px 0 ${onBar?'#fff':'var(--accent)'};`:''}">${inner}</div>`;
+ };
+ const bar=`<div style="display:flex;${s.scr?'overflow-x:auto;':''}justify-content:${AJ==='stretch'?'flex-start':AJ};background:${onBar?'var(--accent)':'var(--surface)'};${s.div?'border-bottom:1px solid '+(onBar?'rgba(255,255,255,.2)':'var(--line)')+';':''}">${names.map(tab).join('')}</div>`;
+ const page=`<div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg)"><div class="fb ${'abcd'[cur%4]}" style="padding:18px 26px;border-radius:12px;font:600 15px var(--f-body)">${names[cur]} page</div></div>`;
+ g.innerHTML=`<div class="fill" style="padding:0;flex-direction:column">${onBar?`<div style="background:var(--accent);color:#fff;padding:10px 14px;font:600 15px var(--f-display)">My app</div>`:''}${bar}${page}</div>`;
+ const L=['tabs: ['];
+ names.forEach((t,i)=>{
+  if(s.kind==='text')L.push(`    Tab(text: '${t}'),`);
+  else if(s.kind==='icon')L.push(`    Tab(icon: Icon(Icons.${['home','star','person','add'][i%4]})),`);
+  else L.push(`    Tab(icon: Icon(Icons.${['home','star','person','add'][i%4]}), text: '${t}'),`);
+ });
+ L.push('  ],');
+ if(s.scr)L.push('isScrollable: true,');
+ if(s.al!=='fill')L.push(`tabAlignment: TabAlignment.${s.al},`);
+ if(s.ind==='pill')L.push('indicator: BoxDecoration(\n    color: Colors.white24,\n    borderRadius: BorderRadius.circular(999),\n  ),','indicatorSize: TabBarIndicatorSize.tab,');
+ else if(s.ind==='none')L.push('indicatorColor: Colors.transparent,');
+ else{L.push(`indicatorWeight: ${s.iw},`);L.push(`indicatorSize: TabBarIndicatorSize.${s.isz},`)}
+ if(!s.div)L.push('dividerColor: Colors.transparent,');
+ const body=`DefaultTabController(\n  length: ${n},\n  child: Scaffold(\n    appBar: AppBar(\n      title: const Text('My app'),\n      bottom: TabBar(\n${L.map(x=>'        '+x).join('\n')}\n      ),\n    ),\n    body: TabBarView(\n      children: [${names.map(t=>`\n        ${t}Page(),`).join('')}\n      ],\n    ),\n  ),\n)`;
+ const notes=[];
+ if(s.scr)notes.push('isScrollable lets the tabs run past the edge, which you need above about four labels.');
+ if(!s.scr&&n>4)notes.push(n+' fixed tabs squeeze the labels. Turn on isScrollable.');
+ if(s.al==='fill'&&s.scr)notes.push('TabAlignment.fill is not allowed with isScrollable; start or center instead.');
+ if(s.ind==='pill')notes.push('A pill indicator is just a BoxDecoration passed to indicator, with indicatorSize: tab.');
+ return {code:body,hint:notes.join(' ')||'Tap a tab. With DefaultTabController you need no State class at all.'};
 },
-act(a,st){if(a.startsWith('tab:'))st.t=+a.slice(4)}});
+after(g,st,s,draw){g.querySelectorAll('.tb').forEach(el=>el.addEventListener('click',()=>{st.i=+el.dataset.i;draw()}))}});
 /* ================= GESTURES ================= */
 def({cat:'Gestures',id:'gestures',name:'GestureDetector',tags:'tap doubletap longpress pan drag gesture recognizer',h:300,
 blurb:'GestureDetector wraps any widget and reports taps, double taps, long presses and drags. It has no visual effect of its own.',
@@ -2677,77 +2852,133 @@ act(a,st,s){
 const phone=(inner,extra)=>`<div class="ph" style="position:absolute;left:50%;top:8px;bottom:8px;width:210px;margin-left:-105px;border:2px solid var(--fg);border-radius:18px;overflow:hidden;background:var(--bg);${extra||''}">${inner}</div>`;
 const appbar=t=>`<div style="height:34px;background:var(--c1);color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:600;font-size:13px">${t}</div>`;
 
-def({cat:'Material',id:'dialog',name:'AlertDialog & showDialog',tags:'dialog alertdialog simpledialog showdialog modal barrier dismissible actions confirm cancel popup navigator pop',h:330,
-blurb:'showDialog puts a modal on top of the current screen and returns a Future that completes when it closes. AlertDialog is the usual content: a title, a message and action buttons. Navigator.pop(context, value) closes it and sends a value back.',
-use:'Confirm a delete, ask a yes or no question, show a short choice list (SimpleDialog) or a full-screen form (Dialog.fullscreen).',
-watch:'Dialogs are routes, so close them with Navigator.pop, not by hiding a widget. The barrier colour blocks taps on the page, and barrierDismissible decides if tapping it closes the dialog. Never call showDialog from build.',
-ctl:[{k:'k',l:'dialog type',t:'sel',o:['AlertDialog','SimpleDialog','Dialog.fullscreen'],v:'AlertDialog'},{k:'bd',l:'barrierDismissible',t:'chk',v:true}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;
- const body=`<div style="padding:12px"><div style="height:10px;width:60%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><div style="height:10px;width:85%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><button class="btn k-Filled" data-a="show" style="padding:7px 14px;font-size:13px">Show dialog</button></div>`;
- let dlg='';
- if(st.open){
-  if(s.k==='AlertDialog')dlg=`<div style="position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:20px;padding:18px 16px 10px;box-shadow:0 8px 28px rgba(0,0,0,.35)"><div style="font:600 17px var(--f-body);margin-bottom:8px">Delete file?</div><div style="font-size:13px;color:var(--muted);margin-bottom:14px">This cannot be undone.</div><div style="display:flex;justify-content:flex-end;gap:14px;font:600 13px var(--f-body);color:var(--accent)"><span data-a="no" style="cursor:pointer">Cancel</span><span data-a="yes" style="cursor:pointer">Delete</span></div></div>`;
-  else if(s.k==='SimpleDialog')dlg=`<div style="position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:20px;padding:16px 0 8px;box-shadow:0 8px 28px rgba(0,0,0,.35)"><div style="font:600 17px var(--f-body);margin:0 16px 8px">Pick a colour</div>${['Blue','Pink','Teal'].map(c=>`<div data-a="pick${c}" style="cursor:pointer;padding:10px 16px;font-size:14px">${c}</div>`).join('')}</div>`;
-  else dlg=`<div style="position:absolute;inset:0;background:var(--surface)">${appbar(`<span data-a="no" style="cursor:pointer;display:inline-flex">${ic('close',20)}</span>New event<span data-a="yes" style="margin-left:auto;cursor:pointer">Save</span>`)}<div style="padding:14px"><div style="height:34px;border:1.5px solid var(--line);border-radius:8px;margin-bottom:10px"></div><div style="height:34px;border:1.5px solid var(--line);border-radius:8px"></div></div></div>`;
-  dlg=(s.k==='Dialog.fullscreen'?'':`<div data-a="scrim" style="position:absolute;inset:0;background:rgba(0,0,0,.45)"></div>`)+dlg;
- }
- g.innerHTML=phone(appbar('Files')+body+dlg);
- const call=s.k==='AlertDialog'?`AlertDialog(\n      title: Text('Delete file?'),\n      content: Text('This cannot be undone.'),\n      actions: [\n        TextButton(\n          onPressed: () => Navigator.pop(context, false),\n          child: Text('Cancel'),\n        ),\n        TextButton(\n          onPressed: () => Navigator.pop(context, true),\n          child: Text('Delete'),\n        ),\n      ],\n    )`:s.k==='SimpleDialog'?`SimpleDialog(\n      title: Text('Pick a colour'),\n      children: [\n        SimpleDialogOption(\n          onPressed: () => Navigator.pop(context, 'Blue'),\n          child: Text('Blue'),\n        ),\n        // Pink, Teal ...\n      ],\n    )`:`Dialog.fullscreen(\n      child: NewEventForm(),\n    )`;
- const code=`final result = await showDialog<${s.k==='SimpleDialog'?'String':s.k==='AlertDialog'?'bool':'void'}>(\n  context: context,${s.bd?'':'\n  barrierDismissible: false,'}\n  builder: (context) =>\n    ${call},\n);\n// result is null if the user tapped the barrier`;
- return {code,hint:st.res?('showDialog returned: '+st.res):(s.bd?'Tap the dim area to dismiss. The Future completes with null.':'barrierDismissible is false, so tapping outside does nothing. The user must choose.')};
-},
-act(a,st,s,t){
- if(a==='show'){st.open=true;st.res=''}
- else if(a==='scrim'){if(s.bd){st.open=false;st.res='null (dismissed by tapping the barrier)'}}
- else if(a==='yes'){st.open=false;st.res=s.k==='AlertDialog'?'true':'saved'}
- else if(a==='no'){st.open=false;st.res=s.k==='AlertDialog'?'false':'null (closed)'}
- else if(a.startsWith('pick')){st.open=false;st.res="'"+a.slice(4)+"'"}
+def({cat:'Material',id:'dialog',name:'AlertDialog & showDialog',tags:'modal popup confirm barrierdismissible actions scrollable showdialog result pop',h:340,
+blurb:'showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content and a row of actions.',
+use:'Confirm a destructive action, ask a short question, show a short message that needs an answer.',
+watch:'The builder gets its own context, so Navigator.pop(context) inside it closes the dialog, not the screen. Await showDialog to read the result, and check context.mounted before using the outer context afterwards.',
+ctl:[{k:'icon',l:'icon',t:'chk',v:false},
+ {k:'title',l:'title',t:'chk',v:true},
+ {k:'long',l:'long content (scrollable)',t:'chk',v:false},
+ {k:'n',l:'actions',t:'sel',o:['1','2','3'],v:'2'},
+ {k:'al',l:'actionsAlignment',t:'sel',o:['end','center','spaceBetween'],v:'end'},
+ {k:'r',l:'shape: borderRadius',t:'rng',min:0,max:32,v:28},
+ {k:'ins',l:'insetPadding',t:'rng',min:8,max:64,v:40},
+ {k:'bd',l:'barrierDismissible',t:'chk',v:true},
+ {k:'kind',l:'variant',t:'sel',o:['AlertDialog','SimpleDialog','Dialog (custom)'],v:'AlertDialog'}],
+render(s,st,g){
+ const n=+s.n,AJ={end:'flex-end',center:'center',spaceBetween:'space-between'}[s.al];
+ const acts=['Cancel','Delete','Later'].slice(0,n).map((t,i)=>`<button style="border:0;background:none;color:${i===1?'var(--danger)':'var(--accent)'};font:600 14px var(--f-body);padding:8px 12px;border-radius:8px;cursor:pointer">${t}</button>`).join('');
+ const body=s.kind==='SimpleDialog'
+  ?['Use Google account','Use work account','Add a new account'].map(t=>`<div style="padding:12px 24px;font:14.5px var(--f-body)">${t}</div>`).join('')
+  :`<div style="padding:0 24px 20px;font-size:14.5px;color:var(--muted);line-height:1.5;${s.long?'max-height:110px;overflow:auto;':''}">Deleting this project removes every file in it. This cannot be undone.${s.long?' '+'This dialog has a lot of content, so scrollable: true wraps the title and content in a scroll view instead of letting them overflow. '.repeat(3):''}</div>`;
+ const head=(s.icon?`<div style="padding:22px 24px 0;text-align:center;color:var(--accent)">${ic('delete',28)}</div>`:'')+(s.title?`<div style="padding:${s.icon?'14px':'22px'} 24px 12px;font:600 19px var(--f-display);text-align:${s.icon?'center':'left'}">Delete project?</div>`:'');
+ const custom=s.kind==='Dialog (custom)';
+ const card=`<div style="width:min(330px,100%);margin:0 ${s.ins/2}px;background:var(--surface);border-radius:${s.r}px;box-shadow:0 10px 36px rgba(10,20,60,.34);overflow:hidden">${custom?`<div style="padding:26px;text-align:center"><div style="font:600 17px var(--f-display);margin-bottom:8px">Any layout you like</div><div style="font-size:13.5px;color:var(--muted)">Dialog gives you the surface and nothing else.</div></div>`:head+body+(s.kind==='AlertDialog'?`<div style="display:flex;justify-content:${AJ};gap:4px;padding:8px 14px 14px">${acts}</div>`:'')}</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;background:rgba(10,20,50,.45);padding:10px">${card}</div>`;
+ const L=[];
+ if(s.icon)L.push('icon: const Icon(Icons.delete_outline),');
+ if(s.title)L.push("title: const Text('Delete project?'),");
+ L.push("content: const Text('Deleting this project removes every file in it.'),");
+ if(s.long)L.push('scrollable: true,');
+ if(s.al!=='end')L.push(`actionsAlignment: MainAxisAlignment.${s.al},`);
+ L.push(`shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(${s.r})),`);
+ if(s.ins!==40)L.push(`insetPadding: const EdgeInsets.symmetric(horizontal: ${s.ins}, vertical: 24),`);
+ L.push('actions: [\n    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text(\'Cancel\')),\n    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text(\'Delete\')),\n  ],');
+ const inner=custom
+  ?"Dialog(\n      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular("+s.r+")),\n      child: Padding(padding: const EdgeInsets.all(24), child: yourLayout),\n    )"
+  :s.kind==='SimpleDialog'
+   ?"SimpleDialog(\n      title: const Text('Pick an account'),\n      children: [\n        SimpleDialogOption(onPressed: () => Navigator.pop(context, 'google'), child: const Text('Use Google account')),\n        SimpleDialogOption(onPressed: () => Navigator.pop(context, 'work'), child: const Text('Use work account')),\n      ],\n    )"
+   :'AlertDialog(\n'+L.map(x=>'      '+x).join('\n')+'\n    )';
+ const code=`final ok = await showDialog<bool>(\n  context: context,\n  barrierDismissible: ${s.bd},${s.bd?'':'   // the user must choose an action'}\n  builder: (context) => ${inner},\n);\nif (!context.mounted) return;\nif (ok == true) deleteProject();`;
+ const notes=[];
+ if(!s.bd)notes.push('barrierDismissible: false means a tap outside does nothing, so the user must pick an action.');
+ if(s.long)notes.push('scrollable: true wraps the title and content in a scroll view, which matters at large font sizes.');
+ if(s.kind==='SimpleDialog')notes.push('SimpleDialog lists choices with SimpleDialogOption, and each one pops with its value.');
+ if(s.kind==='Dialog (custom)')notes.push('Dialog is just the surface: you build the whole inside yourself.');
+ notes.push('The dim layer is a real route, so the back button closes it.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Material',id:'bottom-sheet',name:'BottomSheet',tags:'bottom sheet modal persistent showmodalbottomsheet drag handle scroll controlled draggablescrollablesheet slide up',h:340,
-blurb:'A bottom sheet is a panel that slides up from the bottom edge. showModalBottomSheet blocks the page behind it with a barrier, like a dialog. A persistent sheet (Scaffold.showBottomSheet) stays while the user keeps using the page.',
-use:'Share menus, filters, action lists, a mini player or any short task that does not need a full page.',
-watch:'The sheet only takes the height it needs, up to about 9/16 of the screen. For tall content or a keyboard, set isScrollControlled: true. Close it with Navigator.pop.',
-ctl:[{k:'md',l:'type',t:'sel',o:['modal','persistent'],v:'modal'},{k:'dh',l:'showDragHandle',t:'chk',v:true},{k:'sc',l:'isScrollControlled (taller)',t:'chk',v:false}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;
- if(!st.box){
-  g.innerHTML=phone(`${appbar('Photos')}<div style="padding:12px"><div style="height:10px;width:70%;background:var(--line);border-radius:5px;margin-bottom:8px"></div><button class="btn k-Filled" data-a="tog" style="padding:7px 14px;font-size:13px">Open sheet</button></div><div class="bs1" style="position:absolute;inset:34px 0 0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s" data-a="scrim"></div><div class="bs2" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:26px 26px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.3);transform:translateY(105%);transition:transform .28s cubic-bezier(.3,0,.2,1);padding:0 16px 14px"><div class="bh" style="width:32px;height:4px;border-radius:2px;background:var(--muted);margin:10px auto 10px"></div><div style="font:600 15px var(--f-body);margin-bottom:6px">Share</div>${['Copy link','Send message','More apps'].map(x=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;font-size:14px;border-top:1px solid var(--line)">${ic('share',18,'var(--c1)')}${x}</div>`).join('')}<div class="bx" style="display:none;font-size:12px;color:var(--muted);padding:10px 0;border-top:1px solid var(--line);line-height:2.6">More rows because isScrollControlled lets the sheet grow.<br>Row A<br>Row B<br>Row C</div></div>`,'');
-  st.box=true;st.scrim=g.querySelector('.bs1');st.sh=g.querySelector('.bs2');st.hd=g.querySelector('.bh');st.bx=g.querySelector('.bx');st.open=false;
+def({cat:'Material',id:'bottom-sheet',name:'BottomSheet',tags:'modal sheet showmodalbottomsheet draggable scrollcontrolled draghandle persistent keyboard safearea',h:340,
+blurb:'A panel that slides up from the bottom. showModalBottomSheet dims the screen behind it; a persistent sheet lets the user keep using the screen. For a sheet the user can drag between sizes, use DraggableScrollableSheet.',
+use:'A short list of actions, a filter panel, a form that does not deserve a whole screen.',
+watch:'Any sheet taller than half the screen, or holding a text field, needs isScrollControlled: true. Add padding for MediaQuery.viewInsets so the keyboard does not cover the field.',
+ctl:[{k:'h',l:'height',t:'rng',min:30,max:92,step:2,v:45},
+ {k:'sc',l:'isScrollControlled',t:'chk',v:false},
+ {k:'dh',l:'showDragHandle',t:'chk',v:true},
+ {k:'r',l:'top corner radius',t:'rng',min:0,max:32,v:20},
+ {k:'safe',l:'useSafeArea',t:'chk',v:false},
+ {k:'kb',l:'keyboard is open',t:'chk',v:false},
+ {k:'kind',l:'variant',t:'sel',o:['modal','persistent','DraggableScrollableSheet'],v:'modal'},
+ {k:'dism',l:'isDismissible',t:'chk',v:true},
+ {k:'drag',l:'enableDrag',t:'chk',v:true}],
+render(s,st,g){
+ const modal=s.kind==='modal',drg=s.kind==='DraggableScrollableSheet';
+ let h=+s.h;if(!s.sc&&h>56)h=56;
+ const kb=s.kb?34:0;
+ const rows=['Share','Copy link','Add to favourites','Download','Report'].map(t=>`<div style="display:flex;align-items:center;gap:14px;padding:11px 20px;font:14.5px var(--f-body)">${ic('star',19)}${t}</div>`).join('');
+ const sheet=`<div style="position:absolute;left:0;right:0;bottom:${kb}px;height:${h}%;background:var(--surface);border-radius:${s.r}px ${s.r}px 0 0;box-shadow:0 -6px 24px rgba(10,20,60,.22);overflow:hidden;display:flex;flex-direction:column">${s.dh?'<div style="padding:10px 0 4px;display:flex;justify-content:center"><span style="width:34px;height:4px;border-radius:999px;background:var(--line)"></span></div>':'<div style="height:10px"></div>'}${s.safe?'<div style="height:6px"></div>':''}<div style="flex:1;overflow:auto">${rows}</div>${s.kb?'<div style="padding:10px 20px;border-top:1px solid var(--line)"><div style="height:38px;border:1.2px solid var(--accent);border-radius:8px;display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--muted)">Type a comment</div></div>':''}</div>`;
+ const kbBar=s.kb?`<div style="position:absolute;left:0;right:0;bottom:0;height:${kb}px;background:#1f2937;color:#fff;display:flex;align-items:center;justify-content:center;font:11px var(--f-mono);letter-spacing:.08em">KEYBOARD</div>`:'';
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden;background:${modal?'rgba(10,20,50,.45)':'transparent'}"><div style="padding:16px;color:var(--muted);font-size:13.5px">${modal?'Screen behind the dim layer':'Screen stays usable'}</div>${sheet}${kbBar}</div></div>`;
+ let code;
+ if(drg)code=`showModalBottomSheet(\n  context: context,\n  isScrollControlled: true,   // required\n  builder: (context) => DraggableScrollableSheet(\n    expand: false,\n    initialChildSize: ${(h/100).toFixed(2)},\n    minChildSize: 0.25,\n    maxChildSize: 0.9,\n    snap: true,\n    builder: (context, scrollController) => ListView(\n      controller: scrollController,   // hand it to your list\n      children: items,\n    ),\n  ),\n);`;
+ else if(s.kind==='persistent')code=`// stays on screen, no dim layer, no route\nfinal controller = Scaffold.of(context).showBottomSheet(\n  (context) => SizedBox(height: ${Math.round(h*4)}, child: content),\n);\nawait controller.closed;\n\n// or pin one permanently:\nScaffold(bottomSheet: content, body: ...)`;
+ else{
+  const L=['context: context,'];
+  if(s.sc)L.push('isScrollControlled: true,');
+  if(s.dh)L.push('showDragHandle: true,');
+  if(s.safe)L.push('useSafeArea: true,');
+  if(!s.dism)L.push('isDismissible: false,');
+  if(!s.drag)L.push('enableDrag: false,');
+  L.push(`shape: const RoundedRectangleBorder(\n    borderRadius: BorderRadius.vertical(top: Radius.circular(${s.r})),\n  ),`);
+  const inner=s.kb
+   ?"builder: (context) => Padding(\n    padding: MediaQuery.viewInsetsOf(context),   // lift above the keyboard\n    child: content,\n  ),"
+   :'builder: (context) => content,';
+  L.push(inner);
+  code=`final result = await showModalBottomSheet<String>(\n${L.map(x=>'  '+x).join('\n')}\n);`;
  }
- st.hd.style.display=s.dh?'block':'none';st.bx.style.display=s.sc?'block':'none';
- st.sh.style.transform=st.open?'translateY(0)':'translateY(105%)';
- const modal=s.md==='modal';
- st.scrim.style.opacity=st.open&&modal?'1':'0';st.scrim.style.pointerEvents=st.open&&modal?'auto':'none';
- const code=modal?`showModalBottomSheet<void>(\n  context: context,${s.dh?'\n  showDragHandle: true,':''}${s.sc?'\n  isScrollControlled: true,':''}\n  builder: (context) => Padding(\n    padding: EdgeInsets.all(16),\n    child: Column(\n      mainAxisSize: MainAxisSize.min,\n      children: [\n        ListTile(title: Text('Copy link')),\n        ListTile(title: Text('Send message')),\n        TextButton(\n          onPressed: () => Navigator.pop(context),\n          child: Text('Close'),\n        ),\n      ],\n    ),\n  ),\n);`:`// inside a State that has a Scaffold above it\nfinal controller = Scaffold.of(context).showBottomSheet(\n  (context) => Container(\n    height: 200,\n    child: Text('Stays while you use the page'),\n  ),\n);\n// close it later\ncontroller.close();`;
- return {code,hint:modal?'Modal: tap the dim area or press the button to close it. The page behind is blocked.':'Persistent: the page stays usable. Press the button again to close it.'};
-},
-act(a,st,s){if(a==='tog')st.open=!st.open;else if(a==='scrim')st.open=false}});
+ const notes=[];
+ if(!s.sc&&+s.h>56)notes.push('Without isScrollControlled the sheet is capped at about nine sixteenths of the screen, which is why it stopped growing.');
+ if(s.kb&&!s.sc)notes.push('A text field in a sheet needs isScrollControlled, or the keyboard covers it.');
+ if(s.kb)notes.push('MediaQuery.viewInsetsOf(context) as padding is what lifts the content above the keyboard.');
+ if(s.kind==='persistent')notes.push('A persistent sheet has no dim layer and no route, so the back button does not close it.');
+ if(drg)notes.push('DraggableScrollableSheet gives you a scrollController that must go to the list inside, or dragging and scrolling fight each other.');
+ if(!s.dism&&modal)notes.push('isDismissible: false stops a tap outside closing it.');
+ return {code,hint:notes.join(' ')||'Drag the height slider past half the screen to see why isScrollControlled exists.'};
+}});
 
-def({cat:'Material',id:'snackbar',name:'SnackBar',tags:'snackbar toast message undo action scaffoldmessenger showsnackbar duration floating behavior feedback',h:320,
-blurb:'A SnackBar is a short message that slides up from the bottom, stays for a few seconds, then leaves on its own. It can carry one action such as Undo. You show it through ScaffoldMessenger, not through Scaffold.',
-use:'Confirm a quick action ("Message sent") or let the user undo it ("Item deleted. Undo").',
-watch:'One snackbar shows at a time and the next one waits in a queue. Use ScaffoldMessenger.of(context).hideCurrentSnackBar() before showing a new one if you want to replace it. Do not put important information only in a snackbar.',
-ctl:[{k:'bh',l:'behavior',t:'sel',o:['fixed','floating'],v:'floating'},{k:'ac',l:'action: Undo',t:'chk',v:true},{k:'du',l:'duration (s)',t:'rng',min:1,max:6,v:3}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;st.s=s;
- if(!st.box){
-  g.innerHTML=phone(`${appbar('Inbox')}<div style="padding:12px"><button class="btn k-Filled" data-a="show" style="padding:7px 14px;font-size:13px">Delete message</button></div><div class="sn" style="position:absolute;left:0;right:0;bottom:0;background:#2d3142;color:#fff;display:flex;align-items:center;padding:12px 14px;font-size:13px;gap:10px;transform:translateY(120%);transition:transform .25s,margin .25s"><span style="flex:1">Message deleted</span><span class="su" data-a="undo" style="color:#9fc0ff;font-weight:700;cursor:pointer">UNDO</span></div>`,'');
-  st.box=true;st.sn=g.querySelector('.sn');st.su=g.querySelector('.su');st.g=g;
- }
- const fl=s.bh==='floating';
- st.sn.style.margin=fl?'0 10px 10px':'0';st.sn.style.borderRadius=fl?'6px':'0';
- st.su.style.display=s.ac?'':'none';
- st.sn.style.transform=st.vis?'translateY(0)':'translateY(140%)';
- const code=`ScaffoldMessenger.of(context).showSnackBar(\n  SnackBar(\n    content: Text('Message deleted'),\n    duration: Duration(seconds: ${s.du}),${fl?'\n    behavior: SnackBarBehavior.floating,':''}${s.ac?'\n    action: SnackBarAction(\n      label: \'Undo\',\n      onPressed: () {\n        // put the message back\n      },\n    ),':''}\n  ),\n);`;
- return {code,hint:st.note||'Press the button. The bar stays for '+s.du+' s and then hides itself.'};
-},
-act(a,st,s){
- if(a==='show'){st.vis=true;st.note='Visible. It will close by itself after '+s.du+' s.';clearTimeout(st.tm);st.tm=setTimeout(()=>{if(!alive(st.g))return;st.vis=false;st.note='Closed after the duration ('+s.du+' s). onPressed did not run.';st.d&&st.d.draw()},s.du*1000)}
- else if(a==='undo'&&st.vis){st.vis=false;clearTimeout(st.tm);st.note='Undo pressed: the action onPressed ran and the snackbar closed.'}
-},
-after(g,st,s,draw,d){st.d=d}});
+def({cat:'Material',id:'snackbar',name:'SnackBar',tags:'toast message action undo scaffoldmessenger floating duration dismissdirection closeicon queue',h:330,
+blurb:'A short message at the bottom of the screen, shown through ScaffoldMessenger. It can carry one action, and it disappears by itself after a few seconds.',
+use:'Confirm something happened, with an optional Undo. Not for anything the user must read or act on.',
+watch:'Use ScaffoldMessenger.of(context).showSnackBar, not Scaffold.of. Bars are queued, so three calls show three in a row: call clearSnackBars first if you only want the latest.',
+ctl:[{k:'beh',l:'behavior',t:'sel',o:['fixed','floating'],v:'floating'},
+ {k:'act',l:'action',t:'chk',v:true},
+ {k:'close',l:'showCloseIcon',t:'chk',v:false},
+ {k:'dur',l:'duration (seconds)',t:'rng',min:1,max:10,v:4},
+ {k:'mg',l:'margin (floating only)',t:'rng',min:0,max:32,v:12},
+ {k:'r',l:'corner radius',t:'rng',min:0,max:24,v:8},
+ {k:'col',l:'backgroundColor',t:'sel',o:['theme','dark','green','red'],v:'theme'},
+ {k:'long',l:'long message',t:'chk',v:false},
+ {k:'bar',l:'show a bottom bar behind',t:'chk',v:true}],
+render(s,st,g){
+ const float=s.beh==='floating';
+ const C={theme:'#323232',dark:'#111827',green:'#15803d',red:'#b91c1c'}[s.col];
+ const msg=s.long?'Project deleted. It will be removed from every device the next time they sync.':'Project deleted';
+ const snack=`<div style="position:absolute;left:${float?s.mg:0}px;right:${float?s.mg:0}px;bottom:${(float?s.mg:0)+(s.bar?56:0)}px;background:${C};color:#fff;border-radius:${float?s.r:0}px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.3)"><span style="flex:1;font:14px var(--f-body);line-height:1.35">${msg}</span>${s.act?'<button style="border:0;background:none;color:#8ab4ff;font:600 13.5px var(--f-body);cursor:pointer">UNDO</button>':''}${s.close?'<span style="opacity:.8">'+ic('close',18)+'</span>':''}</div>`;
+ const bottom=s.bar?`<div style="position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;color:var(--muted)">${ic('home',22)}${ic('star',22)}${ic('person',22)}</div>`:'';
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden"><div style="padding:18px;color:var(--muted);font-size:13.5px">Screen content</div>${snack}${bottom}</div></div>`;
+ const L=["content: Text('"+msg+"'),"];
+ if(s.act)L.push("action: SnackBarAction(label: 'UNDO', onPressed: restoreProject),");
+ if(float)L.push('behavior: SnackBarBehavior.floating,',`margin: const EdgeInsets.all(${s.mg}),`,`shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(${s.r})),`);
+ if(s.close)L.push('showCloseIcon: true,');
+ if(s.col!=='theme')L.push(`backgroundColor: Colors.${s.col==='dark'?'black87':s.col},`);
+ L.push(`duration: const Duration(seconds: ${s.dur}),`);
+ const notes=[];
+ if(!float&&s.bar)notes.push('A fixed bar sits under the bottom bar. Use floating so it lifts above it.');
+ if(float)notes.push('margin, width and a rounded shape only work with SnackBarBehavior.floating.');
+ if(s.act&&s.dur<6)notes.push('With an action, give the user longer than '+s.dur+' seconds: six or more is kinder.');
+ return {code:`ScaffoldMessenger.of(context).showSnackBar(\n  SnackBar(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n);\n\n// learn what happened to it\nfinal reason = await ScaffoldMessenger.of(context)\n    .showSnackBar(bar)\n    .closed;   // action, swipe, timeout or hide`,hint:notes.join(' ')||'Tweak the controls: the code is the exact call you would write.'};
+}});
 
 def({cat:'Material',id:'chip',name:'Chip family',tags:'chip inputchip choicechip filterchip actionchip avatar delete selected tag filter label',h:300,
 blurb:'Chips are small pills that stand for an input, a choice, a filter or an action. Flutter has one widget for each job so the semantics and the look are right.',
@@ -2779,50 +3010,97 @@ act(a,st,s){
  else if(a==='act')S.ActionChip++;
 }});
 
-def({cat:'Material',id:'drawer',name:'Drawer',tags:'drawer navigation menu side scaffold hamburger enddrawer opendrawer swipe edge listtile',h:340,
-blurb:'A Drawer is a panel that slides in from the side of a Scaffold. Scaffold adds the menu button to the AppBar for you when you pass a drawer. Swiping from the screen edge opens it too.',
-use:'Apps with more than four or five top-level destinations, or settings and account links that do not need to be on screen all the time.',
-watch:'Close it after navigating with Navigator.pop(context), or it stays open over the next screen. For three to five destinations, NavigationBar is the better choice on phones.',
-ctl:[{k:'end',l:'endDrawer (opens from the right)',t:'chk',v:false}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;
- if(!st.box){
-  st.open=false;st.page='Inbox';
-  g.innerHTML=phone(`<div class="dbar"></div><div class="dpg" style="padding:14px;font:600 15px var(--f-body)"></div><div class="dsc" data-a="scrim" style="position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s"></div><div class="dp" style="position:absolute;top:0;bottom:0;width:150px;background:var(--surface);box-shadow:0 0 20px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,0,.2,1)"><div style="background:var(--c1s);height:70px;padding:12px;display:flex;align-items:flex-end;font:700 14px var(--f-body);color:var(--c1t)">Drawer header</div>${['Inbox','Starred','Sent'].map(x=>`<div class="di" data-a="p${x}" style="padding:12px 14px;font-size:14px;cursor:pointer;display:flex;gap:10px;align-items:center">${ic(x==='Inbox'?'home':x==='Starred'?'star':'share',18)}${x}</div>`).join('')}</div>`,'');
-  st.box=true;st.bar=g.querySelector('.dbar');st.pg=g.querySelector('.dpg');st.sc=g.querySelector('.dsc');st.dp=g.querySelector('.dp');
+def({cat:'Material',id:'drawer',name:'Drawer',tags:'navigation side panel burger enddrawer navigationdrawer header width scrim',h:340,
+blurb:'A panel that slides in from the edge. Put it in Scaffold.drawer and the app bar adds the burger icon for you. NavigationDrawer is the Material 3 version with selection built in.',
+use:'Secondary navigation on phones, and a permanent side menu on wide screens.',
+watch:'Scaffold.of(context) must be called below the Scaffold, so use a Builder if you open the drawer from the same build method. Close it with Navigator.pop before pushing a new route.',
+ctl:[{k:'side',l:'drawer or endDrawer',t:'sel',o:['drawer','endDrawer'],v:'drawer'},
+ {k:'kind',l:'contents',t:'sel',o:['ListTiles','NavigationDrawer','UserAccountsDrawerHeader'],v:'ListTiles'},
+ {k:'w',l:'width',t:'rng',min:200,max:320,v:280},
+ {k:'r',l:'trailing corner radius',t:'rng',min:0,max:32,v:16},
+ {k:'scrim',l:'scrim (dim layer)',t:'chk',v:true},
+ {k:'open',l:'open',t:'chk',v:true},
+ {k:'perm',l:'permanent on a wide screen',t:'chk',v:false}],
+render(s,st,g){
+ const end=s.side==='endDrawer',open=s.perm||s.open;
+ const sel=st.sel||'Inbox';
+ const items=[['Inbox','home'],['Starred','star'],['Profile','person'],['Settings','add']];
+ const nav=s.kind==='NavigationDrawer';
+ const head=s.kind==='UserAccountsDrawerHeader'
+  ?`<div style="background:var(--accent);color:var(--accent-ink);padding:18px 16px 14px"><div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font:600 15px var(--f-body);margin-bottom:10px">TH</div><div style="font:600 14.5px var(--f-body)">Taufiq H</div><div style="font-size:12.5px;opacity:.85">taufiq@example.com</div></div>`
+  :nav?'<div style="padding:18px 22px 10px;font:600 12px var(--f-mono);letter-spacing:.08em;color:var(--muted)">MAIL</div>'
+  :`<div style="height:84px;background:var(--accent-soft);display:flex;align-items:flex-end;padding:14px 16px;font:600 15px var(--f-display);color:var(--accent)">Flutter Atlas</div>`;
+ const rows=items.map(([t,i])=>nav
+  ?`<div class="dsel" data-v="${t}" style="margin:2px 12px;padding:11px 14px;border-radius:999px;display:flex;align-items:center;gap:14px;font:14px var(--f-body);cursor:pointer;background:${sel===t?'var(--accent-soft)':'transparent'};color:${sel===t?'var(--accent)':'var(--fg)'}">${ic(i,20)}${t}</div>`
+  :`<div class="dsel" data-v="${t}" style="padding:12px 16px;display:flex;align-items:center;gap:16px;font:14.5px var(--f-body);cursor:pointer;background:${sel===t?'var(--accent-soft)':'transparent'}">${ic(i,20)}${t}</div>`).join('');
+ const panel=`<div style="position:absolute;top:0;bottom:0;${end?'right':'left'}:0;width:${s.w*0.62}px;background:var(--surface);box-shadow:0 0 24px rgba(10,20,60,.22);border-radius:${end?s.r+'px 0 0 '+s.r+'px':'0 '+s.r+'px '+s.r+'px 0'};overflow:hidden;transform:translateX(${open?0:(end?100:-100)}%);transition:transform .25s ease">${head}${rows}</div>`;
+ const scrim=(s.scrim&&open&&!s.perm)?'<div style="position:absolute;inset:0;background:rgba(10,20,50,.4)"></div>':'';
+ const content=`<div style="position:absolute;inset:0;${s.perm?(end?'margin-right:':'margin-left:')+(s.w*0.62)+'px':''}"><div style="height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--surface)">${s.perm?'':ic('menu',20)}<span style="font:600 14.5px var(--f-display)">${sel}</span></div><div style="padding:14px;color:var(--muted);font-size:13.5px">Screen content</div></div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">${content}${scrim}${panel}</div></div>`;
+ let code;
+ if(s.perm)code=`// wide screen: no Scaffold.drawer, just a Row\nScaffold(\n  body: Row(\n    children: [\n      SizedBox(width: ${s.w}, child: const AppDrawer()),\n      const VerticalDivider(width: 1),\n      const Expanded(child: Content()),\n    ],\n  ),\n)`;
+ else if(nav)code=`Scaffold(\n  ${end?'endDrawer':'drawer'}: NavigationDrawer(\n    selectedIndex: index,\n    onDestinationSelected: (i) {\n      setState(() => index = i);\n      Navigator.pop(context);   // close it\n    },\n    children: const [\n      Padding(padding: EdgeInsets.fromLTRB(28, 16, 16, 10), child: Text('MAIL')),\n      NavigationDrawerDestination(icon: Icon(Icons.inbox), label: Text('Inbox')),\n      NavigationDrawerDestination(icon: Icon(Icons.star), label: Text('Starred')),\n    ],\n  ),\n  body: ...,\n)`;
+ else code=`Scaffold(\n  ${end?'endDrawer':'drawer'}: Drawer(\n    width: ${s.w},\n    shape: const RoundedRectangleBorder(\n      borderRadius: BorderRadius.horizontal(${end?'left':'right'}: Radius.circular(${s.r})),\n    ),\n    child: ListView(\n      padding: EdgeInsets.zero,\n      children: [\n        ${s.kind==='UserAccountsDrawerHeader'?"const UserAccountsDrawerHeader(\n          accountName: Text('Taufiq H'),\n          accountEmail: Text('taufiq@example.com'),\n          currentAccountPicture: CircleAvatar(child: Text('TH')),\n        ),":"const DrawerHeader(child: Text('Flutter Atlas')),"}\n        ListTile(\n          leading: const Icon(Icons.inbox),\n          title: const Text('Inbox'),\n          selected: current == 'Inbox',\n          onTap: () {\n            Navigator.pop(context);   // close first\n            go('/inbox');\n          },\n        ),\n      ],\n    ),\n  ),\n  ${s.scrim?'':'drawerScrimColor: Colors.transparent,\n  '}body: ...,\n)`;
+ const notes=[];
+ if(s.perm)notes.push('On a wide screen a drawer is usually not a drawer at all: put it in a Row beside the body.');
+ if(end)notes.push('endDrawer opens from the end edge and the app bar puts its button on the right. You must add that button yourself unless there is an actions list.');
+ if(nav)notes.push('NavigationDrawer tracks the selected destination for you, which plain ListTiles do not.');
+ return {code,hint:notes.join(' ')||'Tap a row: selection is yours to hold in state.'};
+},
+after(g,st,s,draw){g.querySelectorAll('.dsel').forEach(el=>el.addEventListener('click',()=>{st.sel=el.dataset.v;draw()}))}});
+
+def({cat:'Material',id:'navigation-bar',name:'NavigationBar',tags:'bottom navigation destination indicator labelbehavior navigationrail bottomnavigationbar indexedstack',h:340,
+blurb:'The Material 3 bottom bar. You give it destinations, the selected index and a callback; it draws the pill behind the selected icon and animates between them.',
+use:'Three to five top-level sections of an app.',
+watch:'It stores nothing: keep selectedIndex in your state. Wrap the pages in an IndexedStack if each one should keep its scroll position and state.',
+ctl:[{k:'n',l:'destinations',t:'rng',min:2,max:5,v:4},
+ {k:'lab',l:'labelBehavior',t:'sel',o:['alwaysShow','onlyShowSelected','alwaysHide'],v:'alwaysShow'},
+ {k:'selicon',l:'different selectedIcon',t:'chk',v:true},
+ {k:'h',l:'height',t:'rng',min:56,max:92,v:80},
+ {k:'ind',l:'indicatorColor',t:'sel',o:['theme','green','purple','none'],v:'theme'},
+ {k:'shape',l:'indicatorShape',t:'sel',o:['stadium','rounded square'],v:'stadium'},
+ {k:'kind',l:'variant',t:'sel',o:['NavigationBar','BottomNavigationBar','NavigationRail'],v:'NavigationBar'},
+ {k:'badge',l:'badge on one item',t:'chk',v:false}],
+render(s,st,g){
+ const n=+s.n,cur=Math.min(st.i||0,n-1);
+ const defs=[['Home','home'],['Search','star'],['Saved','favorite'],['Profile','person'],['More','add']].slice(0,n);
+ const IC={theme:'var(--accent-soft)',green:'#dcfce7',purple:'#ede9fe',none:'transparent'}[s.ind];
+ const rail=s.kind==='NavigationRail',m2=s.kind==='BottomNavigationBar';
+ const item=([t,icon],i)=>{
+  const on=i===cur;
+  const showLab=s.lab==='alwaysShow'||(s.lab==='onlyShowSelected'&&on);
+  const pill=on&&!m2?`background:${IC};border-radius:${s.shape==='stadium'?'999px':'12px'};`:'';
+  return `<div class="nv" data-i="${i}" style="flex:${rail?'none':'1'};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:${rail?'14px 0':'0'};color:${on?(m2?'var(--accent)':'var(--fg)'):'var(--muted)'}">
+    <span style="position:relative;padding:4px 18px;${pill};display:inline-flex;align-items:center;justify-content:center;transform:scale(${m2&&on?1.12:1});transition:all .2s">${ic(s.selicon&&on?'favorite':icon,22)}${s.badge&&i===1?'<span style="position:absolute;top:0;right:12px;min-width:16px;height:16px;border-radius:999px;background:var(--danger);color:#fff;font:600 10px var(--f-mono);display:flex;align-items:center;justify-content:center;padding:0 4px">3</span>':''}</span>
+    ${showLab||rail?`<span style="font:${on?600:500} 11.5px var(--f-body)">${t}</span>`:''}
+  </div>`;
+ };
+ const bar=rail
+  ?`<div style="position:absolute;left:0;top:0;bottom:0;width:84px;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;padding-top:10px">${defs.map(item).join('')}</div>`
+  :`<div style="position:absolute;left:0;right:0;bottom:0;height:${m2?64:s.h}px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:center">${defs.map(item).join('')}</div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden"><div style="position:absolute;inset:0;${rail?'left:84px;':'bottom:'+(m2?64:s.h)+'px;'}display:flex;align-items:center;justify-content:center"><div class="fb ${'abcd'[cur%4]}" style="padding:16px 24px;border-radius:12px;font:600 15px var(--f-body)">${defs[cur][0]} page</div></div>${bar}</div></div>`;
+ const dests=defs.map(([t,i])=>`    NavigationDestination(\n      icon: const Icon(Icons.${i==='favorite'?'favorite_border':i}),\n${s.selicon?'      selectedIcon: const Icon(Icons.favorite),\n':''}      label: '${t}',\n    ),`).join('\n');
+ let code;
+ if(rail)code=`Row(\n  children: [\n    NavigationRail(\n      selectedIndex: index,\n      onDestinationSelected: (i) => setState(() => index = i),\n      labelType: NavigationRailLabelType.all,\n      destinations: const [\n        NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),\n        NavigationRailDestination(icon: Icon(Icons.search), label: Text('Search')),\n      ],\n    ),\n    const VerticalDivider(width: 1),\n    Expanded(child: pages[index]),\n  ],\n)`;
+ else if(m2)code=`BottomNavigationBar(\n  currentIndex: index,\n  onTap: (i) => setState(() => index = i),\n  type: BottomNavigationBarType.fixed,   // needed above 3 items\n  items: const [\n    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),\n    BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),\n  ],\n)`;
+ else{
+  const L=['selectedIndex: index,','onDestinationSelected: (i) => setState(() => index = i),'];
+  if(s.lab!=='alwaysShow')L.push(`labelBehavior: NavigationDestinationLabelBehavior.${s.lab},`);
+  if(s.h!==80)L.push(`height: ${s.h},`);
+  if(s.ind!=='theme')L.push(s.ind==='none'?'indicatorColor: Colors.transparent,':`indicatorColor: Colors.${s.ind}.shade100,`);
+  if(s.shape!=='stadium')L.push('indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),');
+  code=`Scaffold(\n  body: IndexedStack(index: index, children: pages),   // keeps each page alive\n  bottomNavigationBar: NavigationBar(\n${L.map(x=>'    '+x).join('\n')}\n    destinations: [\n${dests}\n    ],\n  ),\n)`;
  }
- const end=s.end;
- st.bar.innerHTML=appbar(end?`${st.page}<span data-a="tog" style="margin-left:auto;cursor:pointer;display:inline-flex">${ic('menu',22)}</span>`:`<span data-a="tog" style="cursor:pointer;display:inline-flex">${ic('menu',22)}</span>${st.page}`);
- st.pg.textContent='Page: '+st.page;
- st.dp.style[end?'right':'left']='0';st.dp.style[end?'left':'right']='auto';
- st.dp.style.transform=st.open?'translateX(0)':`translateX(${end?'105%':'-105%'})`;
- st.sc.style.opacity=st.open?'1':'0';st.sc.style.pointerEvents=st.open?'auto':'none';
- g.querySelectorAll('.di').forEach(x=>{x.style.background=x.dataset.a==='p'+st.page?'var(--c1s)':''});
- const code=`Scaffold(\n  appBar: AppBar(title: Text('${st.page}')),\n  ${end?'endDrawer':'drawer'}: Drawer(\n    child: ListView(children: [\n      DrawerHeader(child: Text('Drawer header')),\n      ListTile(\n        leading: Icon(Icons.home),\n        title: Text('Inbox'),\n        onTap: () {\n          // go to the page, then close the drawer\n          Navigator.pop(context);\n        },\n      ),\n      // Starred, Sent ...\n    ]),\n  ),\n  body: Center(child: Text('Page: ${st.page}')),\n)`;
- return {code,hint:'Press the menu icon or the dim area. '+(end?'endDrawer slides in from the right.':'The default drawer slides in from the left.')};
+ const notes=[];
+ if(s.badge)notes.push('A badge is Badge(label: Text("3"), child: Icon(...)) around the icon.');
+ if(rail)notes.push('NavigationRail is the same idea for tablets and desktop. extended: true shows labels beside the icons.');
+ if(m2)notes.push('BottomNavigationBar is the Material 2 widget. Above three items you must set type: fixed or it shifts.');
+ if(s.lab==='alwaysHide')notes.push('Hiding labels saves height but costs clarity. Keep labels unless space is desperate.');
+ notes.push('IndexedStack in the body is what keeps each page scrolled where the user left it.');
+ return {code,hint:notes.join(' ')};
 },
-act(a,st){
- if(a==='tog')st.open=!st.open;else if(a==='scrim')st.open=false;
- else if(a[0]==='p'&&a.length>1){st.page=a.slice(1);st.open=false}
-}});
+after(g,st,s,draw){g.querySelectorAll('.nv').forEach(el=>el.addEventListener('click',()=>{st.i=+el.dataset.i;draw()}))}});
 
-def({cat:'Material',id:'navigation-bar',name:'NavigationBar',tags:'navigation bar bottom tabs destinations selectedindex material3 labelbehavior badge navigationdestination',h:330,
-blurb:'NavigationBar is the Material 3 bottom bar with two to five destinations. You keep selectedIndex in your state and update it in onDestinationSelected. The selected item gets a pill-shaped indicator.',
-use:'The main sections of a phone app, such as Home, Search and Profile.',
-watch:'It does not switch pages for you. Pair it with IndexedStack to keep each page\'s state, or with a router. NavigationBar replaces BottomNavigationBar in Material 3.',
-ctl:[{k:'n',l:'destinations',t:'rng',min:2,max:5,v:3},{k:'lb',l:'labelBehavior',t:'sel',o:['alwaysShow','onlyShowSelected','alwaysHide'],v:'alwaysShow'}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;
- const all=[['Home','home'],['Search','search'],['Saved','favorite'],['Alerts','clock'],['Profile','person']].slice(0,s.n);
- if(st.i==null||st.i>=s.n)st.i=0;
- const items=all.map(([l,k],i)=>{const on=i===st.i;return `<div data-a="n${i}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding-top:8px"><span style="width:56px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:${on?'var(--c1s)':'transparent'};color:${on?'var(--c1t)':'var(--fg)'}">${ic(k,20)}</span>${s.lb==='alwaysHide'||(s.lb==='onlyShowSelected'&&!on)?'':`<span style="font-size:11px;font-weight:${on?700:500}">${l}</span>`}</div>`}).join('');
- g.innerHTML=phone(`${appbar(all[st.i][0])}<div style="padding:16px;font:600 15px var(--f-body)">Body of ${all[st.i][0]}</div><div style="position:absolute;left:0;right:0;bottom:0;height:${s.lb==='alwaysHide'?58:70}px;background:var(--surface);border-top:1px solid var(--line);display:flex">${items}</div>`);
- const code=`int _index = ${st.i};\n\nScaffold(\n  body: pages[_index],\n  bottomNavigationBar: NavigationBar(\n    selectedIndex: _index,${s.lb==='alwaysShow'?'':`\n    labelBehavior:\n        NavigationDestinationLabelBehavior.${s.lb},`}\n    onDestinationSelected: (i) {\n      setState(() => _index = i);\n    },\n    destinations: const [\n${all.map(([l,k])=>`      NavigationDestination(\n        icon: Icon(Icons.${k==='clock'?'notifications':k==='person'?'person':k==='favorite'?'bookmark':k}),\n        label: '${l}',\n      ),`).join('\n')}\n    ],\n  ),\n)`;
- return {code,hint:'selectedIndex = '+st.i+'. NavigationBar only reports the tap, and you decide what to show.'};
-},
-act(a,st){if(a[0]==='n')st.i=+a.slice(1)}});
-
-/* ---- more common errors ---- */
 def({cat:'Common errors',id:'err-setstate-build',name:'setState() called during build',tags:'error setstate markneedsbuild showdialog build during frame postframecallback navigator dialog exception',h:290,
 blurb:'Flutter is already building the widget tree, and your code asks it to build again (setState) or to put something on screen (a dialog, a snackbar, a Navigator push) from inside build. The framework refuses because the tree is in the middle of changing.',
 use:'Seen when build() calls showDialog, setState, Navigator.push or a state-changing callback directly.',
