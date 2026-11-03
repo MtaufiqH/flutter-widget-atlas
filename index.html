@@ -60,6 +60,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -1068,17 +1069,45 @@ render(s,st,g){
  return {code:`FittedBox(\n  fit: BoxFit.${s.fit},\n  clipBehavior: Clip.${s.clip?'hardEdge':'none'},\n  child: SizedBox(width: 260, height: 50, child: Child()),\n)`,hint:{contain:'Scales uniformly until the whole child fits.',cover:'Scales uniformly until the box is covered. The overflow is cropped.',fill:'Stretches each axis separately, so the child is distorted.',fitWidth:'Matches the box width and may overflow vertically.',fitHeight:'Matches the box height and may overflow horizontally.',scaleDown:'Like contain, but never scales up.',none:'No scaling. The child keeps 260 × 50 and overflows.'}[s.fit]};
 }});
 
-def({cat:'Layout',id:'layout-builder',name:'LayoutBuilder & MediaQuery',tags:'responsive breakpoint constraints adaptive screen size',
-blurb:'LayoutBuilder hands you the constraints of its parent, so a widget can change shape based on the room it is actually given. MediaQuery reports the size of the whole screen instead.',
-use:'Responsive layouts. LayoutBuilder for components, MediaQuery for page-level decisions such as phone or tablet.',
-watch:'MediaQuery.sizeOf(context) is the screen, not your parent. Inside a narrow side panel on a wide screen it gives the wrong answer.',
-ctl:[{k:'w',l:'available width',t:'rng',min:140,max:440,step:10,v:380},{k:'bp',l:'breakpoint',t:'rng',min:200,max:400,step:10,v:300}],
+def({cat:'Styling',id:'layout-builder',name:'LayoutBuilder & MediaQuery',tags:'responsive constraints breakpoint maxwidth mediaquery sizeof paddingof viewinsets textscaler orientation',h:340,
+blurb:'LayoutBuilder tells a widget how much space it was given. MediaQuery describes the window: its size, the system padding, the keyboard and the user font setting. They answer different questions.',
+use:'LayoutBuilder for a widget that adapts to its slot. MediaQuery for a whole screen, or for the keyboard and safe areas.',
+watch:'MediaQuery.sizeOf(context) is the window, not your slot. Use the .sizeOf and .paddingOf forms so the widget rebuilds only when that one value changes.',
+ctl:[{k:'w',l:'available width',t:'rng',min:280,max:1100,step:20,v:420},
+ {k:'which',l:'decide with',t:'sel',o:['LayoutBuilder (my slot)','MediaQuery (the window)'],v:'LayoutBuilder (my slot)'},
+ {k:'bp1',l:'first breakpoint',t:'rng',min:320,max:700,step:20,v:600},
+ {k:'bp2',l:'second breakpoint',t:'rng',min:720,max:1200,step:20,v:900},
+ {k:'side',l:'inside a sidebar layout',t:'chk',v:false},
+ {k:'kb',l:'keyboard open',t:'chk',v:false}],
 render(s,st,g){
- const wide=s.w>=s.bp,t=['a','b','c'].map((c,i)=>box('Tile '+(i+1),c,wide?'flex:1;height:64px':'height:40px')).join('');
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${s.w}px;max-width:100%;outline:1.5px dashed var(--c3);outline-offset:3px;padding:6px;display:flex;flex-direction:${wide?'row':'column'};gap:6px">${t}</div></div>`;
- return {code:`LayoutBuilder(\n  builder: (context, constraints) {\n    final wide = constraints.maxWidth >= ${s.bp};\n    return wide ? Row(children: tiles) : Column(children: tiles);\n  },\n)`,hint:`constraints.maxWidth = ${s.w}, so the layout is ${wide?'wide (Row)':'narrow (Column)'}.`};
+ const sidebar=s.side?200:0;
+ const slot=Math.max(160,+s.w-sidebar);
+ const basis=s.which.startsWith('Layout')?slot:+s.w;
+ const mode=basis<+s.bp1?'phone':basis<+s.bp2?'tablet':'desktop';
+ const cols=mode==='phone'?1:mode==='tablet'?2:3;
+ const scale=Math.min(1,(+s.w)/1100);
+ const tiles=[...Array(6)].map((_,i)=>`<div class="fb ${'abcd'[i%4]}" style="border-radius:9px;height:46px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body)">${i+1}</div>`).join('');
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px">
+  <div style="width:${Math.round((+s.w)*0.42)}px;max-width:100%;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)">
+    <div style="display:flex">
+      ${s.side?`<div style="width:${Math.round(sidebar*0.42)}px;background:var(--accent-soft);padding:8px;font:600 10px var(--f-mono);color:var(--accent)">SIDEBAR</div>`:''}
+      <div style="flex:1;padding:8px"><div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:6px">${tiles}</div></div>
+    </div>
+    ${s.kb?'<div style="height:30px;background:#1f2937;color:#fff;display:flex;align-items:center;justify-content:center;font:10px var(--f-mono);letter-spacing:.08em">KEYBOARD</div>':''}
+  </div>
+  <div class="cap" style="margin:0;text-align:center">window ${s.w}px · my slot ${slot}px · deciding on <b>${Math.round(basis)}px</b> → <b>${mode}</b> (${cols} column${cols>1?'s':''})</div>
+ </div>`;
+ const code=s.which.startsWith('Layout')
+  ?`LayoutBuilder(\n  builder: (context, constraints) {\n    final w = constraints.maxWidth;   // the space THIS widget was given\n    if (w < ${s.bp1}) return const OneColumn();\n    if (w < ${s.bp2}) return const TwoColumns();\n    return const ThreeColumns();\n  },\n)`
+  :`// the window, not this widget\nfinal width = MediaQuery.sizeOf(context).width;\nfinal layout = switch (width) {\n  < ${s.bp1} => Layout.phone,\n  < ${s.bp2} => Layout.tablet,\n  _ => Layout.desktop,\n};`;
+ const extra=`\n\n// the other MediaQuery values worth knowing\nfinal padding = MediaQuery.paddingOf(context);        // notch, status bar, home indicator\nfinal insets = MediaQuery.viewInsetsOf(context);      // keyboard height: insets.bottom\nfinal scaler = MediaQuery.textScalerOf(context);      // user font size\nfinal dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;\nfinal landscape = MediaQuery.orientationOf(context) == Orientation.landscape;\nfinal reduceMotion = MediaQuery.of(context).disableAnimations;`;
+ const notes=[];
+ if(s.side&&s.which.startsWith('Media'))notes.push('MediaQuery still reports the full window, so the grid thinks it has more room than it does. This is exactly the case where LayoutBuilder is right.');
+ if(s.side&&s.which.startsWith('Layout'))notes.push('LayoutBuilder sees only the space left beside the sidebar, so the breakpoint fires at the right moment.');
+ if(s.kb)notes.push('The keyboard changes viewInsets, not size. Read MediaQuery.viewInsetsOf(context).bottom for its height.');
+ notes.push('Material suggests breakpoints around 600, 840 and 1200. Keep them in one file and give them names.');
+ return {code:code+extra,hint:notes.join(' ')};
 }});
-
 /* ================= SCROLLING ================= */
 def({cat:'Scrolling',id:'list-view',name:'ListView',tags:'builder separated children lazy scroll list virtualization itemextent shrinkwrap reverse padding physics scrolldirection horizontal',h:330,
 blurb:'ListView scrolls its children along one axis. The plain constructor builds every child immediately. ListView.builder creates items on demand as they scroll into view, and ListView.separated does the same while inserting a separator between items.',
@@ -1151,29 +1180,75 @@ after(g,st,s,draw,d){
  if(lazy)sc.addEventListener('scroll',paint,{passive:true});
 }});
 
-def({cat:'Scrolling',id:'grid-view',name:'GridView',tags:'grid count extent columns spacing aspect',
-blurb:'GridView arranges children in a scrollable 2D grid. GridView.count fixes the number of columns. GridView.extent fixes the maximum tile width and works out the number of columns itself.',
-use:'Photo galleries, dashboards and product lists.',
-watch:'childAspectRatio is width divided by height. A value of 0.75 makes tiles taller than they are wide.',
-ctl:[{k:'kind',l:'Constructor',t:'sel',o:['GridView.count','GridView.extent'],v:'GridView.count'},{k:'n',l:'crossAxisCount',t:'rng',min:1,max:6,v:3},{k:'mx',l:'maxCrossAxisExtent',t:'rng',min:60,max:200,step:10,v:110},{k:'ms',l:'mainAxisSpacing',t:'rng',min:0,max:20,v:8},{k:'cs',l:'crossAxisSpacing',t:'rng',min:0,max:20,v:8},{k:'ar',l:'childAspectRatio',t:'sel',o:['0.75','1','1.5'],v:'1'}],
+def({cat:'Scrolling',id:'grid-view',name:'GridView',tags:'tiles delegate crossaxiscount maxcrossaxisextent aspectratio spacing mainaxisextent builder responsive',h:330,
+blurb:'GridView lays tiles out in a scrolling grid. The gridDelegate decides the tile layout: a fixed number of columns, or as many as fit a maximum tile width.',
+use:'Photo galleries, product grids, dashboards of cards.',
+watch:'childAspectRatio is width divided by height, and getting it wrong is the usual cause of overflowing tiles. mainAxisExtent is often easier: it sets the tile height directly.',
+ctl:[{k:'del',l:'gridDelegate',t:'sel',o:['FixedCrossAxisCount','MaxCrossAxisExtent'],v:'FixedCrossAxisCount'},
+ {k:'cc',l:'crossAxisCount',t:'rng',min:1,max:5,v:3},
+ {k:'mx',l:'maxCrossAxisExtent',t:'rng',min:70,max:200,step:10,v:120},
+ {k:'ar',l:'childAspectRatio',t:'rng',min:.5,max:2,step:.1,v:1},
+ {k:'me',l:'mainAxisExtent instead',t:'sel',o:['off','70','110'],v:'off'},
+ {k:'ms',l:'mainAxisSpacing',t:'rng',min:0,max:24,v:8},
+ {k:'cs',l:'crossAxisSpacing',t:'rng',min:0,max:24,v:8},
+ {k:'pad',l:'padding',t:'rng',min:0,max:24,v:10},
+ {k:'txt',l:'tiles contain text (can overflow)',t:'chk',v:false}],
 render(s,st,g){
- const ext=s.kind==='GridView.extent',avail=g.clientWidth-24,cs=+s.cs,ms=+s.ms;
- const cols=ext?Math.max(1,Math.ceil(avail/(+s.mx+cs))):+s.n;
- g.innerHTML=`<div class="fill sc" style="display:block"><div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:${ms}px ${cs}px">${Array.from({length:18},(_,i)=>`<div class="fb ${'abcd'[i%4]}" style="aspect-ratio:${s.ar};border-radius:8px;width:auto">${i+1}</div>`).join('')}</div></div>`;
- const delegate=ext?`maxCrossAxisExtent: ${s.mx}`:`crossAxisCount: ${s.n}`;
- return {code:`${s.kind}(\n  ${ext?'maxCrossAxisExtent':'crossAxisCount'}: ${ext?s.mx:s.n},\n  mainAxisSpacing: ${ms},\n  crossAxisSpacing: ${cs},\n  childAspectRatio: ${s.ar},\n  children: tiles,\n)`,hint:`Resolved to ${cols} column${cols>1?'s':''}.`+(ext?' Columns = ceil(width / (maxExtent + spacing)).':'')};
+ const fixed=s.del==='FixedCrossAxisCount';
+ const cs=+s.cs,ms=+s.ms,pad=+s.pad;
+ const cols=fixed?`repeat(${s.cc},1fr)`:`repeat(auto-fill,minmax(${Math.min(+s.mx,200)}px,1fr))`;
+ const me=s.me==='off'?0:+s.me;
+ const tiles=[...Array(12)].map((_,i)=>`<div class="fb ${'abcd'[i%4]}" style="${me?`height:${me}px;`:`aspect-ratio:${s.ar};`}border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;font:600 12.5px var(--f-body);text-align:center;padding:4px">${s.txt?`Tile ${i+1}<br><span style="font-weight:400;font-size:11px">a longer label</span>`:i+1}</div>`).join('');
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:auto;padding:${pad}px"><div style="display:grid;grid-template-columns:${cols};gap:${ms}px ${cs}px">${tiles}</div></div></div>`;
+ const dl=fixed
+  ?`SliverGridDelegateWithFixedCrossAxisCount(\n    crossAxisCount: ${s.cc},\n    mainAxisSpacing: ${ms},\n    crossAxisSpacing: ${cs},\n${me?`    mainAxisExtent: ${me},`:`    childAspectRatio: ${(+s.ar).toFixed(1)},`}\n  )`
+  :`SliverGridDelegateWithMaxCrossAxisExtent(\n    maxCrossAxisExtent: ${s.mx},\n    mainAxisSpacing: ${ms},\n    crossAxisSpacing: ${cs},\n${me?`    mainAxisExtent: ${me},`:`    childAspectRatio: ${(+s.ar).toFixed(1)},`}\n  )`;
+ const notes=[];
+ if(!fixed)notes.push('MaxCrossAxisExtent fits as many columns as it can, so the grid adapts to a tablet without any breakpoint code.');
+ if(s.txt&&me===0&&+s.ar>1.2)notes.push('A wide aspect ratio leaves little height, which is exactly how tiles overflow. Lower the ratio or set mainAxisExtent.');
+ if(me)notes.push('mainAxisExtent sets the tile height directly and overrides childAspectRatio. It is usually easier to reason about.');
+ notes.push('GridView.builder is lazy; GridView.count and GridView.extent build every child up front.');
+ return {code:`GridView.builder(\n  padding: const EdgeInsets.all(${pad}),\n  itemCount: items.length,\n  gridDelegate: const ${dl},\n  itemBuilder: (context, i) => TileCard(items[i]),\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Scrolling',id:'scroll-view',name:'SingleChildScrollView',tags:'overflow stripes yellow black bottom overflowed scroll column',
-blurb:'SingleChildScrollView makes one child scrollable. It is the fix for the yellow-and-black "BOTTOM OVERFLOWED" stripes when a Column holds more content than fits on screen.',
-use:'A short form or settings page whose content just slightly exceeds the screen.',
-watch:'It builds the whole child at once. For long or growing content use ListView.builder instead.',
-ctl:[{k:'sc',l:'wrap in SingleChildScrollView',t:'chk',v:false},{k:'n',l:'items',t:'rng',min:4,max:14,v:9}],
+def({cat:'Scrolling',id:'scroll-view',name:'SingleChildScrollView',tags:'scroll column padding physics reverse controller keyboard expanded unbounded intrinsic',h:330,
+blurb:'SingleChildScrollView scrolls one child, usually a Column. Everything inside is built at once, which is fine for a form or an article and wrong for a long list.',
+use:'Forms, settings pages, article bodies, anything short enough to build in one go.',
+watch:'Inside it a Column gets unbounded height, so Expanded throws. Give the Column mainAxisSize.min, and use ListView.builder when the content repeats.',
+ctl:[{k:'n',l:'items in the Column',t:'rng',min:3,max:14,v:7},
+ {k:'axis',l:'scrollDirection',t:'sel',o:['vertical','horizontal'],v:'vertical'},
+ {k:'pad',l:'padding',t:'rng',min:0,max:28,v:12},
+ {k:'phy',l:'physics',t:'sel',o:['default','AlwaysScrollableScrollPhysics','NeverScrollableScrollPhysics'],v:'default'},
+ {k:'rev',l:'reverse',t:'chk',v:false},
+ {k:'kb',l:'keyboardDismissBehavior: onDrag',t:'chk',v:false},
+ {k:'exp',l:'put an Expanded inside (throws)',t:'chk',v:false}],
 render(s,st,g){
- const n=+s.n,H=236,need=n*44,over=Math.max(0,need-H);
- const items=Array.from({length:n},(_,i)=>box('Item '+(i+1),'abcd'[i%4],'height:38px;margin-bottom:6px;flex:none;width:100%')).join('');
- g.innerHTML=`<div class="fill" style="padding:12px"><div style="position:relative;flex:1;overflow:${s.sc?'auto':'hidden'};display:flex;flex-direction:column">${items}${!s.sc&&over>0?`<div class="ovf"><span>BOTTOM OVERFLOWED BY ${over} PIXELS</span></div>`:''}</div></div>`;
- return {code:s.sc?`SingleChildScrollView(\n  child: Column(\n    children: [/* ${n} items */],\n  ),\n)`:`Column(\n  children: [/* ${n} items */],\n)`,hint:s.sc?'The Column keeps its full height and the scroll view moves it.':over>0?'Flutter paints the stripes in debug mode when a Column is taller than its parent.':'Everything fits, so there is nothing to scroll. Add more items to trigger the overflow.'};
+ const n=+s.n,horiz=s.axis==='horizontal';
+ if(s.exp){
+  g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="border:2px solid var(--danger);border-radius:10px;background:rgba(185,28,28,.07);padding:16px;max-width:320px"><div style="font:700 13px var(--f-mono);color:var(--danger);margin-bottom:8px">RenderFlex children have non-zero flex<br>but incoming height constraints are unbounded</div><div style="font-size:12.5px;color:var(--muted);line-height:1.5">A scroll view offers its child infinite space on the scroll axis, so there is nothing for Expanded to divide.</div></div></div>`;
+ } else {
+  const items=[...Array(n)].map((_,i)=>horiz
+   ?`<div class="fb ${'abcd'[i%4]}" style="width:108px;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);flex:none">Card ${i+1}</div>`
+   :`<div class="fb ${'abcd'[i%4]}" style="height:46px;border-radius:10px;display:flex;align-items:center;padding:0 14px;font:600 13.5px var(--f-body)">Section ${i+1}</div>`).join('');
+  g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow-${horiz?'x':'y'}:${s.phy==='NeverScrollableScrollPhysics'?'hidden':'auto'};overflow-${horiz?'y':'x'}:hidden;padding:${s.pad}px"><div style="display:flex;flex-direction:${horiz?(s.rev?'row-reverse':'row'):(s.rev?'column-reverse':'column')};gap:10px;${horiz?'height:100%;':''}">${items}</div></div></div>`;
+ }
+ const L=[];
+ if(horiz)L.push('scrollDirection: Axis.horizontal,');
+ if(s.pad)L.push(`padding: const EdgeInsets.all(${s.pad}),`);
+ if(s.phy!=='default')L.push(`physics: const ${s.phy}(),`);
+ if(s.rev)L.push('reverse: true,');
+ if(s.kb)L.push('keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,');
+ const child=s.exp
+  ?"child: Column(\n    children: [\n      const Header(),\n      Expanded(child: Body()),   // throws: unbounded height\n    ],\n  ),"
+  :`child: ${horiz?'Row':'Column'}(\n    ${horiz?'':'mainAxisSize: MainAxisSize.min,\n    crossAxisAlignment: CrossAxisAlignment.stretch,\n    '}children: [\n      for (var i = 0; i < ${n}; i++) SectionCard(i),\n    ],\n  ),`;
+ const notes=[];
+ if(s.exp)notes.push('This is the most common scroll-view error. Replace Expanded with a fixed height, or let the content size itself.');
+ if(s.phy==='AlwaysScrollableScrollPhysics')notes.push('AlwaysScrollable makes it scrollable even when the content fits, which pull-to-refresh needs.');
+ if(s.phy==='NeverScrollableScrollPhysics')notes.push('NeverScrollable blocks the user. The content can still be moved by a ScrollController.');
+ if(s.kb)notes.push('onDrag hides the keyboard as soon as the user starts scrolling, which feels right on a long form.');
+ if(n>10)notes.push('At this length every child is still built up front. A ListView.builder would build only what is visible.');
+ notes.push('To push a footer to the bottom of a short page, wrap the child in a ConstrainedBox with minHeight from a LayoutBuilder.');
+ return {code:`SingleChildScrollView(\n${L.map(x=>'  '+x).join('\n')}\n  ${child}\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Scrolling',id:'page-view',name:'PageView',tags:'carousel swipe pagecontroller viewportfraction onboarding jumptopage animatetopage nextpage previouspage initialpage onpagechanged padends physics scrolldirection vertical',h:360,
@@ -1211,22 +1286,49 @@ after(g,st,s){
   requestAnimationFrame(()=>{sc[K]=(+s.ip)*size();upd()});
  }});
 
-def({cat:'Scrolling',id:'slivers',name:'CustomScrollView & Slivers',tags:'sliverappbar sliverlist collapsing header pinned floating',
-blurb:'A CustomScrollView lets several scrollable pieces, called slivers, share one scroll position. SliverAppBar is the classic example: a header that collapses as you scroll and can stay pinned at the top.',
-use:'Collapsing headers, and screens that mix lists, grids and headers in one scroll.',
-watch:'Everything inside CustomScrollView.slivers must be a sliver. Wrap normal widgets in SliverToBoxAdapter.',
-ctl:[{k:'pin',l:'pinned',t:'chk',v:true},{k:'ex',l:'expandedHeight',t:'rng',min:100,max:200,step:10,v:150}],
+def({cat:'Scrolling',id:'slivers',name:'CustomScrollView & Slivers',tags:'sliverappbar sliverlist slivergrid slivertoboxadapter sliverpadding pinned floating snap flexiblespace fillremaining',h:340,
+blurb:'A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One scroll position covers all of them.',
+use:'A header that collapses over a list, a screen that mixes a grid and a list, anything a Column of scroll views cannot do.',
+watch:'Only slivers may go in the slivers list. An ordinary widget needs SliverToBoxAdapter, and padding needs SliverPadding.',
+ctl:[{k:'scroll',l:'scroll position',t:'rng',min:0,max:100,v:0},
+ {k:'exp',l:'SliverAppBar expandedHeight',t:'rng',min:80,max:200,v:150},
+ {k:'pin',l:'pinned',t:'chk',v:true},
+ {k:'float',l:'floating',t:'chk',v:false},
+ {k:'snap',l:'snap',t:'chk',v:false},
+ {k:'pieces',l:'after the bar',t:'sel',o:['list','grid then list','adapter + list + fillRemaining'],v:'list'},
+ {k:'bar',l:'flexibleSpace background',t:'chk',v:true}],
 render(s,st,g){
- const ex=+s.ex,rows=Array.from({length:30},(_,i)=>`<div class="li"><span>${i+1}</span>Item ${i+1}</div>`).join('');
- const bar=s.pin?`<div class="sa-anchor"><div class="sa" style="height:${ex}px"><b>Collapsing title</b></div></div><div style="height:${ex}px"></div>`:`<div class="sa" style="height:${ex}px;position:relative"><b>Collapsing title</b></div>`;
- g.innerHTML=`<div class="scr">${bar}${rows}</div>`;
- return {code:`CustomScrollView(\n  slivers: [\n    SliverAppBar(\n      pinned: ${s.pin},\n      expandedHeight: ${ex},\n      title: Text('Collapsing title'),\n    ),\n    SliverList.builder(\n      itemCount: 30,\n      itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n    ),\n  ],\n)`,hint:s.pin?'Pinned: the bar shrinks to toolbar height and stays at the top.':'Not pinned: the bar scrolls away with the content.'};
-},
-after(g,st,s){
- if(!s.pin)return;
- const sc=g.querySelector('.scr'),bar=g.querySelector('.sa'),ex=+s.ex,t=bar.querySelector('b');
- const upd=()=>{const h=Math.max(48,ex-sc.scrollTop);bar.style.height=h+'px';t.style.fontSize=(15+(h-48)/(ex-48||1)*9)+'px'};
- sc.addEventListener('scroll',upd,{passive:true});upd();
+ const p=+s.scroll/100,exp=+s.exp,collapsed=56;
+ const h=Math.max(s.pin?collapsed:0,exp-(exp-collapsed)*p);
+ const titleSmall=h<exp*0.72;
+ const hidden=!s.pin&&h<=collapsed&&p>0.6;
+ const rows=[...Array(8)].map((_,i)=>`<div style="padding:11px 16px;border-bottom:1px solid var(--line);font:14px var(--f-body)">Row ${i+1}</div>`).join('');
+ const grid=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px">${[...Array(6)].map((_,i)=>`<div class="fb ${'abcd'[i%4]}" style="aspect-ratio:1;border-radius:9px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body)">${i+1}</div>`).join('')}</div>`;
+ const adapter='<div style="padding:12px 16px;background:var(--accent-soft);font:600 13px var(--f-body);color:var(--accent)">SliverToBoxAdapter: one ordinary widget</div>';
+ const fill='<div style="padding:26px 16px;text-align:center;color:var(--muted);font-size:13px">SliverFillRemaining: fills what is left</div>';
+ const body=s.pieces==='list'?rows:s.pieces==='grid then list'?grid+rows:adapter+rows+fill;
+ const barBg=s.bar?`background-image:url(${PIC});background-size:cover;background-position:center;`:'background:var(--accent);';
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">
+  <div style="transform:translateY(${-p*60}px)">${body}</div>
+  ${hidden?'':`<div style="position:absolute;left:0;right:0;top:0;height:${h}px;${barBg}color:#fff;display:flex;align-items:${titleSmall?'center':'flex-end'};padding:${titleSmall?'0 14px':'0 14px 14px'};box-shadow:0 2px 10px rgba(10,20,60,.25)"><span style="font:700 ${titleSmall?16:22}px var(--f-display);text-shadow:0 1px 4px rgba(0,0,0,.4);transition:none">Gallery</span></div>`}
+ </div></div>`;
+ const L=[`expandedHeight: ${exp},`];
+ if(s.pin)L.push('pinned: true,');
+ if(s.float)L.push('floating: true,');
+ if(s.snap)L.push('snap: true,');
+ L.push("flexibleSpace: FlexibleSpaceBar(\n        title: const Text('Gallery'),\n"+(s.bar?"        background: Image.network(url, fit: BoxFit.cover),\n":'')+"        collapseMode: CollapseMode.parallax,\n      ),");
+ const pieces=s.pieces==='list'
+  ?"    SliverList.builder(\n      itemCount: items.length,\n      itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n    ),"
+  :s.pieces==='grid then list'
+   ?"    SliverPadding(\n      padding: const EdgeInsets.all(10),\n      sliver: SliverGrid.builder(\n        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(\n          crossAxisCount: 3, mainAxisSpacing: 8, crossAxisSpacing: 8,\n        ),\n        itemCount: 6,\n        itemBuilder: (context, i) => PhotoTile(i),\n      ),\n    ),\n    SliverList.builder(\n      itemCount: items.length,\n      itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n    ),"
+   :"    const SliverToBoxAdapter(child: SectionHeader()),\n    SliverList.builder(\n      itemCount: items.length,\n      itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n    ),\n    const SliverFillRemaining(\n      hasScrollBody: false,\n      child: Center(child: Text('End of list')),\n    ),";
+ const notes=[];
+ if(s.snap&&!s.float)notes.push('snap does nothing without floating: true, and Flutter asserts on it.');
+ if(s.float&&!s.pin)notes.push('floating brings the bar back as soon as the user scrolls up, without returning to the top.');
+ if(s.pin)notes.push('pinned keeps the collapsed toolbar on screen for the whole scroll.');
+ if(!s.pin&&!s.float)notes.push('With neither pinned nor floating the bar scrolls away completely and only comes back at the top.');
+ notes.push('Drag the scroll slider to watch the bar collapse.');
+ return {code:`CustomScrollView(\n  slivers: [\n    SliverAppBar(\n${L.map(x=>'      '+x).join('\n')}\n    ),\n${pieces}\n  ],\n)`,hint:notes.join(' ')};
 }});
 /* ================= DISPLAY ================= */
 def({cat:'Display',id:'text',name:'Text',tags:'font style overflow ellipsis maxlines textstyle typography height lineheight wordspacing decoration softwrap shadow color',h:330,
@@ -1770,27 +1872,57 @@ render(s,st,g){
 },
 after(g,st,s,draw){}});
 
-def({cat:'Structure',id:'scaffold',name:'Scaffold',tags:'appbar drawer fab floatingactionbutton bottomnavigationbar snackbar material page',h:340,
-blurb:'Scaffold is the skeleton of a Material screen. It positions an app bar, a body, a drawer, a floating action button and a bottom navigation bar, and hosts SnackBars.',
-use:'Almost every full screen in a Material app.',
-watch:'Use one Scaffold per screen. Nested Scaffolds work but each one adds its own app bar and safe-area handling.',
-ctl:[{k:'ab',l:'appBar',t:'chk',v:true},{k:'dw',l:'drawer',t:'chk',v:true},{k:'fab',l:'floatingActionButton',t:'chk',v:true},{k:'loc',l:'FAB location',t:'sel',o:['endFloat','centerFloat'],v:'endFloat'},{k:'nav',l:'bottomNavigationBar',t:'chk',v:true}],
+def({cat:'Basics',id:'scaffold',name:'Scaffold',tags:'appbar body fab drawer bottomnavigationbar snackbar extendbody resizetoavoidbottominset persistentfooter safearea',h:340,
+blurb:'Scaffold is the frame of a Material screen. It positions the app bar, the body, a floating action button, bottom and drawer panels, and it handles the keyboard inset for you.',
+use:'Almost every screen in a Material app.',
+watch:'Scaffold.of(context) must be called below the Scaffold, so wrap the caller in a Builder. For snack bars use ScaffoldMessenger, which survives the Scaffold being replaced.',
+ctl:[{k:'bar',l:'appBar',t:'chk',v:true},
+ {k:'fab',l:'floatingActionButton',t:'chk',v:true},
+ {k:'fabloc',l:'fab location',t:'sel',o:['endFloat','centerFloat','centerDocked','endDocked'],v:'endFloat'},
+ {k:'bot',l:'bottomNavigationBar',t:'chk',v:true},
+ {k:'drawer',l:'drawer',t:'chk',v:true},
+ {k:'ext',l:'extendBody',t:'chk',v:false},
+ {k:'extbar',l:'extendBodyBehindAppBar',t:'chk',v:false},
+ {k:'kb',l:'keyboard open',t:'chk',v:false},
+ {k:'resize',l:'resizeToAvoidBottomInset',t:'chk',v:true},
+ {k:'foot',l:'persistentFooterButtons',t:'chk',v:false}],
 render(s,st,g){
- if(st.t===undefined)st.t=0;
- const T=['Home','Search','Profile'],I=['home','star','person'];
- g.innerHTML=`<div class="phone"><div class="pscr">${s.ab?`<div class="abar">${s.dw?`<button class="ib" data-a="dw" aria-label="Open drawer">${ic('menu',20)}</button>`:''}<span>${T[st.t]}</span></div>`:''}<div class="pbody"><div class="ln" style="width:70%"></div><div class="ln" style="width:90%"></div><div class="ln" style="width:55%"></div><div class="ln" style="width:80%"></div></div>${s.fab?`<button class="fab" data-a="fab" aria-label="Add" style="bottom:${s.nav?68:16}px;${s.loc==='centerFloat'?'left:50%;margin-left:-22px':'right:14px'}">${ic('add',22)}</button>`:''}${st.snack?`<div class="snack" style="bottom:${s.nav?64:10}px">Item added</div>`:''}${s.nav?`<div class="bnav">${T.map((t,i)=>`<button class="bn${st.t===i?' on':''}" data-a="nav:${i}">${ic(I[i],20)}<span>${t}</span></button>`).join('')}</div>`:''}${st.open&&s.dw?`<div class="scrim" data-a="dwx"></div><div class="drw"><b>Drawer</b><span>Inbox</span><span>Sent</span><span>Trash</span></div>`:''}</div></div>`;
- const a=[];
- if(s.ab)a.push("appBar: AppBar(title: Text('"+T[st.t]+"')),");
- if(s.dw)a.push('drawer: Drawer(child: ListView(...)),');
- a.push('body: Center(child: Text(\'Body\')),');
- if(s.fab){a.push('floatingActionButton: FloatingActionButton(','  onPressed: () => showSnackBar(),','  child: Icon(Icons.add),','),');a.push('floatingActionButtonLocation:','    FloatingActionButtonLocation.'+s.loc+',')}
- if(s.nav)a.push('bottomNavigationBar: BottomNavigationBar(','  currentIndex: '+st.t+',','  items: [/* Home, Search, Profile */],','),');
- return {code:`Scaffold(\n${a.map(x=>'  '+x).join('\n')}\n)`,hint:'Open the drawer, switch tabs and press the floating button to see a SnackBar.'};
-},
-act(a,st){
- if(a==='dw')st.open=true;else if(a==='dwx')st.open=false;
- else if(a.startsWith('nav:'))st.t=+a.slice(4);
- else if(a==='fab'){st.snack=true;clearTimeout(st.tm);st.tm=setTimeout(()=>{st.snack=false;this.draw&&this.draw()},1800)}
+ const barH=s.bar?52:0,botH=s.bot?56:0,footH=s.foot?48:0,kb=s.kb?70:0;
+ const bodyTop=s.extbar?0:barH;
+ const bodyBottom=(s.ext?0:botH)+footH+(s.kb&&s.resize?kb:0);
+ const img=s.extbar?`background-image:url(${PIC});background-size:cover;background-position:center;`:'background:var(--bg);';
+ const docked=s.fabloc.includes('Docked');
+ const fabRight=s.fabloc.startsWith('end');
+ const fabBottom=(s.ext?0:botH)+footH+(docked?-22:14)+(s.kb&&s.resize?kb:0);
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">
+  <div style="position:absolute;left:0;right:0;top:${bodyTop}px;bottom:${bodyBottom}px;${img}padding:14px;overflow:hidden">
+    <div style="font:600 14px var(--f-body);color:${s.extbar?'#fff':'var(--fg)'};text-shadow:${s.extbar?'0 1px 4px rgba(0,0,0,.5)':'none'}">body</div>
+    <div style="margin-top:8px;font-size:12.5px;color:${s.extbar?'rgba(255,255,255,.85)':'var(--muted)'};text-shadow:${s.extbar?'0 1px 4px rgba(0,0,0,.5)':'none'}">top ${bodyTop}px · bottom ${bodyBottom}px</div>
+  </div>
+  ${s.bar?`<div style="position:absolute;left:0;right:0;top:0;height:${barH}px;background:${s.extbar?'rgba(37,99,235,.55)':'var(--accent)'};color:#fff;display:flex;align-items:center;gap:12px;padding:0 12px;font:600 15px var(--f-display)">${s.drawer?ic('menu',20):''}<span>Title</span></div>`:''}
+  ${s.foot?`<div style="position:absolute;left:0;right:0;bottom:${(s.ext?0:botH)+(s.kb&&s.resize?kb:0)}px;height:${footH}px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px"><span style="font:600 12.5px var(--f-body);color:var(--accent)">CANCEL</span><span style="font:600 12.5px var(--f-body);color:var(--accent)">SAVE</span></div>`:''}
+  ${s.bot?`<div style="position:absolute;left:0;right:0;bottom:${s.kb&&s.resize?kb:0}px;height:${botH}px;background:${s.ext?'rgba(255,255,255,.72)':'var(--surface)'};border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;color:var(--muted)">${ic('home',22)}${ic('star',22)}${ic('person',22)}</div>`:''}
+  ${s.fab?`<div style="position:absolute;${fabRight?'right:16px':'left:50%;transform:translateX(-50%)'};bottom:${fabBottom}px;width:52px;height:52px;border-radius:17px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 14px rgba(10,20,60,.32);z-index:3">${ic('add',24)}</div>`:''}
+  ${s.kb?`<div style="position:absolute;left:0;right:0;bottom:0;height:${kb}px;background:#1f2937;color:#fff;display:flex;align-items:center;justify-content:center;font:11px var(--f-mono);letter-spacing:.08em">KEYBOARD${s.resize?'':'  ·  body does NOT move'}</div>`:''}
+ </div></div>`;
+ const L=[];
+ if(s.bar)L.push("appBar: AppBar(title: const Text('Title')),");
+ L.push('body: const Content(),');
+ if(s.fab)L.push('floatingActionButton: FloatingActionButton(\n    onPressed: () {},\n    child: const Icon(Icons.add),\n  ),',`floatingActionButtonLocation: FloatingActionButtonLocation.${s.fabloc},`);
+ if(s.bot)L.push('bottomNavigationBar: NavigationBar(\n    selectedIndex: index,\n    onDestinationSelected: (i) => setState(() => index = i),\n    destinations: destinations,\n  ),');
+ if(s.foot)L.push("persistentFooterButtons: [\n    TextButton(onPressed: () {}, child: const Text('CANCEL')),\n    TextButton(onPressed: () {}, child: const Text('SAVE')),\n  ],");
+ if(s.drawer)L.push('drawer: const AppDrawer(),');
+ if(s.ext)L.push('extendBody: true,');
+ if(s.extbar)L.push('extendBodyBehindAppBar: true,');
+ if(!s.resize)L.push('resizeToAvoidBottomInset: false,');
+ const notes=[];
+ if(s.extbar)notes.push('extendBodyBehindAppBar lets the body start at y 0, which is how an image sits behind a transparent app bar.');
+ if(s.ext)notes.push('extendBody lets the body paint under the bottom bar, for a see-through navigation bar.');
+ if(s.kb&&!s.resize)notes.push('With resizeToAvoidBottomInset false the body keeps its size and the keyboard covers it. Only turn this off when you handle the inset yourself.');
+ if(s.kb&&s.resize)notes.push('By default the body shrinks by the keyboard height, so a text field stays visible.');
+ if(docked)notes.push('A docked FAB location notches into the bottom bar, which needs a BottomAppBar rather than a NavigationBar.');
+ notes.push('Show a snack bar with ScaffoldMessenger.of(context), not Scaffold.of(context).');
+ return {code:`Scaffold(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Material',id:'tab-bar',name:'TabBar & TabBarView',tags:'tabs controller indicator scrollable tabalignment defaulttabcontroller labelcolor divider',h:340,
@@ -2185,19 +2317,32 @@ act(a,st){
  else if(a==='root'){st.stack=[st.stack[0]];st.anim='pop'}
 }});
 
-def({cat:'Navigation & state',id:'stateful',name:'StatelessWidget vs StatefulWidget',tags:'setstate rebuild const build state lifecycle',h:280,
-blurb:'A StatelessWidget is described entirely by its constructor arguments. A StatefulWidget has a State object that lives on between rebuilds, and calling setState schedules a new build. Parents rebuilding rebuild their children too, unless the child is const.',
-use:'StatefulWidget for anything that changes on screen by itself: counters, form input, animations.',
-watch:'setState rebuilds the whole build method of that State. Keep it low in the tree, and mark children const where you can so they are skipped.',
-ctl:[{k:'cs',l:'child is const',t:'chk',v:true}],
+def({cat:'Basics',id:'stateful',name:'StatelessWidget vs StatefulWidget',tags:'setstate initstate dispose lifecycle didupdatewidget mounted rebuild controller state',h:340,
+blurb:'A StatelessWidget is built from its arguments and nothing else. A StatefulWidget keeps a State object that survives rebuilds, so it can hold a counter, a controller or a subscription.',
+use:'Stateless for anything that just displays. Stateful as soon as something must be remembered between builds.',
+watch:'build runs often and must be free of side effects. Create controllers in initState and dispose them. After an await, check mounted before calling setState.',
+ctl:[{k:'step',l:'lifecycle step',t:'sel',o:['1 constructor','2 initState','3 didChangeDependencies','4 build','5 setState -> build','6 didUpdateWidget -> build','7 dispose'],v:'2 initState'},
+ {k:'kind',l:'widget',t:'sel',o:['StatefulWidget','StatelessWidget'],v:'StatefulWidget'},
+ {k:'bug',l:'show the common mistakes',t:'chk',v:false}],
 render(s,st,g){
- if(st.n===undefined){st.n=0;st.pb=1;st.cb=1}
- g.innerHTML=`<div class="fill" style="flex-direction:column;justify-content:center;gap:12px;padding:18px"><div class="sbox sp"><b>Parent (StatefulWidget)</b><div class="cap" style="margin:2px 0 8px">count = ${st.n} &nbsp;·&nbsp; build() ran ${st.pb} time${st.pb===1?'':'s'}</div><button class="btn k-Filled" data-a="inc">setState: count++</button> <button class="btn k-Text" data-a="rst">Reset</button><div class="sbox sq" style="margin-top:10px"><b>Child (StatelessWidget)</b><div class="cap" style="margin:2px 0 0">build() ran ${st.cb} time${st.cb===1?'':'s'}</div></div></div></div>`;
- return {code:`class _ParentState extends State<Parent> {\n  int count = 0;\n\n  @override\n  Widget build(BuildContext context) {\n    return Column(children: [\n      Text('count = $count'),\n      ElevatedButton(\n        onPressed: () => setState(() => count++),\n        child: Text('setState'),\n      ),\n      ${s.cs?'const ':''}ChildWidget(),\n    ]);\n  }\n}`,hint:s.cs?'The const child is the same instance every time, so Flutter skips rebuilding it.':'A new ChildWidget is created on every build, so it rebuilds each time the parent does.'};
-},
-act(a,st,s){
- if(a==='inc'){st.n++;st.pb++;if(!s.cs)st.cb++}
- else if(a==='rst'){st.n=0;st.pb=1;st.cb=1}
+ const stateless=s.kind==='StatelessWidget';
+ const steps=stateless
+  ?[['constructor','the widget is created with its arguments'],['build','returns the UI from those arguments'],['rebuilt','the parent makes a NEW widget object and build runs again']]
+  :[['constructor','the widget object is created'],['initState','once: controllers, subscriptions, timers. No Theme or MediaQuery yet'],['didChangeDependencies','after initState, and again when an InheritedWidget changes'],['build','may run many times. No side effects'],['setState','marks dirty, then build runs again'],['didUpdateWidget','the parent passed new arguments; compare with oldWidget'],['dispose','last: dispose controllers, cancel subscriptions']];
+ const cur=stateless?Math.min(+s.step.charAt(0)-1,2):+s.step.charAt(0)-1;
+ const rows=steps.map(([n,d],i)=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:7px 10px;border-radius:8px;background:${i===cur?'var(--accent-soft)':'transparent'}"><span style="width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:700 11px var(--f-mono);background:${i===cur?'var(--accent)':'var(--line)'};color:${i===cur?'var(--accent-ink)':'var(--muted)'}">${i+1}</span><div><div style="font:600 13px var(--f-mono);color:${i===cur?'var(--accent)':'var(--fg)'}">${n}</div><div style="font-size:12px;color:var(--muted);line-height:1.4">${d}</div></div></div>`).join('');
+ g.innerHTML=`<div class="fill" style="padding:12px;overflow:auto"><div style="display:flex;flex-direction:column;gap:2px">${rows}</div></div>`;
+ const good=stateless
+  ?`class Greeting extends StatelessWidget {\n  const Greeting({super.key, required this.name});\n\n  final String name;   // final: it never changes\n\n  @override\n  Widget build(BuildContext context) => Text('Hello \$name');\n}`
+  :`class Counter extends StatefulWidget {\n  const Counter({super.key, required this.start});\n\n  final int start;\n\n  @override\n  State<Counter> createState() => _CounterState();\n}\n\nclass _CounterState extends State<Counter> {\n  late int count;\n  late final TextEditingController _controller;\n\n  @override\n  void initState() {\n    super.initState();\n    count = widget.start;                 // read arguments through widget\n    _controller = TextEditingController();\n  }\n\n  @override\n  void didChangeDependencies() {\n    super.didChangeDependencies();\n    // safe to use Theme.of / MediaQuery.of here\n  }\n\n  @override\n  void didUpdateWidget(covariant Counter old) {\n    super.didUpdateWidget(old);\n    if (old.start != widget.start) count = widget.start;   // easy to forget\n  }\n\n  @override\n  void dispose() {\n    _controller.dispose();   // always\n    super.dispose();\n  }\n\n  Future<void> _load() async {\n    final value = await api.fetch();\n    if (!mounted) return;    // the screen may be gone\n    setState(() => count = value);\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return TextButton(\n      onPressed: () => setState(() => count++),\n      child: Text('\$count'),\n    );\n  }\n}`;
+ const bugs=`\n\n// the three that bite\n// 1. a controller created in build is recreated on every rebuild\nWidget build(BuildContext context) {\n  final controller = TextEditingController();   // wrong\n  ...\n}\n\n// 2. setState after an await, with no mounted check\nawait save();\nsetState(() {});   // throws if the screen was popped\n\n// 3. caching widget.x in a field, so new arguments are ignored\nlate final String title = widget.title;   // never updates`;
+ const notes=[];
+ if(stateless)notes.push('A StatelessWidget is thrown away and rebuilt constantly. That is cheap, which is why const constructors matter.');
+ else notes.push('The State object survives rebuilds; the widget object does not. That is why you read arguments as widget.x.');
+ if(s.step.startsWith('2'))notes.push('initState runs before dependencies are ready, so Theme.of and MediaQuery.of belong in didChangeDependencies.');
+ if(s.step.startsWith('6'))notes.push('didUpdateWidget is where you react to new arguments: resubscribe, reset a controller, restart an animation.');
+ if(s.step.startsWith('7'))notes.push('Every controller, subscription, timer and focus node you created must be disposed here.');
+ return {code:good+(s.bug?bugs:''),hint:notes.join(' ')};
 }});
 
 def({cat:'Async',id:'future-builder',name:'FutureBuilder',tags:'async snapshot connectionstate waiting done haserror hasdata initialdata loading error rebuild',h:340,
@@ -2244,29 +2389,44 @@ render(s,st,g){
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const CV2={linear:'linear',easeInOut:'cubic-bezier(.42,0,.58,1)',easeOutCubic:'cubic-bezier(.215,.61,.355,1)',bounceOut:lin(bounce),elasticOut:lin(elastic)};
 
-def({cat:'Layout',first:true,id:'constraints',name:'Layout & constraints',tags:'box constraints min max tight loose size parent child rule core concept boxconstraints',h:300,
-blurb:'Flutter has one layout rule: constraints go down, sizes go up, and the parent sets the position. A parent gives its child a minimum and maximum width and height, and the child picks any size inside that range.',
-use:'Working out why a widget fills the screen, shrinks to its content, or ignores the size you gave it.',
-watch:'A child cannot pick a size outside the constraints it receives. SizedBox(width: 200) under a parent that allows at most 120 is 120 wide. Wrap it in Center or Align to loosen the constraints.',
-ctl:[{k:'kind',l:'Child',t:'sel',o:['Container()','Container(child: Text)','SizedBox(200 x 100)','Center(child: 60 x 40)'],v:'Container()'},
- {k:'maxW',l:'maxWidth',t:'rng',min:60,max:260,step:10,v:200},{k:'minW',l:'minWidth',t:'rng',min:0,max:260,step:10,v:0},
- {k:'maxH',l:'maxHeight',t:'rng',min:40,max:170,step:10,v:120},{k:'minH',l:'minHeight',t:'rng',min:0,max:170,step:10,v:0}],
+def({cat:'Layout',id:'constraints',name:'Layout & constraints',tags:'boxconstraints tight loose unbounded parent child size render overflow debug',h:340,
+blurb:'Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that range; the parent then places it. Almost every layout surprise comes from this one rule.',
+use:'Understanding why a widget is the size it is, and why setting width sometimes does nothing.',
+watch:'Tight constraints leave the child no choice, so a width on the child is ignored. Unbounded constraints make Expanded and a fraction of the height meaningless.',
+ctl:[{k:'parent',l:'parent gives',t:'sel',o:['tight (SizedBox 200x90)','loose (Center)','unbounded height (scroll view)','unbounded width (Row)'],v:'loose (Center)'},
+ {k:'child',l:'child asks for',t:'sel',o:['width 120, height 60','as big as possible','as small as possible','width 400 (too big)'],v:'width 120, height 60'},
+ {k:'fix',l:'loosen with',t:'sel',o:['nothing','Center','UnconstrainedBox','FittedBox'],v:'nothing'}],
 render(s,st,g){
- const maxW=s.maxW,maxH=s.maxH,minW=Math.min(s.minW,maxW),minH=Math.min(s.minH,maxH);
- let w,h,inner='',src;
- if(s.kind==='Container()'){w=maxW;h=maxH;src='Container(color: Colors.blue)';}
- else if(s.kind==='Container(child: Text)'){w=clamp(92,minW,maxW);h=clamp(40,minH,maxH);src="Container(\n    color: Colors.blue,\n    padding: EdgeInsets.all(8),\n    child: Text('Hello'),\n  )";inner='Hello';}
- else if(s.kind==='SizedBox(200 x 100)'){w=clamp(200,minW,maxW);h=clamp(100,minH,maxH);src='SizedBox(\n    width: 200,\n    height: 100,\n    child: ColoredBox(color: Colors.blue),\n  )';}
- else{w=maxW;h=maxH;src='Center(\n    child: SizedBox(width: 60, height: 40, child: Box()),\n  )';const iw=Math.min(60,w),ih=Math.min(40,h);inner=`<div class="fb c" style="position:absolute;left:${(w-iw)/2}px;top:${(h-ih)/2}px;width:${iw}px;height:${ih}px">60×40</div>`;}
- const lab=s.kind==='Container(child: Text)'?'Hello':'';
- g.innerHTML=`<div style="position:absolute;left:16px;top:8px;font:11px var(--f-mono);color:var(--c3t)">max ${maxW} × ${maxH}</div>
-<div style="position:absolute;left:16px;top:30px;width:${w}px;height:${h}px" class="fb a">${s.kind==='Center(child: 60 x 40)'?'':(lab||w+' × '+h)}${s.kind==='Center(child: 60 x 40)'?inner:''}</div>
-<div style="position:absolute;left:16px;top:30px;width:${maxW}px;height:${maxH}px;border:1.5px dashed var(--c3);pointer-events:none"></div>
-<div style="position:absolute;left:16px;top:30px;width:${minW}px;height:${minH}px;border:1.5px dashed var(--c4);pointer-events:none"></div>
-<div style="position:absolute;left:16px;top:${30+maxH+10}px;font:12px var(--f-mono);color:var(--fg)">child size: ${w} × ${h}</div>
-<div style="position:absolute;left:16px;top:${30+maxH+28}px;font:11px var(--f-mono);color:var(--c4t)">min ${minW} × ${minH}</div>`;
- return {code:`Align(\n  alignment: Alignment.topLeft, // loosens incoming constraints\n  child: ConstrainedBox(\n    constraints: BoxConstraints(\n      minWidth: ${minW}, maxWidth: ${maxW},\n      minHeight: ${minH}, maxHeight: ${maxH},\n    ),\n    child: ${src},\n  ),\n)`,
-  hint:'Orange dashes are the maximum the parent allows, pink dashes the minimum. Raise minWidth above what the child wants and it grows to match.'};
+ const p=s.parent,c=s.child;
+ const tight=p.startsWith('tight'),loose=p.startsWith('loose'),unbH=p.includes('unbounded height'),unbW=p.includes('unbounded width');
+ const loosened=s.fix!=='nothing';
+ let w,h,note;
+ if(tight&&!loosened){w=200;h=90;note='The parent gave tight constraints, so the child is 200 x 90 whatever it asked for.'}
+ else if(c==='as big as possible'){w=unbW?260:220;h=unbH?120:110;note=unbH||unbW?'The child asked to be as big as possible with no limit, which in Flutter throws rather than filling the screen.':'The child filled the maximum it was given.'}
+ else if(c==='as small as possible'){w=60;h=34;note='With loose constraints the child may be as small as it likes.'}
+ else if(c==='width 400 (too big)'){w=unbW?300:(tight?200:230);h=70;note=unbW?'With no width limit the child really is 400 wide and overflows its parent.':'The child asked for 400 but the maximum was smaller, so it was clamped.'}
+ else {w=120;h=60;note='Loose constraints let the child be exactly the size it asked for.'}
+ if(loosened&&tight){
+  if(s.fix==='Center'||s.fix==='UnconstrainedBox'){w=c==='width 120, height 60'?120:c==='as small as possible'?60:200;h=c==='width 120, height 60'?60:c==='as small as possible'?34:90;note=s.fix+' loosens the constraints, so the child may now choose its own size.'}
+  if(s.fix==='FittedBox'){w=200;h=90;note='FittedBox keeps the box but scales the child to fit inside it.'}
+ }
+ const over=(unbW&&c==='width 400 (too big)');
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px">
+   <div style="position:relative;width:230px;height:120px;border:1.5px dashed var(--c3);display:flex;align-items:center;justify-content:center;${over?'':'overflow:hidden'}">
+     <div class="fb ${over?'d':'c'}" style="width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body);flex:none">${w} x ${h}</div>
+     ${over?'<div style="position:absolute;right:-6px;top:0;bottom:0;width:10px;background:repeating-linear-gradient(45deg,#000,#000 6px,#ffd400 6px,#ffd400 12px)"></div>':''}
+   </div>
+   <div class="cap" style="margin:0;text-align:center;max-width:300px">${esc(note)}</div>
+ </div>`;
+ const parentCode={'tight (SizedBox 200x90)':'SizedBox(\n  width: 200,\n  height: 90,   // tight: min == max\n  child: ','loose (Center)':'Center(\n  // loose: min 0, max = what Center was given\n  child: ','unbounded height (scroll view)':'SingleChildScrollView(\n  // maxHeight is infinity\n  child: ','unbounded width (Row)':'Row(\n  // maxWidth is infinity for a non-flexible child\n  children: ['}[p];
+ const childCode={'width 120, height 60':'Container(width: 120, height: 60)','as big as possible':'Container(constraints: const BoxConstraints.expand())','as small as possible':'const SizedBox.shrink()','width 400 (too big)':'Container(width: 400, height: 70)'}[c];
+ const wrapped=s.fix==='nothing'?childCode:s.fix==='FittedBox'?`FittedBox(child: ${childCode})`:`${s.fix}(child: ${childCode})`;
+ const notes=[];
+ notes.push(note);
+ if(tight&&s.fix==='nothing')notes.push('This is why a width on a child inside a tightly sized parent appears to do nothing.');
+ if(unbH)notes.push('Unbounded height is why Expanded throws inside a scroll view, and why a percentage of the height is meaningless there.');
+ if(over)notes.push('The yellow and black stripes are the debug overflow warning. In release they are invisible but the pixels are still wrong.');
+ return {code:`${parentCode}${wrapped}${p.includes('Row')?'],\n)':',\n)'}\n\n// see the real numbers at any point in the tree\nLayoutBuilder(\n  builder: (context, constraints) {\n    debugPrint('\$constraints');\n    return child;\n  },\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'fractionally-sized-box',name:'FractionallySizedBox',tags:'percent percentage fraction relative widthfactor heightfactor responsive',
@@ -3017,99 +3177,171 @@ render(s,st,g){
  return {code:s.merge?`MergeSemantics(\n  child: ${row.replace(/\n/g,'\n  ')},\n)`:row,hint:/no label/.test(stops.join())?'An icon button with no label is read as just "button". The user cannot tell what it does.':'Each line is one swipe for a screen reader user. Fewer, clearer stops make the card faster to use.'};
 }});
 
-def({cat:'Scrolling',id:'reorderable-list-view',name:'ReorderableListView',tags:'drag reorder sort handle onreorder move item list',h:310,
-blurb:'ReorderableListView lets the user drag items to a new position. It tells you the old and new index in onReorder and you update your list.',
-use:'Playlists, to-do lists and settings where the user decides the order.',
-watch:'Every item needs a unique Key. And in onReorder, newIndex is counted before the item is removed, so when moving an item down you must subtract 1.',
-ctl:[{k:'n',l:'item count',t:'rng',min:3,max:8,v:5},{k:'h',l:'buildDefaultDragHandles',t:'chk',v:true}],
+def({cat:'Scrolling',id:'reorderable-list-view',name:'ReorderableListView',tags:'drag reorder handle onreorderitem key proxydecorator header footer builder index fix',h:340,
+blurb:'ReorderableListView lets the user drag rows into a new order. Every child needs a unique key, and your callback has to move the item in your own list.',
+use:'Playlists, task order, a list of steps the user arranges.',
+watch:'The index fix catches everyone: when newIndex is greater than oldIndex you must subtract one before inserting, because the item is removed first.',
+ctl:[{k:'handles',l:'buildDefaultDragHandles',t:'chk',v:true},
+ {k:'where',l:'custom handle',t:'sel',o:['whole row (default)','drag handle only'],v:'whole row (default)'},
+ {k:'head',l:'header',t:'chk',v:false},
+ {k:'foot',l:'footer',t:'chk',v:false},
+ {k:'proxy',l:'proxyDecorator shadow',t:'chk',v:true},
+ {k:'ext',l:'itemExtent',t:'sel',o:['null','56'],v:'null'},
+ {k:'key',l:'rows have unique keys',t:'chk',v:true}],
 render(s,st,g,d){
- st.hintHost=d.hintEl;
- if(st.n!==s.n){st.n=s.n;st.items=NAMES.slice(0,s.n);st.built=false}
- if(!st.built){
-  st.built=true;g.innerHTML='<div class="rl" style="position:absolute;inset:10px 16px 10px;display:flex;flex-direction:column;gap:6px"></div>';st.box=g.querySelector('.rl');
- }
- st.box.innerHTML=st.items.map(n=>`<div class="ri fb a" data-n="${n}" style="height:38px;justify-content:space-between;padding:0 12px;border-radius:8px;flex:none;user-select:none"><span>${n}</span><span class="rh" style="touch-action:none;cursor:${s.h?'grab':'default'};padding:6px;display:flex;opacity:${s.h?1:.25}">${ic('handle',20)}</span></div>`).join('');
- const rows=[...st.box.children];
- rows.forEach(r=>{
-  const hd=r.querySelector('.rh');
-  hd.addEventListener('pointerdown',e=>{
-   if(!s.h)return;e.preventDefault();
-   try{st.box.setPointerCapture(e.pointerId)}catch(_){}
-   r.style.boxShadow='0 6px 14px rgba(20,30,80,.3)';r.style.zIndex=2;
-   const mv=ev=>{
-    const kids=[...st.box.children],top=st.box.getBoundingClientRect().top,rh=44;
-    const to=Math.max(0,Math.min(kids.length-1,Math.floor((ev.clientY-top)/rh))),from=kids.indexOf(r);
-    if(to!==from){const ref=to>from?kids[to].nextSibling:kids[to];st.box.insertBefore(r,ref);const nm=r.dataset.n;st.items.splice(st.items.indexOf(nm),1);st.items.splice(to,0,nm);st.moves=(st.moves||0)+1;st.last=[from,to]}
+ if(!st.rows)st.rows=['Write the brief','Design the screens','Build the app','Ship it'];
+ const rows=st.rows,drag=st.drag;
+ const row=(t,i)=>`<div class="rord" data-i="${i}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:${s.ext==='null'?54:56}px;border-bottom:1px solid var(--line);background:var(--surface);${drag===i?`box-shadow:0 8px 22px rgba(10,20,60,${s.proxy?.3:0});transform:scale(${s.proxy?1.02:1});position:relative;z-index:2;`:''}cursor:${s.where==='whole row (default)'?'grab':'default'};touch-action:none">
+   <div class="fb ${'abcd'[i%4]}" style="width:28px;height:28px;border-radius:50%;flex:none"></div>
+   <span style="flex:1;font:600 13.5px var(--f-body)">${t}</span>
+   ${s.handles?`<span class="rhandle" data-i="${i}" style="color:var(--muted);cursor:grab;padding:4px">${ic('menu',18)}</span>`:''}
+ </div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:auto">${s.head?'<div style="padding:10px 14px;background:var(--accent-soft);color:var(--accent);font:600 12px var(--f-mono);letter-spacing:.07em">HEADER (not reorderable)</div>':''}${rows.map(row).join('')}${s.foot?'<div style="padding:10px 14px;background:var(--accent-soft);color:var(--accent);font:600 12px var(--f-mono);letter-spacing:.07em">FOOTER</div>':''}</div></div>`;
+ const L=[];
+ if(!s.handles)L.push('buildDefaultDragHandles: false,');
+ if(s.head)L.push("header: const Padding(padding: EdgeInsets.all(12), child: Text('HEADER')),");
+ if(s.foot)L.push("footer: const Padding(padding: EdgeInsets.all(12), child: Text('FOOTER')),");
+ if(s.ext!=='null')L.push(`itemExtent: ${s.ext},`);
+ if(s.proxy)L.push("proxyDecorator: (child, index, animation) => Material(\n    elevation: 8,\n    borderRadius: BorderRadius.circular(10),\n    child: child,\n  ),");
+ L.push(`onReorderItem: (oldIndex, newIndex) {\n    setState(() {\n      if (newIndex > oldIndex) newIndex -= 1;   // the fix everyone forgets\n      final item = items.removeAt(oldIndex);\n      items.insert(newIndex, item);\n    });\n  },`);
+ const child=s.where==='drag handle only'
+  ?`  itemBuilder: (context, i) => ListTile(\n    key: ${s.key?'ValueKey(items[i].id)':'ValueKey(i)   // index keys break after a reorder'},\n    title: Text(items[i].title),\n    trailing: ReorderableDragStartListener(\n      index: i,\n      child: const Icon(Icons.drag_handle),\n    ),\n  ),`
+  :`  itemBuilder: (context, i) => ListTile(\n    key: ${s.key?'ValueKey(items[i].id)':'ValueKey(i)   // index keys break after a reorder'},\n    title: Text(items[i].title),\n  ),`;
+ const notes=[];
+ if(!s.key)notes.push('Keys based on the index change as soon as the list moves, so Flutter loses track of which row is which. Use a stable id.');
+ if(!s.handles)notes.push('With buildDefaultDragHandles false nothing starts a drag until you add a ReorderableDragStartListener yourself.');
+ if(s.proxy)notes.push('proxyDecorator builds the floating version of the row while it is dragged.');
+ notes.push('Drag a row in the demo to reorder it.');
+ return {code:`ReorderableListView.builder(\n  itemCount: items.length,\n${L.map(x=>'  '+x).join('\n')}\n${child}\n)`,hint:notes.join(' ')};
+},
+after(g,st,s,draw){
+ const sel=s.where==='drag handle only'&&s.handles?'.rhandle':'.rord';
+ g.querySelectorAll(sel).forEach(el=>{
+  el.addEventListener('pointerdown',e=>{
+   const i=+el.dataset.i;st.drag=i;draw();
+   const rowsEls=[...g.querySelectorAll('.rord')];
+   const h=rowsEls[0]?rowsEls[0].getBoundingClientRect().height:54;
+   const y0=e.clientY;
+   const move=ev=>{
+    const delta=Math.round((ev.clientY-y0)/h);
+    const target=Math.max(0,Math.min(st.rows.length-1,i+delta));
+    if(target!==st.drag){
+     const arr=[...st.rows];const [it]=arr.splice(st.drag,1);arr.splice(target,0,it);
+     st.rows=arr;st.drag=target;draw();
+    }
    };
-   const up=()=>{st.box.removeEventListener('pointermove',mv);st.box.removeEventListener('pointerup',up);st.box.removeEventListener('pointercancel',up);r.style.boxShadow='';r.style.zIndex='';d_hint(st)};
-   st.box.addEventListener('pointermove',mv);st.box.addEventListener('pointerup',up);st.box.addEventListener('pointercancel',up);
+   const up=()=>{st.drag=null;draw();document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up)};
+   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
   });
  });
- return {code:`ReorderableListView(\n  buildDefaultDragHandles: ${s.h},\n  onReorder: (int oldIndex, int newIndex) {\n    setState(() {\n      if (newIndex > oldIndex) newIndex -= 1; // moving down\n      final item = items.removeAt(oldIndex);\n      items.insert(newIndex, item);\n    });\n  },\n  children: [\n    for (final item in items)\n      ListTile(key: ValueKey(item), title: Text(item)),\n  ],\n)`,hint:s.h?'Drag the ≡ handle up or down. Order: '+st.items.join(', '):'With no default handles you wrap items in ReorderableDragStartListener to choose the drag area.'};
 }});
 function d_hint(st){const h=st.hintHost;if(h)h.textContent='Order: '+st.items.join(', ')+(st.last?`  (last move: onReorder(${st.last[0]}, ${st.last[1]>st.last[0]?st.last[1]+1:st.last[1]}))`:'')}
 
-def({cat:'Scrolling',id:'refresh-indicator',name:'RefreshIndicator',tags:'pull to refresh swipe down onrefresh future spinner list reload',h:300,
-blurb:'RefreshIndicator adds the pull-to-refresh gesture to a scrollable. When the user pulls past the threshold it shows a spinner and waits for the Future returned by onRefresh.',
-use:'Feeds, inboxes and any list that can be reloaded from a server.',
-watch:'onRefresh must return a Future, and the spinner stays until it completes. The child must be scrollable and able to overscroll, so a short ListView may need AlwaysScrollableScrollPhysics.',
-ctl:[{k:'du',l:'refresh takes (ms)',t:'rng',min:500,max:3000,step:250,v:1200},{k:'cl',l:'color',t:'sel',o:['blue','pink','teal'],v:'blue'}],
-render(s,st,g,d){
- st.hintHost=d.hintEl;
- const col={blue:'var(--c1)',pink:'var(--c4)',teal:'var(--c2)'}[s.cl];
- if(!st.box){
-  st.n=3;st.busy=false;
-  g.innerHTML=`<div class="rfw" style="position:absolute;inset:0;overflow:hidden;touch-action:pan-x"><div class="rfs" style="position:absolute;left:50%;top:0;width:40px;height:40px;margin-left:-20px;margin-top:-50px;border-radius:50%;background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:3"><div class="spin" style="width:22px;height:22px;border-width:3px"></div></div><div class="rfl" style="position:absolute;left:0;right:0;top:0"></div></div><button class="btn k-Outlined btm" data-a="pull" type="button" style="padding:7px 16px">Simulate pull</button>`;
-  st.box=g.querySelector('.rfw');st.sp=g.querySelector('.rfs');st.list=g.querySelector('.rfl');
-  const body=()=>{st.list.innerHTML=Array.from({length:st.n},(_,i)=>`<div class="li"><span>${i+1}</span>${i===0&&st.n>3?'Fresh item':'Item '+(i+1)}</div>`).join('')};
-  st.body=body;body();
-  st.go=()=>{
-   if(st.busy)return;st.busy=true;st.sp.style.transition='margin-top .2s';st.sp.style.marginTop='24px';st.list.style.transition='transform .2s';st.list.style.transform='translateY(60px)';
-   setTimeout(()=>{st.n=Math.min(st.n+2,9);st.body();st.busy=false;st.sp.style.marginTop='-50px';st.list.style.transform='';st.refreshes=(st.refreshes||0)+1;st.hintHost&&(st.hintHost.textContent='onRefresh ran '+st.refreshes+' time'+(st.refreshes>1?'s':'')+'. Two new items arrived.')},st.du);
-  };
-  let y0=null,dy=0;
-  st.box.addEventListener('pointerdown',e=>{if(st.busy)return;y0=e.clientY;dy=0;try{st.box.setPointerCapture(e.pointerId)}catch(_){}});
-  st.box.addEventListener('pointermove',e=>{if(y0===null||st.busy)return;dy=Math.max(0,Math.min(110,e.clientY-y0));st.sp.style.transition='none';st.list.style.transition='none';st.sp.style.marginTop=(-50+Math.min(dy,74))+'px';st.list.style.transform=`translateY(${dy*.55}px)`;});
-  const end=()=>{if(y0===null)return;y0=null;if(dy>=70)st.go();else{st.sp.style.transition='margin-top .2s';st.list.style.transition='transform .2s';st.sp.style.marginTop='-50px';st.list.style.transform=''}};
-  st.box.addEventListener('pointerup',end);st.box.addEventListener('pointercancel',end);
- }
- st.du=s.du;st.sp.firstChild.style.borderTopColor=col;
- return {code:`RefreshIndicator(\n  color: Colors.${s.cl},\n  onRefresh: () async {\n    await repository.reload(); // about ${s.du} ms here\n    setState(() {});\n  },\n  child: ListView.builder(\n    physics: const AlwaysScrollableScrollPhysics(),\n    itemCount: items.length,\n    itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n  ),\n)`,hint:'Drag the list downward past the threshold and let go, or press Simulate pull.'};
+def({cat:'Scrolling',id:'refresh-indicator',name:'RefreshIndicator',tags:'pull to refresh onrefresh future displacement edgeoffset triggermode alwaysscrollable adaptive',h:330,
+blurb:'RefreshIndicator shows a spinner when the user pulls down past the top of a scrollable, and keeps it turning until the Future you return completes.',
+use:'Reloading a feed, a list of messages or anything the server can change.',
+watch:'The child must really be scrollable. On a short list add physics: AlwaysScrollableScrollPhysics(), or the pull does nothing at all.',
+ctl:[{k:'stage',l:'stage',t:'sel',o:['idle','pulling','refreshing','done'],v:'pulling'},
+ {k:'pull',l:'pull distance',t:'rng',min:0,max:120,v:60},
+ {k:'disp',l:'displacement',t:'rng',min:10,max:90,v:40},
+ {k:'edge',l:'edgeOffset (app bar height)',t:'rng',min:0,max:56,v:0},
+ {k:'trig',l:'triggerMode',t:'sel',o:['onEdge','anywhere'],v:'onEdge'},
+ {k:'short',l:'short list (needs AlwaysScrollable)',t:'chk',v:false},
+ {k:'col',l:'colour',t:'sel',o:['theme','green','red'],v:'theme'},
+ {k:'sw',l:'strokeWidth',t:'rng',min:1,max:6,step:.5,v:2.5}],
+render(s,st,g){
+ const C={theme:'var(--accent)',green:'#15803d',red:'#b91c1c'}[s.col];
+ const stage=s.stage,pull=stage==='idle'?0:stage==='pulling'?+s.pull:stage==='refreshing'?+s.disp+14:0;
+ const n=s.short?2:10;
+ const rows=[...Array(n)].map((_,i)=>`<div style="padding:11px 16px;border-bottom:1px solid var(--line);font:14px var(--f-body)">Item ${i+1}</div>`).join('');
+ const prog=Math.min(1,(+s.pull)/((+s.disp)+40));
+ const spinner=stage==='idle'?'':`<div style="position:absolute;left:50%;top:${(+s.edge)+Math.min(pull,(+s.disp)+14)-18}px;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:var(--surface);box-shadow:0 2px 8px rgba(10,20,60,.25);display:flex;align-items:center;justify-content:center;z-index:3">${stage==='refreshing'?`<div class="spin" style="width:${18}px;height:${18}px;border-width:${s.sw}px;border-top-color:${C}"></div>`:`<div style="width:18px;height:18px;border-radius:50%;border:${s.sw}px solid var(--line);border-top-color:${C};transform:rotate(${prog*320}deg)"></div>`}</div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">${(+s.edge)?`<div style="height:${s.edge}px;background:var(--accent);color:#fff;display:flex;align-items:center;padding:0 14px;font:600 14px var(--f-display)">App bar</div>`:''}<div style="transform:translateY(${Math.min(pull,(+s.disp)+20)}px);transition:transform .2s">${rows}</div>${spinner}</div></div>`;
+ const L=['onRefresh: () async {\n    await api.reload();   // the spinner turns until this completes\n    if (!mounted) return;\n    setState(() {});\n  },'];
+ if(+s.disp!==40)L.push(`displacement: ${s.disp},`);
+ if(+s.edge)L.push(`edgeOffset: ${s.edge},`);
+ if(s.trig!=='onEdge')L.push('triggerMode: RefreshIndicatorTriggerMode.anywhere,');
+ if(s.col!=='theme')L.push(`color: Colors.${s.col},`);
+ if(+s.sw!==2.5)L.push(`strokeWidth: ${(+s.sw).toFixed(1)},`);
+ L.push(`child: ListView.builder(\n    physics: const AlwaysScrollableScrollPhysics(),${s.short?'   // needed: the list is shorter than the screen':''}\n    itemCount: items.length,\n    itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n  ),`);
+ const notes=[];
+ if(s.short)notes.push('A list shorter than the screen does not scroll, so there is nothing to pull. AlwaysScrollableScrollPhysics fixes it.');
+ if(+s.edge)notes.push('edgeOffset pushes the spinner below a pinned app bar, otherwise it appears underneath it.');
+ if(s.trig==='anywhere')notes.push('anywhere lets the pull start from the middle of the list, not only from the top.');
+ notes.push('Return a real Future: returning early stops the spinner before the data arrives.');
+ notes.push('RefreshIndicator.adaptive gives the Cupertino style on iOS. To refresh from code, keep a GlobalKey<RefreshIndicatorState> and call show().');
+ return {code:`RefreshIndicator(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
+}});
+
+def({cat:'Scrolling',id:'scrollbar',name:'Scrollbar',tags:'thumb track visibility thickness radius controller interactive rawscrollbar theme desktop',h:330,
+blurb:'Scrollbar draws a thumb beside a scrollable. On desktop and web it is usually wanted all the time; on mobile it fades in while scrolling.',
+use:'Any long list on desktop or web, and anywhere the user needs to see how far through they are.',
+watch:'With thumbVisibility true you must pass a controller, and the same controller must be on the child, or it throws.',
+ctl:[{k:'vis',l:'thumbVisibility',t:'chk',v:true},
+ {k:'track',l:'trackVisibility',t:'chk',v:false},
+ {k:'th',l:'thickness',t:'rng',min:2,max:18,v:8},
+ {k:'r',l:'radius',t:'rng',min:0,max:12,v:8},
+ {k:'inter',l:'interactive',t:'chk',v:true},
+ {k:'side',l:'scrollbarOrientation',t:'sel',o:['right','left'],v:'right'},
+ {k:'theme',l:'set it app-wide with ScrollbarTheme',t:'chk',v:false},
+ {k:'kind',l:'widget',t:'sel',o:['Scrollbar','RawScrollbar','CupertinoScrollbar'],v:'Scrollbar'}],
+render(s,st,g){
+ const th=+s.th,r=+s.r,left=s.side==='left';
+ const rows=[...Array(14)].map((_,i)=>`<div style="padding:11px 16px;border-bottom:1px solid var(--line);font:14px var(--f-body)">Row ${i+1}</div>`).join('');
+ const thumbCol=s.kind==='CupertinoScrollbar'?'rgba(0,0,0,.45)':'var(--muted)';
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:${left?'row-reverse':'row'}"><div class="sbx" style="flex:1;overflow:auto;scrollbar-width:none">${rows}</div><div style="width:${th+8}px;position:relative;${s.track?'background:rgba(120,130,160,.12);':''}">${s.vis?`<div class="sthumb" style="position:absolute;${left?'left':'right'}:4px;top:4px;width:${th}px;height:52px;border-radius:${r}px;background:${thumbCol};opacity:.75"></div>`:'<div class="cap" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(90deg);white-space:nowrap;margin:0;font-size:10px">fades out</div>'}</div></div></div>`;
+ const L=['controller: _controller,'];
+ if(s.vis)L.push('thumbVisibility: true,');
+ if(s.track)L.push('trackVisibility: true,');
+ if(th!==8)L.push(`thickness: ${th},`);
+ if(r!==8)L.push(`radius: const Radius.circular(${r}),`);
+ if(!s.inter)L.push('interactive: false,');
+ if(left)L.push('scrollbarOrientation: ScrollbarOrientation.left,');
+ const body=`${s.kind}(\n${L.map(x=>'  '+x).join('\n')}\n  child: ListView.builder(\n    controller: _controller,   // the same controller\n    itemCount: items.length,\n    itemBuilder: (context, i) => ListTile(title: Text(items[i])),\n  ),\n)`;
+ const theme=s.theme?`\n\n// once, for the whole app\nMaterialApp(\n  theme: ThemeData(\n    scrollbarTheme: ScrollbarThemeData(\n      thumbVisibility: WidgetStateProperty.all(true),\n      thickness: WidgetStateProperty.all(${th}),\n      radius: const Radius.circular(${r}),\n    ),\n  ),\n)`:'';
+ const notes=[];
+ if(s.vis)notes.push('thumbVisibility keeps the thumb on screen, and it requires the controller to be given to both the Scrollbar and the list.');
+ if(s.kind==='RawScrollbar')notes.push('RawScrollbar is the unstyled base class, for a design system that is not Material.');
+ if(s.kind==='CupertinoScrollbar')notes.push('Scrollbar already uses the Cupertino look on iOS and macOS, so you rarely name this one directly.');
+ if(!s.inter)notes.push('interactive: false makes the bar an indicator only: the user cannot drag the thumb.');
+ if(s.theme)notes.push('ScrollbarTheme is the right place for this: set it once instead of on every list.');
+ return {code:body+theme,hint:notes.join(' ')};
 },
-act(a,st){if(a==='pull'&&st.go)st.go()}});
-
-def({cat:'Scrolling',id:'scrollbar',name:'Scrollbar',tags:'thumb scroll bar thumbvisibility interactive radius thickness controller desktop',h:290,
-blurb:'Scrollbar draws a scroll thumb beside a scrollable. By default it appears while scrolling and fades away. Desktop and web users often expect it always visible and draggable.',
-use:'Long lists on desktop and web, and any scroll area where the user needs to see how far they are.',
-watch:'With thumbVisibility true you must give the Scrollbar and the scroll view the same ScrollController, or Flutter throws an error.',
-ctl:[{k:'tv',l:'thumbVisibility',t:'chk',v:false},{k:'ia',l:'interactive (drag thumb)',t:'chk',v:true},{k:'th',l:'thickness',t:'rng',min:3,max:16,v:8},{k:'rd',l:'rounded thumb',t:'chk',v:true}],
-render(s,st,g){
- if(!st.sc){
-  g.innerHTML=`<div class="sbw" style="position:absolute;inset:12px 16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)"><div class="sbs" style="position:absolute;inset:0;overflow-y:scroll;scrollbar-width:none">${Array.from({length:40},(_,i)=>`<div class="li"><span>${i+1}</span>Row ${i+1}</div>`).join('')}</div><div class="sbt" style="position:absolute;right:3px;top:0;border-radius:4px;background:var(--muted);opacity:0;transition:opacity .25s"></div></div>`;
-  st.sc=g.querySelector('.sbs');st.th=g.querySelector('.sbt');
-  st.place=()=>{const c=st.sc,r=c.clientHeight,h=c.scrollHeight;if(!h)return;const len=Math.max(30,r*r/h),top=(c.scrollTop/(h-r||1))*(r-len);st.th.style.height=len+'px';st.th.style.transform=`translateY(${top||0}px)`};
-  const flash=()=>{st.th.style.opacity=.75;clearTimeout(st.t);if(!st.tv)st.t=setTimeout(()=>{st.th.style.opacity=0},900)};
-  st.sc.addEventListener('scroll',()=>{st.place();flash()},{passive:true});
-  let drag=null;
-  st.th.addEventListener('pointerdown',e=>{if(!st.ia)return;drag={y:e.clientY,top:st.sc.scrollTop};try{st.th.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
-  st.th.addEventListener('pointermove',e=>{if(!drag)return;const c=st.sc,r=c.clientHeight,h=c.scrollHeight,len=parseFloat(st.th.style.height)||30;c.scrollTop=drag.top+(e.clientY-drag.y)*(h-r)/(r-len)});
-  const stop=()=>{drag=null};st.th.addEventListener('pointerup',stop);st.th.addEventListener('pointercancel',stop);
- }
- st.tv=s.tv;st.ia=s.ia;const t=st.th.style;t.width=s.th+'px';t.borderRadius=s.rd?s.th+'px':'0';t.cursor=s.ia?'grab':'default';t.opacity=s.tv?.75:0;t.pointerEvents=s.ia?'auto':'none';st.place();
- return {code:`final controller = ScrollController();\n\nScrollbar(\n  controller: controller,\n  thumbVisibility: ${s.tv},\n  interactive: ${s.ia},\n  thickness: ${s.th},\n  radius: ${s.rd?`Radius.circular(${s.th})`:'null'},\n  child: ListView.builder(\n    controller: controller,\n    itemCount: 40,\n    itemBuilder: (context, i) => ListTile(title: Text('Row $i')),\n  ),\n)`,hint:s.tv?'The thumb stays visible all the time.':'Scroll the list and the thumb appears, then fades out.'};
+after(g,st,s){
+ const box=g.querySelector('.sbx'),thumb=g.querySelector('.sthumb');
+ if(!box||!thumb)return;
+ const upd=()=>{const max=box.scrollHeight-box.clientHeight;if(max<=0)return;const p=box.scrollTop/max;thumb.style.top=(4+p*(box.clientHeight-60))+'px'};
+ box.addEventListener('scroll',upd,{passive:true});upd();
 }});
 
-def({cat:'Scrolling',id:'nested-scroll-view',name:'NestedScrollView',tags:'collapsing header tabs sliver appbar pinned floating headersliverbuilder inner outer',h:320,
-blurb:'NestedScrollView joins an outer header (usually a SliverAppBar) and an inner scrollable body into one scroll gesture. The header collapses first, then the inner list takes over.',
-use:'Collapsing profile headers with a tab bar and a list below, such as a user profile or a product page.',
-watch:'Without NestedScrollView, the inner ListView and the outer scroll view fight for the same drag. Each tab\'s list also needs its own PageStorageKey to keep its position.',
-ctl:[{k:'pin',l:'SliverAppBar pinned',t:'chk',v:true},{k:'tabs',l:'pinned tab bar',t:'chk',v:true}],
+def({cat:'Scrolling',id:'nested-scroll-view',name:'NestedScrollView',tags:'header tabs sliveroverlapabsorber injector tabbarview collapsing floatheaderslivers pagestoragekey',h:340,
+blurb:'NestedScrollView coordinates an outer header with inner scroll views. It is what you need when a collapsing header sits above tabs, each tab scrolling its own list.',
+use:'A profile screen with a big header and tabs, where scrolling a tab collapses the header.',
+watch:'Wrap the SliverAppBar in a SliverOverlapAbsorber and start each inner list with a SliverOverlapInjector, or the first rows hide behind the pinned bar.',
+ctl:[{k:'scroll',l:'scroll position',t:'rng',min:0,max:100,v:0},
+ {k:'exp',l:'header height',t:'rng',min:90,max:200,v:150},
+ {k:'tab',l:'tab',t:'sel',o:['Posts','Media','Likes'],v:'Posts'},
+ {k:'float',l:'floatHeaderSlivers',t:'chk',v:false},
+ {k:'absorb',l:'SliverOverlapAbsorber used',t:'chk',v:true},
+ {k:'keep',l:'PageStorageKey per tab',t:'chk',v:true}],
 render(s,st,g){
- const rows=Array.from({length:30},(_,i)=>`<div class="li"><span>${i+1}</span>Post ${i+1}</div>`).join('');
- g.innerHTML=`<div class="phone" style="top:8px;bottom:8px"><div style="position:absolute;inset:0;overflow-y:auto" class="nsv"><div style="${s.pin?'position:sticky;top:0;z-index:3;':''}height:${s.pin?56:110}px;background:var(--c1);color:var(--accent-ink);display:flex;align-items:flex-end;padding:0 14px 10px;font:700 18px var(--f-display)">${s.pin?'Profile':'Profile header'}</div>${s.pin?'<div style="height:60px;background:var(--c1s);display:flex;align-items:center;padding:0 14px;color:var(--c1t);font-size:13px">Expanded header area scrolls away</div>':''}<div style="${s.tabs?`position:sticky;top:${s.pin?56:0}px;z-index:2;`:''}background:var(--surface);display:flex;border-bottom:1px solid var(--line)"><div class="tab on" style="flex:1;text-align:center">Posts</div><div class="tab" style="flex:1;text-align:center">Likes</div></div>${rows}</div></div>`;
- return {code:`NestedScrollView(\n  headerSliverBuilder: (context, innerBoxIsScrolled) => [\n    SliverAppBar(\n      pinned: ${s.pin},\n      expandedHeight: 120,\n      title: Text('Profile'),\n      bottom: TabBar(tabs: [Tab(text: 'Posts'), Tab(text: 'Likes')]),\n    ),\n  ],\n  body: TabBarView(children: [PostsList(), LikesList()]),\n)`,hint:'Scroll inside the phone. The header collapses first, then the list moves. The tab bar '+(s.tabs?'stays pinned.':'scrolls away too.')};
+ const p=+s.scroll/100,exp=+s.exp,bar=56,tabs=44;
+ const h=Math.max(bar,exp-(exp-bar)*p);
+ const content={Posts:['A first post','Another thought','Something longer here','One more'],Media:['Photo 1','Photo 2','Photo 3','Photo 4'],Likes:['Liked item','Another like','A third']}[s.tab];
+ const rows=content.concat(content).map((t,i)=>`<div style="padding:12px 16px;border-bottom:1px solid var(--line);font:14px var(--f-body)">${t} ${i+1}</div>`).join('');
+ const hide=!s.absorb&&p>0.1;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden">
+  <div style="position:absolute;left:0;right:0;top:${h+tabs}px;bottom:0;overflow:hidden"><div style="transform:translateY(${hide?-28:0}px)">${rows}</div></div>
+  <div style="position:absolute;left:0;right:0;top:${h}px;height:${tabs}px;background:var(--surface);border-bottom:1px solid var(--line);display:flex">${['Posts','Media','Likes'].map(t=>`<div style="flex:1;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);color:${t===s.tab?'var(--accent)':'var(--muted)'};${t===s.tab?'box-shadow:inset 0 -3px 0 var(--accent);':''}">${t}</div>`).join('')}</div>
+  <div style="position:absolute;left:0;right:0;top:0;height:${h}px;background-image:url(${PIC});background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:0 14px 10px;color:#fff;font:700 ${h>bar+30?20:16}px var(--f-display);text-shadow:0 1px 5px rgba(0,0,0,.5)">Profile</div>
+ </div></div>`;
+ const notes=[];
+ if(!s.absorb)notes.push('Without the absorber and injector the first rows slide under the pinned bar, which is the classic NestedScrollView bug.');
+ if(s.float)notes.push('floatHeaderSlivers lets the header come back as soon as the user scrolls up, instead of only at the very top.');
+ if(s.keep)notes.push('A PageStorageKey on each inner list keeps its scroll position when you switch tabs and come back.');
+ notes.push('A plain CustomScrollView cannot do this: it has one scroll position, and each tab needs its own.');
+ return {code:`DefaultTabController(\n  length: 3,\n  child: NestedScrollView(\n${s.float?'    floatHeaderSlivers: true,\n':''}    headerSliverBuilder: (context, innerBoxIsScrolled) => [\n${s.absorb?'      SliverOverlapAbsorber(\n        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),\n        sliver: ':'      '}SliverAppBar(\n          expandedHeight: ${exp},\n          pinned: true,\n          forceElevated: innerBoxIsScrolled,\n          flexibleSpace: const FlexibleSpaceBar(title: Text('Profile')),\n          bottom: const TabBar(tabs: [Tab(text: 'Posts'), Tab(text: 'Media'), Tab(text: 'Likes')]),\n        )${s.absorb?',\n      ),':','}\n    ],\n    body: const TabBarView(\n      children: [PostsTab(), MediaTab(), LikesTab()],\n    ),\n  ),\n)\n\n// inside each tab\nCustomScrollView(\n${s.keep?"  key: const PageStorageKey('posts'),\n":''}  slivers: [\n${s.absorb?'    SliverOverlapInjector(\n      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),\n    ),\n':''}    SliverList.builder(\n      itemCount: posts.length,\n      itemBuilder: (context, i) => ListTile(title: Text(posts[i])),\n    ),\n  ],\n)`,hint:notes.join(' ')};
 }});
-
 /* ---- Layout ---- */
 def({cat:'Layout',id:'table',name:'Table',tags:'grid rows columns tablerow tablecell columnwidths border flexcolumnwidth fixedcolumnwidth intrinsic',h:300,
 blurb:'Table lays children out in rows and columns where each column has one width for all rows. You choose how column widths are decided with columnWidths.',
