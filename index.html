@@ -49,6 +49,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -786,18 +787,49 @@ render(s,st,g){
  return {code,hint:s.k==='ConstrainedBox (max)'?'The child asks for 220 × 140 and is capped at your maximums. Make the limits larger and it stops growing at 220 × 140.':''};
 }});
 
-def({cat:'Layout',id:'container',name:'Container',tags:'decoration box shadow border gradient',
-blurb:'Container is a convenience widget that combines sizing, padding, margin, alignment and painting (color, border, radius, shadow, gradient) in one place.',
+def({cat:'Layout',id:'container',name:'Container',tags:'decoration box shadow border gradient margin transform clipbehavior constraints foregrounddecoration alignment',h:330,
+blurb:'Container is a convenience widget that combines sizing, padding, margin, alignment and painting (color, border, radius, shadow, gradient) in one place. Every control below is a real Container argument.',
 use:'A styled box. If you only need one of those jobs, a dedicated widget (Padding, SizedBox, DecoratedBox) is lighter.',
-watch:'You cannot set both color and decoration. Put the color inside BoxDecoration instead.',
-ctl:[{k:'w',l:'width',t:'rng',min:90,max:260,v:170},{k:'r',l:'radius',t:'rng',min:0,max:60,v:16},{k:'p',l:'padding',t:'rng',min:0,max:32,v:12},{k:'b',l:'border',t:'chk',v:true},{k:'sh',l:'boxShadow',t:'chk',v:true},{k:'gr',l:'gradient',t:'chk',v:false},{k:'al',l:'alignment',t:'sel',o:['topLeft','center','bottomRight'],v:'center'}],
+watch:'You cannot set both color and decoration. Put the color inside BoxDecoration instead. Setting alignment makes the Container expand to fill its parent. transform runs after layout, so a rotated Container still takes its original space.',
+ctl:[{k:'w',l:'width',t:'rng',min:90,max:240,v:170},{k:'h',l:'height',t:'rng',min:60,max:150,v:110},
+ {k:'p',l:'padding',t:'rng',min:0,max:32,v:12},{k:'m',l:'margin',t:'rng',min:0,max:28,v:0},
+ {k:'r',l:'borderRadius',t:'rng',min:0,max:60,v:16},
+ {k:'al',l:'alignment',t:'sel',o:['none','topLeft','center','bottomRight'],v:'center'},
+ {k:'cn',l:'constraints',t:'sel',o:['none','maxWidth: 140','minHeight: 140'],v:'none'},
+ {k:'rot',l:'transform: rotate',t:'rng',min:-20,max:20,v:0},
+ {k:'ta',l:'transformAlignment',t:'sel',o:['topLeft','center'],v:'center'},
+ {k:'cb',l:'clipBehavior',t:'sel',o:['none','antiAlias'],v:'none'},
+ {k:'b',l:'border',t:'chk',v:true},{k:'sh',l:'boxShadow',t:'chk',v:true},{k:'gr',l:'gradient',t:'chk',v:false},
+ {k:'fg',l:'foregroundDecoration',t:'chk',v:false},{k:'ov',l:'child overflows the box',t:'chk',v:false}],
 render(s,st,g){
- const a=AL[s.al];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${s.w}px;height:120px;padding:${s.p}px;display:flex;justify-content:${a[0]};align-items:${a[1]};border-radius:${s.r}px;background:${s.gr?'linear-gradient(135deg,var(--c1),var(--c4))':'var(--c1s)'};${s.b?'border:3px solid var(--c1);':''}${s.sh?'box-shadow:0 8px 18px rgba(20,30,80,.28);':''}color:${s.gr?'#fff':'var(--c1t)'};font-weight:600;font-size:14px">Hello</div></div>`;
+ const a=AL[s.al==='none'?'center':s.al];
+ const W=s.cn==='maxWidth: 140'?Math.min(s.w,140):s.w, H=s.cn==='minHeight: 140'?Math.max(s.h,140):s.h;
+ const child=s.ov?`<div style="width:${W+70}px;height:34px;border-radius:7px;background:var(--c4);color:#fff;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-mono);flex:none">a very wide child</div>`:`<span style="font:600 14px var(--f-body)">Hello</span>`;
+ const box=`<div style="position:relative;box-sizing:border-box;width:${W}px;height:${H}px;padding:${s.p}px;margin:${s.m}px;display:flex;justify-content:${a[0]};align-items:${a[1]};border-radius:${s.r}px;overflow:${s.cb==='none'?'visible':'hidden'};background:${s.gr?'linear-gradient(135deg,var(--c1),var(--c4))':'var(--c1s)'};${s.b?'border:3px solid var(--c1);':''}${s.sh?'box-shadow:0 8px 18px rgba(20,30,80,.28);':''}transform:rotate(${s.rot}deg);transform-origin:${s.ta==='center'?'center':'top left'}">${child}${s.fg?'<div style="position:absolute;inset:0;border-radius:inherit;background:rgba(220,38,38,.22);pointer-events:none"></div>':''}</div>`;
+ const outer=s.m?`<div style="outline:1.5px dashed var(--muted);outline-offset:-1px;display:inline-flex">${box}</div>`:box;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;overflow:hidden">${outer}</div>`;
  const d=[s.gr?'gradient: LinearGradient(colors: [Colors.blue, Colors.pink]),':'color: Colors.blue.shade100,',`borderRadius: BorderRadius.circular(${s.r}),`];
  if(s.b)d.push('border: Border.all(width: 3, color: Colors.blue),');
- if(s.sh)d.push('boxShadow: [BoxShadow(blurRadius: 18, offset: Offset(0, 8))],');
- return {code:`Container(\n  width: ${s.w}, height: 120,\n  padding: EdgeInsets.all(${s.p}),\n  alignment: Alignment.${s.al},\n  decoration: BoxDecoration(\n${d.map(x=>'    '+x).join('\n')}\n  ),\n  child: Text('Hello'),\n)`,hint:''};
+ if(s.sh)d.push('boxShadow: const [BoxShadow(blurRadius: 18, offset: Offset(0, 8))],');
+ const L=[`width: ${s.w},`,`height: ${s.h},`,`padding: const EdgeInsets.all(${s.p}),`];
+ if(s.m)L.push(`margin: const EdgeInsets.all(${s.m}),`);
+ if(s.al!=='none')L.push(`alignment: Alignment.${s.al},`);
+ if(s.cn==='maxWidth: 140')L.push('constraints: const BoxConstraints(maxWidth: 140),');
+ if(s.cn==='minHeight: 140')L.push('constraints: const BoxConstraints(minHeight: 140),');
+ if(s.rot)L.push(`transform: Matrix4.rotationZ(${(s.rot*Math.PI/180).toFixed(3)}),`);
+ if(s.rot&&s.ta==='center')L.push('transformAlignment: Alignment.center,');
+ if(s.cb!=='none')L.push('clipBehavior: Clip.antiAlias,');
+ L.push('decoration: BoxDecoration(\n'+d.map(x=>'    '+x).join('\n')+'\n  ),');
+ if(s.fg)L.push('foregroundDecoration: BoxDecoration(\n    color: Colors.red.withValues(alpha: 0.22),\n    borderRadius: BorderRadius.circular('+s.r+'),\n  ),');
+ L.push(s.ov?"child: const SizedBox(width: 240, child: Text('a very wide child')),":"child: const Text('Hello'),");
+ const notes=[];
+ if(s.al!=='none')notes.push('alignment is set, so in a real layout the Container fills its parent.');
+ if(s.ov&&s.cb==='none')notes.push('The child sticks out: clipBehavior is none, which is the default.');
+ if(s.ov&&s.cb!=='none')notes.push('clipBehavior: Clip.antiAlias cuts the child to the rounded corners.');
+ if(s.m)notes.push('The dashed line shows the space margin adds outside the box.');
+ if(s.rot)notes.push('transform happens after layout, so the slot the Container occupies does not rotate.');
+ if(s.cn!=='none')notes.push('constraints are merged with width and height, and the constraint wins.');
+ return {code:`Container(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')||'Change any control: the code follows it exactly.'};
 }});
 
 def({cat:'Layout',id:'rotated-box',name:'RotatedBox & Transform',tags:'rotate quarterturns transform angle',
