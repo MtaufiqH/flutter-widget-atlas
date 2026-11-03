@@ -57,6 +57,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -758,19 +759,42 @@ render(s,st,g){
  return {code:`${s.dir}(\n${L.map(x=>'  '+x).join('\n')}\n  children: [${kidCode}],\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'expanded',name:'Expanded & Flexible',tags:'flex spacer flexible fill remaining space',
-blurb:'Expanded makes a child fill the space left over along the main axis of a Row, Column or Flex. When several children are flexible, the free space is split in proportion to their flex values. Flexible is the looser cousin: the child may be smaller than its share.',
+def({cat:'Layout',id:'expanded',name:'Expanded & Flexible',tags:'flex spacer flexible fill remaining space fit tight loose mainaxissize',h:320,
+blurb:'Expanded makes a child fill the space left over along the main axis of a Row, Column or Flex. Several flexible children split the free space by their flex values. Flexible is the looser version: the child may end up smaller than its share.',
 use:'Letting one child take whatever room is left, or splitting width in a ratio such as 1 : 2.',
-watch:'Expanded must be a direct child of Row, Column or Flex. Inside a scroll view that runs in the same direction there is no bounded space, and Flutter throws.',
-ctl:[{k:'bk',l:'Widget around B',t:'sel',o:['Expanded','Flexible','SizedBox'],v:'Expanded'},{k:'bf',l:'B flex',t:'rng',min:1,max:4,v:1},{k:'cf',l:'C flex',t:'rng',min:1,max:4,v:2},{k:'sp',l:'Spacer after A',t:'chk',v:false}],
+watch:'Expanded must be a direct child of Row, Column or Flex. Inside a scroll view running the same way there is no bounded space and Flutter throws.',
+ctl:[{k:'bk',l:'Widget around B',t:'sel',o:['Expanded','Flexible','SizedBox'],v:'Expanded'},
+ {k:'fit',l:'Flexible fit',t:'sel',o:['loose','tight'],v:'loose'},
+ {k:'bf',l:'B flex',t:'rng',min:1,max:4,v:1},
+ {k:'cf',l:'C flex',t:'rng',min:1,max:4,v:2},
+ {k:'ck',l:'Widget around C',t:'sel',o:['Expanded','Flexible','none'],v:'Expanded'},
+ {k:'sp',l:'Spacer after A',t:'chk',v:false},
+ {k:'spf',l:'Spacer flex',t:'rng',min:1,max:3,v:1},
+ {k:'vert',l:'Column instead of Row',t:'chk',v:false}],
 render(s,st,g){
- const slot=(f,inner)=>`<div class="slot" style="flex:${f} 1 0">${inner}</div>`;
- const B=s.bk==='SizedBox'?box('B','b','width:90px;height:64px;margin:0 3px'):slot(s.bf,box('B','b',`height:64px;width:${s.bk==='Expanded'?'100%':'58px'}`));
- const C=slot(s.cf,box('C','c','height:64px;width:100%'));
- g.innerHTML=`<div class="fill" style="align-items:center">${box('A','a','width:56px;height:64px;margin:0 3px')}${s.sp?'<div class="spacer" style="flex:1 1 0"></div>':''}${B}${C}</div>`;
- const wrap=s.bk==='SizedBox'?'SizedBox(width: 90, child: B())':`${s.bk}(flex: ${s.bf}, child: B())`;
- return {code:`Row(\n  children: [\n    A(),\n${s.sp?'    Spacer(),\n':''}    ${wrap},\n    Expanded(flex: ${s.cf}, child: C()),\n  ],\n)`,
-  hint:s.bk==='Flexible'?'Flexible keeps B at its own size. The dashed outline is the share it was offered.':s.bk==='Expanded'?'Expanded forces B to fill its whole share. Free space is divided by the flex ratio.':'A fixed SizedBox takes its width first. The flexible children share what remains.'};
+ const vert=s.vert,tight=s.fit==='tight'||s.bk==='Expanded';
+ const slot=(f,inner)=>`<div class="slot" style="flex:${f} 1 0;display:flex;align-items:center;justify-content:center">${inner}</div>`;
+ const sizeOf=(full,natural)=>vert?`height:${full?'100%':natural+'px'};width:76px`:`width:${full?'100%':natural+'px'};height:64px`;
+ const B=s.bk==='SizedBox'
+  ?box('B','b',vert?'height:52px;width:76px;margin:3px 0':'width:90px;height:64px;margin:0 3px')
+  :slot(s.bf,box('B','b',sizeOf(s.bk==='Expanded'||s.fit==='tight',58)));
+ const C=s.ck==='none'
+  ?box('C','c',vert?'height:50px;width:76px;margin:3px 0':'width:70px;height:64px;margin:0 3px')
+  :slot(s.cf,box('C','c',sizeOf(s.ck==='Expanded',52)));
+ g.innerHTML=`<div class="fill" style="${vert?'flex-direction:column;':''}align-items:center;padding:8px">${box('A','a',vert?'height:46px;width:76px;margin:3px 0':'width:56px;height:64px;margin:0 3px')}${s.sp?`<div class="spacer" style="flex:${s.spf} 1 0"></div>`:''}${B}${C}</div>`;
+ const wrapB=s.bk==='SizedBox'?(vert?'SizedBox(height: 52, child: B())':'SizedBox(width: 90, child: B())')
+  :s.bk==='Expanded'?`Expanded(flex: ${s.bf}, child: B())`
+  :`Flexible(flex: ${s.bf}, fit: FlexFit.${s.fit}, child: B())`;
+ const wrapC=s.ck==='none'?'C()':s.ck==='Expanded'?`Expanded(flex: ${s.cf}, child: C())`:`Flexible(flex: ${s.cf}, child: C())`;
+ const notes=[];
+ if(s.bk==='Flexible'&&s.fit==='loose')notes.push('Flexible with loose fit keeps B at its own size. The share it was offered is the space around it.');
+ if(s.bk==='Flexible'&&s.fit==='tight')notes.push('FlexFit.tight makes Flexible behave exactly like Expanded.');
+ if(s.bk==='Expanded')notes.push('Expanded is Flexible with fit: FlexFit.tight, so B fills its whole share.');
+ if(s.bk==='SizedBox')notes.push('A fixed child takes its size first. The flexible children divide only what is left.');
+ if(s.sp)notes.push('Spacer is an Expanded with an empty box, so it eats free space by flex just like the rest.');
+ const tot=(s.bk!=='SizedBox'?+s.bf:0)+(s.ck!=='none'?+s.cf:0)+(s.sp?+s.spf:0);
+ if(tot)notes.push('Total flex is '+tot+', so one unit is 1/'+tot+' of the free space.');
+ return {code:`${vert?'Column':'Row'}(\n  children: [\n    A(),\n${s.sp?`    Spacer(flex: ${s.spf}),\n`:''}    ${wrapB},\n    ${wrapC},\n  ],\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'stack-positioned',name:'Stack & Positioned',tags:'overlay absolute layer badge stackfit clipbehavior positioned fill alignment',h:330,
@@ -804,40 +828,120 @@ render(s,st,g){
  return {code:`Stack(\n  alignment: ${s.al==='center'?'Alignment.center':'AlignmentDirectional.'+s.al},\n${fitLine}${dirLine}  clipBehavior: Clip.${s.clip},\n  children: [\n    Container(color: Colors.blue),\n    Positioned(\n      ${L}\n      child: Badge(),\n    ),\n  ],\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'align-center',name:'Align & Center',tags:'alignment position',
-blurb:'Align places its child at a point inside itself, expressed as an Alignment from the top-left corner (-1, -1) to the bottom-right (1, 1). Center is simply Align with Alignment.center.',
-use:'Pushing one child to a corner or edge of the space it is given.',
-watch:'Align expands to fill its parent when the parent is bounded. Give it widthFactor or heightFactor if you want it to wrap its child instead.',
-ctl:[{k:'al',l:'alignment',t:'sel',o:Object.keys(AL),v:'bottomRight'},{k:'sz',l:'child size',t:'rng',min:30,max:110,v:70}],
+def({cat:'Layout',id:'align-center',name:'Align & Center',tags:'alignment position widthfactor heightfactor fractionaloffset directional center',h:320,
+blurb:'Align places its child at a point inside itself, from Alignment(-1, -1) at the top left to Alignment(1, 1) at the bottom right. Center is Align with Alignment.center. The size factors decide whether Align fills its parent or shrinks to the child.',
+use:'Pushing one child to a corner or an edge of the space it was given.',
+watch:'With no size factors Align grows to fill whatever it is offered, which is what lets the child move. Inside a Row or Column that often surprises people.',
+ctl:[{k:'al',l:'alignment',t:'sel',o:['topLeft','topCenter','topRight','centerLeft','center','centerRight','bottomLeft','bottomCenter','bottomRight','custom'],v:'center'},
+ {k:'x',l:'custom x (-1 to 1)',t:'rng',min:-1,max:1,step:.1,v:0},
+ {k:'y',l:'custom y (-1 to 1)',t:'rng',min:-1,max:1,step:.1,v:0},
+ {k:'wf',l:'widthFactor',t:'sel',o:['null','1.0','2.0'],v:'null'},
+ {k:'hf',l:'heightFactor',t:'sel',o:['null','1.0','2.0'],v:'null'},
+ {k:'dir',l:'use AlignmentDirectional',t:'chk',v:false},
+ {k:'rtl',l:'textDirection: rtl',t:'chk',v:false}],
 render(s,st,g){
- const a=AL[s.al];
- g.innerHTML=`<div class="fill" style="padding:24px"><div style="flex:1;display:flex;justify-content:${a[0]};align-items:${a[1]};border:1.5px dashed var(--c3);border-radius:8px;padding:6px">${box('child','a',`width:${s.sz}px;height:${Math.round(s.sz*.6)}px`)}</div></div>`;
- return {code:`Align(\n  alignment: Alignment.${s.al},\n  child: Child(),\n)`,hint:s.al==='center'?'Align(alignment: Alignment.center) is exactly what Center does.':'The dashed box is the Align widget. It fills the space and positions the child inside it.'};
+ const custom=s.al==='custom';
+ const named={topLeft:[-1,-1],topCenter:[0,-1],topRight:[1,-1],centerLeft:[-1,0],center:[0,0],centerRight:[1,0],bottomLeft:[-1,1],bottomCenter:[0,1],bottomRight:[1,1]};
+ let [x,y]=custom?[+s.x,+s.y]:named[s.al];
+ if(s.dir&&s.rtl)x=-x;
+ const wf=s.wf==='null'?0:+s.wf,hf=s.hf==='null'?0:+s.hf;
+ const cw=76,ch=44;
+ const boxW=wf?cw*wf:0,boxH=hf?ch*hf:0;
+ const inner=`<div style="position:relative;${boxW?`width:${boxW}px`:'width:100%'};${boxH?`height:${boxH}px`:'height:100%'};border:1.5px dashed var(--c3);box-sizing:border-box"><div class="fb c" style="position:absolute;left:${(x+1)/2*100}%;top:${(y+1)/2*100}%;transform:translate(-${(x+1)/2*100}%,-${(y+1)/2*100}%);width:${cw}px;height:${ch}px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body)">child</div></div>`;
+ g.innerHTML=`<div class="fill" style="padding:18px"><div style="position:relative;width:100%;height:100%;border:1.5px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center">${inner}</div></div>`;
+ const A=custom?`Alignment(${(+s.x).toFixed(1)}, ${(+s.y).toFixed(1)})`:(s.dir?`AlignmentDirectional.${s.al.replace('Left','Start').replace('Right','End')}`:`Alignment.${s.al}`);
+ const L=[`alignment: ${A},`];
+ if(wf)L.push(`widthFactor: ${wf.toFixed(1)},`);
+ if(hf)L.push(`heightFactor: ${hf.toFixed(1)},`);
+ L.push("child: const Text('child'),");
+ const notes=[];
+ if(!wf&&!hf)notes.push('With no factors the Align fills the space it was given, shown by the dashed box.');
+ if(wf||hf)notes.push('A size factor makes Align that many times the child size instead of filling the parent.');
+ if(custom)notes.push('Alignment takes any double, so values outside -1 to 1 push the child right out of the box.');
+ if(s.dir)notes.push(s.rtl?'AlignmentDirectional with rtl flips start and end, so topStart is now the top right.':'AlignmentDirectional uses start and end instead of left and right.');
+ return {code:`Align(\n${L.map(x2=>'  '+x2).join('\n')}\n)${s.al==='center'&&!wf&&!hf?"\n\n// the same thing\nCenter(child: const Text('child'))":''}`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'padding',name:'Padding',tags:'spacing inset margin edgeinsets',
-blurb:'Padding insets its child by an EdgeInsets value. It is the lightweight way to add space around a widget without reaching for Container.',
-use:'Space around a single child. For space between siblings, prefer SizedBox or the spacing argument of Row and Column.',
-watch:'Flutter has no margin property on widgets. Margin is either Padding outside the widget or Container(margin: ...).',
-ctl:[{k:'h',l:'horizontal',t:'rng',min:0,max:48,v:24},{k:'v',l:'vertical',t:'rng',min:0,max:48,v:16}],
+def({cat:'Styling',id:'padding',name:'Padding',tags:'spacing inset margin edgeinsets directional only ltrb symmetric rtl',h:320,
+blurb:'Padding adds empty space inside itself, around its child. EdgeInsets says how much on each side, and EdgeInsetsDirectional follows the reading direction instead of left and right.',
+use:'Space around anything. It is the most used layout widget in Flutter.',
+watch:'Padding is space inside the parent, margin on a Container is space outside the decoration. Negative padding does not exist: use Transform.translate or an OverflowBox.',
+ctl:[{k:'mode',l:'EdgeInsets constructor',t:'sel',o:['all','symmetric','only','fromLTRB','directional'],v:'symmetric'},
+ {k:'a',l:'all',t:'rng',min:0,max:48,v:16},
+ {k:'h',l:'horizontal / left / start',t:'rng',min:0,max:48,v:24},
+ {k:'v',l:'vertical / top',t:'rng',min:0,max:48,v:16},
+ {k:'r',l:'right / end',t:'rng',min:0,max:48,v:8},
+ {k:'b',l:'bottom',t:'rng',min:0,max:48,v:8},
+ {k:'rtl',l:'textDirection: rtl',t:'chk',v:false},
+ {k:'cmp',l:'compare with Container margin',t:'chk',v:false}],
 render(s,st,g){
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="padding:${s.v}px ${s.h}px;background:var(--c3s);outline:1.5px dashed var(--c3)">${box('Child','a','width:120px;height:56px')}</div></div>`;
- const e=s.h===s.v?`EdgeInsets.all(${s.h})`:`EdgeInsets.symmetric(horizontal: ${s.h}, vertical: ${s.v})`;
- return {code:`Padding(\n  padding: ${e},\n  child: Child(),\n)`,hint:'The tinted area is the padding. The child keeps its own size.'};
+ const m=s.mode,rtl=s.rtl;
+ let t=0,rr=0,bb=0,l=0;
+ if(m==='all'){t=rr=bb=l=+s.a}
+ else if(m==='symmetric'){t=bb=+s.v;l=rr=+s.h}
+ else if(m==='only'){t=+s.v;l=+s.h;rr=+s.r;bb=+s.b}
+ else if(m==='fromLTRB'){l=+s.h;t=+s.v;rr=+s.r;bb=+s.b}
+ else {t=+s.v;bb=+s.b;if(rtl){rr=+s.h;l=+s.r}else{l=+s.h;rr=+s.r}}
+ const boxed=`<div style="box-sizing:border-box;background:var(--c1s);border:1.5px dashed var(--c1);padding:${t}px ${rr}px ${bb}px ${l}px;border-radius:10px"><div class="fb c" style="padding:14px 18px;border-radius:8px;font:600 13.5px var(--f-body);text-align:center">child</div></div>`;
+ const marg=`<div style="box-sizing:border-box;outline:1.5px dashed var(--muted);outline-offset:-1px"><div style="margin:${t}px ${rr}px ${bb}px ${l}px"><div class="fb d" style="padding:14px 18px;border-radius:8px;font:600 13.5px var(--f-body);text-align:center">child</div></div></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:18px;padding:14px"><div style="flex:1;max-width:200px"><div class="cap" style="margin:0 0 6px">Padding</div>${boxed}</div>${s.cmp?`<div style="flex:1;max-width:200px"><div class="cap" style="margin:0 0 6px">Container(margin:)</div>${marg}</div>`:''}</div>`;
+ const E=m==='all'?`const EdgeInsets.all(${s.a})`
+  :m==='symmetric'?`const EdgeInsets.symmetric(horizontal: ${s.h}, vertical: ${s.v})`
+  :m==='only'?`const EdgeInsets.only(left: ${s.h}, top: ${s.v}, right: ${s.r}, bottom: ${s.b})`
+  :m==='fromLTRB'?`const EdgeInsets.fromLTRB(${s.h}, ${s.v}, ${s.r}, ${s.b})`
+  :`const EdgeInsetsDirectional.only(start: ${s.h}, top: ${s.v}, end: ${s.r}, bottom: ${s.b})`;
+ const notes=[];
+ if(m==='directional')notes.push(rtl?'In rtl, start is the right edge and end is the left. The box flipped without you changing any number.':'In ltr, start is the left edge. Switch textDirection on to see it flip.');
+ if(m!=='directional'&&rtl)notes.push('left and right do not flip in rtl. Use EdgeInsetsDirectional in an app you will translate.');
+ if(s.cmp)notes.push('Padding puts the space inside the parent box; Container margin puts it outside, which matters when the box has a background.');
+ return {code:`Padding(\n  padding: ${E},\n  child: const Text('child'),\n)${s.cmp?`\n\n// the same spacing as a margin instead\nContainer(\n  margin: ${E},\n  child: const Text('child'),\n)`:''}`,hint:notes.join(' ')||'The dashed box is the Padding itself; the coloured box is the child.'};
 }});
 
-def({cat:'Layout',id:'sized-box',name:'SizedBox & ConstrainedBox',tags:'size width height constraints spacing gap',
-blurb:'SizedBox forces its child to an exact size (tight constraints). ConstrainedBox only sets limits, so the child can be anything inside them. SizedBox with no child is the standard way to make a gap.',
-use:'Fixed-size boxes, gaps between widgets, and capping how large a child may grow.',
-watch:'A child inside SizedBox cannot choose its own size. Container(width: 220) inside SizedBox(width: 140) still ends up 140 wide.',
-ctl:[{k:'k',l:'Widget',t:'sel',o:['SizedBox','ConstrainedBox (max)','SizedBox.expand'],v:'SizedBox'},{k:'w',l:'width',t:'rng',min:40,max:260,v:140},{k:'h',l:'height',t:'rng',min:20,max:180,v:80}],
+def({cat:'Layout',id:'sized-box',name:'SizedBox & ConstrainedBox',tags:'width height constraints boxconstraints tight loose expand shrink square gap spacer',h:320,
+blurb:'SizedBox forces an exact size on its child. ConstrainedBox adds limits instead, so the child can still pick a size inside them. Both work by changing the constraints that reach the child.',
+use:'Fixed sizes, gaps between widgets, and minimum or maximum limits on something that sizes itself.',
+watch:'A SizedBox cannot make a child bigger than its own parent allows: the parent constraints win. An empty SizedBox is the cheapest way to add a gap.',
+ctl:[{k:'kind',l:'widget',t:'sel',o:['SizedBox','ConstrainedBox','SizedBox.expand','SizedBox.shrink','SizedBox.square'],v:'SizedBox'},
+ {k:'w',l:'width / maxWidth',t:'rng',min:40,max:300,v:160},
+ {k:'h',l:'height / maxHeight',t:'rng',min:30,max:170,v:90},
+ {k:'mw',l:'minWidth',t:'rng',min:0,max:200,v:0},
+ {k:'mh',l:'minHeight',t:'rng',min:0,max:140,v:0},
+ {k:'child',l:'child wants',t:'sel',o:['to be small','to be huge','nothing (no child)'],v:'to be small'},
+ {k:'par',l:'parent limit (maxWidth 220)',t:'chk',v:false}],
 render(s,st,g){
- let w=s.w,h=s.h,code;
- if(s.k==='ConstrainedBox (max)'){w=Math.min(220,s.w);h=Math.min(140,s.h);code=`ConstrainedBox(\n  constraints: BoxConstraints(\n    maxWidth: ${s.w},\n    maxHeight: ${s.h},\n  ),\n  child: Container(width: 220, height: 140), // wants 220 x 140\n)`}
- else if(s.k==='SizedBox.expand'){w=null;code='SizedBox.expand(\n  child: Child(), // fills all available space\n)'}
- else code=`SizedBox(\n  width: ${s.w},\n  height: ${s.h},\n  child: Child(), // forced to exactly ${s.w} x ${s.h}\n)`;
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:${w===null?'0':'12px'}">${box(w===null?'fills the stage':`${w} × ${h}`,'b',w===null?'width:100%;height:100%;border-radius:0':`width:${w}px;height:${h}px`)}</div>`;
- return {code,hint:s.k==='ConstrainedBox (max)'?'The child asks for 220 × 140 and is capped at your maximums. Make the limits larger and it stops growing at 220 × 140.':''};
+ const k=s.kind;
+ let w=+s.w,h=+s.h;
+ if(k==='SizedBox.expand'){w=320;h=170}
+ if(k==='SizedBox.shrink'){w=0;h=0}
+ if(k==='SizedBox.square'){h=w}
+ const cw=s.child==='to be small'?70:s.child==='to be huge'?400:0,chh=s.child==='to be small'?34:s.child==='to be huge'?240:0;
+ let bw=w,bh=h;
+ if(k==='ConstrainedBox'){bw=Math.max(+s.mw,Math.min(cw||0,w));bh=Math.max(+s.mh,Math.min(chh||0,h))}
+ if(s.par)bw=Math.min(bw,220);
+ const clipped=s.child==='to be huge';
+ const inner=s.child==='nothing (no child)'?'':`<div class="fb c" style="width:${Math.min(cw,bw)}px;height:${Math.min(chh,bh)}px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);overflow:hidden">child</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px">${s.par?'<div style="border:1.5px dotted var(--muted);padding:6px;max-width:234px">':''}<div style="width:${bw}px;height:${bh}px;border:1.5px dashed var(--c1);background:var(--c1s);display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box">${inner}</div>${s.par?'</div>':''}</div>`;
+ let code;
+ if(k==='ConstrainedBox'){
+  const L=[];
+  if(+s.mw)L.push(`minWidth: ${s.mw},`);
+  L.push(`maxWidth: ${s.w},`);
+  if(+s.mh)L.push(`minHeight: ${s.mh},`);
+  L.push(`maxHeight: ${s.h},`);
+  code=`ConstrainedBox(\n  constraints: const BoxConstraints(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n  child: child,\n)`;
+ }
+ else if(k==='SizedBox.expand')code='SizedBox.expand(child: child)   // as big as the parent allows';
+ else if(k==='SizedBox.shrink')code='const SizedBox.shrink()   // 0 x 0, the cheapest empty slot';
+ else if(k==='SizedBox.square')code=`SizedBox.square(\n  dimension: ${s.w},\n  child: child,\n)`;
+ else code=`SizedBox(\n  width: ${s.w},\n  height: ${s.h},\n  child: child,\n)\n\n// as a gap between two widgets\nconst SizedBox(height: 16)`;
+ if(s.par)code='// parent: ConstrainedBox(constraints: BoxConstraints(maxWidth: 220))\n'+code;
+ const notes=[];
+ if(s.par&&bw===220)notes.push('The parent caps the width at 220, and the parent always wins. The dotted line is the parent.');
+ if(k==='ConstrainedBox'&&s.child==='to be huge')notes.push('The child wanted to be huge, so it was clamped to the maximum.');
+ if(k==='ConstrainedBox'&&s.child==='to be small'&&(+s.mw||+s.mh))notes.push('The child wanted to be small, so the minimum pushed it up.');
+ if(k==='SizedBox'&&s.child==='to be huge')notes.push('SizedBox gives tight constraints, so the child is forced to exactly this size whatever it wanted.');
+ if(s.child==='nothing (no child)')notes.push('With no child a SizedBox is pure empty space, which is how most gaps are written.');
+ return {code,hint:notes.join(' ')||'Change what the child wants and watch which widget decides the final size.'};
 }});
 
 def({cat:'Layout',id:'container',name:'Container',tags:'decoration box shadow border gradient margin transform clipbehavior constraints foregrounddecoration alignment',h:330,
@@ -1283,31 +1387,85 @@ render(s,st,g){
  return {code:`${s.var}(\n${cl.map(x=>'  '+x).join('\n')}\n  child: Column(\n    mainAxisSize: MainAxisSize.min,\n    children: [\n      ListTile(\n${tl.map(x=>'        '+x).join('\n')}\n      ),${sepa}\n      // ... more tiles\n    ],\n  ),\n)`,hint:notes.join(' ')||'Card plus a Column of ListTiles is the standard grouped list.'};
 }});
 
-def({cat:'Display',id:'opacity',name:'Opacity',tags:'transparent alpha fade withopacity',
-blurb:'The Opacity widget makes its whole subtree translucent as a single layer. Giving each shape its own alpha colour behaves differently where shapes overlap.',
-use:'Fading one widget or a group of widgets. For a fade that changes over time use AnimatedOpacity or FadeTransition.',
-watch:'Opacity forces an extra compositing layer, so avoid it on large or animating subtrees. Colors with alpha are cheaper when you only need a translucent fill.',
-ctl:[{k:'op',l:'opacity',t:'rng',min:0,max:1,step:.05,v:.5},{k:'m',l:'Approach',t:'sel',o:['Opacity (whole group)','Color alpha (each shape)'],v:'Opacity (whole group)'}],
+def({cat:'Painting and effects',id:'opacity',name:'Opacity',tags:'transparent alpha fade withvalues visibility offstage animatedopacity fadetransition layer cost',h:320,
+blurb:'Opacity fades its child and everything inside it as one layer. That is the important part: overlapping shapes fade together, instead of each one becoming see-through on its own.',
+use:'Dimming a whole group, a disabled state, or a fade you drive yourself.',
+watch:'Any value between 0 and 1 forces an offscreen layer, which costs real time in lists and animations. Fading a single colour with Color.withValues(alpha:) is free.',
+ctl:[{k:'op',l:'opacity',t:'rng',min:0,max:1,step:.05,v:.5},
+ {k:'m',l:'approach',t:'sel',o:['Opacity (whole group)','Color alpha (each shape)','Visibility','Offstage'],v:'Opacity (whole group)'},
+ {k:'tap',l:'child has a button',t:'chk',v:false},
+ {k:'ip',l:'wrap in IgnorePointer',t:'chk',v:false},
+ {k:'sem',l:'alwaysIncludeSemantics',t:'chk',v:false},
+ {k:'vis',l:'visible / offstage toggle',t:'chk',v:true}],
 render(s,st,g){
- const shapes=o=>`<div class="fb a" style="position:absolute;left:0;top:0;width:110px;height:110px;border-radius:50%;background:var(--c1);border-color:var(--c1);opacity:${o}"></div><div class="fb d" style="position:absolute;left:62px;top:0;width:110px;height:110px;border-radius:50%;background:var(--c4);border-color:var(--c4);opacity:${o}"></div>`;
- const grp=s.m.startsWith('Opacity');
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:172px;height:110px;${grp?`opacity:${s.op}`:''}">${shapes(grp?1:s.op)}</div></div>`;
- return {code:grp?`Opacity(\n  opacity: ${s.op},\n  child: Stack(children: [BlueCircle(), RedCircle()]),\n)`:`Stack(children: [\n  Container(color: Colors.blue.withValues(alpha: ${s.op})),\n  Container(color: Colors.red.withValues(alpha: ${s.op})),\n])`,hint:grp?'The group fades as one picture, so the red circle fully hides the blue one where they meet.':'Each circle is translucent on its own, so you can see one through the other in the overlap.'};
+ const o=+s.op,group=s.m==='Opacity (whole group)',vis=s.m==='Visibility',off=s.m==='Offstage';
+ const gone=(vis&&!s.vis)||(off&&!s.vis);
+ const shapes=`<div style="position:relative;width:150px;height:92px">
+  <div style="position:absolute;left:0;top:0;width:96px;height:72px;border-radius:12px;background:${group?'var(--c1)':`rgba(37,99,235,${o})`}"></div>
+  <div style="position:absolute;left:44px;top:22px;width:96px;height:72px;border-radius:12px;background:${group?'var(--c4)':`rgba(220,38,38,${o})`}"></div>
+ </div>`;
+ const btn=s.tap?`<div style="margin-top:12px"><button style="padding:8px 16px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-body);cursor:${s.ip?'not-allowed':'pointer'}">${s.ip?'ignored':'still tappable'}</button></div>`:'';
+ const inner=`<div style="display:flex;flex-direction:column;align-items:center">${shapes}${btn}</div>`;
+ const wrapped=gone
+  ?(off?`<div style="opacity:0">${inner}</div>`:'<div class="cap" style="margin:0">Visibility(visible: false) removes the child from the layout entirely.</div>')
+  :(group?`<div style="opacity:${o}">${inner}</div>`:inner);
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px">${wrapped}</div>`;
+ let code;
+ if(vis)code=`Visibility(\n  visible: ${s.vis},\n  // replacement: SizedBox.shrink(),   // what to show instead\n  // maintainState: true,              // keep the subtree alive\n  child: child,\n)`;
+ else if(off)code=`Offstage(\n  offstage: ${!s.vis},   // laid out and alive, just not painted\n  child: child,\n)`;
+ else if(group)code=`Opacity(\n  opacity: ${o.toFixed(2)},\n${s.sem?'  alwaysIncludeSemantics: true,\n':''}  child: ${s.ip?'IgnorePointer(\n    ignoring: true,\n    child: child,\n  ),':'child,'}\n)`;
+ else code=`// no extra layer: fade the colours themselves\nContainer(color: Colors.blue.withValues(alpha: ${o.toFixed(2)}))\nContainer(color: Colors.red.withValues(alpha: ${o.toFixed(2)}))\n\n// animated versions\nAnimatedOpacity(opacity: ${o.toFixed(2)}, duration: const Duration(milliseconds: 300), child: child)\nFadeTransition(opacity: animation, child: child)   // cheapest animated fade`;
+ const notes=[];
+ if(group)notes.push('The two shapes fade as one layer, so where they overlap you still cannot see through the top one.');
+ else if(!vis&&!off)notes.push('Fading each colour makes the overlap see-through, and costs nothing extra.');
+ if(group&&o>0&&o<1)notes.push('This is the expensive case: Flutter paints the child into an offscreen buffer first.');
+ if(o===0&&group)notes.push('At opacity 0 the child is invisible but still laid out and still receives taps. Use Visibility or IgnorePointer if that matters.');
+ if(s.tap&&s.ip)notes.push('IgnorePointer is what actually stops the taps.');
+ if(vis)notes.push('Visibility removes the child from layout, so the space collapses. Offstage keeps it alive but unpainted.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Display',id:'clip',name:'ClipRRect, ClipOval & ClipPath',tags:'clip rounded corners circle shape mask borderradius',
-blurb:'The Clip widgets cut their child to a shape: rounded rectangle, oval or any custom path. The dashed line shows the child\'s original rectangle.',
-use:'Rounded images and avatars, and any non-rectangular shape.',
-watch:'Clipping costs more than a plain BoxDecoration. If you only need rounded corners on a coloured box, use Container with borderRadius instead.',
-ctl:[{k:'sh',l:'Widget',t:'sel',o:['ClipRRect','ClipOval','ClipPath (triangle)'],v:'ClipRRect'},{k:'r',l:'borderRadius',t:'rng',min:0,max:70,v:24}],
+def({cat:'Painting and effects',id:'clip',name:'ClipRRect, ClipOval & ClipPath',tags:'rounded corners circle shape clipbehavior antialias borderradius custom clipper clip image',h:330,
+blurb:'Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a decoration does not clip the child, which is why these exist.',
+use:'Rounded images and cards, circular avatars, and anything with a custom silhouette.',
+watch:'Each clip adds a layer. In a long list prefer a decoration with a radius, or a Container with clipBehavior, over an extra Clip widget.',
+ctl:[{k:'kind',l:'widget',t:'sel',o:['ClipRRect','ClipOval','ClipPath','none'],v:'ClipRRect'},
+ {k:'r',l:'borderRadius',t:'rng',min:0,max:60,v:18},
+ {k:'corner',l:'which corners',t:'sel',o:['all','top only','diagonal'],v:'all'},
+ {k:'path',l:'ClipPath shape',t:'sel',o:['triangle','ticket','wave'],v:'ticket'},
+ {k:'beh',l:'clipBehavior',t:'sel',o:['antiAlias','hardEdge','antiAliasWithSaveLayer'],v:'antiAlias'},
+ {k:'alt',l:'alternative: Container clipBehavior',t:'chk',v:false}],
 render(s,st,g){
- const css=s.sh==='ClipRRect'?`border-radius:${s.r}px;overflow:hidden`:s.sh==='ClipOval'?'border-radius:50%;overflow:hidden':'clip-path:polygon(50% 0,100% 100%,0 100%)';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:190px;height:140px;outline:1px dashed var(--c3);outline-offset:2px"><img alt="Clipped sample" src="${PIC}" style="display:block;width:100%;height:100%;object-fit:cover;${css}"></div></div>`;
- const w={ClipRRect:`ClipRRect(\n  borderRadius: BorderRadius.circular(${s.r}),\n  child: Image.network(url),\n)`,ClipOval:'ClipOval(\n  child: Image.network(url),\n)','ClipPath (triangle)':'ClipPath(\n  clipper: TriangleClipper(), // a CustomClipper<Path>\n  child: Image.network(url),\n)'};
- return {code:w[s.sh],hint:s.sh==='ClipRRect'?'':s.sh==='ClipOval'?'On a non-square child, ClipOval gives an ellipse. Use a square for a circle.':'ClipPath needs a CustomClipper that returns a Path.'};
+ const k=s.kind,r=+s.r;
+ let radius=`${r}px`;
+ if(s.corner==='top only')radius=`${r}px ${r}px 0 0`;
+ if(s.corner==='diagonal')radius=`${r}px 0 ${r}px 0`;
+ let clip='';
+ if(k==='ClipOval')clip='border-radius:50%;';
+ else if(k==='ClipRRect')clip=`border-radius:${radius};`;
+ else if(k==='ClipPath'){
+  const P={triangle:'polygon(50% 0,100% 100%,0 100%)',ticket:'polygon(0 0,100% 0,100% 38%,94% 50%,100% 62%,100% 100%,0 100%,0 62%,6% 50%,0 38%)',wave:'polygon(0 0,100% 0,100% 82%,75% 100%,50% 84%,25% 100%,0 82%)'}[s.path];
+  clip=`clip-path:${P};`;
+ }
+ const box=`<div style="width:200px;height:132px;overflow:hidden;${clip}${k==='none'?'':''}"><img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px">${box}</div>`;
+ let code;
+ if(k==='none')code="// no clip: the picture keeps its square corners\nImage.network(url, width: 200, height: 132, fit: BoxFit.cover)\n\n// a radius on a decoration does NOT clip the child\nContainer(\n  decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),\n  child: Image.network(url),   // still square\n)";
+ else if(k==='ClipOval')code=`ClipOval(\n  clipBehavior: Clip.${s.beh},\n  child: Image.network(url, width: 200, height: 132, fit: BoxFit.cover),\n)`;
+ else if(k==='ClipPath')code=`class ${s.path[0].toUpperCase()+s.path.slice(1)}Clipper extends CustomClipper<Path> {\n  @override\n  Path getClip(Size size) {\n    final path = Path();\n    ${s.path==='triangle'?'path.moveTo(size.width / 2, 0);\n    path.lineTo(size.width, size.height);\n    path.lineTo(0, size.height);':'// build the outline with lineTo, arcTo and quadraticBezierTo\n    path.addRect(Offset.zero & size);'}\n    path.close();\n    return path;\n  }\n\n  @override\n  bool shouldReclip(covariant CustomClipper<Path> old) => false;\n}\n\nClipPath(\n  clipper: ${s.path[0].toUpperCase()+s.path.slice(1)}Clipper(),\n  clipBehavior: Clip.${s.beh},\n  child: Image.network(url),\n)`;
+ else{
+  const BR=s.corner==='all'?`BorderRadius.circular(${r})`:s.corner==='top only'?`const BorderRadius.vertical(top: Radius.circular(${r}))`:`const BorderRadius.only(\n    topLeft: Radius.circular(${r}),\n    bottomRight: Radius.circular(${r}),\n  )`;
+  code=`ClipRRect(\n  borderRadius: ${BR},\n  clipBehavior: Clip.${s.beh},\n  child: Image.network(url, width: 200, height: 132, fit: BoxFit.cover),\n)`;
+ }
+ if(s.alt)code+=`\n\n// one widget instead of two\nContainer(\n  clipBehavior: Clip.antiAlias,\n  decoration: BoxDecoration(borderRadius: BorderRadius.circular(${r})),\n  child: Image.network(url),\n)\n\n// a Card already clips to its shape\nCard(clipBehavior: Clip.antiAlias, child: Image.network(url))`;
+ const notes=[];
+ if(k==='none')notes.push('No clip, so the corners stay square however you decorate the box.');
+ if(s.beh==='hardEdge')notes.push('hardEdge is the cheapest and shows slightly jagged corners on a diagonal edge.');
+ if(s.beh==='antiAliasWithSaveLayer')notes.push('antiAliasWithSaveLayer is the slowest. Only reach for it when you see seams at the edge.');
+ if(k==='ClipPath')notes.push('ClipPath needs a CustomClipper. Keep shouldReclip false unless the shape depends on changing data.');
+ return {code,hint:notes.join(' ')||'Clipping cuts the child; it does not resize it.'};
 }});
 
-/* ================= INPUT ================= */
 def({cat:'Input',id:'buttons',name:'Buttons',tags:'elevatedbutton filledbutton outlinedbutton textbutton iconbutton onpressed styleFrom buttonstyle shape padding minimumsize elevation icon alignment disabled',h:330,
 blurb:'Material gives you five button widgets that differ only in emphasis. They share the same arguments, and everything about the look comes from style, which you normally build with the matching styleFrom helper.',
 use:'Any tap target with a label. Pick the type by how important the action is.',
@@ -1945,43 +2103,94 @@ act(a,st,s){
 }});
 
 /* ---- Display ---- */
-def({cat:'Display',id:'clip-rect',name:'ClipRect',tags:'clip rectangle crop reveal slider comparison customclipper rect align widthfactor',h:250,
-blurb:'ClipRect cuts its child to a rectangle. By default the rectangle is the child\'s own bounds. Pass a CustomClipper<Rect> to choose any region, for example a before and after reveal.',
-use:'Hiding overflow, cropping part of an image, progress fills, and comparison sliders.',
-watch:'Clipping happens at paint time. It does not change the child\'s layout size, and touches outside the clipped area are ignored. Do not animate it over large images unless you profile it.',
-ctl:[{k:'m',l:'Approach',t:'sel',o:['CustomClipper (reveal)','Align + widthFactor (crop)'],v:'CustomClipper (reveal)'},{k:'rv',l:'visible width %',t:'rng',min:0,max:100,step:1,v:45}],
+def({cat:'Painting and effects',id:'clip-rect',name:'ClipRect',tags:'overflow align widthfactor clipper rect half image scale transform',h:320,
+blurb:'ClipRect cuts a child back to its own layout box. It matters when a child paints outside that box: a scaled Transform, an Align with a size factor, or a widget that overflows on purpose.',
+use:'Showing half an image, stopping a scaled child spilling out, and wrapping a BackdropFilter.',
+watch:'It does not change layout. The child is still laid out at its full size, and only the painting is cut.',
+ctl:[{k:'on',l:'ClipRect',t:'chk',v:true},
+ {k:'case',l:'what the child does',t:'sel',o:['Align widthFactor 0.5','Transform.scale 1.6','Transform.translate','oversized child'],v:'Align widthFactor 0.5'},
+ {k:'al',l:'Align alignment',t:'sel',o:['centerLeft','center','centerRight'],v:'centerLeft'},
+ {k:'sc',l:'scale',t:'rng',min:1,max:2.2,step:.1,v:1.6},
+ {k:'dx',l:'translate x',t:'rng',min:-60,max:60,v:30}],
 render(s,st,g){
- const reveal=s.m.startsWith('Custom');
- if(st.mode!==s.m){
-  st.mode=s.m;
-  g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div id="crw" style="position:relative;width:280px;max-width:100%;height:160px;outline:1px dashed var(--c3);outline-offset:2px;touch-action:none;cursor:${reveal?'ew-resize':'default'}"><img id="crb" draggable="false" alt="Original sample" src="${PIC}" style="display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:cover;${reveal?'filter:grayscale(1) contrast(.9)':'opacity:.18'}"><div id="crc" style="position:absolute;top:0;bottom:0;left:0;overflow:hidden"><img id="cri" draggable="false" alt="Clipped sample" src="${PIC}" style="display:block;max-width:none;height:100%;pointer-events:none;object-fit:cover;object-position:left"></div><div id="crh" style="position:absolute;top:0;bottom:0;width:3px;margin-left:-1.5px;background:var(--accent);${reveal?'':'display:none'}"></div></div></div>`;
+ const on=s.on,c=s.case;
+ let inner='';
+ const img=`<img alt="Sample landscape" src="${PIC}" style="width:200px;height:120px;object-fit:cover;display:block">`;
+ if(c==='Align widthFactor 0.5'){
+  const pos={centerLeft:'left',center:'center',centerRight:'right'}[s.al];
+  inner=`<div style="width:100px;height:120px;${on?'overflow:hidden;':''}display:flex;justify-content:${pos==='left'?'flex-start':pos==='right'?'flex-end':'center'}">${img}</div>`;
+ } else if(c==='Transform.scale 1.6'){
+  inner=`<div style="width:200px;height:120px;${on?'overflow:hidden;':''}"><div style="width:200px;height:120px;transform:scale(${s.sc});transform-origin:center">${img}</div></div>`;
+ } else if(c==='Transform.translate'){
+  inner=`<div style="width:200px;height:120px;${on?'overflow:hidden;':''}"><div style="transform:translateX(${s.dx}px)">${img}</div></div>`;
+ } else {
+  inner=`<div style="width:160px;height:96px;${on?'overflow:hidden;':''}background:var(--c1s);display:flex;align-items:center;justify-content:center"><div class="fb d" style="width:260px;height:70px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);flex:none">a child wider than its box</div></div>`;
  }
- const wrap=g.querySelector('#crw');
- g.querySelector('#crc').style.width=s.rv+'%';
- g.querySelector('#cri').style.width=(wrap?wrap.clientWidth:280)+'px';
- g.querySelector('#crh').style.left=s.rv+'%';
- const code=reveal?`class RevealClipper extends CustomClipper<Rect> {\n  RevealClipper(this.fraction);\n  final double fraction;\n\n  @override\n  Rect getClip(Size size) =>\n      Rect.fromLTWH(0, 0, size.width * fraction, size.height);\n\n  @override\n  bool shouldReclip(RevealClipper old) =>\n      old.fraction != fraction;\n}\n\nClipRect(\n  clipper: RevealClipper(${(s.rv/100).toFixed(2)}),\n  child: Image.network(url),\n)`:`ClipRect(\n  child: Align(\n    alignment: Alignment.centerLeft,\n    widthFactor: ${(s.rv/100).toFixed(2)},\n    child: Image.network(url),\n  ),\n)`;
- return {code,hint:reveal?'Drag across the picture or use the slider.':'Align with a widthFactor shrinks the layout width, and ClipRect hides the rest.'};
-},
-after(g,st,s,draw,d){
- if(st.bound)return;st.bound=true;
- const move=e=>{const w=g.querySelector('#crw');if(!w||!(e.buttons&1)||!s.m.startsWith('Custom'))return;const r=w.getBoundingClientRect();s.rv=clamp(Math.round((e.clientX-r.left)/r.width*100),0,100);const i=d.el.querySelector('.ctl input[type=range]');if(i){i.value=s.rv;const o=i.parentNode.querySelector('output');if(o)o.textContent=s.rv}draw()};
- g.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#crw')){try{g.setPointerCapture(e.pointerId)}catch(_){}}move(e)});g.addEventListener('pointermove',move);
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="outline:1.5px dashed var(--c3);outline-offset:2px">${inner}</div></div>`;
+ let code;
+ if(c==='Align widthFactor 0.5')code=`${on?'ClipRect(\n  child: ':''}Align(\n  alignment: Alignment.${s.al},\n  widthFactor: 0.5,   // the box is half the child width\n  child: Image.network(url, width: 200, height: 120),\n)${on?',\n)':''}`;
+ else if(c==='Transform.scale 1.6')code=`${on?'ClipRect(\n  child: ':''}Transform.scale(\n  scale: ${(+s.sc).toFixed(1)},\n  child: Image.network(url, width: 200, height: 120),\n)${on?',\n)':''}`;
+ else if(c==='Transform.translate')code=`${on?'ClipRect(\n  child: ':''}Transform.translate(\n  offset: const Offset(${s.dx}, 0),\n  child: Image.network(url, width: 200, height: 120),\n)${on?',\n)':''}`;
+ else code=`${on?'ClipRect(\n  child: ':''}SizedBox(\n  width: 160,\n  child: OverflowBox(\n    maxWidth: 260,\n    child: child,\n  ),\n)${on?',\n)':''}`;
+ code+=`\n\n// clip to something smaller than the box\nClipRect(\n  clipper: _TopHalf(),\n  child: child,\n)\n\nclass _TopHalf extends CustomClipper<Rect> {\n  @override\n  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width, size.height / 2);\n  @override\n  bool shouldReclip(covariant CustomClipper<Rect> old) => false;\n}`;
+ const notes=[];
+ notes.push(on?'The dashed outline is the layout box. Everything outside it is cut.':'Without ClipRect the child paints right past its box and over its neighbours.');
+ if(c==='Align widthFactor 0.5')notes.push('widthFactor makes the Align half the child width, so only half the picture has room. The alignment decides which half you see.');
+ if(c==='Transform.scale 1.6')notes.push('Transform happens after layout, so the box stays 200 by 120 however far the child grows.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Display',id:'decorated-box',name:'DecoratedBox & BoxDecoration',tags:'decoration border shadow gradient boxshadow shape circle radius background container',h:250,
-blurb:'DecoratedBox paints a BoxDecoration behind or in front of its child: colour or gradient, border, rounded corners, shape and shadows. Container creates one for you when you pass decoration.',
-use:'Cards, badges, buttons and any custom background that needs more than a plain colour.',
-watch:'If you set shape: BoxShape.circle, you cannot also set borderRadius, and Flutter throws an assertion. When you only need a colour, ColoredBox is cheaper.',
-ctl:[{k:'sh',l:'shape',t:'sel',o:['rectangle','circle'],v:'rectangle'},{k:'r',l:'borderRadius',t:'rng',min:0,max:60,v:18},{k:'bw',l:'border width',t:'rng',min:0,max:8,v:2},{k:'sb',l:'shadow blur',t:'rng',min:0,max:30,v:14},{k:'gr',l:'gradient',t:'chk',v:true}],
+def({cat:'Painting and effects',id:'decorated-box',name:'DecoratedBox & BoxDecoration',tags:'border radius gradient shadow shape circle image blend position foreground',h:330,
+blurb:'BoxDecoration is what paints a box: a colour or gradient, a border, rounded corners, shadows and even a background image. DecoratedBox is the widget that draws one, behind or in front of its child.',
+use:'Any styled box. Container uses exactly this underneath.',
+watch:'color and gradient cannot both be set. With shape: BoxShape.circle you cannot set borderRadius. A rounded decoration does not clip the child: add a ClipRRect or clipBehavior.',
+ctl:[{k:'fill',l:'fill',t:'sel',o:['color','linear gradient','radial gradient','sweep gradient'],v:'linear gradient'},
+ {k:'shape',l:'shape',t:'sel',o:['rectangle','circle'],v:'rectangle'},
+ {k:'r',l:'borderRadius',t:'rng',min:0,max:60,v:18},
+ {k:'bw',l:'border width',t:'rng',min:0,max:10,v:2},
+ {k:'bs',l:'border sides',t:'sel',o:['all','bottom only','left accent'],v:'all'},
+ {k:'blur',l:'shadow blurRadius',t:'rng',min:0,max:40,v:18},
+ {k:'spread',l:'shadow spreadRadius',t:'rng',min:-8,max:16,v:0},
+ {k:'dy',l:'shadow offset y',t:'rng',min:-12,max:24,v:8},
+ {k:'img',l:'background image',t:'chk',v:false},
+ {k:'pos',l:'position',t:'sel',o:['background','foreground'],v:'background'}],
 render(s,st,g){
- const circ=s.sh==='circle';
- const bg=s.gr?'linear-gradient(135deg,var(--c1),var(--c4))':'var(--c1s)';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${circ?130:190}px;height:130px;background:${bg};border:${s.bw}px solid var(--fg);border-radius:${circ?'50%':s.r+'px'};box-shadow:${s.sb?`0 ${Math.round(s.sb/2)}px ${s.sb}px rgba(10,20,60,.35)`:'none'};display:flex;align-items:center;justify-content:center;color:#fff;font:700 15px var(--f-display)">child</div></div>`;
- const lines=[s.gr?"  gradient: LinearGradient(\n    begin: Alignment.topLeft,\n    end: Alignment.bottomRight,\n    colors: [Colors.blue, Colors.pink],\n  ),":'  color: Colors.blue.shade50,',circ?'  shape: BoxShape.circle,':`  borderRadius: BorderRadius.circular(${s.r}),`];
- if(s.bw)lines.push(`  border: Border.all(width: ${s.bw}),`);
- if(s.sb)lines.push(`  boxShadow: [\n    BoxShadow(\n      blurRadius: ${s.sb},\n      offset: Offset(0, ${Math.round(s.sb/2)}),\n      color: Colors.black26,\n    ),\n  ],`);
- return {code:`DecoratedBox(\n  decoration: BoxDecoration(\n${lines.join('\n')}\n  ),\n  child: Center(child: Text('child')),\n)`,hint:circ?'On a circle the borderRadius control is ignored.':''};
+ const circle=s.shape==='circle';
+ const F={ 'color':'var(--c1s)','linear gradient':'linear-gradient(135deg,var(--c1),var(--c4))','radial gradient':'radial-gradient(circle at 35% 30%,var(--c3),var(--c1))','sweep gradient':'conic-gradient(var(--c1),var(--c4),var(--c3),var(--c1))'}[s.fill];
+ const bw=+s.bw;
+ let border='';
+ if(bw){
+  if(s.bs==='all')border=`border:${bw}px solid var(--c1);`;
+  else if(s.bs==='bottom only')border=`border-bottom:${bw}px solid var(--c1);`;
+  else border=`border-left:${bw+2}px solid var(--c1);`;
+ }
+ const sh=(+s.blur||+s.spread||+s.dy)?`box-shadow:0 ${s.dy}px ${s.blur}px ${s.spread}px rgba(20,30,80,.32);`:'';
+ const deco=`${s.img?`background-image:url(${PIC});background-size:cover;background-position:center;`:`background:${F};`}${circle?'border-radius:50%;':`border-radius:${s.r}px;`}${border}${sh}`;
+ const fg=s.pos==='foreground';
+ const sizeCss=circle?'width:132px;height:132px':'width:200px;height:120px';
+ const inner=`<div style="position:relative;${sizeCss};display:flex;align-items:center;justify-content:center;box-sizing:border-box">${fg?`<span style="font:600 14px var(--f-body)">child text</span><div style="position:absolute;inset:0;${deco}opacity:.82;pointer-events:none"></div>`:`<div style="position:absolute;inset:0;${deco}"></div><span style="position:relative;font:600 14px var(--f-body);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)">child text</span>`}</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px">${inner}</div>`;
+ const L=[];
+ if(s.img)L.push("image: const DecorationImage(\n      image: NetworkImage(url),\n      fit: BoxFit.cover,\n    ),");
+ else if(s.fill==='color')L.push('color: Colors.blue.shade100,');
+ else if(s.fill==='linear gradient')L.push('gradient: const LinearGradient(\n      begin: Alignment.topLeft,\n      end: Alignment.bottomRight,\n      colors: [Colors.blue, Colors.red],\n    ),');
+ else if(s.fill==='radial gradient')L.push('gradient: const RadialGradient(\n      center: Alignment(-0.3, -0.4),\n      radius: 0.9,\n      colors: [Colors.amber, Colors.blue],\n    ),');
+ else L.push('gradient: const SweepGradient(\n      colors: [Colors.blue, Colors.red, Colors.amber, Colors.blue],\n    ),');
+ if(circle)L.push('shape: BoxShape.circle,');
+ else if(s.r)L.push(`borderRadius: BorderRadius.circular(${s.r}),`);
+ if(bw){
+  if(s.bs==='all')L.push(`border: Border.all(width: ${bw}, color: Colors.blue),`);
+  else if(s.bs==='bottom only')L.push(`border: const Border(bottom: BorderSide(width: ${bw}, color: Colors.blue)),`);
+  else L.push(`border: const Border(left: BorderSide(width: ${bw+2}, color: Colors.blue)),`);
+ }
+ if(+s.blur||+s.spread||+s.dy)L.push(`boxShadow: [\n      BoxShadow(\n        color: Colors.black.withValues(alpha: 0.32),\n        blurRadius: ${s.blur},\n        spreadRadius: ${s.spread},\n        offset: const Offset(0, ${s.dy}),\n      ),\n    ],`);
+ const notes=[];
+ if(circle&&s.r)notes.push('shape: circle ignores borderRadius, and setting both throws in debug mode.');
+ if(fg)notes.push('position: foreground paints the decoration over the child, which is how you add a scrim or a gloss.');
+ if(s.img)notes.push('A DecorationImage replaces the colour and gradient. It can take its own colorFilter and opacity.');
+ if(+s.spread<0)notes.push('A negative spreadRadius pulls the shadow in, which gives a tighter, more modern look.');
+ if(+s.blur>26)notes.push('Large blur values are expensive on older phones. Keep them under about 24 in long lists.');
+ return {code:`DecoratedBox(\n${fg?'  position: DecorationPosition.foreground,\n':''}  decoration: BoxDecoration(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n  child: const Center(child: Text('child text')),\n)`,hint:notes.join(' ')||'Container(decoration: ...) wraps exactly this widget.'};
 }});
 
 def({cat:'Display',id:'tooltip',name:'Tooltip',tags:'hover long press message hint label accessibility semantics waitduration',h:240,
@@ -2170,15 +2379,32 @@ render(s,st,g){
 }});
 
 /* ---- Display ---- */
-def({cat:'Display',id:'colored-box',name:'ColoredBox',tags:'color background fill container cheap solid',h:230,
-blurb:'ColoredBox paints a solid colour behind its child and does nothing else: no padding, border, radius or size of its own. It is the lightest way to fill an area.',
-use:'A plain coloured background. Add Padding or SizedBox around it when you also need spacing or a size.',
-watch:'With no child it expands to fill the parent, and with a child it matches the child\'s size. If you later need a radius or border, switch to DecoratedBox or Container.',
-ctl:[{k:'c',l:'color',t:'sel',o:['blue','teal','orange','pink'],v:'teal'},{k:'ch',l:'has a child',t:'chk',v:true}],
+def({cat:'Painting and effects',id:'colored-box',name:'ColoredBox',tags:'background fill cheap const container material performance',h:300,
+blurb:'ColoredBox paints one rectangle of colour behind its child, and does nothing else. It is the cheapest way to give something a background.',
+use:'A flat background behind a widget or a whole screen section.',
+watch:'It has no size of its own: it takes the space it is offered, or the size of its child. Pair it with SizedBox or Padding when you need dimensions.',
+ctl:[{k:'col',l:'color',t:'sel',o:['surface tint','blue','green','transparent'],v:'surface tint'},
+ {k:'which',l:'widget',t:'sel',o:['ColoredBox','Container(color:)','DecoratedBox','Material(color:)'],v:'ColoredBox'},
+ {k:'child',l:'child',t:'sel',o:['text','nothing (fills parent)'],v:'text'},
+ {k:'pad',l:'padding around the child',t:'rng',min:0,max:32,v:16},
+ {k:'ink',l:'needs an ink ripple',t:'chk',v:false}],
 render(s,st,g){
- const col={blue:['c1s','c1'],teal:['c2s','c2'],orange:['c3s','c3'],pink:['c4s','c4']}[s.c];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:210px;height:130px;outline:1.5px dashed var(--c3);outline-offset:2px;display:flex;align-items:center;justify-content:center"><div style="background:var(--${col[0]});${s.ch?'padding:14px 18px;':'width:100%;height:100%;'}font-weight:600;color:var(--fg)">${s.ch?'Text child':''}</div></div></div>`;
- return {code:`ColoredBox(\n  color: Colors.${s.c==='orange'?'orange':s.c==='pink'?'pink':s.c==='teal'?'teal':'blue'}.shade100,\n${s.ch?"  child: Padding(\n    padding: EdgeInsets.all(14),\n    child: Text('Text child'),\n  ),\n":''})`,hint:s.ch?'The box wraps its child. The padding comes from a separate Padding widget.':'With no child ColoredBox fills the dashed parent.'};
+ const C={'surface tint':'var(--accent-soft)',blue:'#dbeafe',green:'#dcfce7',transparent:'transparent'}[s.col];
+ const full=s.child!=='text';
+ const inner=full?'':`<span style="font:600 14px var(--f-body)">child</span>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="${full?'width:100%;height:100%;':''}background:${C};padding:${s.pad}px;border-radius:${s.which==='ColoredBox'||s.which==='Container(color:)'?0:8}px;display:flex;align-items:center;justify-content:center;border:${s.col==='transparent'?'1px dashed var(--line)':'0'}">${inner||'<span class="cap" style="margin:0">fills whatever space it is given</span>'}</div></div>`;
+ const colExpr=s.col==='surface tint'?'Theme.of(context).colorScheme.surfaceContainer':s.col==='transparent'?'Colors.transparent':`Colors.${s.col}.shade100`;
+ let code;
+ if(s.which==='ColoredBox')code=`ColoredBox(\n  color: ${colExpr},\n  child: Padding(\n    padding: const EdgeInsets.all(${s.pad}),\n    child: const Text('child'),\n  ),\n)\n\n// when the colour is a constant, the whole thing can be const\nconst ColoredBox(color: Colors.white, child: Text('child'))`;
+ else if(s.which==='Container(color:)')code=`Container(\n  color: ${colExpr},\n  padding: const EdgeInsets.all(${s.pad}),\n  child: const Text('child'),\n)\n\n// convenient, but it builds a DecoratedBox and a Padding for you`;
+ else if(s.which==='DecoratedBox')code=`DecoratedBox(\n  decoration: BoxDecoration(\n    color: ${colExpr},\n    borderRadius: BorderRadius.circular(8),\n  ),\n  child: Padding(\n    padding: const EdgeInsets.all(${s.pad}),\n    child: const Text('child'),\n  ),\n)\n\n// use this once you also need a radius, border or shadow`;
+ else code=`Material(\n  color: ${colExpr},\n  borderRadius: BorderRadius.circular(8),\n  child: InkWell(\n    onTap: () {},\n    child: Padding(\n      padding: const EdgeInsets.all(${s.pad}),\n      child: const Text('child'),\n    ),\n  ),\n)\n\n// the ripple needs a Material above it to paint on`;
+ const notes=[];
+ if(s.ink&&s.which!=='Material(color:)')notes.push('A ripple cannot paint on a ColoredBox or a plain Container. Switch to Material, or use Ink(decoration: ...) with an InkWell.');
+ if(s.which==='ColoredBox')notes.push('One painted rectangle and nothing else. With a const colour the widget itself can be const, so it is never rebuilt.');
+ if(s.which==='Container(color:)')notes.push('Container is the convenient version. It is fine, just slightly more work for the same pixels.');
+ if(s.col==='transparent')notes.push('A transparent ColoredBox still paints: it is not free, just invisible. Remove it instead.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Display',id:'text-rich',name:'Text.rich & RichText',tags:'textspan span style bold italic link underline inline paragraph widgetspan textscaler',h:230,
@@ -2272,49 +2498,116 @@ const PAL={sunset:['#ff9a3c','#ff3d77','#7b2ff7'],ocean:['#00c6ff','#0072ff','#5
 const palCss=(k,t)=>{const c=PAL[k];return t==='LinearGradient'?`linear-gradient(90deg,${c.join(',')})`:t==='RadialGradient'?`radial-gradient(circle,${c.join(',')})`:`conic-gradient(from 0deg,${c.join(',')},${c[0]})`};
 const star=encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="'+IC.star+'"/></svg>');
 
-def({cat:'Display',id:'backdrop-filter',name:'BackdropFilter',tags:'blur frosted glass imagefilter effect background sigma',h:250,
-blurb:'BackdropFilter applies an image filter, usually a blur, to everything painted behind it. The child is drawn on top of the filtered area, which gives the frosted-glass look.',
-use:'Frosted panels, blurred dialog backgrounds and glass-style navigation bars.',
-watch:'It filters everything behind it across the whole canvas, not just the area under its child. Wrap it in ClipRect, or ClipRRect for rounded corners, to limit the effect. It is also expensive, so use it sparingly.',
-ctl:[{k:'sg',l:'sigma (blur)',t:'rng',min:0,max:20,v:6},{k:'tint',l:'white tint on child',t:'chk',v:true}],
-render(s,st,g){
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:270px;max-width:100%;height:170px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,var(--c1) 0 25%,var(--c4) 25% 50%,var(--c3) 50% 75%,var(--c2) 75%)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 42px var(--f-display);color:#fff;letter-spacing:.08em">FLUTTER</div><div style="position:absolute;left:34px;right:34px;top:36px;bottom:36px;border-radius:12px;backdrop-filter:blur(${s.sg}px);-webkit-backdrop-filter:blur(${s.sg}px);background:rgba(255,255,255,${s.tint?.25:0});border:1px solid rgba(255,255,255,.55)"></div></div></div>`;
- return {code:`import 'dart:ui';\n\nStack(\n  children: [\n    Background(),\n    ClipRRect(\n      borderRadius: BorderRadius.circular(12),\n      child: BackdropFilter(\n        filter: ImageFilter.blur(sigmaX: ${s.sg}, sigmaY: ${s.sg}),\n        child: Container(\n          color: Colors.white${s.tint?'.withValues(alpha: 0.25)':'.withValues(alpha: 0)'},\n        ),\n      ),\n    ),\n  ],\n)`,hint:'The browser blur is an approximation of Flutter\'s Gaussian sigma. Raise it and the letters behind the panel dissolve.'};
-}});
-
-def({cat:'Display',id:'shader-mask',name:'ShaderMask',tags:'gradient text mask shader blendmode srcin createshader gradient text icon',h:230,
-blurb:'ShaderMask paints its child, then covers it with a shader, for example a gradient, using a blend mode. With BlendMode.srcIn the gradient fills only the shape of the child, so text and icons get gradient colour.',
-use:'Gradient text and icons, fade-out edges on a scroll view, and shimmer loading effects.',
-watch:'With srcIn the child\'s own colour is discarded and only its shape (alpha) is kept, so make the child white or opaque. shaderCallback receives the child\'s bounds, so the gradient follows the child\'s size.',
-ctl:[{k:'t',l:'shader',t:'sel',o:['LinearGradient','RadialGradient','SweepGradient'],v:'LinearGradient'},{k:'p',l:'colours',t:'sel',o:['sunset','ocean','lime'],v:'sunset'},{k:'c',l:'child',t:'sel',o:['Text','Icon'],v:'Text'}],
-render(s,st,g){
- const bg=palCss(s.p,s.t);
- const child=s.c==='Text'?`<div style="font:800 64px/1 var(--f-display);letter-spacing:-.02em;background:${bg};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">Flutter</div>`:`<div style="width:120px;height:120px;background:${bg};-webkit-mask:url('data:image/svg+xml;utf8,${star}') center/contain no-repeat;mask:url('data:image/svg+xml;utf8,${star}') center/contain no-repeat"></div>`;
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center">${child}</div>`;
- const cols=PAL[s.p].map((h,i)=>['Colors.orange','Colors.pink','Colors.purple'][i]);
- const ocean=['Colors.cyan','Colors.blue','Colors.deepPurple'],lime=['Colors.lime','Colors.green','Colors.teal'];
- const cl=({sunset:['Colors.orange','Colors.pink','Colors.purple'],ocean,lime})[s.p].join(', ');
- return {code:`ShaderMask(\n  blendMode: BlendMode.srcIn,\n  shaderCallback: (Rect bounds) => ${s.t}(\n    colors: [${cl}],\n  ).createShader(bounds),\n  child: ${s.c==='Text'?"Text(\n    'Flutter',\n    style: TextStyle(\n      fontSize: 64,\n      fontWeight: FontWeight.w800,\n      color: Colors.white, // required: srcIn keeps only its shape\n    ),\n  )":'Icon(Icons.star, size: 120, color: Colors.white)'},\n)`,hint:'The child is white in code. The gradient replaces its colour and keeps only its outline.'};
-}});
-
-def({cat:'Display',id:'color-filtered',name:'ColorFiltered',tags:'filter grayscale sepia invert tint matrix colorfilter blendmode image effect',h:250,
-blurb:'ColorFiltered applies a colour filter to its child as a whole. A filter either blends one colour over the child with a BlendMode, or remaps every pixel with a 4 × 5 colour matrix.',
-use:'Greyscale for disabled images, sepia and invert effects, and tinting icons or photos.',
-watch:'It forces an offscreen layer, so avoid animating it over large areas. For a single image, the Image widget\'s own color and colorBlendMode parameters are cheaper.',
-ctl:[{k:'f',l:'filter',t:'sel',o:['none','grayscale (matrix)','sepia (matrix)','invert (matrix)','tint (mode)'],v:'grayscale (matrix)'}],
-render(s,st,g){
- const css={none:'none','grayscale (matrix)':'grayscale(1)','sepia (matrix)':'sepia(1)','invert (matrix)':'invert(1)','tint (mode)':'none'}[s.f];
- const tint=s.f==='tint (mode)'?'<div style="position:absolute;inset:0;background:#e0457b;mix-blend-mode:multiply"></div>':'';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:240px;max-width:100%;height:130px;overflow:hidden;border-radius:10px;filter:${css}"><img alt="Filtered sample" draggable="false" src="${PIC}" style="display:block;width:100%;height:100%;object-fit:cover">${tint}</div></div>`;
- const M={'grayscale (matrix)':'0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0,      0,      0,      1, 0,','sepia (matrix)':'0.393, 0.769, 0.189, 0, 0,\n    0.349, 0.686, 0.168, 0, 0,\n    0.272, 0.534, 0.131, 0, 0,\n    0,     0,     0,     1, 0,','invert (matrix)':'-1,  0,  0, 0, 255,\n     0, -1,  0, 0, 255,\n     0,  0, -1, 0, 255,\n     0,  0,  0, 1, 0,'};
- const f=s.f==='none'?'// no filter':s.f==='tint (mode)'?'ColorFilter.mode(Colors.pink, BlendMode.modulate)':`ColorFilter.matrix(<double>[\n    ${M[s.f]}\n  ])`;
- return {code:s.f==='none'?'Image.network(url) // no ColorFiltered':`ColorFiltered(\n  colorFilter: ${f},\n  child: Image.network(url),\n)`,hint:'The browser uses its own filters to preview the same effect, so the exact tones can differ slightly from Flutter.'};
-}});
-
-/* ---------- Common errors ---------- */
+const longTxt='This is a long message that does not fit on a single line of the row.';
 const errb=t=>`<div class="erb">${esc(t)}</div>`;
 const okb=t=>`<div class="okb">${esc(t)}</div>`;
-const longTxt='This is a long message that does not fit on a single line of the row.';
+const ocean=['Colors.cyan','Colors.blue','Colors.deepPurple'],lime=['Colors.lime','Colors.green','Colors.teal'];
+
+def({cat:'Painting and effects',id:'backdrop-filter',name:'BackdropFilter',tags:'blur frosted glass imagefilter sigma clip appbar scrim cost',h:330,
+blurb:'BackdropFilter filters whatever is already painted behind it. With ImageFilter.blur that gives the frosted glass look. It must sit over other content, and it must be clipped, or the blur spreads across the whole layer.',
+use:'A translucent app bar over a scrolling list, a blurred backdrop behind a sheet, a glass card over a photo.',
+watch:'It is one of the most expensive widgets in Flutter. Keep the blurred area small, never put one in a scrolling list row, and always wrap it in a clip.',
+ctl:[{k:'sig',l:'blur sigma',t:'rng',min:0,max:24,step:1,v:10},
+ {k:'clip',l:'wrapped in a ClipRRect',t:'chk',v:true},
+ {k:'r',l:'clip radius',t:'rng',min:0,max:40,v:18},
+ {k:'tint',l:'tint over the blur',t:'rng',min:0,max:60,step:5,v:25},
+ {k:'where',l:'shape',t:'sel',o:['card','top bar','full screen'],v:'card'},
+ {k:'on',l:'enabled',t:'chk',v:true}],
+render(s,st,g){
+ const sig=+s.sig,on=s.on;
+ const blur=on?`backdrop-filter:blur(${sig}px);-webkit-backdrop-filter:blur(${sig}px);`:'';
+ const tint=`background:rgba(255,255,255,${(+s.tint)/100});`;
+ const clip=s.clip?`border-radius:${s.r}px;overflow:hidden;`:'';
+ let panel;
+ if(s.where==='top bar')panel=`<div style="position:absolute;left:0;right:0;top:0;height:58px;${blur}${tint}${s.clip?'border-radius:0 0 '+s.r+'px '+s.r+'px;overflow:hidden;':''}display:flex;align-items:center;padding:0 16px;font:600 15px var(--f-display);color:#10203f">Frosted app bar</div>`;
+ else if(s.where==='full screen')panel=`<div style="position:absolute;inset:0;${blur}${tint}display:flex;align-items:center;justify-content:center;font:600 15px var(--f-display);color:#10203f">Whole area blurred</div>`;
+ else panel=`<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:112px;${clip}${blur}${tint}display:flex;align-items:center;justify-content:center;font:600 14.5px var(--f-body);color:#10203f;border:1px solid rgba(255,255,255,.5)">Glass card</div>`;
+ g.innerHTML=`<div class="fill" style="padding:0"><div style="position:absolute;inset:0;overflow:hidden;background-image:url(${PIC});background-size:cover;background-position:center">${panel}</div></div>`;
+ const inner=`BackdropFilter(\n  filter: ImageFilter.blur(sigmaX: ${sig}, sigmaY: ${sig}),\n${on?'':'  enabled: false,\n'}  child: Container(\n    color: Colors.white.withValues(alpha: ${((+s.tint)/100).toFixed(2)}),\n    child: content,\n  ),\n)`;
+ const code=s.clip
+  ?`import 'dart:ui';\n\nClipRRect(\n  borderRadius: BorderRadius.circular(${s.r}),\n  child: ${inner.split('\n').join('\n  ')},\n)`
+  :`import 'dart:ui';\n\n${inner}`;
+ const notes=[];
+ if(!s.clip)notes.push('With no clip the blur leaks out to the whole layer. In a real app that means the entire screen goes soft.');
+ if(sig===0)notes.push('Sigma 0 is no blur at all, so the widget costs a layer for nothing.');
+ if(sig>16)notes.push('Sigma above about 16 looks heavy and costs more. Most frosted designs sit between 8 and 14.');
+ if(+s.tint===0)notes.push('Blur alone often looks muddy. A white or black tint over it is what makes text readable.');
+ if(!on)notes.push('enabled: false keeps the widget in the tree but skips the filter, which is a cheap way to degrade on old devices.');
+ if(s.where==='top bar')notes.push('For a real frosted app bar set extendBodyBehindAppBar: true on the Scaffold so content scrolls under it.');
+ return {code,hint:notes.join(' ')};
+}});
+
+def({cat:'Painting and effects',id:'shader-mask',name:'ShaderMask',tags:'gradient text fade edge blendmode srcin dstin mask shader createshader',h:330,
+blurb:'ShaderMask paints a shader over its child and combines the two with a blend mode. Two patterns cover almost every use: fade an edge with dstIn, and paint text or an icon with a gradient using srcIn.',
+use:'Fading the bottom of a scrolling list, gradient headlines, and tinted icons.',
+watch:'The callback receives the child bounds, so build gradients from bounds.width and bounds.height rather than fixed numbers. Like Opacity it needs an offscreen layer, so keep it off list rows.',
+ctl:[{k:'use',l:'pattern',t:'sel',o:['fade an edge','gradient text','tint everything'],v:'fade an edge'},
+ {k:'dir',l:'fade from',t:'sel',o:['bottom','top','right','left'],v:'bottom'},
+ {k:'amt',l:'fade length',t:'rng',min:10,max:80,step:5,v:40},
+ {k:'bm',l:'blendMode',t:'sel',o:['dstIn','srcIn','modulate'],v:'dstIn'},
+ {k:'g1',l:'gradient colour 1',t:'sel',o:['blue','purple','amber'],v:'blue'},
+ {k:'g2',l:'gradient colour 2',t:'sel',o:['red','teal','purple'],v:'red'}],
+render(s,st,g){
+ const C={blue:'#2563eb',purple:'#7c3aed',amber:'#d97706',red:'#dc2626',teal:'#0d9488'};
+ const c1=C[s.g1],c2=C[s.g2];
+ const dirMap={bottom:'to bottom',top:'to top',right:'to right',left:'to left'};
+ let demo;
+ if(s.use==='fade an edge'){
+  const stop=100-(+s.amt);
+  demo=`<div style="width:230px;height:150px;overflow:hidden;-webkit-mask-image:linear-gradient(${dirMap[s.dir]},#000 ${stop}%,transparent 100%);mask-image:linear-gradient(${dirMap[s.dir]},#000 ${stop}%,transparent 100%)">${[0,1,2,3,4,5].map(i=>`<div style="padding:9px 12px;font:14px var(--f-body);border-bottom:1px solid var(--line)">List item ${i+1}</div>`).join('')}</div>`;
+ } else if(s.use==='gradient text'){
+  demo=`<div style="font:800 40px var(--f-display);background:linear-gradient(120deg,${c1},${c2});-webkit-background-clip:text;background-clip:text;color:transparent;padding:4px 2px">Flutter</div>`;
+ } else {
+  demo=`<div style="position:relative;width:200px;height:132px;overflow:hidden;border-radius:10px"><img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(120deg,${c1},${c2});mix-blend-mode:multiply"></div></div>`;
+ }
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px">${demo}</div>`;
+ const align={bottom:['topCenter','bottomCenter'],top:['bottomCenter','topCenter'],right:['centerLeft','centerRight'],left:['centerRight','centerLeft']}[s.dir];
+ let code;
+ if(s.use==='fade an edge')code=`ShaderMask(\n  blendMode: BlendMode.dstIn,   // keep the child, use the shader as alpha\n  shaderCallback: (bounds) => LinearGradient(\n    begin: Alignment.${align[0]},\n    end: Alignment.${align[1]},\n    colors: const [Colors.white, Colors.transparent],\n    stops: const [${((100-(+s.amt))/100).toFixed(2)}, 1.0],\n  ).createShader(bounds),\n  child: ListView(children: items),\n)`;
+ else if(s.use==='gradient text')code=`ShaderMask(\n  blendMode: BlendMode.srcIn,   // paint the glyphs with the gradient\n  shaderCallback: (bounds) => const LinearGradient(\n    colors: [Color(0xFF${c1.slice(1).toUpperCase()}), Color(0xFF${c2.slice(1).toUpperCase()})],\n  ).createShader(bounds),\n  child: const Text(\n    'Flutter',\n    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w800, color: Colors.white),\n  ),\n)`;
+ else code=`ShaderMask(\n  blendMode: BlendMode.modulate,   // multiply the two\n  shaderCallback: (bounds) => const LinearGradient(\n    colors: [Color(0xFF${c1.slice(1).toUpperCase()}), Color(0xFF${c2.slice(1).toUpperCase()})],\n  ).createShader(bounds),\n  child: Image.network(url, fit: BoxFit.cover),\n)`;
+ const notes=[];
+ if(s.use==='fade an edge')notes.push('dstIn keeps the child colours and uses the shader only as an alpha mask, which is exactly what a fade needs.');
+ if(s.use==='gradient text')notes.push('srcIn keeps the child only where the shader is opaque, so the gradient takes the shape of the glyphs. The child colour must be opaque, usually white.');
+ if(s.use==='tint everything')notes.push('modulate multiplies the two, which tints rather than replaces.');
+ notes.push('bounds is the child size, so the gradient always matches whatever it wraps.');
+ return {code,hint:notes.join(' ')};
+}});
+
+def({cat:'Painting and effects',id:'color-filtered',name:'ColorFiltered',tags:'greyscale sepia tint blendmode matrix disabled image colorfilter saturation',h:330,
+blurb:'ColorFiltered recolours its child and everything inside it. Build the filter from a blend mode and a colour, or from a 4 by 5 matrix for effects such as greyscale and sepia.',
+use:'Greying out unavailable content, tinting a logo, dimming a photo behind text.',
+watch:'It needs an offscreen layer, like Opacity. For a single image, Image(color:, colorBlendMode:) does the same thing without the extra layer.',
+ctl:[{k:'f',l:'filter',t:'sel',o:['none','greyscale','sepia','tint (srcIn)','tint (modulate)','darken','invert'],v:'greyscale'},
+ {k:'col',l:'tint colour',t:'sel',o:['blue','green','red','black'],v:'blue'},
+ {k:'what',l:'applied to',t:'sel',o:['a photo','a card with text','an icon'],v:'a photo'},
+ {k:'cmp',l:'show the original beside it',t:'chk',v:true}],
+render(s,st,g){
+ const C={blue:'#2563eb',green:'#15803d',red:'#b91c1c',black:'#111827'}[s.col];
+ const FIL={none:'',greyscale:'filter:grayscale(1);',sepia:'filter:sepia(.85);','tint (srcIn)':`filter:brightness(0) saturate(100%);background:${C};`,'tint (modulate)':'filter:saturate(1.6) hue-rotate(180deg);',darken:'filter:brightness(.52);',invert:'filter:invert(1);'}[s.f];
+ const srcIn=s.f==='tint (srcIn)';
+ const item=fil=>{
+  if(s.what==='a photo')return `<div style="width:170px;height:112px;border-radius:10px;overflow:hidden;${srcIn&&fil?`background:${C};`:''}"><img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover;display:block;${fil?FIL.replace(/background:[^;]+;/,''):''}${srcIn&&fil?'opacity:0;':''}"></div>`;
+  if(s.what==='an icon')return `<div style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;color:${srcIn&&fil?C:'var(--c1)'};${fil&&!srcIn?FIL:''}">${ic('favorite',62)}</div>`;
+  return `<div style="width:170px;border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);${fil?FIL.replace(/background:[^;]+;/,''):''}"><div style="height:46px;background:linear-gradient(120deg,var(--c1),var(--c4))"></div><div style="padding:10px 12px"><div style="font:600 14px var(--f-body)">Pro feature</div><div style="font-size:12.5px;color:var(--muted)">Unavailable on this plan</div></div></div>`;
+ };
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:22px;padding:14px">${s.cmp?`<div style="text-align:center"><div class="cap" style="margin:0 0 6px">original</div>${item(false)}</div>`:''}<div style="text-align:center"><div class="cap" style="margin:0 0 6px">${s.f}</div>${item(true)}</div></div>`;
+ let filter;
+ if(s.f==='greyscale')filter="const ColorFilter.matrix(<double>[\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0.2126, 0.7152, 0.0722, 0, 0,\n    0,      0,      0,      1, 0,\n  ])";
+ else if(s.f==='sepia')filter="const ColorFilter.matrix(<double>[\n    0.393, 0.769, 0.189, 0, 0,\n    0.349, 0.686, 0.168, 0, 0,\n    0.272, 0.534, 0.131, 0, 0,\n    0,     0,     0,     1, 0,\n  ])";
+ else if(s.f==='invert')filter="const ColorFilter.matrix(<double>[\n    -1, 0, 0, 0, 255,\n    0, -1, 0, 0, 255,\n    0, 0, -1, 0, 255,\n    0, 0, 0, 1, 0,\n  ])";
+ else if(s.f==='tint (srcIn)')filter=`const ColorFilter.mode(Colors.${s.col==='black'?'black':s.col}, BlendMode.srcIn)`;
+ else if(s.f==='tint (modulate)')filter=`const ColorFilter.mode(Colors.${s.col==='black'?'black':s.col}, BlendMode.modulate)`;
+ else if(s.f==='darken')filter='const ColorFilter.mode(Colors.black54, BlendMode.darken)';
+ else filter='const ColorFilter.mode(Colors.transparent, BlendMode.dst)   // no change';
+ const alt=s.what==='a photo'?"\n\n// for one image there is a cheaper way\nImage.network(url, color: Colors.blue, colorBlendMode: BlendMode.srcIn)":'';
+ const notes=[];
+ if(s.f==='greyscale')notes.push('The greyscale matrix uses luminance weights, which is why it looks right rather than washed out.');
+ if(s.f==='tint (srcIn)')notes.push('srcIn throws away the child colours and keeps only its shape, which is how a monochrome logo is recoloured.');
+ if(s.f==='darken')notes.push('A darken filter over a photo is the usual way to keep white text readable.');
+ if(s.what==='a card with text')notes.push('The filter applies to the whole subtree, so the text is recoloured too. That is what makes it good for a disabled state.');
+ return {code:`ColorFiltered(\n  colorFilter: ${filter},\n  child: child,\n)${alt}`,hint:notes.join(' ')};
+}});
 
 def({cat:'Common errors',id:'err-overflow',name:'A RenderFlex overflowed',tags:'error red screen yellow black stripes overflow row column text too long expanded flexible',h:250,
 blurb:'A Row or Column has a child that is wider (or taller) than the space left. In the official example a Column holding a long Text tries to be as wide as its text, which is more than its parent Row can give it.',
@@ -2578,15 +2871,39 @@ render(s,st,g){
 }});
 
 /* ---- Painting ---- */
-def({cat:'Painting and effects',id:'physical-model',name:'PhysicalModel',tags:'elevation shadow material card shape circle shadowcolor borderradius materialdesign',h:250,
-blurb:'PhysicalModel draws a shape with a Material-style elevation shadow, and clips its child to that shape. It is the lightweight way to add elevation without a Material widget.',
-use:'Raised cards, floating badges and avatars with a real elevation shadow.',
-watch:'Unlike BoxDecoration, elevation here follows the Material shadow model and uses shadowColor. It does not draw ink splashes, so use Material when you need a tappable surface.',
-ctl:[{k:'e',l:'elevation',t:'rng',min:0,max:24,v:10},{k:'sh',l:'shape',t:'sel',o:['rectangle','circle'],v:'rectangle'},{k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},{k:'c',l:'shadowColor',t:'sel',o:['black','pink','blue'],v:'black'}],
+def({cat:'Painting and effects',id:'physical-model',name:'PhysicalModel',tags:'elevation shadow shape clip material card boxshadow physicalshape animated',h:330,
+blurb:'PhysicalModel draws a surface with a real cast shadow from its shape, and can clip the child to that shape. Material does the same inside a Material app, with theming and ink on top.',
+use:'Shadows outside Material, or when you need the shadow to follow an unusual shape.',
+watch:'Most of the time Material or Card is the better choice. For a plain drop shadow, a BoxDecoration boxShadow is cheaper and gives you blur and spread.',
+ctl:[{k:'el',l:'elevation',t:'rng',min:0,max:24,v:8},
+ {k:'shape',l:'shape',t:'sel',o:['rectangle','circle'],v:'rectangle'},
+ {k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},
+ {k:'col',l:'color',t:'sel',o:['white','blue','transparent'],v:'white'},
+ {k:'sc',l:'shadowColor',t:'sel',o:['black','blue','green'],v:'black'},
+ {k:'clip',l:'clipBehavior: antiAlias',t:'chk',v:true},
+ {k:'img',l:'child is an image that overflows',t:'chk',v:true},
+ {k:'which',l:'widget',t:'sel',o:['PhysicalModel','Material','BoxDecoration shadow'],v:'PhysicalModel'}],
 render(s,st,g){
- const circ=s.sh==='circle',sc={black:'0,0,0',pink:'217,71,106',blue:'47,107,255'}[s.c];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${circ?120:190}px;height:120px;background:var(--surface);border-radius:${circ?'50%':s.r+'px'};box-shadow:0 ${s.e*.5}px ${s.e*1.2}px rgba(${sc},.${s.e?38:0}),0 ${s.e*.2}px ${s.e*.4}px rgba(${sc},.${s.e?28:0});display:flex;align-items:center;justify-content:center;font:600 14px var(--f-body)">child</div></div>`;
- return {code:`PhysicalModel(\n  color: Colors.white,\n  elevation: ${s.e},\n  shadowColor: Colors.${s.c},\n  shape: BoxShape.${s.sh},\n${circ?'':`  borderRadius: BorderRadius.circular(${s.r}),\n`}  child: SizedBox(width: ${circ?120:190}, height: 120, child: Center(child: Text('child'))),\n)`,hint:s.e?'':'Elevation 0 means no shadow.'};
+ const circle=s.shape==='circle';
+ const C={white:'var(--surface)',blue:'#dbeafe',transparent:'transparent'}[s.col];
+ const SC={black:'rgba(10,15,40,.42)',blue:'rgba(37,99,235,.45)',green:'rgba(21,128,61,.45)'}[s.sc];
+ const el=+s.el;
+ const radius=circle?'50%':s.r+'px';
+ const child=s.img
+  ?`<img alt="Sample landscape" src="${PIC}" style="width:${circle?150:220}px;height:${circle?150:124}px;object-fit:cover;display:block;transform:scale(1.12)">`
+  :`<div style="width:${circle?150:200}px;height:${circle?150:110}px;display:flex;align-items:center;justify-content:center;font:600 14.5px var(--f-body)">surface</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="background:${C};border-radius:${radius};${s.clip?'overflow:hidden;':''}box-shadow:0 ${Math.round(el/2)}px ${el*2.1}px ${SC};display:flex;align-items:center;justify-content:center">${child}</div></div>`;
+ let code;
+ if(s.which==='Material')code=`Material(\n  elevation: ${el},\n  color: ${s.col==='transparent'?'Colors.transparent':s.col==='white'?'Theme.of(context).colorScheme.surface':'Colors.blue.shade100'},\n  shadowColor: Colors.${s.sc},\n  shape: ${circle?'const CircleBorder()':`RoundedRectangleBorder(borderRadius: BorderRadius.circular(${s.r}))`},\n  clipBehavior: Clip.${s.clip?'antiAlias':'none'},\n  child: child,\n)\n\n// Material also gives you ink ripples and animated elevation`;
+ else if(s.which==='BoxDecoration shadow')code=`Container(\n  decoration: BoxDecoration(\n    color: ${s.col==='transparent'?'Colors.transparent':'Colors.white'},\n    ${circle?'shape: BoxShape.circle,':`borderRadius: BorderRadius.circular(${s.r}),`}\n    boxShadow: [\n      BoxShadow(\n        color: Colors.${s.sc}.withValues(alpha: 0.42),\n        blurRadius: ${el*2},\n        offset: Offset(0, ${Math.round(el/2)}),\n      ),\n    ],\n  ),\n  clipBehavior: Clip.${s.clip?'antiAlias':'none'},\n  child: child,\n)\n\n// cheapest, and you control blur and spread directly`;
+ else code=`PhysicalModel(\n  color: ${s.col==='transparent'?'Colors.transparent':s.col==='white'?'Colors.white':'Colors.blue.shade100'},\n  elevation: ${el},\n  shadowColor: Colors.${s.sc},\n  shape: BoxShape.${s.shape},\n${circle?'':`  borderRadius: BorderRadius.circular(${s.r}),\n`}  clipBehavior: Clip.${s.clip?'antiAlias':'none'},\n  child: child,\n)\n\n// AnimatedPhysicalModel tweens elevation, colour and shape`;
+ const notes=[];
+ if(s.img&&!s.clip)notes.push('clipBehavior is off, so the oversized image spills past the rounded corners.');
+ if(s.img&&s.clip)notes.push('clipBehavior: Clip.antiAlias cuts the child to the shape, which is the main reason to use this over a plain shadow.');
+ if(s.col==='transparent')notes.push('A transparent colour still casts the shadow, because the shadow comes from the shape, not the fill.');
+ if(s.which==='Material')notes.push('Inside a Material app prefer Material or Card: you also get theming, ink ripples and animated elevation.');
+ if(circle&&+s.r)notes.push('With BoxShape.circle the borderRadius is ignored.');
+ return {code,hint:notes.join(' ')};
 }});
 
 /* ================= v6 GROUP B: animation, async, input ================= */
