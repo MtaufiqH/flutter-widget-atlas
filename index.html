@@ -62,6 +62,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -1001,18 +1002,50 @@ render(s,st,g){
  return {code:`Container(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')||'Change any control: the code follows it exactly.'};
 }});
 
-def({cat:'Layout',id:'rotated-box',name:'RotatedBox & Transform',tags:'rotate quarterturns transform angle',
-blurb:'RotatedBox turns its child in quarter turns and changes the layout, so neighbours make room. Transform.rotate rotates by any angle but only at paint time: the layout slot stays exactly where it was.',
-use:'RotatedBox for vertical labels and sideways text. Transform.rotate for decorative tilts and animations.',
-watch:'Transform.rotate does not move or resize anything around it, so a rotated child can overlap its neighbours.',
-ctl:[{k:'m',l:'Widget',t:'sel',o:['RotatedBox','Transform.rotate'],v:'RotatedBox'},{k:'deg',l:'angle (degrees)',t:'rng',min:0,max:270,step:15,v:90}],
+def({cat:'Layout',id:'rotated-box',name:'RotatedBox & Transform',tags:'rotate scale translate matrix4 quarterturns layout paint origin alignment hit test perspective',h:330,
+blurb:'Transform paints its child through a matrix without changing the layout, so neighbours never move. RotatedBox rotates during layout, so the parent really does see the new width and height.',
+use:'Transform for visual effects and animation. RotatedBox for a vertical label that must take vertical space.',
+watch:'Transform.rotate takes radians; AnimatedRotation and RotationTransition take turns. A scaled child overlaps its siblings, because the layout box never changed.',
+ctl:[{k:'w',l:'widget',t:'sel',o:['Transform.rotate','Transform.scale','Transform.translate','Transform.flip','RotatedBox','Matrix4 (3D)'],v:'Transform.rotate'},
+ {k:'ang',l:'angle (degrees)',t:'rng',min:-180,max:180,step:5,v:30},
+ {k:'sc',l:'scale',t:'rng',min:.4,max:2,step:.1,v:1.4},
+ {k:'dx',l:'translate x',t:'rng',min:-60,max:60,v:24},
+ {k:'dy',l:'translate y',t:'rng',min:-40,max:40,v:0},
+ {k:'qt',l:'quarterTurns',t:'sel',o:['1','2','3'],v:'1'},
+ {k:'al',l:'alignment / origin',t:'sel',o:['center','topLeft','bottomRight'],v:'center'},
+ {k:'hit',l:'transformHitTests',t:'chk',v:true},
+ {k:'nb',l:'show the neighbours',t:'chk',v:true}],
 render(s,st,g){
- const rb=s.m==='RotatedBox',q=Math.round(s.deg/90)%4,odd=rb&&q%2===1;
- const inner=rb?`position:absolute;left:50%;top:50%;width:110px;height:40px;transform:translate(-50%,-50%) rotate(${q*90}deg)`:`width:110px;height:40px;transform:rotate(${s.deg}deg)`;
- const wrap=rb?`position:relative;width:${odd?40:110}px;height:${odd?110:40}px`:'width:110px;height:40px';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:10px">${box('A','a','width:50px;height:50px')}<div style="${wrap};outline:1.5px dashed var(--c3);outline-offset:2px;flex:none;display:flex;align-items:center;justify-content:center">${box('child','b',inner)}</div>${box('B','c','width:50px;height:50px')}</div>`;
- return {code:rb?`RotatedBox(\n  quarterTurns: ${q}, // ${q*90} degrees clockwise\n  child: Text('child'),\n)`:`Transform.rotate(\n  angle: ${s.deg} * math.pi / 180,\n  child: Text('child'),\n)`,
-  hint:rb?'RotatedBox snaps to quarter turns. Its dashed layout box changes shape, so A and B move.':'The dashed layout box never changes. A and B stay put no matter the angle.'};
+ const w=s.w;
+ const origin={center:'center',topLeft:'top left',bottomRight:'bottom right'}[s.al];
+ let t='',boxW=96,boxH=56;
+ if(w==='Transform.rotate')t=`rotate(${s.ang}deg)`;
+ else if(w==='Transform.scale')t=`scale(${s.sc})`;
+ else if(w==='Transform.translate')t=`translate(${s.dx}px,${s.dy}px)`;
+ else if(w==='Transform.flip')t='scaleX(-1)';
+ else if(w==='Matrix4 (3D)')t=`perspective(600px) rotateY(${s.ang}deg)`;
+ else {const q=+s.qt;t=`rotate(${q*90}deg)`;if(q%2===1){boxW=56;boxH=96}}
+ const rotated=w==='RotatedBox';
+ const centre=`<div style="${rotated?`width:${boxW}px;height:${boxH}px;`:'width:96px;height:56px;'}display:flex;align-items:center;justify-content:center;flex:none">${rotated?`<div class="fb c" style="width:96px;height:56px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);transform:${t};transform-origin:center">label</div>`:`<div class="fb c" style="width:96px;height:56px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body);transform:${t};transform-origin:${origin}">label</div>`}</div>`;
+ const nb=s.nb?`<div class="fb a" style="width:52px;height:56px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);flex:none">A</div>`:'';
+ const nb2=s.nb?`<div class="fb b" style="width:52px;height:56px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);flex:none">B</div>`:'';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="display:flex;align-items:center;gap:8px;border:1.5px dashed var(--c3);padding:10px">${nb}<div style="outline:1px dotted var(--muted);outline-offset:1px">${centre}</div>${nb2}</div></div>`;
+ const rad=(+s.ang*Math.PI/180).toFixed(3);
+ const C={
+  'Transform.rotate':`Transform.rotate(\n  angle: ${rad},   // radians, not degrees\n  alignment: Alignment.${s.al},\n${s.hit?'':'  transformHitTests: false,\n'}  child: child,\n)`,
+  'Transform.scale':`Transform.scale(\n  scale: ${(+s.sc).toFixed(1)},\n  alignment: Alignment.${s.al},\n  child: child,\n)`,
+  'Transform.translate':`Transform.translate(\n  offset: const Offset(${s.dx}, ${s.dy}),\n  child: child,\n)`,
+  'Transform.flip':'Transform.flip(\n  flipX: true,\n  child: child,\n)',
+  'RotatedBox':`RotatedBox(\n  quarterTurns: ${s.qt},   // rotates during LAYOUT\n  child: child,\n)`,
+  'Matrix4 (3D)':`Transform(\n  alignment: Alignment.center,\n  transform: Matrix4.identity()\n    ..setEntry(3, 2, 0.001)   // perspective\n    ..rotateY(${rad}),\n  child: child,\n)`}[w];
+ const notes=[];
+ if(rotated)notes.push('RotatedBox changed the layout box itself, so the neighbours moved. That is what you want for a vertical label in a Row.');
+ else notes.push('The layout box is unchanged, shown by the dotted outline, so the neighbours stayed where they were.');
+ if(w==='Transform.scale'&&+s.sc>1&&s.nb)notes.push('The scaled child overlaps its neighbours, because nothing was re-laid out.');
+ if(!s.hit)notes.push('transformHitTests: false means taps use the original, untransformed position.');
+ if(w==='Matrix4 (3D)')notes.push('setEntry(3, 2, 0.001) adds the perspective that makes a 3D rotation look like a card flip.');
+ notes.push('To animate these, use AnimatedRotation, AnimatedScale and AnimatedSlide, or the matching *Transition widgets.');
+ return {code:C,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'wrap',name:'Wrap',tags:'chips tags flow wrap runspacing alignment runalignment crossaxisalignment direction vertical',h:320,
@@ -1047,27 +1080,72 @@ render(s,st,g){
  return {code:`Wrap(\n${L.map(x=>'  '+x).join('\n')}\n  children: [for (final t in tags) Chip(label: Text(t))],\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'aspect-ratio',name:'AspectRatio',tags:'ratio 16:9 video',
-blurb:'AspectRatio sizes its child to a fixed width-to-height ratio. It takes the widest size the parent allows, derives the height, and shrinks the whole box if that height does not fit.',
-use:'Video players, thumbnails and cards that must keep their proportions at any width.',
-watch:'With unbounded constraints in both directions it has nothing to base the ratio on and throws.',
-ctl:[{k:'r',l:'aspectRatio',t:'sel',o:['1/1','4/3','16/9','21/9','9/16'],v:'16/9'},{k:'w',l:'parent width',t:'rng',min:120,max:320,v:240}],
+def({cat:'Layout',id:'aspect-ratio',name:'AspectRatio',tags:'ratio 16:9 video thumbnail square portrait fit bounded constraints',h:320,
+blurb:'AspectRatio sizes its child to a width-to-height ratio. It takes the widest width allowed, works out the height from the ratio, and tries the other way round if that height is not allowed.',
+use:'Video frames, image placeholders, grid tiles and map previews that must keep their shape on every screen.',
+watch:'It needs at least one bounded axis to work from. Inside a tightly sized parent the ratio is ignored, because the size was already decided.',
+ctl:[{k:'r',l:'aspectRatio',t:'sel',o:['16 / 9','4 / 3','1','3 / 4','9 / 16','2.35'],v:'16 / 9'},
+ {k:'w',l:'available width',t:'rng',min:120,max:300,step:10,v:240},
+ {k:'hmax',l:'height limit',t:'rng',min:60,max:170,v:170},
+ {k:'tight',l:'parent is tightly sized',t:'chk',v:false},
+ {k:'what',l:'child',t:'sel',o:['video frame','image','map'],v:'video frame'}],
 render(s,st,g){
- const p=s.r.split('/').map(Number),q=p[0]/p[1],mw=+s.w,mh=220;let w=mw,h=w/q;if(h>mh){h=mh;w=h*q}
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${mw}px;height:${mh}px;outline:1px dashed var(--line);display:flex;align-items:center;justify-content:center">${box(`${s.r.replace('/',' : ')}  ·  ${Math.round(w)} × ${Math.round(h)}`,'d',`width:${w}px;height:${h}px`)}</div></div>`;
- return {code:`AspectRatio(\n  aspectRatio: ${p[0]} / ${p[1]},\n  child: Container(color: Colors.teal),\n)`,hint:h>=mh-.5?'The tall ratio would exceed the available height, so the box shrinks to keep its shape.':'Width comes from the parent. Height follows from the ratio.'};
+ const R={'16 / 9':16/9,'4 / 3':4/3,'1':1,'3 / 4':3/4,'9 / 16':9/16,'2.35':2.35}[s.r];
+ let w=+s.w,h=w/R;
+ const limited=h>+s.hmax;
+ if(limited){h=+s.hmax;w=h*R}
+ if(s.tight){w=+s.w;h=+s.hmax}
+ const inner=s.what==='image'
+  ?`<img alt="Sample landscape" src="${PIC}" style="width:100%;height:100%;object-fit:cover;display:block">`
+  :s.what==='map'
+   ?`<div style="width:100%;height:100%;background:linear-gradient(135deg,#dbeafe,#bbf7d0);display:flex;align-items:center;justify-content:center;color:var(--muted)">${ic('home',24)}</div>`
+   :`<div style="width:100%;height:100%;background:#0f172a;display:flex;align-items:center;justify-content:center;color:#fff;gap:8px"><span style="width:0;height:0;border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent"></span></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><div style="width:${s.w}px;max-height:${s.hmax}px;border:1.5px dashed var(--c3);display:flex;align-items:center;justify-content:center"><div style="width:${Math.round(w)}px;height:${Math.round(h)}px;border-radius:8px;overflow:hidden">${inner}</div></div></div>`;
+ const notes=[];
+ notes.push(`${Math.round(w)} x ${Math.round(h)} for a ratio of ${(+R).toFixed(2)}.`);
+ if(limited&&!s.tight)notes.push('The height limit was hit first, so AspectRatio worked back from the height and the box is now narrower than the space offered.');
+ if(s.tight)notes.push('The parent gave tight constraints, so the ratio is ignored entirely. Wrap it in a Center or an Align to loosen them.');
+ notes.push('In a GridView use childAspectRatio or mainAxisExtent on the delegate instead of an AspectRatio per tile.');
+ return {code:`AspectRatio(\n  aspectRatio: ${s.r},   // width / height\n  child: ${s.what==='image'?'Image.network(url, fit: BoxFit.cover)':s.what==='map'?'MapPreview()':'VideoPlayer(controller)'},\n)${s.tight?'\n\n// inside a tightly sized parent the ratio is ignored:\nSizedBox(\n  width: '+s.w+',\n  height: '+s.hmax+',\n  child: AspectRatio(aspectRatio: '+s.r+', child: child),   // no effect\n)':''}`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'fitted-box',name:'FittedBox',tags:'boxfit scale fit shrink cover contain',
-blurb:'FittedBox scales and positions its child inside itself using a BoxFit. The child here wants to be 260 × 50, but the box is only 200 × 100.',
-use:'Shrinking text or an icon to fit a fixed slot, and cropping content to cover an area.',
-watch:'FittedBox does not clip by default. Without a clip the scaled child can paint outside its box.',
-ctl:[{k:'fit',l:'fit',t:'sel',o:['contain','cover','fill','fitWidth','fitHeight','scaleDown','none'],v:'contain'},{k:'clip',l:'clipBehavior hardEdge',t:'chk',v:true}],
+def({cat:'Layout',id:'fitted-box',name:'FittedBox',tags:'scale fit contain cover scaledown text overflow clip alignment shrink',h:320,
+blurb:'FittedBox lays its child out at its natural size and then paints it at a different scale so it fits the space. It scales; it does not reflow.',
+use:'Stopping a long label overflowing, and scaling a whole fixed-size design to any screen.',
+watch:'It needs bounded space. Inside an unbounded parent the child has infinite room, so there is no scale to compute.',
+ctl:[{k:'fit',l:'fit',t:'sel',o:['contain','cover','fill','fitWidth','fitHeight','scaleDown','none'],v:'contain'},
+ {k:'al',l:'alignment',t:'sel',o:['center','topLeft','bottomRight'],v:'center'},
+ {k:'clip',l:'clipBehavior: hardEdge',t:'chk',v:false},
+ {k:'bw',l:'box width',t:'rng',min:90,max:280,v:180},
+ {k:'bh',l:'box height',t:'rng',min:40,max:140,v:70},
+ {k:'child',l:'child',t:'sel',o:['long text','a small chip','a fixed design'],v:'long text'}],
 render(s,st,g){
- const W0=200,H0=100,w=260,h=50,a=W0/w,b=H0/h;
- const sc={contain:[Math.min(a,b),Math.min(a,b)],cover:[Math.max(a,b),Math.max(a,b)],fill:[a,b],fitWidth:[a,a],fitHeight:[b,b],scaleDown:[Math.min(1,a,b),Math.min(1,a,b)],none:[1,1]}[s.fit];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:${W0}px;height:${H0}px;border:1.5px dashed var(--c3);${s.clip?'overflow:hidden':''}"><div class="fb a" style="position:absolute;left:50%;top:50%;width:${w}px;height:${h}px;border-radius:8px;transform:translate(-50%,-50%) scale(${sc[0]},${sc[1]})">child 260 × 50</div></div></div>`;
- return {code:`FittedBox(\n  fit: BoxFit.${s.fit},\n  clipBehavior: Clip.${s.clip?'hardEdge':'none'},\n  child: SizedBox(width: 260, height: 50, child: Child()),\n)`,hint:{contain:'Scales uniformly until the whole child fits.',cover:'Scales uniformly until the box is covered. The overflow is cropped.',fill:'Stretches each axis separately, so the child is distorted.',fitWidth:'Matches the box width and may overflow vertically.',fitHeight:'Matches the box height and may overflow horizontally.',scaleDown:'Like contain, but never scales up.',none:'No scaling. The child keeps 260 × 50 and overflows.'}[s.fit]};
+ const natural=s.child==='long text'?[300,40]:s.child==='a small chip'?[90,32]:[260,150];
+ const bw=+s.bw,bh=+s.bh;
+ let sx=bw/natural[0],sy=bh/natural[1];
+ let scale=1;
+ if(s.fit==='contain')scale=Math.min(sx,sy);
+ else if(s.fit==='cover')scale=Math.max(sx,sy);
+ else if(s.fit==='fitWidth')scale=sx;
+ else if(s.fit==='fitHeight')scale=sy;
+ else if(s.fit==='scaleDown')scale=Math.min(1,Math.min(sx,sy));
+ else if(s.fit==='none')scale=1;
+ const fill=s.fit==='fill';
+ const AP={center:'center',topLeft:'flex-start',bottomRight:'flex-end'}[s.al];
+ const inner=s.child==='long text'
+  ?`<div style="width:${natural[0]}px;height:${natural[1]}px;display:flex;align-items:center;font:600 22px var(--f-body);white-space:nowrap">A rather long label</div>`
+  :s.child==='a small chip'
+   ?`<div class="fb c" style="width:${natural[0]}px;height:${natural[1]}px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body)">chip</div>`
+   :`<div style="width:${natural[0]}px;height:${natural[1]}px;border:1.5px solid var(--c1);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--surface)"><div style="height:16px;background:var(--c1s);border-radius:5px;width:70%"></div><div style="height:10px;background:var(--line);border-radius:5px"></div><div style="height:10px;background:var(--line);border-radius:5px;width:80%"></div><div style="flex:1;background:var(--c2s);border-radius:7px"></div></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:14px"><div style="width:${bw}px;height:${bh}px;border:1.5px dashed var(--c3);display:flex;align-items:${AP==='center'?'center':AP};justify-content:${AP==='center'?'center':AP};${s.clip?'overflow:hidden':'overflow:visible'}"><div style="transform:${fill?`scale(${sx},${sy})`:`scale(${scale})`};transform-origin:${s.al==='center'?'center':s.al==='topLeft'?'top left':'bottom right'}">${inner}</div></div></div>`;
+ const notes=[];
+ notes.push(`The child is ${natural[0]} x ${natural[1]} and the box is ${bw} x ${bh}, so it is painted at ${fill?'a different scale per axis':(scale).toFixed(2)+'x'}.`);
+ if(s.fit==='fill')notes.push('fill stretches each axis separately, which distorts the child.');
+ if(s.fit==='none'&&scale===1&&(natural[0]>bw||natural[1]>bh))notes.push('none keeps the natural size, so the child spills out unless you clip it.');
+ if(s.fit==='scaleDown')notes.push('scaleDown is contain that never enlarges, which is the safest choice for text.');
+ if(s.child==='long text')notes.push('For a label, FittedBox(fit: BoxFit.scaleDown) is the usual way to avoid the yellow overflow stripes.');
+ notes.push('Padding and borders scale with everything else, because the whole child is painted at one scale.');
+ return {code:`FittedBox(\n  fit: BoxFit.${s.fit},\n  alignment: Alignment.${s.al},\n${s.clip?'  clipBehavior: Clip.hardEdge,\n':''}  child: ${s.child==='long text'?"const Text('A rather long label', style: TextStyle(fontSize: 22))":s.child==='a small chip'?"const Chip(label: Text('chip'))":'const FixedSizeDesign()'},\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Styling',id:'layout-builder',name:'LayoutBuilder & MediaQuery',tags:'responsive constraints breakpoint maxwidth mediaquery sizeof paddingof viewinsets textscaler orientation',h:340,
@@ -2463,40 +2541,99 @@ render(s,st,g){
  return {code:`${parentCode}${wrapped}${p.includes('Row')?'],\n)':',\n)'}\n\n// see the real numbers at any point in the tree\nLayoutBuilder(\n  builder: (context, constraints) {\n    debugPrint('\$constraints');\n    return child;\n  },\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'fractionally-sized-box',name:'FractionallySizedBox',tags:'percent percentage fraction relative widthfactor heightfactor responsive',
-blurb:'FractionallySizedBox sizes its child as a fraction of the space its parent offers. A widthFactor of 0.5 makes the child half as wide as the parent.',
-use:'Percentage-style sizing: a progress bar fill, a bottom sheet that takes 60 percent of the height, a hero image at 80 percent width.',
-watch:'It needs bounded space from its parent. In an unbounded Column or ListView the fraction has nothing to be a fraction of and Flutter throws an error.',
-ctl:[{k:'wf',l:'widthFactor',t:'rng',min:.1,max:1,step:.05,v:.5},{k:'hf',l:'heightFactor',t:'rng',min:.1,max:1,step:.05,v:.6},{k:'al',l:'alignment',t:'sel',o:['center','topLeft','bottomRight'],v:'center'}],
+def({cat:'Layout',id:'fractionally-sized-box',name:'FractionallySizedBox',tags:'fraction widthfactor heightfactor percentage parent alignment bounded expanded mediaquery',h:320,
+blurb:'FractionallySizedBox sizes its child to a fraction of the space it was offered. A factor of 1 fills it, 0.5 takes half, and anything above 1 makes the child larger than its parent.',
+use:'A button that is 80 percent of the width, a sheet that takes half the height, a simple bar in a chart.',
+watch:'A fraction of infinity is undefined, so it throws inside an unbounded Row or Column. A null factor leaves that axis to the parent.',
+ctl:[{k:'wf',l:'widthFactor',t:'sel',o:['null','0.3','0.5','0.8','1.0','1.3'],v:'0.8'},
+ {k:'hf',l:'heightFactor',t:'sel',o:['null','0.3','0.5','1.0'],v:'null'},
+ {k:'al',l:'alignment',t:'sel',o:['center','centerLeft','topCenter','bottomRight'],v:'center'},
+ {k:'alt',l:'compare with',t:'sel',o:['nothing','Expanded (flex)','MediaQuery fraction'],v:'nothing'},
+ {k:'unb',l:'inside an unbounded Row (throws)',t:'chk',v:false}],
 render(s,st,g){
- const a=AL[s.al];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:280px;max-width:100%;height:180px;border:1.5px dashed var(--c3);display:flex;justify-content:${a[0]};align-items:${a[1]}"><div class="fb a" style="width:${s.wf*100}%;height:${s.hf*100}%">${Math.round(s.wf*100)}% × ${Math.round(s.hf*100)}%</div></div></div>`;
- return {code:`SizedBox(\n  width: 280,\n  height: 180,\n  child: FractionallySizedBox(\n    alignment: Alignment.${s.al},\n    widthFactor: ${s.wf},\n    heightFactor: ${s.hf},\n    child: Box(),\n  ),\n)`,hint:'The dashed outline is the parent. Leave heightFactor null to keep the child\'s own height.'};
+ const pw=240,ph=110;
+ const wf=s.wf==='null'?null:+s.wf,hf=s.hf==='null'?null:+s.hf;
+ if(s.unb){
+  g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="border:2px solid var(--danger);border-radius:10px;background:rgba(185,28,28,.07);padding:14px;max-width:320px;font:700 12.5px var(--f-mono);color:var(--danger);line-height:1.5">BoxConstraints forces an infinite width.<br><span style="font-weight:400;color:var(--muted);font-family:var(--f-body);font-size:12.5px">A fraction of infinity has no meaning, so give the Row a bounded child: Expanded, Flexible or a SizedBox.</span></div></div>`;
+ } else {
+  const cw=wf===null?pw:pw*wf,ch=hf===null?ph:ph*hf;
+  const AP={center:['center','center'],centerLeft:['flex-start','center'],topCenter:['center','flex-start'],bottomRight:['flex-end','flex-end']}[s.al];
+  g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="width:${pw}px;height:${ph}px;border:1.5px dashed var(--c3);display:flex;justify-content:${AP[0]};align-items:${AP[1]};${cw>pw?'':'overflow:hidden'}"><div class="fb ${cw>pw?'d':'c'}" style="width:${cw}px;height:${ch}px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body);flex:none">${Math.round(cw)} x ${Math.round(ch)}</div></div></div>`;
+ }
+ let code=`FractionallySizedBox(\n${wf!==null?`  widthFactor: ${wf},\n`:''}${hf!==null?`  heightFactor: ${hf},\n`:''}  alignment: Alignment.${s.al},\n  child: child,\n)`;
+ if(s.unb)code=`// throws\nRow(\n  children: [\n    FractionallySizedBox(widthFactor: 0.5, child: child),\n  ],\n)\n\n// fix it by bounding the width first\nRow(\n  children: [\n    Expanded(\n      child: FractionallySizedBox(widthFactor: 0.5, child: child),\n    ),\n  ],\n)`;
+ if(s.alt==='Expanded (flex)')code+=`\n\n// inside a Row or Column, flex is usually clearer\nRow(\n  children: [\n    Expanded(flex: 8, child: child),\n    const Spacer(flex: 2),\n  ],\n)`;
+ if(s.alt==='MediaQuery fraction')code+=`\n\n// a fraction of the SCREEN, not of the parent\nSizedBox(\n  width: MediaQuery.sizeOf(context).width * ${wf ?? 0.8},\n  child: child,\n)\n// careful: this ignores padding and any parent limit`;
+ const notes=[];
+ if(wf===null&&hf===null)notes.push('Both factors are null, so the child simply gets the parent constraints unchanged.');
+ if(wf!==null&&wf>1)notes.push('A factor above 1 makes the child bigger than its parent, which overflows unless you clip it.');
+ if(hf===null)notes.push('A null heightFactor leaves the height to the parent, so only the width is a fraction.');
+ if(s.alt==='MediaQuery fraction')notes.push('MediaQuery measures the window, not the slot, so it is wrong inside a sidebar or a padded card.');
+ if(s.alt==='Expanded (flex)')notes.push('Inside a Row or Column, Expanded with a flex ratio says the same thing more directly.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'intrinsic',name:'IntrinsicHeight & IntrinsicWidth',tags:'equal height same height stretch row cards divider intrinsicwidth',h:280,
-blurb:'IntrinsicHeight sizes its child to the child\'s natural height. Inside a Row with crossAxisAlignment.stretch it makes every child as tall as the tallest one.',
-use:'Equal-height cards in a Row, or a VerticalDivider that must match the height of the content beside it.',
-watch:'It makes Flutter measure the subtree twice, which costs extra layout work on every build. Avoid it in long lists and use it on small subtrees only.',
-ctl:[{k:'on',l:'IntrinsicHeight',t:'chk',v:true},{k:'ln',l:'lines in middle card',t:'rng',min:1,max:6,v:4}],
+def({cat:'Layout',id:'intrinsic',name:'IntrinsicHeight & IntrinsicWidth',tags:'equal height row divider stretch natural size expensive stepwidth table',h:320,
+blurb:'These widgets ask the children how big they would like to be, then force them all to the largest of those sizes. That costs an extra layout pass, which is why Flutter calls them relatively expensive.',
+use:'Making a Row of cards the same height so a vertical Divider reaches top to bottom, or a Column of buttons as wide as the widest.',
+watch:'Never put one inside a list item that repeats hundreds of times. A child that cannot report an intrinsic size, such as a lazy list, throws instead.',
+ctl:[{k:'on',l:'IntrinsicHeight',t:'chk',v:true},
+ {k:'dir',l:'widget',t:'sel',o:['IntrinsicHeight (Row)','IntrinsicWidth (Column)'],v:'IntrinsicHeight (Row)'},
+ {k:'div',l:'divider between',t:'chk',v:true},
+ {k:'cross',l:'crossAxisAlignment: stretch instead',t:'chk',v:false},
+ {k:'step',l:'IntrinsicWidth stepWidth: 40',t:'chk',v:false}],
 render(s,st,g){
- const card=(c,t,n)=>`<div class="fb ${c}" style="flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:10px;width:30%;text-align:left;gap:6px"><b>${t}</b>${Array.from({length:n},()=>'<span class="ln" style="width:100%"></span>').join('')}</div>`;
- g.innerHTML=`<div class="fill" style="align-items:flex-start;justify-content:center;padding-top:30px"><div style="display:flex;gap:10px;width:100%;max-width:340px;align-items:${s.on?'stretch':'flex-start'}">${card('a','A',1)}${card('b','B',s.ln)}${card('c','C',2)}</div></div>`;
- return {code:s.on?`IntrinsicHeight(\n  child: Row(\n    crossAxisAlignment: CrossAxisAlignment.stretch,\n    children: [CardA(), CardB(), CardC()],\n  ),\n)`:`Row(\n  crossAxisAlignment: CrossAxisAlignment.start,\n  children: [CardA(), CardB(), CardC()],\n)`,
-  hint:s.on?'All three cards match the tallest one.':'Without IntrinsicHeight each card keeps its own height.'};
+ const row=s.dir.startsWith('IntrinsicHeight');
+ const on=s.on||s.cross;
+ const texts=row?['Short','A rather longer piece of text that wraps onto three lines in this column','Medium length text']:['OK','Cancel','Save for later'];
+ const items=texts.map((t,i)=>row
+  ?`<div class="fb ${'abc'[i]}" style="flex:1;padding:10px;border-radius:9px;font:13px var(--f-body);${on?'align-self:stretch;':'align-self:flex-start;'}">${t}</div>`
+  :`<div class="fb ${'abc'[i]}" style="padding:9px 14px;border-radius:9px;font:600 13px var(--f-body);text-align:center;${on?'width:100%;':''}${s.step&&on?'min-width:160px;':''}">${t}</div>`).join(s.div?(row?'<div style="width:1px;background:var(--muted);align-self:stretch"></div>':'<div style="height:1px;background:var(--muted);align-self:stretch"></div>'):'');
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="display:flex;flex-direction:${row?'row':'column'};align-items:${on?'stretch':'flex-start'};gap:8px;width:${row?'100%':'auto'};max-width:320px;border:1.5px dashed var(--c3);padding:8px">${items}</div></div>`;
+ let code;
+ if(row)code=s.cross
+  ?`// often enough, and free\nRow(\n  crossAxisAlignment: CrossAxisAlignment.stretch,\n  children: [\n    Expanded(child: CardA()),\n${s.div?'    const VerticalDivider(width: 1),\n':''}    Expanded(child: CardB()),\n  ],\n)`
+  :`IntrinsicHeight(\n  child: Row(\n    crossAxisAlignment: CrossAxisAlignment.stretch,\n    children: [\n      Expanded(child: CardA()),\n${s.div?'      const VerticalDivider(width: 1),\n':''}      Expanded(child: CardB()),\n    ],\n  ),\n)`;
+ else code=`IntrinsicWidth(\n${s.step?'  stepWidth: 40,   // round up to a multiple\n':''}  child: Column(\n    crossAxisAlignment: CrossAxisAlignment.stretch,\n    children: const [\n      OutlinedButton(onPressed: null, child: Text('OK')),\n      OutlinedButton(onPressed: null, child: Text('Cancel')),\n      OutlinedButton(onPressed: null, child: Text('Save for later')),\n    ],\n  ),\n)`;
+ const notes=[];
+ if(!on)notes.push('Without it each child keeps its own size, so the divider stops short and the buttons are different widths.');
+ if(s.cross)notes.push('crossAxisAlignment: stretch already makes children fill the height the Row has, and costs nothing. Try it before reaching for IntrinsicHeight.');
+ if(s.step)notes.push('stepWidth rounds the result up to a multiple, which keeps a row of buttons visually tidy.');
+ notes.push('The subtree is laid out twice, so keep these out of long lists. A Table does the same job in one pass.');
+ return {code,hint:notes.join(' ')};
 }});
 
-def({cat:'Layout',id:'overflow-box',name:'OverflowBox & UnconstrainedBox',tags:'overflow unconstrained constraints bleed escape parent size overflow warning',h:240,
-blurb:'These two widgets let a child ignore the size its parent allows. OverflowBox swaps in constraints you choose. UnconstrainedBox removes the constraints so the child takes its natural size.',
-use:'Letting a decoration bleed past its parent\'s edge (OverflowBox), or giving a child its natural size inside a tight parent (UnconstrainedBox).',
-watch:'The child can paint outside the parent. UnconstrainedBox reports the striped overflow warning in debug builds, and OverflowBox stays silent. Neither one clips, so wrap them in ClipRect if you need clipping.',
-ctl:[{k:'m',l:'Widget',t:'sel',o:['none (default)','OverflowBox','UnconstrainedBox'],v:'OverflowBox'},{k:'cw',l:'child width',t:'rng',min:60,max:280,step:10,v:220}],
+def({cat:'Layout',id:'overflow-box',name:'OverflowBox & UnconstrainedBox',tags:'overflow unbounded constraints child bigger than parent sizedoverflowbox full bleed deferToChild',h:330,
+blurb:'OverflowBox replaces the constraints its child receives, so the child can be larger than the box while the parent still believes the box is its original size. UnconstrainedBox removes the limits instead.',
+use:'A full-bleed banner inside a padded list, an oversized glow, a child that must escape its slot.',
+watch:'Parts painted outside the parent usually do not receive taps, because hit testing follows the parent bounds.',
+ctl:[{k:'w',l:'widget',t:'sel',o:['OverflowBox','UnconstrainedBox','SizedOverflowBox','none'],v:'OverflowBox'},
+ {k:'mw',l:'maxWidth given to the child',t:'rng',min:100,max:360,step:10,v:300},
+ {k:'mh',l:'maxHeight given to the child',t:'rng',min:40,max:160,v:110},
+ {k:'al',l:'alignment',t:'sel',o:['center','topLeft','centerLeft'],v:'center'},
+ {k:'fit',l:'fit',t:'sel',o:['max','deferToChild'],v:'max'},
+ {k:'axis',l:'UnconstrainedBox constrainedAxis',t:'sel',o:['none','horizontal','vertical'],v:'none'}],
 render(s,st,g){
- const PW=150,PH=90,cw=s.m==='none (default)'?Math.min(s.cw,PW):s.cw;
- const warn=s.m==='UnconstrainedBox'&&s.cw>PW;
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:${PW}px;height:${PH}px;border:1.5px solid var(--c3);background:var(--c3s)"><div class="fb a" style="position:absolute;left:${(PW-cw)/2-1.5}px;top:${(PH-50)/2-1.5}px;width:${cw}px;height:50px">child ${s.cw}px</div>${warn?'<div class="ovf"><span>OVERFLOWED BY '+(s.cw-PW)+' PIXELS</span></div>':''}</div></div>`;
- const kids={'none (default)':`Container(\n  width: ${PW}, height: ${PH},\n  alignment: Alignment.center,\n  child: Box(width: ${s.cw}), // clamped to ${PW}\n)`,OverflowBox:`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: OverflowBox(\n    maxWidth: ${s.cw},\n    child: Box(width: ${s.cw}),\n  ),\n)`,UnconstrainedBox:`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: UnconstrainedBox(\n    child: Box(width: ${s.cw}),\n  ),\n)`};
- return {code:kids[s.m],hint:s.m==='none (default)'?'The parent\'s limit wins and the child is clamped to 150.':s.m==='OverflowBox'?'The child keeps its width and bleeds out on both sides with no warning.':warn?'UnconstrainedBox lets the child grow and flags the overflow in debug mode.':'The child fits, so there is nothing to report.'};
+ const parentW=190,parentH=86;
+ const none=s.w==='none';
+ let cw=none?parentW:Math.min(+s.mw,360),ch=none?parentH:Math.min(+s.mh,160);
+ if(s.w==='UnconstrainedBox'){cw=s.axis==='horizontal'?parentW:300;ch=s.axis==='vertical'?parentH:120}
+ const AP={center:'center',topLeft:'flex-start',centerLeft:'flex-start'}[s.al];
+ const AV={center:'center',topLeft:'flex-start',centerLeft:'center'}[s.al];
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:20px"><div style="position:relative;width:${parentW}px;height:${parentH}px;border:1.5px dashed var(--c3);display:flex;align-items:${AV};justify-content:${AP}"><div class="fb ${cw>parentW||ch>parentH?'d':'c'}" style="position:${s.al==='center'?'absolute':'relative'};${s.al==='center'?'left:50%;top:50%;transform:translate(-50%,-50%);':''}width:${cw}px;height:${ch}px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body);flex:none">${cw} x ${ch}</div></div></div>`;
+ let code;
+ if(none)code='// no wrapper: the child is clamped to the parent constraints\nSizedBox(\n  width: 190,\n  height: 86,\n  child: child,\n)';
+ else if(s.w==='OverflowBox')code=`SizedBox(\n  width: 190,\n  height: 86,\n  child: OverflowBox(\n    maxWidth: ${s.mw},\n    maxHeight: ${s.mh},\n    alignment: Alignment.${s.al},\n${s.fit==='deferToChild'?'    fit: OverflowBoxFit.deferToChild,\n':''}    child: child,   // laid out with YOUR constraints\n  ),\n)`;
+ else if(s.w==='UnconstrainedBox')code=`UnconstrainedBox(\n${s.axis!=='none'?`  constrainedAxis: Axis.${s.axis},   // keep the limits on this axis\n`:''}  alignment: Alignment.${s.al},\n  child: child,   // free to be its natural size\n)\n\n// it warns in debug when the child then overflows`;
+ else code=`SizedOverflowBox(\n  size: const Size(190, 86),   // what the parent is told\n  alignment: Alignment.${s.al},\n  child: child,                // may paint larger\n)`;
+ const notes=[];
+ if(none)notes.push('With no wrapper the child is clamped to the parent constraints and simply shrinks.');
+ if(s.w==='OverflowBox')notes.push('The parent still measures 190 x 86, so siblings lay out as if the child were that size. Only the painting escapes.');
+ if(s.fit==='deferToChild')notes.push('deferToChild sizes the box to the child instead of filling the parent offer, so the parent can lay out around it.');
+ if(s.w==='UnconstrainedBox'&&s.axis!=='none')notes.push('constrainedAxis keeps the limits on one axis and drops them on the other.');
+ if(s.w==='SizedOverflowBox')notes.push('SizedOverflowBox reports a fixed size while the child paints at whatever size it likes.');
+ notes.push('A common real use is a banner that must reach the screen edges inside a padded list.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'indexed-stack',name:'IndexedStack',tags:'tabs keep state index sizing offstage visibility pageview lazy bottom navigation',h:330,
@@ -2824,16 +2961,36 @@ render(s,st,g){
  return {code:`Flex(\n  direction: Axis.${s.dir},\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  spacing: ${s.sp},\n${s.rev?`  ${v?'verticalDirection: VerticalDirection.up':'textDirection: TextDirection.rtl'},\n`:''}  children: [A(), B(), C()],\n)`,hint:`Same as ${v?'Column':'Row'}(...). Flex just lets you pick the direction yourself.`};
 }});
 
-def({cat:'Layout',id:'limited-box',name:'LimitedBox',tags:'unbounded max infinite listview limit size',h:250,
-blurb:'LimitedBox caps the size of its child, but only when the parent gives unbounded space on that axis. When the parent is bounded, LimitedBox does nothing.',
-use:'A default size for a child that would otherwise want infinite space, for example inside a ListView or a scroll view.',
-watch:'Do not use it as a general max size. For that, use ConstrainedBox, which always applies its limits.',
-ctl:[{k:'p',l:'parent',t:'sel',o:['bounded (SizedBox 200 x 110)','unbounded (scroll view)'],v:'unbounded (scroll view)'},{k:'mw',l:'maxWidth',t:'rng',min:60,max:240,step:10,v:140},{k:'mh',l:'maxHeight',t:'rng',min:30,max:150,step:10,v:70}],
+def({cat:'Layout',id:'limited-box',name:'LimitedBox',tags:'unbounded maxwidth maxheight horizontal list scroll view constrainedbox difference',h:320,
+blurb:'LimitedBox applies a maximum only when the incoming constraint is unbounded. If the parent already gives a real limit, it does nothing at all. That is the whole difference from ConstrainedBox.',
+use:'Giving a sensible size to a child that lands in unbounded space, such as inside a horizontal list or a scroll view.',
+watch:'Because it is invisible under bounded constraints, it is easy to think it is broken. Switch the parent in the demo to see when it bites.',
+ctl:[{k:'parent',l:'parent gives',t:'sel',o:['bounded (240px wide)','unbounded (horizontal list)'],v:'unbounded (horizontal list)'},
+ {k:'w',l:'maxWidth',t:'rng',min:80,max:300,step:10,v:160},
+ {k:'use',l:'widget',t:'sel',o:['LimitedBox','ConstrainedBox','nothing'],v:'LimitedBox'},
+ {k:'want',l:'child wants',t:'sel',o:['as big as possible','width 120'],v:'as big as possible'}],
 render(s,st,g){
- const ub=s.p.startsWith('unbounded');
- const w=ub?s.mw:200,h=ub?s.mh:110;
- g.innerHTML=`<div style="position:absolute;left:16px;top:10px;font:11px var(--f-mono);color:var(--muted)">${ub?'parent gives infinite space':'parent is 200 × 110'}</div><div style="position:absolute;left:16px;top:34px;width:${ub?'calc(100% - 32px)':'200px'};height:${ub?'calc(100% - 50px)':'110px'};border:1.5px dashed var(--c3);${ub?'border-style:dotted;':''}"><div class="fb a" style="width:${w}px;height:${h}px;max-width:100%;max-height:100%">${w} × ${h}</div></div>`;
- return {code:`${ub?'SingleChildScrollView(\n  scrollDirection: Axis.horizontal,\n  child: ':'SizedBox(\n  width: 200, height: 110,\n  child: '}LimitedBox(\n    maxWidth: ${s.mw},\n    maxHeight: ${s.mh},\n    child: Container(color: Colors.blue), // wants all the space\n  ),\n)`,hint:ub?'No limit comes from the parent, so LimitedBox steps in and caps the child.':'The parent already bounds the child, so LimitedBox is ignored and the child fills the parent.'};
+ const unbounded=s.parent.startsWith('unbounded');
+ const want=s.want==='width 120'?120:999;
+ let w;
+ if(s.use==='nothing')w=unbounded?330:(want===999?240:120);
+ else if(s.use==='ConstrainedBox')w=Math.min(+s.w,want===999?(unbounded?999:240):120);
+ else w=unbounded?Math.min(+s.w,want):(want===999?240:120);
+ const over=w>300;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="position:relative;width:${unbounded?300:240}px;height:84px;border:1.5px ${unbounded?'dotted':'dashed'} var(--c3);display:flex;align-items:center;${over?'':'overflow:hidden'}"><div class="fb ${over?'d':'c'}" style="width:${Math.min(w,330)}px;height:54px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body);flex:none">${over?'unbounded':w+'px'}</div>${over?'<div style="position:absolute;right:-8px;top:0;bottom:0;width:10px;background:repeating-linear-gradient(45deg,#000,#000 6px,#ffd400 6px,#ffd400 12px)"></div>':''}</div><div class="cap" style="margin:10px 0 0;position:absolute;bottom:12px;left:0;right:0;text-align:center">${unbounded?'the dotted box has no width limit to give':'the dashed box offers at most 240px'}</div></div>`;
+ const inner=s.use==='nothing'?'child'
+  :s.use==='ConstrainedBox'?`ConstrainedBox(\n    constraints: const BoxConstraints(maxWidth: ${s.w}),\n    child: child,\n  )`
+  :`LimitedBox(\n    maxWidth: ${s.w},   // only used when the width is unbounded\n    child: child,\n  )`;
+ const code=unbounded
+  ?`ListView(\n  scrollDirection: Axis.horizontal,   // children get unbounded width\n  children: [\n    ${inner},\n  ],\n)`
+  :`SizedBox(\n  width: 240,   // a real maximum\n  child: ${inner},\n)`;
+ const notes=[];
+ if(!unbounded&&s.use==='LimitedBox')notes.push('The parent already gives a maximum, so LimitedBox does nothing here. This is the behaviour that confuses people.');
+ if(!unbounded&&s.use==='ConstrainedBox')notes.push('ConstrainedBox always applies, so it clamps the child even under bounded constraints.');
+ if(unbounded&&s.use==='nothing')notes.push('With no limit at all the child tries to be infinitely wide and overflows.');
+ if(unbounded&&s.use==='LimitedBox')notes.push('Here the width really is unbounded, so maxWidth takes effect.');
+ notes.push('ListView already wraps its children in a LimitedBox, which is why an unbounded child inside one usually still renders.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'constraints-transform-box',name:'ConstraintsTransformBox',tags:'constraints transform unconstrained width height overflow modify',h:240,
@@ -2849,16 +3006,27 @@ render(s,st,g){
  return {code:s.m==='(none)'?`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: Container(width: ${cw}, height: ${ch}), // clamped to ${PW} x ${PH}\n)`:`SizedBox(\n  width: ${PW}, height: ${PH},\n  child: ${wrap},\n)`,hint:{'(none)':'Without it the parent\'s tight constraints win.','widthUnconstrained':'Width is free, height is still limited to 90.','heightUnconstrained':'Height is free, width is still limited to 150.','unconstrained':'Both limits are removed, like UnconstrainedBox.'}[s.m]};
 }});
 
-def({cat:'Layout',id:'fractional-translation',name:'FractionalTranslation',tags:'offset shift move translate fraction slide transform hit test',
-blurb:'FractionalTranslation moves its child by a fraction of the child\'s own size, painted after layout. An offset of (1, 0) shifts the child one full child-width to the right.',
-use:'Nudging or sliding something by a proportion of its own size without knowing the pixel size, for example off-screen entry animations.',
-watch:'Layout is not affected, so neighbours do not move. By default taps follow the shifted child (transformHitTests: true).',
-ctl:[{k:'dx',l:'dx',t:'rng',min:-1.5,max:1.5,step:.1,v:.5},{k:'dy',l:'dy',t:'rng',min:-1.5,max:1.5,step:.1,v:.3}],
+def({cat:'Layout',id:'fractional-translation',name:'FractionalTranslation',tags:'offset fraction translate badge slide transition hit test size independent',h:320,
+blurb:'FractionalTranslation moves its child by a fraction of the child size, so you never need to know how big it is. Offset(0.5, 0) moves it right by exactly half its own width.',
+use:'Nudging a badge half outside its corner, and any slide whose distance should follow the widget size.',
+watch:'Like every transform it moves the painting, not the layout. Neighbours do not move, and the child may overlap them.',
+ctl:[{k:'x',l:'translation x',t:'rng',min:-1,max:1,step:.1,v:.5},
+ {k:'y',l:'translation y',t:'rng',min:-1,max:1,step:.1,v:-.5},
+ {k:'size',l:'child size',t:'sel',o:['small badge','large badge'],v:'small badge'},
+ {k:'hit',l:'transformHitTests',t:'chk',v:true},
+ {k:'cmp',l:'compare with Transform.translate',t:'chk',v:false}],
 render(s,st,g){
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="position:relative;width:90px;height:60px;border:1.5px dashed var(--c3)"><div class="fb a" style="position:absolute;inset:0;width:90px;height:60px;transform:translate(${s.dx*100}%,${s.dy*100}%);border-radius:6px">child</div></div></div>`;
- return {code:`FractionalTranslation(\n  translation: Offset(${s.dx}, ${s.dy}),\n  child: Child(), // 90 x 60\n)`,hint:`Shifted by ${Math.round(s.dx*90)} px across and ${Math.round(s.dy*60)} px down. The dashed box is where layout still thinks the child is.`};
+ const sz=s.size==='small badge'?22:40;
+ const x=(+s.x)*sz,y=(+s.y)*sz;
+ const avatar=(label,tx,ty)=>`<div style="position:relative;width:76px;height:76px"><div class="fb a" style="width:76px;height:76px;border-radius:18px;display:flex;align-items:center;justify-content:center;font:600 13px var(--f-body)">${label}</div><div style="position:absolute;right:0;top:0;transform:translate(${tx}px,${ty}px)"><div style="width:${sz}px;height:${sz}px;border-radius:50%;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:center;font:700 ${sz>30?14:11}px var(--f-mono)">3</div></div></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;gap:40px;padding:18px">${avatar('avatar',x,y)}${s.cmp?`<div style="text-align:center">${avatar('fixed px',12,-12)}<div class="cap" style="margin:8px 0 0">Transform.translate(12, -12)</div></div>`:''}</div>`;
+ const notes=[];
+ notes.push(`The badge is ${sz}px, so a translation of ${(+s.x).toFixed(1)} moves it ${Math.round(x)}px.`);
+ if(s.cmp)notes.push('A fixed pixel offset has to change whenever the badge size changes; a fraction does not.');
+ if(!s.hit)notes.push('With transformHitTests false the tap target stays where the layout put it, not where the badge is painted.');
+ notes.push('SlideTransition and AnimatedSlide use the same fractional offsets, which is why a slide-in page transition is written as Offset(1, 0).');
+ return {code:`Stack(\n  clipBehavior: Clip.none,\n  children: [\n    const Avatar(),\n    Positioned(\n      right: 0,\n      top: 0,\n      child: FractionalTranslation(\n        translation: const Offset(${(+s.x).toFixed(1)}, ${(+s.y).toFixed(1)}),   // fractions of the badge size\n${s.hit?'':'        transformHitTests: false,\n'}        child: const Badge(count: 3),\n      ),\n    ),\n  ],\n)\n\n// the animated version uses the same units\nAnimatedSlide(\n  offset: const Offset(${(+s.x).toFixed(1)}, ${(+s.y).toFixed(1)}),\n  duration: const Duration(milliseconds: 250),\n  child: child,\n)`,hint:notes.join(' ')};
 }});
-
 /* ---- Display ---- */
 def({cat:'Painting and effects',id:'colored-box',name:'ColoredBox',tags:'background fill cheap const container material performance',h:300,
 blurb:'ColoredBox paints one rectangle of colour behind its child, and does nothing else. It is the cheapest way to give something a background.',
@@ -3436,20 +3604,36 @@ render(s,st,g){
  return {code:`Table(\n  ${cw}\n${s.b?'  border: TableBorder.all(),\n':''}  defaultVerticalAlignment:\n      TableCellVerticalAlignment.${s.va},\n  children: [\n    TableRow(children: [Text('Name'), Text('Size'), Text('Notes')]),\n    // more TableRow(...) widgets\n  ],\n)`,hint:'The last row is taller so you can see the vertical alignment setting.'};
 }});
 
-def({cat:'Layout',id:'baseline',name:'Baseline',tags:'text baseline align alphabetic ideographic crossaxisalignment baseline row mixed font sizes',h:240,
-blurb:'Baseline positions a child so its text baseline sits at a given distance from the top. In a Row, CrossAxisAlignment.baseline lines up the baselines of children with different sizes.',
-use:'Mixing text of different sizes on one line, such as a big price next to a small currency sign.',
-watch:'CrossAxisAlignment.baseline needs textBaseline to be set, and it only aligns children that have a baseline, so a plain box without text uses its bottom edge.',
-ctl:[{k:'m',l:'approach',t:'sel',o:['Row + CrossAxisAlignment.baseline','Row + CrossAxisAlignment.center','Baseline widget'],v:'Row + CrossAxisAlignment.baseline'},{k:'sz',l:'big text size',t:'rng',min:20,max:64,v:44},{k:'bl',l:'Baseline(baseline:)',t:'rng',min:30,max:120,step:5,v:70}],
+def({cat:'Layout',id:'baseline',name:'Baseline',tags:'text alignment alphabetic ideographic crossaxisalignment row mixed font sizes',h:320,
+blurb:'A baseline is the line the letters sit on, not the top or bottom of the box. Two pieces of text at different sizes look right when their baselines line up, which is what CrossAxisAlignment.baseline does in a Row.',
+use:'A price next to a currency symbol, a number next to a unit, a heading next to a small label.',
+watch:'crossAxisAlignment: baseline requires textBaseline to be set, or it asserts. Only text has a baseline: a Container falls back to its bottom edge.',
+ctl:[{k:'how',l:'align with',t:'sel',o:['baseline','center','end','Baseline widget'],v:'baseline'},
+ {k:'b',l:'baseline distance',t:'rng',min:20,max:60,v:38},
+ {k:'big',l:'big text size',t:'rng',min:24,max:52,v:38},
+ {k:'pad',l:'wrap one in a Container',t:'chk',v:false}],
 render(s,st,g){
- if(s.m==='Baseline widget'){
-  const top=s.bl-s.sz*.8;
-  g.innerHTML=`<div class="fill" style="align-items:flex-start;padding:30px 24px"><div style="position:relative;width:100%;height:150px"><div style="position:absolute;left:0;right:0;top:${s.bl}px;border-top:1.5px dashed var(--c4)"></div><span style="position:absolute;right:0;top:${s.bl-12}px;font:11px var(--f-mono);color:var(--c4t)">baseline: ${s.bl}</span><span style="position:absolute;left:0;top:${top}px;font:700 ${s.sz}px/1 var(--f-display)">Flutter</span></div></div>`;
-  return {code:`Baseline(\n  baseline: ${s.bl},\n  baselineType: TextBaseline.alphabetic,\n  child: Text(\n    'Flutter',\n    style: TextStyle(fontSize: ${s.sz}, fontWeight: FontWeight.bold),\n  ),\n)`,hint:'The pink line sits ' + s.bl + ' px from the top, and the letters\' baseline rests on it.'};
- }
- const al=s.m.includes('baseline')?'baseline':'center';
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="display:flex;align-items:${al};gap:8px;padding:10px;border:1.5px dashed var(--c3)"><span style="font:600 16px var(--f-body)">$</span><span style="font:700 ${s.sz}px/1 var(--f-display)">49</span><span style="font:500 14px var(--f-body);color:var(--muted)">.99 / month</span></div></div>`;
- return {code:`Row(\n  crossAxisAlignment: CrossAxisAlignment.${al},\n${al==='baseline'?'  textBaseline: TextBaseline.alphabetic,\n':''}  children: [\n    Text('\\$', style: small),\n    Text('49', style: TextStyle(fontSize: ${s.sz})),\n    Text('.99 / month', style: small),\n  ],\n)`,hint:al==='baseline'?'All three texts sit on one baseline, like printed text.':'Centering lines up the middles, so the small text floats above the big number\'s baseline.'};
+ const how=s.how,big=+s.big;
+ const AL={'baseline':'baseline','center':'center','end':'flex-end','Baseline widget':'baseline'}[how];
+ const wrap=(inner)=>s.pad?`<div style="background:var(--c2s);border-radius:7px;padding:8px 10px;${AL==='baseline'?'':''}">${inner}</div>`:inner;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:18px"><div style="position:relative;display:flex;align-items:${AL};gap:5px;border:1.5px dashed var(--c3);padding:12px 10px;max-width:100%;box-sizing:border-box">
+  <span style="font-size:15px;color:var(--muted)">Rp</span>
+  ${wrap(`<span style="font-size:min(${big}px,11vw);font-weight:800;line-height:1.05">149</span>`)}
+  <span style="font-size:15px;color:var(--muted)">.000</span>
+  <span style="font-size:13px;color:var(--muted);white-space:nowrap">/ mo</span>
+  ${AL==='baseline'?'<div style="position:absolute;left:8px;right:8px;bottom:19px;height:1px;background:var(--danger);opacity:.5"></div>':''}
+ </div></div>`;
+ let code;
+ if(how==='Baseline widget')code=`Baseline(\n  baseline: ${s.b},   // pixels from the top of this widget\n  baselineType: TextBaseline.alphabetic,\n  child: const Text('149', style: TextStyle(fontSize: ${big})),\n)`;
+ else code=`Row(\n  crossAxisAlignment: CrossAxisAlignment.${how},\n${how==='baseline'?'  textBaseline: TextBaseline.alphabetic,   // required\n':''}  children: [\n    const Text('Rp', style: TextStyle(fontSize: 15)),\n    ${s.pad?`Container(\n      padding: const EdgeInsets.all(8),\n      child: const Text('149', style: TextStyle(fontSize: ${big}, fontWeight: FontWeight.w800)),\n    ),`:`const Text('149', style: TextStyle(fontSize: ${big}, fontWeight: FontWeight.w800)),`}\n    const Text('.000', style: TextStyle(fontSize: 15)),\n  ],\n)`;
+ const notes=[];
+ if(how==='baseline')notes.push('The red line is the shared baseline. The letters sit on it whatever their size.');
+ if(how==='center')notes.push('center lines up the middles of the boxes, so the small text floats too high next to the big number.');
+ if(how==='end')notes.push('end lines up the bottoms of the boxes, which includes the descender space, so it still looks slightly off.');
+ if(s.pad)notes.push('The padded Container has no baseline of its own, so the alignment uses its bottom edge and the effect is lost. Keep the Text directly in the Row.');
+ if(how==='Baseline widget')notes.push('The Baseline widget sets an exact distance from its top down to the child baseline, which you need only for custom drawing.');
+ notes.push('Use TextBaseline.ideographic for Chinese, Japanese and Korean.');
+ return {code,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'flow',name:'Flow',tags:'flowdelegate paintchildren transform matrix4 radial menu fan custom layout performance',h:300,
@@ -3465,17 +3649,45 @@ render(s,st,g){
 },
 act(a,st){if(a==='tog')st.open=!st.open}});
 
-def({cat:'Layout',id:'safe-area',name:'SafeArea',tags:'notch status bar home indicator cutout inset padding mediaquery viewpadding display cutout',h:330,
-blurb:'SafeArea pads its child to keep it out of areas the system uses: the status bar, the notch or camera cutout, rounded corners and the home indicator.',
-use:'Any screen that draws edge to edge, such as a custom page without a Scaffold and AppBar.',
-watch:'Scaffold and AppBar already handle the top inset. Wrapping a Scaffold body in SafeArea as well can add a double gap. SafeArea reads the real device insets, so test it on a phone.',
-ctl:[{k:'on',l:'SafeArea',t:'chk',v:true},{k:'top',l:'top',t:'chk',v:true},{k:'bottom',l:'bottom',t:'chk',v:true}],
+def({cat:'Layout',id:'safe-area',name:'SafeArea',tags:'notch status bar home indicator padding mediaquery insets minimum keyboard sliversafearea',h:330,
+blurb:'SafeArea is a Padding fed by MediaQuery: it keeps its child clear of the status bar, the notch, the home indicator and rounded corners.',
+use:'Around screen content that would otherwise sit under system furniture.',
+watch:'A Scaffold already handles the app bar and bottom bar, so wrap the body content, not the whole Scaffold. Wrapping a scroll view cuts the scrollable area, so prefer padding on the list.',
+ctl:[{k:'on',l:'SafeArea',t:'chk',v:true},
+ {k:'top',l:'top',t:'chk',v:true},
+ {k:'bottom',l:'bottom',t:'chk',v:true},
+ {k:'min',l:'minimum padding',t:'rng',min:0,max:24,v:0},
+ {k:'device',l:'device',t:'sel',o:['notch + home indicator','status bar only','none'],v:'notch + home indicator'},
+ {k:'what',l:'content',t:'sel',o:['a header image','a list','a bottom button'],v:'a header image'}],
 render(s,st,g){
- const pt=s.on&&s.top?34:0,pb=s.on&&s.bottom?24:0;
- g.innerHTML=`<div class="phone" style="top:8px;bottom:8px;width:210px;margin-left:-105px"><div style="position:absolute;inset:0;background:linear-gradient(180deg,var(--c1s),var(--c2s));padding:${pt}px 0 ${pb}px"><div style="height:100%;border:1.5px dashed var(--c4);display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-size:13px"><b>Top of my content</b><span style="color:var(--muted)">Bottom of my content</span></div></div><div style="position:absolute;left:0;right:0;top:0;height:34px;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#fff;font:600 11px var(--f-mono)"><span>9:41</span><span style="width:62px;height:16px;border-radius:8px;background:#000;position:absolute;left:50%;margin-left:-31px;top:5px"></span><span>5G</span></div><div style="position:absolute;left:0;right:0;bottom:0;height:24px;display:flex;align-items:center;justify-content:center"><i style="width:80px;height:4px;border-radius:2px;background:var(--fg);opacity:.7"></i></div></div>`;
- return {code:s.on?`SafeArea(\n  top: ${s.top},\n  bottom: ${s.bottom},\n  child: MyPage(),\n)`:'MyPage() // no SafeArea: the notch can cover the content',hint:s.on?'The dashed box is your content. The dark bars are the system areas it now avoids.':'Without SafeArea the first line sits under the status bar and notch.'};
+ const notch=s.device==='notch + home indicator';
+ const topInset=s.device==='none'?0:notch?30:22;
+ const botInset=notch?18:0;
+ const on=s.on;
+ const pt=Math.max(on&&s.top?topInset:0,+s.min);
+ const pb=Math.max(on&&s.bottom?botInset:0,+s.min);
+ let content;
+ if(s.what==='a header image')content=`<div style="height:100%;background-image:url(${PIC});background-size:cover;background-position:center;display:flex;align-items:flex-start;padding:10px"><span style="color:#fff;font:700 15px var(--f-display);text-shadow:0 1px 5px rgba(0,0,0,.6)">Header</span></div>`;
+ else if(s.what==='a list')content=`<div style="height:100%;overflow:hidden">${[...Array(6)].map((_,i)=>`<div style="padding:10px 14px;border-bottom:1px solid var(--line);font:13.5px var(--f-body)">Row ${i+1}</div>`).join('')}</div>`;
+ else content=`<div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:12px"><div style="padding:12px;border-radius:999px;background:var(--accent);color:#fff;text-align:center;font:600 14px var(--f-body)">Continue</div></div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:10px"><div style="position:relative;width:200px;height:170px;border:3px solid #1f2937;border-radius:22px;overflow:hidden;background:var(--surface)">
+  <div style="position:absolute;left:0;right:0;top:0;bottom:0;padding:${pt}px 0 ${pb}px">${content}</div>
+  ${topInset?`<div style="position:absolute;left:0;right:0;top:0;height:${topInset}px;background:rgba(220,38,38,.18);border-bottom:1px dashed rgba(220,38,38,.5);display:flex;align-items:center;justify-content:center;font:9px var(--f-mono);color:#b91c1c">${notch?'NOTCH':'STATUS BAR'}</div>`:''}
+  ${notch?'<div style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:76px;height:20px;background:#1f2937;border-radius:0 0 12px 12px"></div>':''}
+  ${botInset?`<div style="position:absolute;left:0;right:0;bottom:0;height:${botInset}px;background:rgba(220,38,38,.18);border-top:1px dashed rgba(220,38,38,.5);display:flex;align-items:center;justify-content:center"><span style="width:60px;height:4px;border-radius:999px;background:#1f2937"></span></div>`:''}
+ </div></div>`;
+ const L=[];
+ if(!s.top)L.push('top: false,');
+ if(!s.bottom)L.push('bottom: false,');
+ if(+s.min)L.push(`minimum: const EdgeInsets.all(${s.min}),`);
+ const notes=[];
+ if(!on)notes.push('Without SafeArea the content runs under the notch and the home indicator.');
+ if(on&&!s.top&&s.what==='a header image')notes.push('top: false is exactly what you want here: the image fills the notch area while the text below still clears it.');
+ if(+s.min)notes.push('minimum gives a floor, so you still get sensible spacing on a device with no inset at all.');
+ if(s.what==='a list'&&on)notes.push('Wrapping a list in SafeArea stops content scrolling under the bar. Often better: padding on the list so it scrolls under but ends clear.');
+ notes.push('SafeArea reads MediaQuery.paddingOf. The keyboard lives in viewInsets instead, which it ignores unless maintainBottomViewPadding is on.');
+ return {code:`SafeArea(\n${L.map(x=>'  '+x).join('\n')}${L.length?'\n':''}  child: child,\n)\n\n// the numbers behind it\nfinal padding = MediaQuery.paddingOf(context);\nprint(padding.top);      // status bar or notch\nprint(padding.bottom);   // home indicator\n\n// inside a CustomScrollView\nSliverSafeArea(sliver: SliverList(...))`,hint:notes.join(' ')};
 }});
-
 /* ---- Painting ---- */
 def({cat:'Painting and effects',id:'physical-model',name:'PhysicalModel',tags:'elevation shadow shape clip material card boxshadow physicalshape animated',h:330,
 blurb:'PhysicalModel draws a surface with a real cast shadow from its shape, and can clip the child to that shape. Material does the same inside a Material app, with theming and ink on top.',
