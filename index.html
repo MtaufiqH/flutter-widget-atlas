@@ -59,6 +59,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -583,6 +584,7 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 @keyframes kfsl{from{transform:translateX(-34px)}to{transform:translateX(34px)}}
 @keyframes kfsz{from{height:14px}to{height:72px}}
 @keyframes kfst{from{opacity:.15;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -1841,99 +1843,248 @@ render(s,st,g){
 },
 after(g,st,s,draw){g.querySelectorAll('.tb').forEach(el=>el.addEventListener('click',()=>{st.i=+el.dataset.i;draw()}))}});
 /* ================= GESTURES ================= */
-def({cat:'Gestures',id:'gestures',name:'GestureDetector',tags:'tap doubletap longpress pan drag gesture recognizer',h:300,
-blurb:'GestureDetector wraps any widget and reports taps, double taps, long presses and drags. It has no visual effect of its own.',
-use:'Custom touch handling on widgets that are not buttons.',
-watch:'GestureDetector gives no ripple or hover feedback. For tappable Material surfaces use InkWell. Gesture detectors compete: a pan and a tap on the same widget are arbitrated by Flutter.',
-render(s,st,g){
- g.innerHTML='<div class="gdz"><div class="fb a gd" style="left:40px;top:30px;width:120px;height:84px;position:absolute;touch-action:none;cursor:grab;user-select:none;flex-direction:column">Try me<span style="font-weight:400;font-size:11px">tap, double tap,<br>hold, drag</span></div></div><pre class="log">no gesture yet</pre>';
- return {code:`GestureDetector(\n  onTap: () => log('onTap'),\n  onDoubleTap: () => log('onDoubleTap'),\n  onLongPress: () => log('onLongPress'),\n  onPanUpdate: (d) =>\n      setState(() => offset += d.delta),\n  child: Container(width: 120, height: 84),\n)`,hint:'Interact with the box. The log shows the callbacks Flutter would fire.'};
+def({cat:'Interaction models',id:'gestures',name:'GestureDetector',tags:'tap drag pan scale longpress behavior hittest velocity delta onpanupdate doubletap arena',h:340,
+blurb:'GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child and on behavior.',
+use:'Any custom tap or drag target. For anything inside a Material app that should ripple, use InkWell instead.',
+watch:'behavior: deferToChild means empty space in the child is not tappable. Pan and scale callbacks cannot be used together. A horizontal drag inside a vertical list should use onHorizontalDrag, not onPan.',
+ctl:[{k:'g',l:'gesture',t:'sel',o:['onTap','onDoubleTap','onLongPress','onPanUpdate (free drag)','onHorizontalDragUpdate','onScaleUpdate (pinch)'],v:'onPanUpdate (free drag)'},
+ {k:'beh',l:'behavior',t:'sel',o:['deferToChild','opaque','translucent'],v:'deferToChild'},
+ {k:'empty',l:'child has empty space',t:'chk',v:true},
+ {k:'log',l:'show the event details',t:'chk',v:true}],
+render(s,st,g,d){
+ const x=st.x||0,y=st.y||0,sc=st.sc||1,n=st.n||0,last=st.last||'none yet';
+ const opaque=s.beh!=='deferToChild';
+ const target=`<div class="gd" style="position:relative;width:230px;height:150px;border:1.5px dashed var(--c3);display:flex;align-items:${s.empty?'flex-start':'center'};justify-content:center;${opaque?'background:var(--c1s);':''}cursor:${s.g.includes('Drag')||s.g.includes('pan')||s.g.includes('Pan')?'grab':'pointer'};touch-action:none;overflow:hidden">
+   <div class="gchip fb c" style="position:absolute;left:50%;top:50%;transform:translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(${sc});width:92px;height:56px;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--f-body)">${s.g==='onTap'?'tap me':s.g==='onDoubleTap'?'double tap':s.g==='onLongPress'?'hold me':'drag me'}</div>
+   ${s.empty?'<div style="position:absolute;left:8px;top:8px;font:11px var(--f-mono);color:var(--muted)">empty space</div>':''}
+ </div>`;
+ const log=s.log?`<div class="cap" style="margin:0;text-align:center">${esc(last)} &nbsp;·&nbsp; fired <b>${n}</b> time${n===1?'':'s'}</div>`:'';
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px">${target}${log}</div>`;
+ const CB={
+  onTap:"onTap: () => setState(() => taps++),",
+  onDoubleTap:"onDoubleTap: () => setState(() => scale = scale == 1 ? 1.6 : 1),",
+  onLongPress:"onLongPress: () => showMenu(...),",
+  'onPanUpdate (free drag)':"onPanStart: (d) => setState(() => dragging = true),\n  onPanUpdate: (d) => setState(() => offset += d.delta),\n  onPanEnd: (d) => setState(() {\n    dragging = false;\n    velocity = d.velocity.pixelsPerSecond;\n  }),",
+  onHorizontalDragUpdate:"onHorizontalDragUpdate: (d) => setState(() => dx += d.delta.dx),\n  onHorizontalDragEnd: (d) => snapToSide(d.primaryVelocity ?? 0),",
+  'onScaleUpdate (pinch)':"onScaleStart: (d) => _base = scale,\n  onScaleUpdate: (d) => setState(() {\n    scale = (_base * d.scale).clamp(0.5, 3.0);\n    focal = d.focalPoint;\n  }),"}[s.g];
+ const notes=[];
+ if(s.beh==='deferToChild'&&s.empty)notes.push('deferToChild only reacts where the child actually paints, so the empty area does not respond.');
+ if(s.beh==='opaque')notes.push('opaque makes the whole box respond, even where nothing is painted. This is usually what you want over blank space.');
+ if(s.beh==='translucent')notes.push('translucent reacts and still lets widgets behind it receive the same pointer.');
+ if(s.g==='onHorizontalDragUpdate')notes.push('Inside a vertical list use onHorizontalDrag, not onPan: pan claims both axes and the list stops scrolling.');
+ if(s.g==='onScaleUpdate (pinch)')notes.push('Scale and pan callbacks cannot both be set. Scale already reports a focalPoint, so use it for both.');
+ if(s.g==='onDoubleTap')notes.push('Adding onDoubleTap delays onTap slightly, because Flutter waits to see if a second tap arrives.');
+ return {code:`GestureDetector(\n  behavior: HitTestBehavior.${s.beh},\n  ${CB}\n  child: child,\n)`,hint:notes.join(' ')};
 },
-after(g,st){
- const zone=g.querySelector('.gdz'),b=g.querySelector('.gd'),log=g.querySelector('.log');
- let X=40,Y=30,dn=null,timer=null,last=0,pu=0;const lines=[];
- const say=t=>{if(t.startsWith('onPanUpdate')&&lines[0]&&lines[0].startsWith('onPanUpdate'))lines[0]=t;else lines.unshift(t);lines.length=Math.min(lines.length,5);log.textContent=lines.join('\n')};
- b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);dn={x:e.clientX,y:e.clientY,ox:X,oy:Y,moved:false,long:false};pu=0;clearTimeout(timer);timer=setTimeout(()=>{if(dn&&!dn.moved){dn.long=true;say('onLongPress')}},500);b.style.cursor='grabbing'});
- b.addEventListener('pointermove',e=>{
-  if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;
-  if(!dn.moved&&Math.hypot(dx,dy)>6){dn.moved=true;clearTimeout(timer);say('onPanStart')}
-  if(dn.moved){const r=zone.getBoundingClientRect();X=Math.max(0,Math.min(r.width-b.offsetWidth,dn.ox+dx));Y=Math.max(0,Math.min(r.height-b.offsetHeight,dn.oy+dy));b.style.left=X+'px';b.style.top=Y+'px';pu++;say('onPanUpdate x'+pu)}
- });
- const up=()=>{if(!dn)return;clearTimeout(timer);if(dn.moved)say('onPanEnd');else if(!dn.long){const n=Date.now();if(n-last<300){say('onDoubleTap');last=0}else{say('onTap');last=n}}dn=null;b.style.cursor='grab'};
- b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
+after(g,st,s,draw){
+ const el=g.querySelector('.gd');if(!el)return;
+ const fire=t=>{st.n=(st.n||0)+1;st.last=t;draw()};
+ if(s.g==='onTap')el.addEventListener('click',()=>fire('onTap'));
+ else if(s.g==='onDoubleTap')el.addEventListener('dblclick',()=>{st.sc=(st.sc||1)===1?1.5:1;fire('onDoubleTap')});
+ else if(s.g==='onLongPress'){let t;el.addEventListener('pointerdown',()=>{t=setTimeout(()=>fire('onLongPress: fired after ~500 ms'),500)});['pointerup','pointerleave'].forEach(e=>el.addEventListener(e,()=>clearTimeout(t)))}
+ else if(s.g==='onScaleUpdate (pinch)'){
+  el.addEventListener('wheel',e=>{e.preventDefault();st.sc=Math.min(2.4,Math.max(.5,(st.sc||1)-e.deltaY/600));fire('onScaleUpdate: scale '+(st.sc).toFixed(2))},{passive:false});
+  st.last=st.last||'scroll or pinch on the box';
+ } else {
+  const horiz=s.g==='onHorizontalDragUpdate';
+  let down=false,px=0,py=0;
+  el.addEventListener('pointerdown',e=>{down=true;px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{
+   if(!down)return;
+   const dx=e.clientX-px,dy=e.clientY-py;px=e.clientX;py=e.clientY;
+   st.x=Math.max(-62,Math.min(62,(st.x||0)+dx));
+   if(!horiz)st.y=Math.max(-42,Math.min(42,(st.y||0)+dy));
+   st.n=(st.n||0)+1;st.last=`details.delta = Offset(${dx.toFixed(0)}, ${horiz?'0':dy.toFixed(0)})`;draw();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>{down=false}));
+ }
 }});
 
-def({cat:'Gestures',id:'ink-well',name:'InkWell',tags:'ripple splash material tap feedback inkresponse',
-blurb:'InkWell adds the Material ripple to a tappable area. The ripple is painted on the nearest Material ancestor, underneath the child.',
-use:'Tappable cards, list rows and custom buttons that should feel like Material.',
-watch:'If a child paints an opaque background (for example Container(color: ...)), it covers the ripple and the effect disappears. Turn on the switch below to see it.',
-ctl:[{k:'col',l:'splashColor',t:'sel',o:['blue','teal','amber'],v:'blue'},{k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},{k:'bug',l:'child paints a color',t:'chk',v:false}],
+def({cat:'Interaction models',id:'ink-well',name:'InkWell',tags:'ripple splash material tap feedback inkresponse borderradius customborder overlaycolor ink',h:340,
+blurb:'InkWell is a tap target that paints a Material ripple. The ripple is drawn by the Material above it, which is why a coloured Container between the two hides it.',
+use:'Any tappable row, card or tile inside a Material app.',
+watch:'Set borderRadius to match the corners, or the splash leaks past them. If the ripple does not show, a Container with a colour is painting over it: use Ink(decoration:) instead.',
+ctl:[{k:'col',l:'splashColor',t:'sel',o:['theme','blue','teal','amber','none'],v:'blue'},
+ {k:'r',l:'borderRadius',t:'rng',min:0,max:40,v:16},
+ {k:'shape',l:'customBorder',t:'sel',o:['none','circle','stadium'],v:'none'},
+ {k:'bug',l:'child paints a colour (hides the ripple)',t:'chk',v:false},
+ {k:'fix',l:'fix it with Ink(decoration:)',t:'chk',v:false},
+ {k:'hover',l:'hoverColor',t:'chk',v:true},
+ {k:'long',l:'onLongPress too',t:'chk',v:false},
+ {k:'en',l:'onTap set',t:'chk',v:true}],
 render(s,st,g){
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div class="ink" style="border-radius:${s.r}px;background:var(--c1s);border:1px solid var(--c1)"><div class="inkc" style="${s.bug?'background:var(--c1s);':''}">Tap or click me</div></div></div>`;
- return {code:`Material(\n  color: Colors.blue.shade50,\n  borderRadius: BorderRadius.circular(${s.r}),\n  child: InkWell(\n    onTap: () {},\n    borderRadius: BorderRadius.circular(${s.r}),\n    splashColor: Colors.${s.col}.withOpacity(0.4),\n    child: Padding(\n      padding: EdgeInsets.all(24),\n${s.bug?'      // BUG: this color hides the ripple\n      child: ColoredBox(color: Colors.blue.shade50,\n          child: Text(\'Tap me\')),\n':"      child: Text('Tap me'),\n"}    ),\n  ),\n)`,hint:s.bug?'The child paints an opaque color on top of the ripple, so nothing shows.':'Press and hold inside the box.'};
+ const SC={theme:'rgba(37,99,235,.28)',blue:'rgba(37,99,235,.3)',teal:'rgba(13,148,136,.3)',amber:'rgba(217,119,6,.3)',none:'transparent'}[s.col];
+ const hidden=s.bug&&!s.fix;
+ const radius=s.shape==='circle'?'50%':s.shape==='stadium'?'999px':s.r+'px';
+ const size=s.shape==='circle'?'width:128px;height:128px':'width:210px;height:92px';
+ const inner=`<div class="ink" style="position:relative;${size};border-radius:${radius};overflow:hidden;display:flex;align-items:center;justify-content:center;background:${hidden?'var(--c3s)':(s.fix?'var(--c1s)':'transparent')};border:1px solid var(--line);cursor:${s.en?'pointer':'not-allowed'};--sp:${s.en?SC:'transparent'}">
+  <span style="font:600 13.5px var(--f-body);position:relative;z-index:2">${s.en?'tap me':'disabled'}</span>
+ </div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:16px"><div style="background:var(--surface);border-radius:${radius};">${inner}</div></div>`;
+ const L=[];
+ if(s.en)L.push('onTap: () {},');else L.push('onTap: null,   // disabled: no ripple at all');
+ if(s.long)L.push('onLongPress: () {},');
+ if(s.shape==='none')L.push(`borderRadius: BorderRadius.circular(${s.r}),`);
+ else L.push(`customBorder: const ${s.shape==='circle'?'CircleBorder()':'StadiumBorder()'},`);
+ if(s.col!=='theme'&&s.col!=='none')L.push(`splashColor: Colors.${s.col}.withValues(alpha: 0.3),`);
+ if(s.col==='none')L.push('splashFactory: NoSplash.splashFactory,   // keep the tap, drop the ripple');
+ if(s.hover)L.push('hoverColor: Colors.black.withValues(alpha: 0.04),');
+ let code;
+ if(s.fix)code=`Material(\n  color: Colors.transparent,\n  child: Ink(\n    decoration: BoxDecoration(\n      color: Colors.blue.shade50,\n      borderRadius: BorderRadius.circular(${s.r}),\n    ),\n    child: InkWell(\n${L.map(x=>'      '+x).join('\n')}\n      child: const SizedBox(height: 92, child: Center(child: Text('tap me'))),\n    ),\n  ),\n)`;
+ else if(s.bug)code=`// BUG: the Container paints over the ripple\nInkWell(\n${L.map(x=>'  '+x).join('\n')}\n  child: Container(\n    color: Colors.amber.shade50,   // <- hides the splash\n    child: const SizedBox(height: 92, child: Center(child: Text('tap me'))),\n  ),\n)`;
+ else code=`InkWell(\n${L.map(x=>'  '+x).join('\n')}\n  child: const SizedBox(\n    height: 92,\n    child: Center(child: Text('tap me')),\n  ),\n)`;
+ const notes=[];
+ if(hidden)notes.push('The ripple is still happening, it is just painted over by the Container colour. Turn on the Ink fix to see it again.');
+ if(s.fix)notes.push('Ink paints the background on the Material itself, so the splash draws on top of it.');
+ if(!s.en)notes.push('With onTap null there is no ripple and no hover: that is how a disabled row looks.');
+ if(s.shape!=='none')notes.push('customBorder clips the splash to any ShapeBorder and wins over borderRadius.');
+ if(s.col==='none')notes.push('NoSplash.splashFactory removes the ripple while keeping the tap and the hover.');
+ notes.push('InkWell needs a Material somewhere above it. Scaffold, Card and Material all provide one.');
+ return {code,hint:notes.join(' ')};
 },
 after(g,st,s){
- const el=g.querySelector('.ink'),C={blue:'var(--c1)',teal:'var(--c2)',amber:'var(--c3)'}[s.col];
+ const el=g.querySelector('.ink');if(!el||!s.en)return;
  el.addEventListener('pointerdown',e=>{
-  const r=el.getBoundingClientRect(),sz=Math.max(r.width,r.height)*2.2,sp=document.createElement('span');
-  sp.className='rip';sp.style.cssText=`left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px;width:${sz}px;height:${sz}px;background:${C}`;
-  el.insertBefore(sp,el.firstChild);sp.addEventListener('animationend',()=>sp.remove());
+  const r=el.getBoundingClientRect();
+  const sp=document.createElement('span');
+  const size=Math.max(r.width,r.height)*2.2;
+  sp.style.cssText=`position:absolute;left:${e.clientX-r.left}px;top:${e.clientY-r.top}px;width:${size}px;height:${size}px;margin:${-size/2}px 0 0 ${-size/2}px;border-radius:50%;background:var(--sp);transform:scale(0);opacity:1;pointer-events:none;z-index:1;animation:ripple .55s ease-out forwards`;
+  el.appendChild(sp);setTimeout(()=>sp.remove(),600);
  });
 }});
 
-def({cat:'Gestures',id:'dismissible',name:'Dismissible',tags:'swipe delete archive list remove key swipe to dismiss',h:290,
-blurb:'Dismissible lets the user swipe a list item away. You provide background widgets that appear while swiping, and onDismissed removes the item from your data.',
-use:'Swipe to delete or archive in lists.',
-watch:'Every Dismissible needs a unique key, and onDismissed must actually remove the item from the list. Otherwise Flutter throws a "dismissed widget is still part of the tree" error.',
-ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','startToEnd','endToStart'],v:'horizontal'},{k:'th',l:'dismissThreshold',t:'sel',o:['0.3','0.4','0.6'],v:'0.4'}],
-render(s,st,g){
- if(!st.items)st.items=['Inbox zero','Buy milk','Call Dana','Book flights'];
- g.innerHTML=`<div class="fill" style="flex-direction:column;gap:8px;padding:14px">${st.items.length?st.items.map(i=>`<div class="dm" data-i="${esc(i)}"><div class="dmb"><div class="bl">${ic('check',20)} Archive</div><div class="br">Delete ${ic('delete',20)}</div></div><div class="dmf">${esc(i)}</div></div>`).join(''):'<div class="cap" style="margin:auto">All dismissed.</div>'}<button class="btn k-Text rst" data-a="reset" style="align-self:flex-start">Reset list</button></div>`;
- return {code:`Dismissible(\n  key: ValueKey(item),\n  direction: DismissDirection.${s.dir},\n  dismissThresholds: {\n    DismissDirection.horizontal: ${s.th},\n  },\n  background: ArchiveBackground(),\n  secondaryBackground: DeleteBackground(),\n  onDismissed: (direction) =>\n      setState(() => items.remove(item)),\n  child: ListTile(title: Text(item)),\n)`,hint:'Drag a row sideways and release past the threshold. ('+st.items.length+' left)'};
+def({cat:'Interaction models',id:'dismissible',name:'Dismissible',tags:'swipe to delete background secondarybackground confirmdismiss direction threshold key ondismissed undo',h:340,
+blurb:'Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from your list.',
+use:'Swipe to delete, archive or mark as read.',
+watch:'The key must be unique and stable, usually ValueKey(item.id). In onDismissed you must remove the item from your data, or the next build throws.',
+ctl:[{k:'dir',l:'direction',t:'sel',o:['horizontal','endToStart','startToEnd','vertical'],v:'horizontal'},
+ {k:'two',l:'secondaryBackground',t:'chk',v:true},
+ {k:'th',l:'dismissThreshold',t:'rng',min:.1,max:.9,step:.05,v:.4},
+ {k:'confirm',l:'confirmDismiss dialog',t:'chk',v:false},
+ {k:'resize',l:'resizeDuration',t:'sel',o:['300 ms','null (no collapse)'],v:'300 ms'},
+ {k:'key',l:'unique key per row',t:'chk',v:true},
+ {k:'snack',l:'show Undo afterwards',t:'chk',v:true}],
+render(s,st,g,d){
+ const rows=st.rows||[1,2,3,4];
+ const off=st.off||0,idx=st.idx;
+ const bg=(left)=>`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:${left?'flex-start':'flex-end'};padding:0 18px;background:${left?'#15803d':'var(--danger)'};color:#fff;font:600 13px var(--f-body);gap:8px">${left?ic('star',18)+'Archive':'Delete'+ic('delete',18)}</div>`;
+ const row=(id,i)=>{
+  const moving=idx===i;
+  const dx=moving?off:0;
+  const showLeft=dx>0;
+  return `<div class="dis" data-i="${i}" style="position:relative;height:54px;border-bottom:1px solid var(--line);overflow:hidden;touch-action:pan-y">${(s.two||showLeft)?bg(showLeft):bg(false)}<div style="position:absolute;inset:0;background:var(--surface);display:flex;align-items:center;gap:12px;padding:0 14px;transform:translateX(${dx}px);cursor:grab"><div class="fb ${'abcd'[i%4]}" style="width:32px;height:32px;border-radius:50%;flex:none"></div><div><div style="font:600 13.5px var(--f-body)">Message ${id}</div><div style="font-size:12px;color:var(--muted)">swipe me</div></div></div></div>`;
+ };
+ g.innerHTML=`<div class="fill" style="padding:0;flex-direction:column"><div style="flex:1;overflow:hidden">${rows.map(row).join('')}</div>${st.toast?`<div style="position:absolute;left:10px;right:10px;bottom:10px;background:#323232;color:#fff;border-radius:8px;padding:11px 14px;display:flex;align-items:center;gap:12px"><span style="flex:1;font:13.5px var(--f-body)">Message ${st.toast} deleted</span><button class="undo" style="border:0;background:none;color:#8ab4ff;font:600 13px var(--f-body);cursor:pointer">UNDO</button></div>`:''}</div>`;
+ const L=[`key: ${s.key?'ValueKey(item.id)':'UniqueKey()   // wrong: a new key every build'},`];
+ if(s.dir!=='horizontal')L.push(`direction: DismissDirection.${s.dir},`);
+ if(+s.th!==0.4)L.push(`dismissThresholds: const {DismissDirection.horizontal: ${(+s.th).toFixed(2)}},`);
+ if(s.resize!=='300 ms')L.push('resizeDuration: null,   // skip the collapse');
+ L.push("background: Container(\n    color: Colors.green,\n    alignment: Alignment.centerLeft,\n    padding: const EdgeInsets.only(left: 18),\n    child: const Icon(Icons.archive, color: Colors.white),\n  ),");
+ if(s.two)L.push("secondaryBackground: Container(\n    color: Colors.red,\n    alignment: Alignment.centerRight,\n    padding: const EdgeInsets.only(right: 18),\n    child: const Icon(Icons.delete, color: Colors.white),\n  ),");
+ if(s.confirm)L.push("confirmDismiss: (direction) async {\n    return await showDialog<bool>(\n      context: context,\n      builder: (context) => AlertDialog(\n        title: const Text('Delete this message?'),\n        actions: [\n          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),\n          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),\n        ],\n      ),\n    ) ?? false;\n  },");
+ L.push(`onDismissed: (direction) {\n    final removed = items[index];\n    setState(() => items.removeAt(index));   // required\n${s.snack?"    ScaffoldMessenger.of(context).showSnackBar(\n      SnackBar(\n        content: Text('\${removed.title} deleted'),\n        action: SnackBarAction(label: 'UNDO', onPressed: () => setState(() => items.insert(index, removed))),\n      ),\n    );\n":''}  },`);
+ L.push('child: ListTile(title: Text(item.title)),');
+ const notes=[];
+ if(!s.key)notes.push('A new key on every build makes Flutter treat every row as new, so the wrong one disappears. Use a stable ValueKey from your data.');
+ if(s.confirm)notes.push('confirmDismiss returns a Future<bool>. Returning false snaps the row back, which is what you want for a destructive action.');
+ if(s.two)notes.push('secondaryBackground shows when swiping the other way, so one row can archive and delete.');
+ if(s.resize!=='300 ms')notes.push('resizeDuration: null skips the collapse, which looks better when your list has its own removal animation.');
+ notes.push('Swipe a row in the demo to see the threshold at work.');
+ return {code:`Dismissible(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')};
 },
-act(a,st){if(a==='reset')st.items=['Inbox zero','Buy milk','Call Dana','Book flights']},
 after(g,st,s,draw){
- g.querySelectorAll('.dm').forEach(row=>{
-  const fg=row.querySelector('.dmf');let x0=null,dx=0;
-  fg.addEventListener('pointerdown',e=>{fg.setPointerCapture(e.pointerId);x0=e.clientX;dx=0;fg.style.transition='none'});
-  fg.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;if(s.dir==='startToEnd')dx=Math.max(0,dx);if(s.dir==='endToStart')dx=Math.min(0,dx);fg.style.transform=`translateX(${dx}px)`});
-  const end=()=>{
-   if(x0===null)return;x0=null;const W=row.clientWidth;fg.style.transition='transform .2s ease-out';
-   if(Math.abs(dx)>W*(+s.th)){fg.style.transform=`translateX(${dx>0?W:-W}px)`;const k=row.dataset.i;setTimeout(()=>{st.items=st.items.filter(i=>i!==k);draw()},200)}
-   else fg.style.transform='translateX(0)';
-   dx=0;
-  };
-  fg.addEventListener('pointerup',end);fg.addEventListener('pointercancel',end);
+ if(!st.rows)st.rows=[1,2,3,4];
+ const un=g.querySelector('.undo');
+ if(un)un.addEventListener('click',()=>{st.rows=[st.toast,...st.rows].sort((a,b)=>a-b);st.toast=null;draw()});
+ g.querySelectorAll('.dis').forEach(el=>{
+  let down=false,sx=0;
+  el.addEventListener('pointerdown',e=>{down=true;sx=e.clientX;st.idx=+el.dataset.i;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{
+   if(!down)return;
+   let dx=e.clientX-sx;
+   if(s.dir==='endToStart')dx=Math.min(0,dx);
+   if(s.dir==='startToEnd')dx=Math.max(0,dx);
+   st.off=dx;draw();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>{
+   if(!down)return;down=false;
+   const w=el.getBoundingClientRect().width;
+   if(Math.abs(st.off)>w*(+s.th)){
+    const i=st.idx,id=st.rows[i];
+    if(s.confirm){st.off=0;st.idx=null;draw();return}
+    st.rows=st.rows.filter((_,k)=>k!==i);
+    if(s.snack)st.toast=id;
+   }
+   st.off=0;st.idx=null;draw();
+  }));
  });
 }});
 
-def({cat:'Gestures',id:'draggable',name:'Draggable & DragTarget',tags:'drag drop dragtarget longpressdraggable feedback',h:290,
-blurb:'Draggable lets the user pick up a widget and carry it. A DragTarget accepts the dropped data. While dragging, the original shows childWhenDragging and a copy follows the finger as feedback.',
-use:'Reordering, sorting into buckets and drag-and-drop interfaces.',
-watch:'Use LongPressDraggable inside scrollable areas so dragging does not fight with scrolling. For reordering a list, ReorderableListView is simpler.',
-render(s,st,g){
- if(!st.src){st.src=['Apple','Pear','Plum','Fig'];st.acc=[]}
- g.innerHTML=`<div class="fill" style="gap:14px;padding:14px"><div style="display:flex;flex-direction:column;gap:8px;width:110px;flex:none">${st.src.map(k=>`<div class="dr fb ${'abcd'[k.length%4]}" data-k="${k}" style="height:40px">${k}</div>`).join('')}${st.src.length?'':'<div class="cap" style="margin:auto 0">Empty</div>'}</div><div class="tgt"><b>DragTarget</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${st.acc.map(k=>`<span class="chip c${k.length%4}">${k}</span>`).join('')||'<span class="cap" style="margin:0">Drop here</span>'}</div></div></div><button class="btn k-Text" data-a="reset" style="position:absolute;left:8px;bottom:6px">Reset</button>`;
- return {code:`Draggable<String>(\n  data: 'Apple',\n  feedback: Material(child: Chip(label: Text('Apple'))),\n  childWhenDragging: Opacity(opacity: 0.3, child: chip),\n  child: chip,\n),\n\nDragTarget<String>(\n  onAcceptWithDetails: (d) =>\n      setState(() => accepted.add(d.data)),\n  builder: (context, candidate, rejected) =>\n      Container(...),\n)`,hint:'Drag a fruit onto the target. The target highlights while you hover over it. ('+st.acc.length+' accepted)'};
+def({cat:'Interaction models',id:'draggable',name:'Draggable & DragTarget',tags:'drag drop feedback childwhendragging data dragtarget onaccept longpressdraggable axis candidate',h:340,
+blurb:'Draggable carries a value under the finger; DragTarget decides whether to take it. The feedback widget is what follows the pointer, and childWhenDragging is what stays behind.',
+use:'Sorting into buckets, a drag-and-drop board, dropping a file onto an area.',
+watch:'Wrap feedback in a Material when it contains text, or it renders with yellow underlines. Inside a scrolling list use LongPressDraggable so scrolling still works.',
+ctl:[{k:'kind',l:'widget',t:'sel',o:['Draggable','LongPressDraggable'],v:'Draggable'},
+ {k:'axis',l:'axis',t:'sel',o:['free','horizontal','vertical'],v:'free'},
+ {k:'cwd',l:'childWhenDragging',t:'sel',o:['faded copy','nothing','unchanged'],v:'faded copy'},
+ {k:'anchor',l:'dragAnchorStrategy',t:'sel',o:['childDragAnchor','pointerDragAnchor'],v:'childDragAnchor'},
+ {k:'picky',l:'target rejects the wrong colour',t:'chk',v:true},
+ {k:'max',l:'maxSimultaneousDrags: 1',t:'chk',v:true}],
+render(s,st,g,d){
+ const held=st.held,over=st.over,placed=st.placed||[];
+ const chips=[['A','a','blue'],['B','b','teal'],['C','d','red']].filter(c=>!placed.includes(c[0]));
+ const chip=([t,cl,col])=>`<div class="drg" data-t="${t}" data-col="${col}" style="width:62px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 15px var(--f-body);cursor:grab;touch-action:none;${held===t?(s.cwd==='nothing'?'visibility:hidden;':s.cwd==='faded copy'?'opacity:.3;':''):''}" class="drg fb ${cl}">${t}</div>`;
+ const accepted=over&&(!s.picky||over==='blue');
+ g.innerHTML=`<div class="fill" style="flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:14px">
+  <div style="display:flex;gap:12px">${chips.map(chip).join('')}</div>
+  <div class="dtg" style="width:210px;height:92px;border-radius:14px;border:2px dashed ${over?(accepted?'#15803d':'var(--danger)'):'var(--line)'};background:${over?(accepted?'rgba(21,128,61,.12)':'rgba(185,28,28,.1)'):'transparent'};display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font:600 13px var(--f-body);color:var(--muted)">${placed.length?placed.map(t=>`<span class="fb a" style="width:40px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:700 13px var(--f-body)">${t}</span>`).join(''):(over?(accepted?'release to drop':'this one is rejected'):'DragTarget')}</div>
+ </div>`;
+ const L=[`data: item.colour,`];
+ if(s.axis!=='free')L.push(`axis: Axis.${s.axis},`);
+ if(s.max)L.push('maxSimultaneousDrags: 1,');
+ if(s.anchor==='pointerDragAnchor')L.push('dragAnchorStrategy: pointerDragAnchorStrategy,');
+ L.push("feedback: Material(\n    color: Colors.transparent,\n    child: Chip(label: Text(item.name)),   // follows the finger\n  ),");
+ if(s.cwd==='faded copy')L.push('childWhenDragging: Opacity(opacity: 0.3, child: chip),');
+ else if(s.cwd==='nothing')L.push('childWhenDragging: const SizedBox.shrink(),');
+ L.push('onDragStarted: () => HapticFeedback.selectionClick(),','onDragEnd: (details) => debugPrint(\'accepted: \${details.wasAccepted}\'),','child: chip,');
+ const target=`DragTarget<String>(\n  onWillAcceptWithDetails: (details) => ${s.picky?"details.data == 'blue'":'true'},\n  onAcceptWithDetails: (details) => setState(() => bucket.add(details.data)),\n  onLeave: (data) => setState(() => hovering = false),\n  builder: (context, candidate, rejected) => Container(\n    decoration: BoxDecoration(\n      border: Border.all(\n        color: candidate.isNotEmpty\n            ? Colors.green\n            : rejected.isNotEmpty ? Colors.red : Colors.grey,\n        width: 2,\n      ),\n    ),\n    child: const Center(child: Text('Drop here')),\n  ),\n)`;
+ const notes=[];
+ if(s.kind==='LongPressDraggable')notes.push('LongPressDraggable waits for a hold before the drag starts, which is what lets a surrounding list keep scrolling.');
+ if(s.picky)notes.push('onWillAcceptWithDetails runs while the item hovers, so candidate and rejected in the builder tell you which border colour to draw.');
+ if(s.anchor==='pointerDragAnchor')notes.push('pointerDragAnchorStrategy centres the feedback on the finger rather than keeping the original grab offset.');
+ if(s.cwd==='unchanged')notes.push('With no childWhenDragging the original stays fully visible, so it looks like the item was copied.');
+ notes.push('Drag a chip onto the box in the demo.');
+ return {code:`${s.kind}<String>(\n${L.map(x=>'  '+x).join('\n')}\n)\n\n${target}`,hint:notes.join(' ')};
 },
-act(a,st){if(a==='reset'){st.src=['Apple','Pear','Plum','Fig'];st.acc=[]}},
 after(g,st,s,draw){
- const tgt=g.querySelector('.tgt');
- g.querySelectorAll('.dr').forEach(el=>{
-  el.style.touchAction='none';
+ const tgt=g.querySelector('.dtg');
+ g.querySelectorAll('.drg').forEach(el=>{
   el.addEventListener('pointerdown',e=>{
-   e.preventDefault();
-   const gr=g.getBoundingClientRect(),er=el.getBoundingClientRect(),ox=e.clientX-er.left,oy=e.clientY-er.top;
-   const ghost=el.cloneNode(true);ghost.classList.add('ghost');ghost.style.cssText=`position:absolute;left:${er.left-gr.left}px;top:${er.top-gr.top}px;width:${er.width}px;pointer-events:none;z-index:9`;
-   g.appendChild(ghost);el.style.opacity='.3';
-   const over=ev=>{const t=tgt.getBoundingClientRect();return ev.clientX>t.left&&ev.clientX<t.right&&ev.clientY>t.top&&ev.clientY<t.bottom};
-   const mv=ev=>{ghost.style.left=ev.clientX-gr.left-ox+'px';ghost.style.top=ev.clientY-gr.top-oy+'px';tgt.classList.toggle('hot',over(ev))};
-   const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);ghost.remove();el.style.opacity='';tgt.classList.remove('hot');if(over(ev)){const k=el.dataset.k;st.src=st.src.filter(x=>x!==k);st.acc.push(k);draw()}};
-   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+   st.held=el.dataset.t;el.setPointerCapture(e.pointerId);draw();
+   const ghost=document.createElement('div');
+   ghost.textContent=el.dataset.t;
+   ghost.style.cssText='position:fixed;z-index:99;width:62px;height:46px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px var(--f-body);pointer-events:none;box-shadow:0 6px 18px rgba(10,20,60,.35)';
+   document.body.appendChild(ghost);
+   const move=ev=>{
+    ghost.style.left=(ev.clientX-31)+'px';ghost.style.top=(ev.clientY-23)+'px';
+    const t=g.querySelector('.dtg');if(!t)return;
+    const r=t.getBoundingClientRect();
+    const inside=ev.clientX>r.left&&ev.clientX<r.right&&ev.clientY>r.top&&ev.clientY<r.bottom;
+    const col=el.dataset.col;
+    const nowOver=inside?col:null;
+    if(nowOver!==st.over){st.over=nowOver;draw()}
+   };
+   const up=ev=>{
+    ghost.remove();
+    document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);
+    const ok=st.over&&(!s.picky||st.over==='blue');
+    if(ok){st.placed=[...(st.placed||[]),el.dataset.t]}
+    st.held=null;st.over=null;draw();
+   };
+   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
   });
  });
 }});
-
 /* ================= ANIMATION ================= */
 def({cat:'Animation and motion',id:'animated-container',name:'AnimatedContainer',tags:'implicit animation duration curve tween size color padding alignment transform onend',h:330,
 blurb:'AnimatedContainer takes the same arguments as Container, plus a duration. Rebuild it with different values and it animates from the old ones to the new ones. No controller, no State machinery.',
@@ -2262,61 +2413,95 @@ render(s,st,g){
  return {code:`DecoratedBox(\n${fg?'  position: DecorationPosition.foreground,\n':''}  decoration: BoxDecoration(\n${L.map(x=>'    '+x).join('\n')}\n  ),\n  child: const Center(child: Text('child text')),\n)`,hint:notes.join(' ')||'Container(decoration: ...) wraps exactly this widget.'};
 }});
 
-def({cat:'Display',id:'tooltip',name:'Tooltip',tags:'hover long press message hint label accessibility semantics waitduration',h:240,
-blurb:'Tooltip shows a short text label near its child when the user hovers with a mouse or long-presses on a touch screen. Screen readers also announce the message.',
-use:'Explaining icon-only buttons. Always add one to an IconButton, because the icon alone gives screen reader users no label.',
-watch:'Tooltips do not appear until the pointer rests for waitDuration, and touch users need a long press. Never hide essential information inside one.',
-ctl:[{k:'msg',l:'message',t:'sel',o:['Add to favorites','Share','Delete item'],v:'Add to favorites'},{k:'below',l:'preferBelow',t:'chk',v:true},{k:'wd',l:'waitDuration (ms)',t:'rng',min:0,max:1000,step:100,v:300}],
+def({cat:'Interaction models',id:'tooltip',name:'Tooltip',tags:'hint hover longpress triggermode waitduration showduration preferbelow richmessage decoration accessibility',h:330,
+blurb:'Tooltip shows a small label when the user hovers, long presses or taps, depending on triggerMode. Screen readers read the message too, which is why every icon-only button should have one.',
+use:'Explaining an icon button, a truncated label, or a control whose purpose is not obvious.',
+watch:'On touch the default trigger is a long press, so a tooltip is invisible to most phone users: it is for accessibility and desktop, not a substitute for a label.',
+ctl:[{k:'show',l:'showing',t:'chk',v:true},
+ {k:'below',l:'preferBelow',t:'chk',v:true},
+ {k:'off',l:'verticalOffset',t:'rng',min:8,max:48,v:24},
+ {k:'trig',l:'triggerMode',t:'sel',o:['longPress (touch default)','tap','manual'],v:'longPress (touch default)'},
+ {k:'rich',l:'richMessage',t:'chk',v:false},
+ {k:'style',l:'decoration',t:'sel',o:['default','light','accent'],v:'default'},
+ {k:'wait',l:'waitDuration (ms)',t:'rng',min:0,max:1200,step:100,v:0},
+ {k:'wide',l:'constraints: maxWidth 160',t:'chk',v:false}],
 render(s,st,g){
- if(!st.btn){
-  g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><button class="btn k-Icon" type="button" aria-label="Favorite" style="border:1px solid var(--line);background:var(--surface)">${ic('favorite',22)}</button></div><div class="tip" role="tooltip" hidden style="position:absolute;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);font:500 12.5px var(--f-body);padding:6px 10px;border-radius:6px;white-space:nowrap;pointer-events:none"></div>`;
-  st.btn=g.querySelector('.btn');st.tip=g.querySelector('.tip');
-  const show=()=>{clearTimeout(st.t);st.t=setTimeout(()=>{st.tip.hidden=false},st.wd)};
-  const hide=()=>{clearTimeout(st.t);st.tip.hidden=true};
-  st.btn.addEventListener('pointerenter',show);st.btn.addEventListener('pointerleave',hide);st.btn.addEventListener('focus',show);st.btn.addEventListener('blur',hide);
-  st.btn.addEventListener('click',()=>{show();setTimeout(hide,st.wd+1800)});
- }
- st.wd=s.wd;st.tip.textContent=s.msg;st.tip.style.top=s.below?'calc(50% + 32px)':'calc(50% - 64px)';
- return {code:`Tooltip(\n  message: '${s.msg}',\n  preferBelow: ${s.below},\n  waitDuration: Duration(milliseconds: ${s.wd}),\n  child: IconButton(\n    onPressed: () {},\n    icon: Icon(Icons.favorite),\n  ),\n)`,hint:'Hover over the heart, focus it with Tab, or tap it. A real phone needs a long press.'};
+ const D={default:'background:#4a4a4a;color:#fff',light:'background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 4px 14px rgba(10,20,60,.18)',accent:'background:var(--accent);color:var(--accent-ink)'}[s.style];
+ const msg=s.rich?'Delete <b>permanently</b><br><span style="opacity:.8;font-size:11px">cannot be undone</span>':'Delete this item';
+ const bubble=s.show?`<div style="position:absolute;left:50%;transform:translateX(-50%);${s.below?`top:calc(100% + ${s.off-14}px)`:`bottom:calc(100% + ${s.off-14}px)`};${D};padding:7px 11px;border-radius:6px;font:13px var(--f-body);white-space:${s.wide?'normal':'nowrap'};${s.wide?'width:160px;':''}text-align:center;line-height:1.35;z-index:3">${msg}</div>`:'';
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:20px"><div style="position:relative"><button style="width:48px;height:48px;border-radius:50%;border:0;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(10,20,60,.14)">${ic('delete',22)}</button>${bubble}</div></div>`;
+ const L=[s.rich
+  ?"richMessage: const TextSpan(\n    text: 'Delete ',\n    children: [\n      TextSpan(text: 'permanently', style: TextStyle(fontWeight: FontWeight.bold)),\n    ],\n  ),"
+  :"message: 'Delete this item',"];
+ if(!s.below)L.push('preferBelow: false,');
+ if(s.off!==24)L.push(`verticalOffset: ${s.off},`);
+ if(s.trig==='tap')L.push('triggerMode: TooltipTriggerMode.tap,');
+ if(s.trig==='manual')L.push('triggerMode: TooltipTriggerMode.manual,');
+ if(+s.wait)L.push(`waitDuration: const Duration(milliseconds: ${s.wait}),`);
+ if(s.wide)L.push('constraints: const BoxConstraints(maxWidth: 160),');
+ if(s.style!=='default')L.push(s.style==='light'
+  ?"decoration: BoxDecoration(\n    color: Colors.white,\n    borderRadius: BorderRadius.circular(6),\n    boxShadow: const [BoxShadow(blurRadius: 14, color: Colors.black26)],\n  ),\n  textStyle: const TextStyle(color: Colors.black87),"
+  :"decoration: BoxDecoration(\n    color: Theme.of(context).colorScheme.primary,\n    borderRadius: BorderRadius.circular(6),\n  ),\n  textStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),");
+ L.push("child: IconButton(\n    icon: const Icon(Icons.delete),\n    onPressed: deleteItem,\n  ),");
+ const notes=[];
+ if(s.trig==='manual')notes.push('With manual you show it yourself: give the Tooltip a GlobalKey and call ensureTooltipVisible().');
+ if(+s.wait)notes.push('waitDuration only applies to mouse hover, which is why a value of about 500 ms feels right on desktop and changes nothing on touch.');
+ if(s.rich)notes.push('richMessage takes an InlineSpan, so parts of the text can be styled. message and richMessage cannot both be set.');
+ notes.push('IconButton already has a tooltip argument, so you rarely need to wrap one by hand.');
+ return {code:`Tooltip(\n${L.map(x=>'  '+x).join('\n')}\n)\n\n// shorter, for a button\nIconButton(\n  tooltip: 'Delete this item',\n  icon: const Icon(Icons.delete),\n  onPressed: deleteItem,\n)`,hint:notes.join(' ')};
 }});
-
 /* ---- Gestures ---- */
-def({cat:'Gestures',id:'interactive-viewer',name:'InteractiveViewer',tags:'zoom pan pinch scale transform map image minscale maxscale transformationcontroller',h:280,
-blurb:'InteractiveViewer lets the user pan and zoom its child with drag and pinch gestures. You set the zoom limits, and it can use a TransformationController so you can read or reset the zoom from code.',
-use:'Photos, maps, diagrams, charts and any content bigger than its screen space.',
-watch:'Give it a finite size, usually by putting it in an Expanded or SizedBox. Gestures inside the child, such as taps, still work, but drag gestures compete with panning.',
-ctl:[{k:'mn',l:'minScale',t:'rng',min:.5,max:1,step:.1,v:.5},{k:'mx',l:'maxScale',t:'rng',min:1,max:5,step:.5,v:4},{k:'pan',l:'panEnabled',t:'chk',v:true},{k:'sc',l:'scaleEnabled',t:'chk',v:true}],
-render(s,st,g){
- if(!st.vp){
-  st.k=1;st.x=0;st.y=0;st.pts=new Map();
-  g.innerHTML=`<div class="ivp" style="position:absolute;inset:12px 12px 52px;overflow:hidden;border:1.5px solid var(--c1);border-radius:10px;background:var(--surface);touch-action:none;cursor:grab"><div class="ivc" style="position:absolute;left:50%;top:50%;width:300px;height:150px;margin:-75px 0 0 -150px;transform-origin:50% 50%"><img alt="Pannable sample" draggable="false" src="${PIC}" style="display:block;width:100%;height:100%;user-select:none;pointer-events:none"></div></div><div style="position:absolute;left:12px;right:12px;bottom:10px;display:flex;gap:8px;align-items:center;justify-content:center"><button class="btn k-Outlined" type="button" data-a="out" style="padding:6px 14px">−</button><button class="btn k-Outlined" type="button" data-a="in" style="padding:6px 14px">+</button><button class="btn k-Text" type="button" data-a="rs" style="padding:6px 12px">Reset</button><span class="ivs" style="font:12px var(--f-mono);color:var(--muted);min-width:64px;text-align:right"></span></div>`;
-  st.vp=g.querySelector('.ivp');st.c=g.querySelector('.ivc');st.lab=g.querySelector('.ivs');
-  st.apply=()=>{st.k=clamp(st.k,st.mn,st.mx);st.c.style.transform=`translate(${st.x}px,${st.y}px) scale(${st.k})`;st.lab.textContent=st.k.toFixed(2)+'×'};
-  const vp=st.vp;
-  vp.addEventListener('pointerdown',e=>{st.pts.set(e.pointerId,[e.clientX,e.clientY]);try{vp.setPointerCapture(e.pointerId)}catch(_){}});
-  vp.addEventListener('pointermove',e=>{
-   if(!st.pts.has(e.pointerId))return;
-   const prev=st.pts.get(e.pointerId);
-   if(st.pts.size===1){if(st.pan){st.x+=e.clientX-prev[0];st.y+=e.clientY-prev[1]}}
-   else if(st.pts.size===2&&st.sc){
-    const o=[...st.pts.entries()].find(([id])=>id!==e.pointerId)[1];
-    const d0=Math.hypot(prev[0]-o[0],prev[1]-o[1]),d1=Math.hypot(e.clientX-o[0],e.clientY-o[1]);
-    if(d0>0)st.k*=d1/d0;
-   }
-   st.pts.set(e.pointerId,[e.clientX,e.clientY]);st.apply();
-  });
-  const up=e=>st.pts.delete(e.pointerId);
-  vp.addEventListener('pointerup',up);vp.addEventListener('pointercancel',up);
-  vp.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!st.sc)return;e.preventDefault();st.k*=Math.exp(-e.deltaY*.01);st.apply()},{passive:false});
- }
- st.mn=s.mn;st.mx=s.mx;st.pan=s.pan;st.sc=s.sc;st.apply();
- st.vp.style.cursor=s.pan?'grab':'default';
- return {code:`InteractiveViewer(\n  minScale: ${s.mn},\n  maxScale: ${s.mx},\n  panEnabled: ${s.pan},\n  scaleEnabled: ${s.sc},\n  child: Image.network(url),\n)`,hint:'Drag to pan. Pinch, press + and −, or hold Ctrl or ⌘ and scroll to zoom.'};
+def({cat:'Interaction models',id:'interactive-viewer',name:'InteractiveViewer',tags:'zoom pan pinch scale transformationcontroller boundarymargin constrained minscale maxscale doubletap',h:340,
+blurb:'InteractiveViewer lets the user pan and zoom its child. A TransformationController gives you the matrix, so you can reset it, animate it or read the current scale.',
+use:'Photo viewers, maps, diagrams and any canvas larger than the screen.',
+watch:'constrained: false is what lets the child be bigger than the viewport, and it is needed for a large diagram. Wheel and double-tap zoom are not built in: you add them with the controller.',
+ctl:[{k:'scale',l:'current scale',t:'rng',min:.6,max:3,step:.1,v:1},
+ {k:'min',l:'minScale',t:'rng',min:.3,max:1,step:.1,v:.8},
+ {k:'max',l:'maxScale',t:'rng',min:1.5,max:6,step:.5,v:2.5},
+ {k:'pan',l:'panEnabled',t:'chk',v:true},
+ {k:'zoom',l:'scaleEnabled',t:'chk',v:true},
+ {k:'bm',l:'boundaryMargin',t:'sel',o:['zero','40','infinite'],v:'zero'},
+ {k:'con',l:'constrained',t:'chk',v:true},
+ {k:'axis',l:'panAxis',t:'sel',o:['free','aligned'],v:'free'}],
+render(s,st,g,d){
+ const sc=Math.min(+s.max,Math.max(+s.min,st.sc===undefined?+s.scale:st.sc));
+ const tx=st.tx||0,ty=st.ty||0;
+ g.innerHTML=`<div class="ivw" style="position:absolute;inset:14px;overflow:hidden;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);cursor:${s.pan?'grab':'default'};touch-action:none"><div style="position:absolute;left:50%;top:50%;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(${sc});transform-origin:center"><img alt="Sample landscape" src="${PIC}" style="width:260px;height:160px;object-fit:cover;display:block;border-radius:8px"></div><div style="position:absolute;right:8px;bottom:6px;font:11px var(--f-mono);color:var(--muted);background:var(--surface);padding:2px 6px;border-radius:5px">scale ${sc.toFixed(2)}</div></div>`;
+ const L=[];
+ if(+s.min!==0.8)L.push(`minScale: ${(+s.min).toFixed(1)},`);
+ if(+s.max!==2.5)L.push(`maxScale: ${(+s.max).toFixed(1)},`);
+ if(!s.pan)L.push('panEnabled: false,');
+ if(!s.zoom)L.push('scaleEnabled: false,');
+ if(s.bm!=='zero')L.push(s.bm==='infinite'?'boundaryMargin: const EdgeInsets.all(double.infinity),':'boundaryMargin: const EdgeInsets.all(40),');
+ if(!s.con)L.push('constrained: false,   // the child may be larger than the viewport');
+ if(s.axis==='aligned')L.push('panAxis: PanAxis.aligned,');
+ L.push('transformationController: _controller,','onInteractionEnd: (details) => setState(() {}),','child: Image.network(url),');
+ const notes=[];
+ if(!s.con)notes.push('constrained: false lets the child keep its own size, which is what a big diagram or map needs.');
+ if(s.bm==='infinite')notes.push('An infinite boundaryMargin lets the user pan the child completely off screen.');
+ if(s.axis==='aligned')notes.push('PanAxis.aligned locks panning to one axis at a time, which feels steadier.');
+ if(!s.zoom)notes.push('With scaleEnabled false the user can still pan, which suits a long timeline.');
+ notes.push('Drag the picture, and scroll on it to zoom.');
+ return {code:`final _controller = TransformationController();\n\n@override\nvoid dispose() {\n  _controller.dispose();\n  super.dispose();\n}\n\nInteractiveViewer(\n${L.map(x=>'  '+x).join('\n')}\n)\n\n// reset, or animate back\nvoid reset() => _controller.value = Matrix4.identity();\n\n// read the current scale\nfinal scale = _controller.value.getMaxScaleOnAxis();\n\n// double tap to zoom (not built in)\nGestureDetector(\n  onDoubleTapDown: (d) => _tapPosition = d.localPosition,\n  onDoubleTap: () {\n    final zoomed = _controller.value.getMaxScaleOnAxis() > 1.1;\n    _controller.value = zoomed\n        ? Matrix4.identity()\n        : (Matrix4.identity()..translate(-_tapPosition.dx, -_tapPosition.dy)..scale(2.0));\n  },\n  child: viewer,\n)`,hint:notes.join(' ')};
 },
-act(a,st){
- if(a==='in'&&st.sc)st.k*=1.4;else if(a==='out'&&st.sc)st.k/=1.4;else if(a==='rs'){st.k=1;st.x=0;st.y=0}
+after(g,st,s,draw){
+ const el=g.querySelector('.ivw');if(!el)return;
+ if(st.sc===undefined)st.sc=+s.scale;
+ let down=false,px=0,py=0;
+ if(s.pan){
+  el.addEventListener('pointerdown',e=>{down=true;px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{
+   if(!down)return;
+   const dx=e.clientX-px,dy=e.clientY-py;px=e.clientX;py=e.clientY;
+   const lim=s.bm==='infinite'?400:s.bm==='40'?140:90;
+   st.tx=Math.max(-lim,Math.min(lim,(st.tx||0)+dx));
+   if(s.axis!=='aligned'||Math.abs(dx)<Math.abs(dy))st.ty=Math.max(-lim,Math.min(lim,(st.ty||0)+dy));
+   draw();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>{down=false}));
+ }
+ if(s.zoom)el.addEventListener('wheel',e=>{e.preventDefault();st.sc=Math.min(+s.max,Math.max(+s.min,(st.sc||1)-e.deltaY/500));draw()},{passive:false});
 }});
-
 /* ---- Animation ---- */
 def({cat:'Animation and motion',id:'implicit-animations',name:'Animated* widgets (implicit)',tags:'animatedopacity animatedalign animatedpadding animatedpositioned animatedsize animatedscale animatedrotation animatedslide animateddefaulttextstyle crossfade',h:330,
 blurb:'The implicit animation widgets all work the same way: give them a duration, rebuild with a different value, and they animate. Each one animates a single property, so they are cheaper and clearer than a whole AnimatedContainer.',
