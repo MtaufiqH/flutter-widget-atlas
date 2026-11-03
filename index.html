@@ -50,6 +50,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -564,6 +565,9 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .papi a{font:600 12.5px var(--f-body);color:var(--accent);text-decoration:none}
 .papi a:after{content:' \2197'}
 .papi a:hover{text-decoration:underline}
+.scr.h{overflow-x:auto;overflow-y:hidden}
+.scr.h .in{display:flex;height:100%;align-items:center}
+.li.hz{display:flex;align-items:center;justify-content:center;height:70px;margin:0 4px;border-radius:9px;background:var(--c1s);color:var(--fg);font:600 12.5px var(--f-mono)}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -710,15 +714,42 @@ function mount(d){
 }
 
 /* ================= LAYOUT ================= */
-def({cat:'Layout',id:'row-column',name:'Row & Column',tags:'flex axis vertical horizontal main cross alignment',
-blurb:'The two workhorses of Flutter layout. Column stacks children vertically and Row lays them out horizontally. Each has a main axis (the direction it lays out) and a cross axis (the other one), and two alignment properties control both.',
+def({cat:'Layout',id:'row-column',name:'Row & Column',tags:'flex axis vertical horizontal main cross alignment mainaxissize spacing textdirection verticaldirection baseline',h:320,
+blurb:'The two workhorses of Flutter layout. Column stacks children vertically and Row lays them out horizontally. Each has a main axis (the direction it lays out) and a cross axis (the other one). Row and Column are both Flex underneath, so they take the same arguments.',
 use:'Any time two or more widgets sit next to each other or one above the other.',
-watch:'CrossAxisAlignment.stretch throws a BoxConstraints error when the parent gives unbounded size on the cross axis.',
-ctl:[{k:'dir',l:'Widget',t:'sel',o:['Column','Row'],v:'Column'},{k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','end','center','spaceBetween','spaceAround','spaceEvenly'],v:'start'},{k:'ca',l:'crossAxisAlignment',t:'sel',o:['start','center','end','stretch'],v:'start'}],
+watch:'CrossAxisAlignment.stretch throws a BoxConstraints error when the parent gives unbounded size on the cross axis. MainAxisSize.max fills the parent, which is why a Column in a dialog often looks too tall. crossAxisAlignment: baseline needs textBaseline to be set.',
+ctl:[{k:'dir',l:'Widget',t:'sel',o:['Column','Row'],v:'Column'},
+ {k:'ma',l:'mainAxisAlignment',t:'sel',o:['start','end','center','spaceBetween','spaceAround','spaceEvenly'],v:'start'},
+ {k:'ca',l:'crossAxisAlignment',t:'sel',o:['start','center','end','stretch','baseline'],v:'start'},
+ {k:'ms',l:'mainAxisSize',t:'sel',o:['max','min'],v:'max'},
+ {k:'sp',l:'spacing',t:'rng',min:0,max:24,v:0},
+ {k:'td',l:'textDirection',t:'sel',o:['ltr','rtl'],v:'ltr'},
+ {k:'vd',l:'verticalDirection',t:'sel',o:['down','up'],v:'down'},
+ {k:'tx',l:'children are text of different sizes',t:'chk',v:false}],
 render(s,st,g){
- const col=s.dir==='Column',sz=[[64,38],[96,50],[76,62]],cl=['a','b','c'];
- g.innerHTML=`<div class="fill" style="flex-direction:${col?'column':'row'};justify-content:${AX[s.ma]};align-items:${AX[s.ca]}">`+sz.map((z,i)=>box('ABC'[i],cl[i],s.ca==='stretch'?(col?`height:${z[1]}px`:`width:${z[0]}px`):`width:${z[0]}px;height:${z[1]}px`)).join('')+'</div>';
- return {code:`${s.dir}(\n  mainAxisAlignment: MainAxisAlignment.${s.ma},\n  crossAxisAlignment: CrossAxisAlignment.${s.ca},\n  children: [A(), B(), C()],\n)`,hint:col?'Main axis runs top to bottom, cross axis runs left to right.':'Main axis runs left to right, cross axis runs top to bottom.'};
+ const col=s.dir==='Column',base=s.ca==='baseline',sz=[[64,38],[96,50],[76,62]],cl=['a','b','c'];
+ const rev=col?(s.vd==='up'):(s.td==='rtl');
+ const kids=base||s.tx
+  ?[['A',14],['B',26],['C',18]].map((t,i)=>`<div class="fb ${cl[i]}" style="padding:4px 12px;font-size:${t[1]}px;line-height:1.1;${s.ca==='stretch'?(col?'':'align-self:stretch'):''}">${t[0]}</div>`).join('')
+  :sz.map((z,i)=>box('ABC'[i],cl[i],s.ca==='stretch'?(col?`height:${z[1]}px`:`width:${z[0]}px`):`width:${z[0]}px;height:${z[1]}px`)).join('');
+ const align=base?'baseline':AX[s.ca];
+ const inner=`<div style="display:flex;box-sizing:border-box;flex-direction:${col?(rev?'column-reverse':'column'):(rev?'row-reverse':'row')};justify-content:${AX[s.ma]};align-items:${align};gap:${s.sp}px;${s.ms==='max'?(col?'height:100%':'width:100%'):''};${col?'width:auto':'height:auto'};border:1.5px dashed var(--c3);padding:4px">${kids}</div>`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center;padding:8px">${inner}</div>`;
+ const L=[`mainAxisAlignment: MainAxisAlignment.${s.ma},`,`crossAxisAlignment: CrossAxisAlignment.${s.ca},`];
+ if(s.ms!=='max')L.push('mainAxisSize: MainAxisSize.min,');
+ if(s.sp)L.push(`spacing: ${s.sp},   // Flutter 3.27 and later`);
+ if(base)L.push('textBaseline: TextBaseline.alphabetic,   // required for baseline');
+ if(!col&&s.td==='rtl')L.push('textDirection: TextDirection.rtl,');
+ if(col&&s.vd==='up')L.push('verticalDirection: VerticalDirection.up,');
+ const kidCode=base||s.tx?"Text('A'), Text('B', style: TextStyle(fontSize: 26)), Text('C')":'A(), B(), C()';
+ const notes=[];
+ notes.push(col?'Main axis runs top to bottom, cross axis runs left to right.':'Main axis runs left to right, cross axis runs top to bottom.');
+ if(s.ms==='min')notes.push('With MainAxisSize.min the dashed box shrinks to the children.');
+ if(base)notes.push('baseline lines up the bottom of the letters, not the boxes.');
+ if(s.sp)notes.push('Before Flutter 3.27 you got the same gap with SizedBox or Padding between children.');
+ if(!col&&s.td==='rtl')notes.push('With rtl the children run right to left, and start means the right edge.');
+ if(col&&s.vd==='up')notes.push('With VerticalDirection.up the first child sits at the bottom.');
+ return {code:`${s.dir}(\n${L.map(x=>'  '+x).join('\n')}\n  children: [${kidCode}],\n)`,hint:notes.join(' ')};
 }});
 
 def({cat:'Layout',id:'expanded',name:'Expanded & Flexible',tags:'flex spacer flexible fill remaining space',
@@ -892,31 +923,74 @@ render(s,st,g){
 }});
 
 /* ================= SCROLLING ================= */
-def({cat:'Scrolling',id:'list-view',name:'ListView',tags:'builder separated children lazy scroll list virtualization',h:300,
+def({cat:'Scrolling',id:'list-view',name:'ListView',tags:'builder separated children lazy scroll list virtualization itemextent shrinkwrap reverse padding physics scrolldirection horizontal',h:330,
 blurb:'ListView scrolls its children along one axis. The plain constructor builds every child immediately. ListView.builder creates items on demand as they scroll into view, and ListView.separated does the same while inserting a separator between items.',
 use:'Anything that scrolls. Use builder or separated for long or unknown-length lists.',
-watch:'shrinkWrap: true forces Flutter to measure every child, which removes most of the lazy-loading benefit. Prefer slivers when mixing a list with other scrolling content.',
-ctl:[{k:'kind',l:'Constructor',t:'sel',o:['children','builder','separated'],v:'builder'},{k:'n',l:'itemCount',t:'rng',min:10,max:5000,step:10,v:1000}],
+watch:'shrinkWrap: true forces Flutter to measure every child, which removes most of the lazy-loading benefit. Prefer slivers when mixing a list with other scrolling content. A horizontal ListView inside a Column needs a fixed height, usually from a SizedBox.',
+ctl:[{k:'kind',l:'Constructor',t:'sel',o:['children','builder','separated'],v:'builder'},
+ {k:'n',l:'itemCount',t:'rng',min:10,max:5000,step:10,v:1000},
+ {k:'axis',l:'scrollDirection',t:'sel',o:['vertical','horizontal'],v:'vertical'},
+ {k:'ext',l:'itemExtent',t:'sel',o:['null','40','72'],v:'null'},
+ {k:'pad',l:'padding',t:'rng',min:0,max:24,v:0},
+ {k:'phy',l:'physics',t:'sel',o:['default','NeverScrollableScrollPhysics'],v:'default'},
+ {k:'rev',l:'reverse',t:'chk',v:false},
+ {k:'sw',l:'shrinkWrap',t:'chk',v:false}],
 render(s,st,g){
- g.innerHTML='<div class="scr"><div class="in"></div></div>';
- const n=+s.n;
- const code={children:`ListView(\n  children: List.generate(${n}, (i) => ListTile(title: Text('Item $i'))),\n) // all ${n} built up front`,builder:`ListView.builder(\n  itemCount: ${n},\n  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n)`,separated:`ListView.separated(\n  itemCount: ${n},\n  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n  separatorBuilder: (context, i) => const Divider(),\n)`}[s.kind];
- return {code,hint:''};
+ const horiz=s.axis==='horizontal';
+ g.innerHTML='<div class="scr'+(horiz?' h':'')+'"><div class="in"></div></div>';
+ const n=+s.n,L=[];
+ if(s.kind!=='children')L.push(`itemCount: ${n},`);
+ if(horiz)L.push('scrollDirection: Axis.horizontal,');
+ if(s.ext!=='null')L.push(`itemExtent: ${s.ext},`);
+ if(s.pad)L.push(`padding: const EdgeInsets.all(${s.pad}),`);
+ if(s.phy!=='default')L.push('physics: const NeverScrollableScrollPhysics(),');
+ if(s.rev)L.push('reverse: true,');
+ if(s.sw)L.push('shrinkWrap: true,');
+ const head=s.kind==='children'?'ListView(':s.kind==='separated'?'ListView.separated(':'ListView.builder(';
+ const tail=s.kind==='children'
+  ?`  children: List.generate(${n}, (i) => ListTile(title: Text('Item $i'))),`
+  :s.kind==='separated'
+   ?"  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),\n  separatorBuilder: (context, i) => const Divider(height: 1),"
+   :"  itemBuilder: (context, i) => ListTile(title: Text('Item $i')),";
+ const note=s.kind==='children'?`\n// all ${n} children are built up front`:'';
+ return {code:head+'\n'+L.map(x=>'  '+x).join('\n')+(L.length?'\n':'')+tail+'\n)'+note,hint:''};
 },
 after(g,st,s,draw,d){
  const sc=g.querySelector('.scr'),inn=g.querySelector('.in');
- const n=+s.n,sep=s.kind==='separated',row=sep?54:44,lazy=s.kind!=='children';
- const item=i=>`<div class="li"><span>${i}</span>Item ${i}</div>`+(sep&&i<n-1?'<div class="sepr"></div>':'');
+ const n=+s.n,sep=s.kind==='separated',lazy=s.kind!=='children',horiz=s.axis==='horizontal';
+ const fixed=s.ext!=='null'?+s.ext:0;
+ const row=fixed||(horiz?110:(sep?54:44));
+ const pad=+s.pad;
+ sc.style.overflowX=horiz?(s.phy==='default'?'auto':'hidden'):'hidden';
+ sc.style.overflowY=horiz?'hidden':(s.phy==='default'?'auto':'hidden');
+ sc.style.padding=pad+'px';
+ if(s.sw&&!horiz){const need=n*row+2*pad;sc.style.height=Math.min(need,sc.parentElement.clientHeight)+'px';sc.style.alignSelf='flex-start'}
+ else sc.style.height='';
+ inn.style.display=horiz?'flex':'block';
+ inn.style.flexDirection=horiz?(s.rev?'row-reverse':'row'):'';
+ if(!horiz)inn.style.transform='';
+ const item=i=>horiz
+  ?`<div class="li hz" style="width:${row-8}px;flex:none">Item ${i}</div>`
+  :`<div class="li" style="${fixed?'height:'+fixed+'px;':''}"><span>${i}</span>Item ${i}</div>`+(sep&&i<n-1?'<div class="sepr"></div>':'');
  const paint=()=>{
-  const top=sc.scrollTop,view=sc.clientHeight;st.top=top;
+  const top=horiz?sc.scrollLeft:sc.scrollTop,view=horiz?sc.clientWidth:sc.clientHeight;st.top=top;
   let a=0,b=n-1;
   if(lazy){a=Math.max(0,Math.floor((top-250)/row));b=Math.min(n-1,Math.ceil((top+view+250)/row))}
   let h='';for(let i=a;i<=b;i++)h+=item(i);
-  inn.style.paddingTop=a*row+'px';inn.style.paddingBottom=Math.max(0,n-1-b)*row+'px';
+  if(horiz){inn.style.paddingLeft=a*row+'px';inn.style.paddingRight=Math.max(0,n-1-b)*row+'px';inn.style.paddingTop='';inn.style.paddingBottom=''}
+  else{inn.style.paddingTop=a*row+'px';inn.style.paddingBottom=Math.max(0,n-1-b)*row+'px';inn.style.paddingLeft='';inn.style.paddingRight=''}
   inn.innerHTML=h;
-  d.hintEl.textContent=lazy?`itemBuilder ran for ${b-a+1} of ${n} items (indices ${a} to ${b}). Scroll to watch the window move. The rest are never built.`:`All ${n} children were built up front, including the ones nobody scrolls to.`;
+  const parts=[];
+  parts.push(lazy?`itemBuilder ran for ${b-a+1} of ${n} items (indices ${a} to ${b}). The rest are never built.`:`All ${n} children were built up front, including the ones nobody scrolls to.`);
+  if(fixed)parts.push(`itemExtent: ${fixed} tells Flutter every row is the same size, so it can jump straight to any offset without measuring.`);
+  if(s.sw)parts.push('shrinkWrap makes the list only as tall as its content, and every child is measured to work that out.');
+  if(s.phy!=='default')parts.push('NeverScrollableScrollPhysics blocks the user from scrolling. Only code can move it now.');
+  if(s.rev)parts.push('reverse starts the list at the far end, which is what a chat screen wants.');
+  d.hintEl.textContent=parts.join(' ');
  };
- const keep=st.top||0;paint();sc.scrollTop=keep;paint();
+ const keep=st.top||0;paint();
+ if(horiz)sc.scrollLeft=keep;else sc.scrollTop=keep;
+ paint();
  if(lazy)sc.addEventListener('scroll',paint,{passive:true});
 }});
 
@@ -998,42 +1072,113 @@ after(g,st,s){
  sc.addEventListener('scroll',upd,{passive:true});upd();
 }});
 /* ================= DISPLAY ================= */
-def({cat:'Display',id:'text',name:'Text',tags:'font style overflow ellipsis maxlines textstyle typography',h:280,
-blurb:'Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of properties.',
+def({cat:'Display',id:'text',name:'Text',tags:'font style overflow ellipsis maxlines textstyle typography height lineheight wordspacing decoration softwrap shadow color',h:330,
+blurb:'Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of properties. Every control below is a real argument of Text or TextStyle.',
 use:'Every label, paragraph and heading.',
-watch:'overflow only matters when text cannot wrap: with no maxLines the text just wraps and you will never see an ellipsis.',
-ctl:[{k:'fs',l:'fontSize',t:'rng',min:12,max:32,v:18},{k:'fw',l:'fontWeight',t:'sel',o:['w300','w400','w600','w800'],v:'w400'},{k:'it',l:'italic',t:'chk',v:false},{k:'ls',l:'letterSpacing',t:'rng',min:-1,max:6,step:.5,v:0},{k:'ta',l:'textAlign',t:'sel',o:['left','center','right','justify'],v:'left'},{k:'ml',l:'maxLines',t:'sel',o:['null','1','2','3'],v:'2'},{k:'ov',l:'overflow',t:'sel',o:['clip','ellipsis','fade','visible'],v:'ellipsis'}],
+watch:'overflow only matters when text cannot wrap: with no maxLines the text just wraps and you will never see an ellipsis. height is a multiple of fontSize, not a pixel value. Setting style replaces nothing you do not name, because it is merged with the DefaultTextStyle.',
+ctl:[{k:'fs',l:'fontSize',t:'rng',min:12,max:32,v:18},
+ {k:'fw',l:'fontWeight',t:'sel',o:['w300','w400','w600','w800'],v:'w400'},
+ {k:'lh',l:'height (line height)',t:'rng',min:1,max:2.2,step:.1,v:1.35},
+ {k:'ls',l:'letterSpacing',t:'rng',min:-1,max:6,step:.5,v:0},
+ {k:'ws',l:'wordSpacing',t:'rng',min:0,max:14,step:1,v:0},
+ {k:'ta',l:'textAlign',t:'sel',o:['left','center','right','justify'],v:'left'},
+ {k:'ml',l:'maxLines',t:'sel',o:['null','1','2','3'],v:'2'},
+ {k:'ov',l:'overflow',t:'sel',o:['clip','ellipsis','fade','visible'],v:'ellipsis'},
+ {k:'dec',l:'decoration',t:'sel',o:['none','underline','lineThrough','overline'],v:'none'},
+ {k:'col',l:'color',t:'sel',o:['default','blue','red','muted'],v:'default'},
+ {k:'it',l:'italic',t:'chk',v:false},
+ {k:'sw',l:'softWrap',t:'chk',v:true},
+ {k:'bg',l:'backgroundColor',t:'chk',v:false},
+ {k:'sh',l:'shadows',t:'chk',v:false}],
 render(s,st,g){
- const n=s.ml==='null'?0:+s.ml,lh=1.35;
- let css=`width:236px;font-size:${s.fs}px;font-weight:${s.fw.slice(1)};font-style:${s.it?'italic':'normal'};letter-spacing:${s.ls}px;text-align:${s.ta};line-height:${lh};`;
- if(n){
+ const n=s.ml==='null'?0:+s.ml,lh=+s.lh;
+ const COL={default:'var(--fg)',blue:'var(--c1)',red:'var(--c4)',muted:'var(--muted)'}[s.col];
+ const DEC={none:'none',underline:'underline',lineThrough:'line-through',overline:'overline'}[s.dec];
+ let css=`width:236px;font-size:${s.fs}px;font-weight:${s.fw.slice(1)};font-style:${s.it?'italic':'normal'};letter-spacing:${s.ls}px;word-spacing:${s.ws}px;text-align:${s.ta};line-height:${lh};color:${COL};text-decoration:${DEC};`;
+ if(s.bg)css+='background:var(--c3s);';
+ if(s.sh)css+='text-shadow:0 2px 3px rgba(20,30,80,.45);';
+ if(!s.sw)css+='white-space:nowrap;overflow:hidden;';
+ if(n&&s.sw){
   const h=`calc(${n}*${lh}em)`;
   if(s.ov==='ellipsis')css+=`display:-webkit-box;-webkit-line-clamp:${n};-webkit-box-orient:vertical;overflow:hidden;`;
   else if(s.ov==='clip')css+=`max-height:${h};overflow:hidden;`;
   else if(s.ov==='fade')css+=`max-height:${h};overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 1em),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 1em),transparent);`;
   else css+=`height:${h};overflow:visible;`;
  }
+ if(!s.sw&&s.ov==='ellipsis')css+='text-overflow:ellipsis;';
  g.innerHTML=`<div class="fill sc"><div style="margin:auto"><div style="${css}outline:1px dashed var(--c3);outline-offset:3px">Flutter draws every pixel itself, so a Text widget is really a small layout engine for glyphs that wraps, aligns and truncates for you.</div></div></div>`;
  const sty=[`fontSize: ${s.fs}`];
  if(s.fw!=='w400')sty.push(`fontWeight: FontWeight.${s.fw}`);
  if(s.it)sty.push('fontStyle: FontStyle.italic');
+ if(lh!==1.35)sty.push(`height: ${lh}`);
  if(+s.ls)sty.push(`letterSpacing: ${s.ls}`);
- const args=[`'Flutter draws every pixel itself...'`];
- if(n)args.push(`maxLines: ${n}`,`overflow: TextOverflow.${s.ov}`);
+ if(+s.ws)sty.push(`wordSpacing: ${s.ws}`);
+ if(s.col!=='default')sty.push(`color: Colors.${s.col==='muted'?'grey':s.col}`);
+ if(s.dec!=='none')sty.push(`decoration: TextDecoration.${s.dec}`);
+ if(s.bg)sty.push('backgroundColor: Color(0xFFFDE68A)');
+ if(s.sh)sty.push('shadows: const [Shadow(blurRadius: 3, offset: Offset(0, 2))]');
+ const args=["'Flutter draws every pixel itself...'"];
+ if(n)args.push(`maxLines: ${n}`);
+ if(n||!s.sw)args.push(`overflow: TextOverflow.${s.ov}`);
+ if(!s.sw)args.push('softWrap: false');
  if(s.ta!=='left')args.push(`textAlign: TextAlign.${s.ta}`);
- args.push(`style: TextStyle(${sty.join(', ')})`);
- return {code:`Text(\n${args.map(a=>'  '+a+',').join('\n')}\n)`,hint:n?'The dashed outline is the box the Text was given.':'No maxLines, so the text wraps freely and overflow has no effect.'};
+ args.push(`style: TextStyle(\n    ${sty.join(',\n    ')},\n  )`);
+ const notes=[];
+ notes.push(n?'The dashed outline is the box the Text was given.':'No maxLines, so the text wraps freely and overflow has no effect.');
+ if(!s.sw)notes.push('With softWrap: false everything stays on one line and runs past the edge.');
+ if(lh!==1.35)notes.push('height multiplies fontSize, so '+s.fs+' x '+lh+' is a line box of about '+Math.round(s.fs*lh)+' pixels.');
+ if(s.ta==='justify')notes.push('justify stretches the spaces so both edges line up. The last line is left alone.');
+ return {code:`Text(\n${args.map(a=>'  '+a+',').join('\n')}\n)`,hint:notes.join(' ')};
 }});
 
-def({cat:'Display',id:'image',name:'Image & BoxFit',tags:'picture photo network asset fit cover contain',
-blurb:'Image shows a picture from the network, an asset, a file or memory. When the image and the box it lives in have different shapes, BoxFit decides how the picture is scaled and cropped.',
+def({cat:'Display',id:'image',name:'Image & BoxFit',tags:'picture photo network asset fit cover contain alignment repeat colorblendmode opacity errorbuilder loadingbuilder cachewidth',h:330,
+blurb:'Image shows a picture from the network, an asset, a file or memory. When the image and the box it lives in have different shapes, BoxFit decides how the picture is scaled and cropped, and alignment decides which part survives the crop.',
 use:'Photos, avatars and artwork. Use cover to fill a box and contain to show the whole picture.',
-watch:'Image.network shows nothing while loading and on error unless you provide loadingBuilder and errorBuilder.',
-ctl:[{k:'fit',l:'fit',t:'sel',o:['fill','contain','cover','fitWidth','fitHeight','none','scaleDown'],v:'cover'}],
+watch:'Image.network shows nothing while loading and nothing on error unless you give it loadingBuilder and errorBuilder. Decoding a large photo into a small box wastes memory: pass cacheWidth. Image.network has no disk cache, so use cached_network_image in production.',
+ctl:[{k:'fit',l:'fit',t:'sel',o:['fill','contain','cover','fitWidth','fitHeight','none','scaleDown'],v:'cover'},
+ {k:'al',l:'alignment',t:'sel',o:['center','topLeft','topCenter','bottomRight'],v:'center'},
+ {k:'bw',l:'box width',t:'rng',min:90,max:280,v:200},
+ {k:'bh',l:'box height',t:'rng',min:70,max:180,v:140},
+ {k:'rep',l:'repeat',t:'sel',o:['noRepeat','repeat','repeatX','repeatY'],v:'noRepeat'},
+ {k:'tint',l:'color + colorBlendMode',t:'sel',o:['none','srcIn (solid)','modulate (tint)','saturation (grey)'],v:'none'},
+ {k:'op',l:'opacity',t:'rng',min:.2,max:1,step:.1,v:1},
+ {k:'state',l:'network state',t:'sel',o:['loaded','loading','error'],v:'loaded'}],
 render(s,st,g){
- const f=s.fit,css={fill:'width:100%;height:100%;object-fit:fill',contain:'width:100%;height:100%;object-fit:contain',cover:'width:100%;height:100%;object-fit:cover',fitWidth:'width:100%;height:auto',fitHeight:'height:100%;width:auto',none:'width:300px;height:150px;max-width:none',scaleDown:'width:100%;height:100%;object-fit:scale-down'}[f];
- g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:200px;height:140px;border:1.5px solid var(--c3);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--c3s)"><img alt="Sample landscape" src="${PIC}" style="display:block;${css}"></div></div>`;
- return {code:`Image.network(\n  'https://example.com/photo.jpg',\n  width: 200, height: 140,\n  fit: BoxFit.${f},\n)`,hint:'The picture is 300 × 150 and the box is 200 × 140. The coloured border is part of the picture so you can see what gets cropped or stretched.'};
+ const OBJ={fill:'fill',contain:'contain',cover:'cover',fitWidth:'none',fitHeight:'none',none:'none',scaleDown:'contain'}[s.fit];
+ const AP={center:'center',topLeft:'left top',topCenter:'center top',bottomRight:'right bottom'}[s.al];
+ let imgCss=`display:block;opacity:${s.op};object-position:${AP};`;
+ if(s.fit==='fitWidth')imgCss+='width:100%;height:auto;';
+ else if(s.fit==='fitHeight')imgCss+='height:100%;width:auto;';
+ else if(s.fit==='none')imgCss+='width:300px;height:150px;max-width:none;';
+ else if(s.fit==='scaleDown')imgCss+='max-width:100%;max-height:100%;';
+ else imgCss+=`width:100%;height:100%;object-fit:${OBJ};`;
+ const FIL={none:'',"srcIn (solid)":'filter:brightness(0) saturate(100%) invert(32%) sepia(68%) saturate(1500%) hue-rotate(205deg);',"modulate (tint)":'filter:sepia(.6) hue-rotate(170deg) saturate(2.2);',"saturation (grey)":'filter:grayscale(1);'}[s.tint];
+ imgCss+=FIL;
+ let inner;
+ if(s.state==='loading')inner=`<div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font:12px var(--f-mono)"><div class="spin"></div>loadingBuilder<br>42%</div>`;
+ else if(s.state==='error')inner=`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--danger);font:12px var(--f-mono)">${ic('close',26)}errorBuilder</div>`;
+ else if(s.rep!=='noRepeat'){
+  const rp={repeat:'repeat',repeatX:'repeat-x',repeatY:'repeat-y'}[s.rep];
+  inner=`<div style="width:100%;height:100%;background-image:url(${PIC});background-size:90px 45px;background-repeat:${rp};opacity:${s.op};${FIL}"></div>`;
+ }
+ else inner=`<img alt="Sample landscape" src="${PIC}" style="${imgCss}">`;
+ g.innerHTML=`<div class="fill" style="align-items:center;justify-content:center"><div style="width:${s.bw}px;height:${s.bh}px;border:1.5px solid var(--c3);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--c3s)">${inner}</div></div>`;
+ const L=["'https://example.com/photo.jpg',",`width: ${s.bw}, height: ${s.bh},`,`fit: BoxFit.${s.fit},`];
+ if(s.al!=='center')L.push(`alignment: Alignment.${s.al},`);
+ if(s.rep!=='noRepeat')L.push(`repeat: ImageRepeat.${s.rep},`);
+ if(s.tint!=='none')L.push(`color: Colors.blue,\n  colorBlendMode: BlendMode.${s.tint.split(' ')[0]},`);
+ if(s.op<1)L.push(`opacity: const AlwaysStoppedAnimation(${s.op}),`);
+ L.push(`cacheWidth: ${s.bw*2},   // decode at the size you draw`);
+ if(s.state!=='loaded')L.push("loadingBuilder: (context, child, progress) => progress == null\n      ? child\n      : CircularProgressIndicator(\n          value: progress.expectedTotalBytes == null ? null\n              : progress.cumulativeBytesLoaded / progress.expectedTotalBytes!,\n        ),","errorBuilder: (context, error, stack) => const Icon(Icons.broken_image),");
+ const notes=[];
+ if(s.fit==='cover')notes.push('cover fills the box and crops the rest. alignment decides which part you keep.');
+ if(s.fit==='contain')notes.push('contain shows the whole picture and leaves empty space.');
+ if(s.fit==='fill')notes.push('fill stretches the picture and distorts it.');
+ if(s.fit==='none')notes.push('none draws the picture at its real size, 300 by 150, and clips the rest.');
+ if(s.fit==='scaleDown')notes.push('scaleDown is contain that never enlarges a small picture.');
+ if(s.tint==='srcIn (solid)')notes.push('BlendMode.srcIn paints the whole shape in one colour, which is how a monochrome logo is recoloured.');
+ if(s.state==='error')notes.push('Without errorBuilder this box would just be empty.');
+ return {code:`Image.network(\n${L.map(x=>'  '+x).join('\n')}\n)`,hint:notes.join(' ')||'The picture is 300 x 150 and the box is '+s.bw+' x '+s.bh+'.'};
 }});
 
 def({cat:'Display',id:'icon-avatar',name:'Icon & CircleAvatar',tags:'icons material avatar profile picture initials',
@@ -5724,6 +5869,87 @@ setp('drawer',[
 'Permanent drawer|pattern|-|On a wide screen, put the drawer content in a Row next to the body instead of in Scaffold.drawer.',
 'NavigationRail|widget|-|The side rail for medium widths, between a bottom bar and a full drawer.'],
 'key','material/Drawer-class.html · material/NavigationDrawer-class.html');
+
+setp('form',[
+'## Form',
+'key|GlobalKey<FormState>|-|How you reach the form from code. Create it once as a field, not inside build.',
+'child|Widget|required|The tree holding the fields. They find the Form through the context.',
+'autovalidateMode|AutovalidateMode?|disabled|disabled, always, onUserInteraction or onUnfocus. onUserInteraction is the kind default: no red errors before the user has typed.',
+'onChanged|VoidCallback?|null|Called whenever any field in the form changes.',
+'canPop / onPopInvokedWithResult|bool? / callback|null|Warn before leaving a half-filled form.',
+'## FormState, through the key',
+'formKey.currentState!.validate()|bool|-|Runs every validator and shows the errors. Returns true when all pass.',
+'formKey.currentState!.save()|void|-|Calls onSaved on every field.',
+'formKey.currentState!.reset()|void|-|Puts every field back to its initial value and clears errors.',
+'## TextFormField, on top of everything TextField has',
+'validator|FormFieldValidator<String>?|null|Return an error message, or null when the value is fine.',
+'initialValue|String?|null|Starting text. Cannot be used together with a controller.',
+'onSaved|FormFieldSetter<String>?|null|Receives the final value when save() runs.',
+'autovalidateMode|AutovalidateMode?|form|Per-field override of the form setting.',
+'forceErrorText|String?|null|Show an error from outside the validator, such as one the server returned.',
+'errorBuilder|FormFieldErrorBuilder?|null|Build the error widget yourself instead of plain red text.',
+'## FormField, for your own controls',
+'builder|Function(FormFieldState<T>)|required|Build any widget and call state.didChange(value) when it changes. This is how you validate a dropdown, a date or a checkbox.',
+'DropdownButtonFormField|widget|-|A ready-made dropdown with validator and decoration.',
+'## Patterns worth knowing',
+'Focus order|pattern|-|textInputAction: TextInputAction.next plus onFieldSubmitted and FocusScope.of(context).nextFocus() to move between fields.',
+'Scroll to the first error|pattern|-|Give each field a GlobalKey and call Scrollable.ensureVisible on the first one that failed.',
+'Validation packages|package|-|form_validator and flutter_form_builder save writing the same validators over and over.'],
+'','widgets/Form-class.html · material/TextFormField-class.html');
+
+setp('segmented-button',[
+'## SegmentedButton',
+'segments|List<ButtonSegment<T>>|required|The choices. ButtonSegment(value:, label:, icon:, tooltip:, enabled:).',
+'selected|Set<T>|required|The chosen values, as a Set even for single choice: {Size.medium}.',
+'onSelectionChanged|void Function(Set<T>)?|null|Called with the new set. null disables the whole control.',
+'multiSelectionEnabled|bool|false|Allow more than one segment at a time.',
+'emptySelectionAllowed|bool|false|Allow nothing selected. With false the user cannot untick the last one.',
+'## Looks',
+'showSelectedIcon|bool|true|Show the tick on selected segments. Turn it off to keep narrow segments readable.',
+'selectedIcon|Widget?|check|Replace the tick.',
+'style|ButtonStyle?|theme|Same styling as a button. Use WidgetStateProperty to colour the selected state.',
+'direction|Axis|horizontal|Axis.vertical stacks the segments.',
+'expandedInsets|EdgeInsets?|null|Stretch the control to the parent width, with these insets.',
+'## Good to know',
+'Width|advice|-|Segments share the width evenly and do not scroll. Above about four short labels, use a dropdown or tabs.',
+'Compared with other controls|advice|-|SegmentedButton is for filtering or a view switch. For navigation use TabBar or NavigationBar, and for a form value use a Radio group.',
+'CupertinoSegmentedControl / CupertinoSlidingSegmentedControl|widget|-|The iOS versions.',
+'ToggleButtons|widget|-|The older Material 2 control, still useful for an icon-only row.'],
+'key','material/SegmentedButton-class.html');
+
+setp('date-time-picker',[
+'## showDatePicker',
+'context|BuildContext|required|Used to find the Navigator and Theme.',
+'firstDate / lastDate|DateTime|required|The range the user may pick from.',
+'initialDate|DateTime?|null|Which date starts selected. It must sit inside the range and pass selectableDayPredicate.',
+'currentDate|DateTime?|today|Which day is marked as today.',
+'selectableDayPredicate|SelectableDayPredicate?|null|Return false to grey out a day, for weekends or booked dates.',
+'initialEntryMode|DatePickerEntryMode|calendar|calendar, input, calendarOnly or inputOnly.',
+'initialDatePickerMode|DatePickerMode|day|Open on the day grid or the year list.',
+'## Text you should translate',
+'helpText / confirmText / cancelText|String?|localised|The title and the two buttons.',
+'fieldHintText / fieldLabelText|String?|localised|Hint and label of the typed-input field.',
+'errorFormatText / errorInvalidText|String?|localised|Messages for a badly formed date and an out-of-range date.',
+'locale|Locale?|ambient|Force a locale. Add localizationsDelegates and supportedLocales to MaterialApp or the picker stays English.',
+'## Dialog behaviour',
+'builder|TransitionBuilder?|null|Wrap the dialog, usually to apply a Theme or force a TextDirection.',
+'barrierDismissible / barrierColor / barrierLabel|bool / Color? / String?|true|The dim layer behind.',
+'useRootNavigator|bool|true|Push on the root navigator.',
+'routeSettings|RouteSettings?|null|Name the route for observers.',
+'keyboardType|TextInputType?|datetime|Keyboard for the input mode.',
+'onDatePickerModeChange|ValueChanged<DatePickerEntryMode>?|null|Told when the user switches between calendar and typing.',
+'calendarDelegate|CalendarDelegate|Gregorian|Support another calendar system, such as Hijri.',
+'## The other pickers',
+'showTimePicker|function|-|Takes initialTime: TimeOfDay, initialEntryMode: dial or input, and the same help and builder arguments. Wrap in a MediaQuery with alwaysUse24HourFormat to force 24-hour time.',
+'showDateRangePicker|function|-|Returns a DateTimeRange. Opens full screen on a phone.',
+'DatePickerDialog / TimePickerDialog|widget|-|The dialogs themselves, if you want to embed one.',
+'InputDatePickerFormField|widget|-|A typed date field for a Form, with validation.',
+'CalendarDatePicker|widget|-|The inline calendar with no dialog around it.',
+'## Results and formatting',
+'await showDatePicker(...)|Future<DateTime?>|-|Returns null when the user cancels. Always check for null.',
+'DateFormat (intl package)|class|-|Formatting for display. DateFormat.yMMMd(locale).format(date). Dart itself has no date formatting.',
+'showTimePicker result|TimeOfDay?|-|Combine it with a date yourself: DateTime(d.year, d.month, d.day, t.hour, t.minute).'],
+'anchorPoint · textDirection · switchToInputEntryModeIcon · switchToCalendarEntryModeIcon','material/showDatePicker.html');
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
