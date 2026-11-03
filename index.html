@@ -47,6 +47,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -551,6 +552,16 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .pgbar button:hover{background:var(--accent-soft);color:var(--accent)}
 .pgro{position:absolute;left:10px;right:10px;bottom:8px;display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font:12px var(--f-mono);color:var(--muted)}
 .pgro b{color:var(--fg)}
+.pt tr.pgh td{font:700 11px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--accent-soft);padding:7px 14px;border-top:1px solid var(--line)}
+.prare{border-top:1px solid var(--line);padding:11px 14px}
+.prare b{display:block;font:700 11px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.prare p{margin:0;font-size:13px;line-height:2}
+.prare code{font:12.5px var(--f-mono);color:var(--fg)}
+.prare span{color:var(--muted);margin:0 7px}
+.papi{border-top:1px solid var(--line);padding:11px 14px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.papi a{font:600 12.5px var(--f-body);color:var(--accent);text-decoration:none}
+.papi a:after{content:' \2197'}
+.papi a:hover{text-decoration:underline}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -584,8 +595,16 @@ const CINTRO={'Layout':'Place, size and align widgets.','Scrolling':'Lists, grid
 
 function propsHTML(d){
  const m=META[d.id];if(!m||!m.p)return '';
- const rows=m.p.map(r=>{const c=r.split('|');return `<tr><td>${esc(c[0])}</td><td>${esc(c[1])}</td><td>${esc(c[2])}</td><td>${esc(c.slice(3).join('|'))}</td></tr>`}).join('');
- return `<details class="props"><summary><span>Properties</span><span class="pn">${m.p.length}</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+ let n=0;
+ const rows=m.p.map(r=>{
+  if(r.slice(0,3)==='## ')return `<tr class="pgh"><td colspan="4">${esc(r.slice(3))}</td></tr>`;
+  n++;const c=r.split('|');
+  return `<tr><td>${esc(c[0])}</td><td>${esc(c[1])}</td><td>${esc(c[2])}</td><td>${esc(c.slice(3).join('|'))}</td></tr>`}).join('');
+ const rare=m.rare?(Array.isArray(m.rare)?m.rare:m.rare.split(/\s*·\s*/)).filter(Boolean):[];
+ n+=rare.length;
+ const rh=rare.length?`<div class="prare"><b>Rarely needed</b><p>${rare.map(x=>`<code>${esc(x)}</code>`).join('<span>·</span>')}</p></div>`:'';
+ const ah=m.api?`<div class="papi">${(Array.isArray(m.api)?m.api:[m.api]).map(u=>{const nm=u.split('/').pop().replace(/-class\.html$|\.html$/,'').replace(/-/g,'.');return `<a href="https://api.flutter.dev/flutter/${u}" target="_blank" rel="noopener">${esc(nm)} on api.flutter.dev</a>`}).join('')}</div>`:'';
+ return `<details class="props"><summary><span>Properties</span><span class="pn">${n}</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>${rows}</tbody></table></div>${rh}${ah}</details>`;
 }
 function relHTML(d){
  const m=META[d.id];if(!m||!m.r||!m.r.length)return '';
@@ -4693,6 +4712,481 @@ Object.assign(LINKS,{
 'class-modifiers':[['Class modifiers','https://dart.dev/language/class-modifiers'],['Class modifiers for API maintainers','https://dart.dev/language/class-modifiers-for-apis']]
 });
 {const m=PATH.find(p=>p.t==='Know Dart');if(m){m.s.push(['oop-basics','Write classes, constructors and private members.'],['oop-inherit','Use extends, implements, with and abstract.'],['class-modifiers','Use sealed and the other Dart 3 modifiers.'],['fp-core','Use pure functions, closures and copyWith.'],['fp-pipeline','Replace loops with where, map and fold.'])}}
+
+/* ================= v18: full grouped property reference (checked against api.flutter.dev) ================= */
+function setp(id,p,rare,api){const m=META[id];if(!m){META[id]={r:[]}}
+ META[id].p=p;if(rare)META[id].rare=rare;if(api)META[id].api=api}
+
+setp('container',[
+'## Everyday',
+'child|Widget?|null|The widget inside. With no child the Container fills the space it is given; with a child it shrinks to fit.',
+'padding|EdgeInsetsGeometry?|null|Space inside the decoration, around the child.',
+'margin|EdgeInsetsGeometry?|null|Space outside the decoration.',
+'color|Color?|null|Background colour. Cannot be used together with decoration: put the colour inside BoxDecoration instead.',
+'decoration|Decoration?|null|Painted behind the child. Usually BoxDecoration for colour, border, radius, gradient and shadow.',
+'width|double?|null|A width the Container passes down as a tight constraint.',
+'height|double?|null|A height the Container passes down as a tight constraint.',
+'alignment|AlignmentGeometry?|null|Where the child sits. Setting it makes the Container expand to fill the parent.',
+'## Size, transform and paint',
+'constraints|BoxConstraints?|null|Extra limits on the child, such as minWidth or maxHeight. width and height are merged into these.',
+'foregroundDecoration|Decoration?|null|Painted in front of the child, so it can cover it.',
+'transform|Matrix4?|null|Matrix applied when painting, after layout. It does not change the space the Container takes.',
+'transformAlignment|AlignmentGeometry?|null|The origin of transform, relative to the Container size.',
+'clipBehavior|Clip|Clip.none|How the child is clipped to the decoration. Needed for a rounded image; Clip.antiAlias gives smooth edges.'],
+'key · isAntiAlias','widgets/Container-class.html');
+
+setp('row-column',[
+'## Everyday',
+'children|List<Widget>|const []|The widgets in order. Row goes left to right, Column top to bottom.',
+'mainAxisAlignment|MainAxisAlignment|MainAxisAlignment.start|Position along the main axis: start, end, center, spaceBetween, spaceAround, spaceEvenly.',
+'crossAxisAlignment|CrossAxisAlignment|CrossAxisAlignment.center|Position across the main axis: start, end, center, stretch, baseline.',
+'mainAxisSize|MainAxisSize|MainAxisSize.max|max takes all the space it is offered, min shrinks to the children. Use min inside a scroll view or a dialog.',
+'spacing|double|0.0|Gap between adjacent children. Added in Flutter 3.27; on older versions use SizedBox or Padding.',
+'## Direction and baseline',
+'textDirection|TextDirection?|null|Left-to-right or right-to-left for a Row, and what start and end mean. Defaults to the ambient Directionality.',
+'verticalDirection|VerticalDirection|VerticalDirection.down|Order of children for a Column, and what start and end mean on that axis.',
+'textBaseline|TextBaseline?|null|Which baseline to line up. Required when crossAxisAlignment is baseline.',
+'## Flex only (Row and Column are Flex)',
+'direction|Axis|required|Flex takes the axis as an argument. Row is Flex(direction: horizontal), Column is vertical.',
+'clipBehavior|Clip|Clip.none|Clips children that overflow. The yellow and black overflow stripes still appear in debug mode.'],
+'key','widgets/Row-class.html');
+META['flex']&&setp('flex',META['row-column'].p,'key','widgets/Flex-class.html');
+
+setp('expanded',[
+'## Expanded',
+'child|Widget|required|The widget that is stretched. Expanded only works directly inside a Row, Column or Flex.',
+'flex|int|1|Share of the leftover space. Two children with flex 1 and 2 get one third and two thirds.',
+'## Flexible (Expanded is Flexible with fit: tight)',
+'fit|FlexFit|FlexFit.loose|tight forces the child to fill its share. loose lets the child be smaller than its share.',
+'child|Widget|required|The widget that may shrink or grow.',
+'## Related',
+'Spacer(flex:)|widget|flex: 1|Empty flexible space. Spacer() is Expanded with an empty box.'],
+'key','widgets/Expanded-class.html');
+
+setp('wrap',[
+'## Everyday',
+'children|List<Widget>|const []|The widgets laid out in runs. A new run starts when the line is full.',
+'spacing|double|0.0|Gap between children inside one run.',
+'runSpacing|double|0.0|Gap between runs, so between lines in a horizontal Wrap.',
+'direction|Axis|Axis.horizontal|The main axis. vertical makes columns that wrap into new columns.',
+'## Alignment',
+'alignment|WrapAlignment|WrapAlignment.start|How children sit inside a run: start, end, center, spaceBetween, spaceAround, spaceEvenly.',
+'runAlignment|WrapAlignment|WrapAlignment.start|How the whole set of runs sits on the cross axis.',
+'crossAxisAlignment|WrapCrossAlignment|WrapCrossAlignment.start|How children of different heights line up inside a run.',
+'## Direction and clipping',
+'textDirection|TextDirection?|null|Horizontal order of children and the meaning of start and end.',
+'verticalDirection|VerticalDirection|VerticalDirection.down|Vertical order of runs and the meaning of start and end.',
+'clipBehavior|Clip|Clip.none|Whether children that stick out are clipped.'],
+'key','widgets/Wrap-class.html');
+
+setp('scaffold',[
+'## Everyday',
+'body|Widget?|null|The main content. It sits under the app bar and above the bottom bar.',
+'appBar|PreferredSizeWidget?|null|The bar at the top, almost always an AppBar.',
+'floatingActionButton|Widget?|null|The round button floating above the body.',
+'bottomNavigationBar|Widget?|null|The bar at the bottom: NavigationBar, BottomNavigationBar or your own widget.',
+'drawer|Widget?|null|Panel that slides in from the start edge. Open it with Scaffold.of(context).openDrawer().',
+'backgroundColor|Color?|null|Colour behind everything. Defaults to the theme scaffold colour.',
+'## Keyboard and layout',
+'resizeToAvoidBottomInset|bool?|true|Whether the body shrinks when the keyboard appears. Set false when you handle the inset yourself.',
+'extendBody|bool|false|Lets the body paint under the bottom bar, for a see-through navigation bar.',
+'extendBodyBehindAppBar|bool|false|Lets the body paint behind the app bar, for a transparent bar over an image.',
+'primary|bool|true|Whether the app bar makes room for the status bar.',
+'## Sheets, footers and the end drawer',
+'bottomSheet|Widget?|null|A sheet that stays on screen above the bottom bar. For a temporary one use showModalBottomSheet.',
+'persistentFooterButtons|List<Widget>?|null|Buttons pinned above the bottom bar, such as Cancel and Save.',
+'persistentFooterAlignment|AlignmentDirectional|centerEnd|How those footer buttons are aligned.',
+'endDrawer|Widget?|null|Panel that slides in from the end edge, often a filter panel.',
+'## Drawer behaviour and callbacks',
+'onDrawerChanged|DrawerCallback?|null|Called with true when the drawer opens and false when it closes.',
+'onEndDrawerChanged|DrawerCallback?|null|The same for the end drawer.',
+'drawerEnableOpenDragGesture|bool|true|Whether an edge swipe opens the drawer. Set false when the body has its own horizontal gesture.',
+'endDrawerEnableOpenDragGesture|bool|true|The same for the end drawer.',
+'drawerEdgeDragWidth|double?|null|How wide the edge area is that starts the drawer swipe.',
+'drawerScrimColor|Color?|null|Colour of the dim layer over the body while a drawer is open.',
+'drawerBarrierDismissible|bool|true|Whether tapping the dim layer closes the drawer.',
+'## Floating action button placement',
+'floatingActionButtonLocation|FloatingActionButtonLocation?|endFloat|Where the button sits, for example centerDocked with a BottomAppBar.',
+'floatingActionButtonAnimator|FloatingActionButtonAnimator?|null|How the button animates when the location changes.',
+'## State',
+'restorationId|String?|null|Id used to save and restore the scaffold state, such as which drawer was open.'],
+'key · drawerDragStartBehavior · persistentFooterDecoration · bottomSheetScrimBuilder','material/Scaffold-class.html');
+
+setp('stack-positioned',[
+'## Stack',
+'children|List<Widget>|const []|Painted in order, so the last child is on top.',
+'alignment|AlignmentGeometry|AlignmentDirectional.topStart|Where children that are not wrapped in Positioned sit.',
+'fit|StackFit|StackFit.loose|loose lets each child be its own size. expand forces them to fill the stack. passthrough passes the parent constraints down.',
+'clipBehavior|Clip|Clip.hardEdge|Whether children that stick out are cut off. Use Clip.none to let a badge hang outside.',
+'textDirection|TextDirection?|null|Resolves start and end in alignment.',
+'## Positioned (only directly inside a Stack)',
+'child|Widget|required|The widget being placed.',
+'left / top / right / bottom|double?|null|Distance from that edge of the stack. Give left and right (or top and bottom) to stretch the child.',
+'width / height|double?|null|A fixed size. You may set at most two of left, right and width on one axis.',
+'## Positioned variants',
+'Positioned.fill|constructor|all edges 0|Stretches the child over the whole stack. The usual way to add an overlay.',
+'Positioned.directional|constructor|-|Uses start and end instead of left and right, so it follows the text direction. textDirection is required.',
+'Positioned.fromRect / fromRelativeRect|constructor|-|Places the child from a Rect or RelativeRect, handy when animating with RectTween.',
+'## Related',
+'AnimatedPositioned|widget|-|Same arguments plus duration and curve, and it animates between positions.'],
+'key','widgets/Stack-class.html · widgets/Positioned-class.html');
+
+setp('sized-box',[
+'## SizedBox',
+'width|double?|null|Forces exactly this width. null leaves the width to the parent.',
+'height|double?|null|Forces exactly this height.',
+'child|Widget?|null|The widget inside. With no child, SizedBox is just empty space.',
+'## SizedBox shorthands',
+'SizedBox.shrink()|constructor|0 x 0|As small as possible. Use it instead of Container() for an empty slot.',
+'SizedBox.expand()|constructor|infinite|As big as the parent allows.',
+'SizedBox.square(dimension:)|constructor|-|Same width and height.',
+'SizedBox.fromSize(size:)|constructor|-|Takes a Size object, useful with a measured size.',
+'## ConstrainedBox',
+'constraints|BoxConstraints|required|Extra limits, written as BoxConstraints(minWidth:, maxWidth:, minHeight:, maxHeight:).',
+'child|Widget?|null|The widget being limited.',
+'## BoxConstraints shorthands',
+'BoxConstraints.tight(Size)|constructor|-|One exact size, min equals max.',
+'BoxConstraints.loose(Size)|constructor|-|Any size up to that maximum.',
+'BoxConstraints.expand()|constructor|infinite|As large as allowed on both axes.',
+'BoxConstraints.tightFor(width:, height:)|constructor|-|Exact on the axes you give, free on the others.'],
+'key','widgets/SizedBox-class.html · widgets/ConstrainedBox-class.html');
+
+setp('align-center',[
+'## Align',
+'alignment|AlignmentGeometry|Alignment.center|Where the child sits. Alignment(-1,-1) is the top left, Alignment(1,1) the bottom right. AlignmentDirectional follows the text direction.',
+'child|Widget?|null|The widget being placed.',
+'widthFactor|double?|null|Makes Align as wide as the child width times this factor, instead of filling the parent. 1.0 means shrink to the child.',
+'heightFactor|double?|null|The same for height.',
+'## Center',
+'child|Widget?|null|Center is Align with alignment: Alignment.center and nothing else.',
+'widthFactor / heightFactor|double?|null|Same meaning as on Align.',
+'## Good to know',
+'Align inside a Stack|behaviour|-|Works, but Positioned gives exact edges and may be clearer.',
+'Align with no size factors|behaviour|fills parent|Align grows to the space it is offered, so the child can move inside it.'],
+'key','widgets/Align-class.html');
+
+setp('padding',[
+'## Padding',
+'padding|EdgeInsetsGeometry|required|The space to add. EdgeInsets.all(16), .symmetric(horizontal:, vertical:), .only(left:, top:, right:, bottom:), .fromLTRB(...).',
+'child|Widget?|null|The widget inside the padding.',
+'## EdgeInsetsDirectional',
+'EdgeInsetsDirectional.only(start:, end:)|class|-|Follows the text direction, so start is the left edge in English and the right edge in Arabic. Prefer it in apps you will translate.',
+'## Good to know',
+'Padding vs Container(padding:)|choice|-|Container wraps a Padding internally. Use Padding on its own when you need nothing else: it is cheaper and clearer.',
+'Negative padding|not supported|-|Use Transform.translate or a negative margin on a Container instead.'],
+'key','widgets/Padding-class.html');
+
+setp('list-view',[
+'## Everyday',
+'children|List<Widget>|const []|Only on the default ListView. Every child is built at once, so keep the list short.',
+'itemBuilder|NullableIndexedWidgetBuilder|required|ListView.builder: builds each row on demand. Returning null ends the list.',
+'itemCount|int?|null|How many items. null means endless, so always set it for real data.',
+'padding|EdgeInsetsGeometry?|null|Space around the whole list. Prefer it over wrapping the list in a Padding.',
+'scrollDirection|Axis|Axis.vertical|Axis.horizontal makes a side-scrolling list. Give it a fixed height.',
+'controller|ScrollController?|null|Read the offset, scroll by code (animateTo, jumpTo) or detect reaching the end.',
+'physics|ScrollPhysics?|platform|NeverScrollableScrollPhysics blocks scrolling, BouncingScrollPhysics and ClampingScrollPhysics force a platform feel, AlwaysScrollableScrollPhysics allows a pull-to-refresh on short lists.',
+'shrinkWrap|bool|false|true makes the list as tall as its content, which builds every child. Needed inside a Column, but slivers are the better fix.',
+'reverse|bool|false|Starts at the bottom and grows upward. The usual choice for a chat.',
+'## Separators and size',
+'separatorBuilder|IndexedWidgetBuilder|required|ListView.separated: builds what goes between two items, usually a Divider.',
+'itemExtent|double?|null|Tell the list every row has this height. It then skips measuring, which makes long lists much faster.',
+'itemExtentBuilder|ItemExtentBuilder?|null|The same when rows have different but known heights.',
+'prototypeItem|Widget?|null|A sample row whose height is used for all rows. Easier than itemExtent when the height comes from the theme.',
+'## Performance',
+'scrollCacheExtent|ScrollCacheExtent?|null|How much is built just outside the screen. Replaces the deprecated cacheExtent.',
+'addAutomaticKeepAlives|bool|true|Lets rows keep their state when scrolled away. Set false for very long lists of simple rows.',
+'addRepaintBoundaries|bool|true|Wraps each row in a repaint boundary. Usually leave it on.',
+'findChildIndexCallback|ChildIndexGetter?|null|Maps a row key to its index so Flutter can reuse rows when the data is reordered.',
+'## Constructors',
+'ListView(children:)|constructor|-|Fixed, short lists only.',
+'ListView.builder(itemCount:, itemBuilder:)|constructor|-|The default choice: rows are built lazily.',
+'ListView.separated(itemCount:, itemBuilder:, separatorBuilder:)|constructor|-|Builder plus dividers.',
+'ListView.custom(childrenDelegate:)|constructor|-|Full control through a SliverChildDelegate.'],
+'key · primary · semanticChildCount · addSemanticIndexes · dragStartBehavior · keyboardDismissBehavior · restorationId · clipBehavior · hitTestBehavior · cacheExtent (deprecated)','widgets/ListView-class.html');
+
+setp('grid-view',[
+'## Everyday',
+'gridDelegate|SliverGridDelegate|required|Decides the tile layout. Use SliverGridDelegateWithFixedCrossAxisCount or ...WithMaxCrossAxisExtent.',
+'itemBuilder / children|builder or List<Widget>|-|GridView.builder builds tiles on demand; GridView(children:) builds them all.',
+'itemCount|int?|null|Number of tiles for the builder.',
+'padding|EdgeInsetsGeometry?|null|Space around the grid.',
+'controller|ScrollController?|null|Scroll position control.',
+'physics|ScrollPhysics?|platform|Same options as ListView.',
+'shrinkWrap|bool|false|Size the grid to its content. Avoid it on long grids.',
+'## Delegate settings (inside gridDelegate)',
+'crossAxisCount|int|required|FixedCrossAxisCount: how many tiles per row.',
+'maxCrossAxisExtent|double|required|MaxCrossAxisExtent: the widest a tile may be. Flutter fits as many as it can, which adapts to tablets.',
+'childAspectRatio|double|1.0|Tile width divided by height. Lower it when text overflows the tile.',
+'mainAxisSpacing / crossAxisSpacing|double|0.0|Gaps between rows and between columns.',
+'mainAxisExtent|double?|null|A fixed tile height. It wins over childAspectRatio and is easier to reason about.',
+'## Constructors',
+'GridView.builder|constructor|-|Lazy, with any delegate. The usual choice.',
+'GridView.count(crossAxisCount:)|constructor|-|Shorthand for a fixed number of columns, children built eagerly.',
+'GridView.extent(maxCrossAxisExtent:)|constructor|-|Shorthand for responsive tiles, children built eagerly.',
+'GridView.custom|constructor|-|Own delegate for children and layout.',
+'## Performance',
+'scrollCacheExtent|ScrollCacheExtent?|null|Area built outside the screen. Replaces the deprecated cacheExtent.',
+'addAutomaticKeepAlives / addRepaintBoundaries|bool|true|Same meaning as on ListView.',
+'findChildIndexCallback|ChildIndexGetter?|null|Reuse tiles when items move.'],
+'key · primary · reverse · scrollDirection · semanticChildCount · addSemanticIndexes · dragStartBehavior · keyboardDismissBehavior · restorationId · clipBehavior · hitTestBehavior','widgets/GridView-class.html');
+
+setp('scroll-view',[
+'## Everyday',
+'child|Widget?|null|The one widget that scrolls, usually a Column.',
+'scrollDirection|Axis|Axis.vertical|Axis.horizontal for a sideways scroll.',
+'padding|EdgeInsetsGeometry?|null|Space around the child.',
+'controller|ScrollController?|null|Read or set the scroll offset.',
+'physics|ScrollPhysics?|platform|AlwaysScrollableScrollPhysics makes it scrollable even when the content fits, which pull-to-refresh needs.',
+'reverse|bool|false|Start from the bottom.',
+'## Layout notes',
+'Column inside|pattern|-|Give the Column mainAxisSize: MainAxisSize.min. Expanded does not work inside a scroll view because the height is unbounded.',
+'Full height with IntrinsicHeight|pattern|-|LayoutBuilder plus ConstrainedBox(minHeight: viewport) is the usual way to push a footer to the bottom.',
+'When not to use it|advice|-|For a long or repeating list use ListView.builder: SingleChildScrollView builds everything at once.',
+'## Other',
+'clipBehavior|Clip|Clip.hardEdge|Whether content outside is cut off.',
+'keyboardDismissBehavior|ScrollViewKeyboardDismissBehavior?|manual|onDrag hides the keyboard as soon as the user scrolls.',
+'restorationId|String?|null|Save and restore the scroll offset.'],
+'key · primary · dragStartBehavior · hitTestBehavior','widgets/SingleChildScrollView-class.html');
+
+setp('page-view',[
+'## Everyday',
+'controller|PageController?|null|Controls which page is shown. Create it in initState and dispose it.',
+'children / itemBuilder|List<Widget> or builder|-|PageView(children:) builds all pages; PageView.builder(itemCount:, itemBuilder:) builds them on demand.',
+'onPageChanged|ValueChanged<int>?|null|Fires when the centred page changes. Use it to update dots or a title.',
+'scrollDirection|Axis|Axis.horizontal|Axis.vertical gives a vertical pager, like a stories feed.',
+'physics|ScrollPhysics?|platform|NeverScrollableScrollPhysics turns off swiping so only your buttons change pages.',
+'pageSnapping|bool|true|false lets the view stop between pages.',
+'## PageController',
+'initialPage|int|0|The page shown first.',
+'viewportFraction|double|1.0|How much of the view one page fills. 0.85 lets the neighbours peek in.',
+'keepPage|bool|true|Remember the page when the widget is rebuilt.',
+'jumpToPage(int)|void|-|Change page at once, with no animation.',
+'animateToPage(int, duration:, curve:)|Future<void>|-|Glide to a page. Await it to run code when the animation ends.',
+'nextPage / previousPage(duration:, curve:)|Future<void>|-|Step one page.',
+'page|double?|null|Current position as a decimal, such as 1.4 mid-swipe. Null before the first layout.',
+'hasClients|bool|false|True once a PageView is attached. Check it before calling page or jumpToPage.',
+'## Layout and behaviour',
+'padEnds|bool|true|Adds space before the first and after the last page when viewportFraction is below 1.',
+'reverse|bool|false|Reverses the order, so page 0 sits at the end.',
+'allowImplicitScrolling|bool|false|Keeps the neighbouring pages built, which helps screen readers and makes swipes feel instant.',
+'clipBehavior|Clip|Clip.hardEdge|Whether pages that peek in are cut off.',
+'scrollBehavior|ScrollBehavior?|null|Override scrollbars, overscroll glow and which pointers can drag.'],
+'key · dragStartBehavior · hitTestBehavior · restorationId · scrollCacheExtent · findChildIndexCallback','widgets/PageView-class.html');
+
+setp('scrollbar',[
+'## Everyday',
+'child|Widget|required|The scrollable the bar belongs to, usually a ListView or SingleChildScrollView.',
+'controller|ScrollController?|null|Required when the child is not the primary scroll view, and whenever thumbVisibility is true. The same controller must be on the child.',
+'thumbVisibility|bool?|theme|true keeps the thumb on screen instead of fading out. Common on desktop and web.',
+'trackVisibility|bool?|theme|Shows the track behind the thumb.',
+'interactive|bool?|platform|Whether the user can drag the thumb and tap the track.',
+'## Appearance',
+'thickness|double?|theme|How thick the bar is.',
+'radius|Radius?|theme|Rounded corners of the thumb.',
+'scrollbarOrientation|ScrollbarOrientation?|null|Force the bar to a side: left, right, top or bottom.',
+'## Advanced',
+'notificationPredicate|ScrollNotificationPredicate?|depth 0|Which scroll notifications this bar listens to. Change it for a nested scroll view.',
+'ScrollbarTheme|ThemeData|-|Set thumbColor, thickness, radius and visibility once for the whole app.',
+'RawScrollbar|widget|-|The platform-neutral base class. Use it when you want no Material styling.',
+'CupertinoScrollbar|widget|-|The iOS look, used automatically by Scrollbar on iOS and macOS.'],
+'key','material/Scrollbar-class.html');
+
+setp('text',[
+'## Everyday',
+'data|String|required|The string to show. Text.rich takes a textSpan instead.',
+'style|TextStyle?|null|Colour, size, weight and family. It is merged with the nearest DefaultTextStyle, so you only set what differs.',
+'maxLines|int?|null|Cut off after this many lines. Pair it with overflow.',
+'overflow|TextOverflow?|clip|What happens to text that does not fit: clip, fade, ellipsis or visible.',
+'textAlign|TextAlign?|start|left, right, center, justify, start or end.',
+'softWrap|bool?|true|false keeps everything on one line, so long text overflows instead of wrapping.',
+'## TextStyle, the part you set most',
+'fontSize / fontWeight / fontStyle|double? / FontWeight? / FontStyle?|theme|Size in logical pixels, w100 to w900 or FontWeight.bold, and italic.',
+'color / backgroundColor|Color?|theme|Text colour and the colour behind it.',
+'height|double?|null|Line height as a multiple of fontSize. 1.4 is a common body value.',
+'letterSpacing / wordSpacing|double?|null|Extra space between letters and between words. Negative values tighten.',
+'fontFamily / fontFamilyFallback / package|String? / List<String>? / String?|null|The font to use, the fonts to try next, and the package a font comes from.',
+'decoration / decorationColor / decorationStyle / decorationThickness|TextDecoration? and friends|null|underline, lineThrough or overline, and how it is drawn.',
+'shadows|List<Shadow>?|null|Shadows under the glyphs.',
+'foreground / background|Paint?|null|Paint the text with a gradient or an outline. Cannot be used together with color or backgroundColor.',
+'fontFeatures / fontVariations|List<FontFeature>? / List<FontVariation>?|null|OpenType features such as tabular numbers, and variable-font axes such as weight.',
+'inherit|bool|true|false ignores the surrounding DefaultTextStyle, so every field must be set.',
+'## Accessibility and measurement',
+'semanticsLabel|String?|null|What a screen reader says instead of the visible text. Useful for "4.5" read as "four and a half stars".',
+'textScaler|TextScaler?|system|How the user font-size setting is applied. Replaces the deprecated textScaleFactor. Do not disable it without a reason.',
+'textWidthBasis|TextWidthBasis?|parent|Whether the width is the parent width or the longest line.',
+'strutStyle|StrutStyle?|null|Forces a minimum line height, so rows stay the same height whatever the glyphs are.',
+'textHeightBehavior|TextHeightBehavior?|null|Whether height applies to the first ascent and last descent.',
+'## Related widgets',
+'SelectableText|widget|-|Same look, but the user can select and copy.',
+'RichText / Text.rich|widget|-|Several styles in one paragraph.',
+'DefaultTextStyle|widget|-|Sets the style for every Text below it in the tree.',
+'AutoSizeText (package)|widget|-|Shrinks the font until the text fits.'],
+'key · locale · textDirection · selectionColor · semanticsIdentifier · textScaleFactor (deprecated)','widgets/Text-class.html · painting/TextStyle-class.html');
+
+setp('text-rich',[
+'## Text.rich and RichText',
+'text / textSpan|InlineSpan|required|The span tree. RichText takes text:, Text.rich takes the span as its first argument.',
+'textAlign|TextAlign|start|Horizontal alignment of the paragraph.',
+'maxLines|int?|null|Line limit before overflow applies.',
+'overflow|TextOverflow|clip|clip, fade, ellipsis or visible.',
+'softWrap|bool|true|Whether the paragraph wraps.',
+'textScaler|TextScaler|noScaling on RichText|RichText does not scale by default, which is a common accessibility bug. Text.rich follows MediaQuery. Prefer Text.rich.',
+'## TextSpan, the usual child',
+'text|String?|null|The literal characters of this span.',
+'style|TextStyle?|null|Style for this span. It is merged with the parent span style.',
+'children|List<InlineSpan>?|null|Nested spans, each able to change the style again.',
+'recognizer|GestureRecognizer?|null|Makes one span tappable, usually a TapGestureRecognizer for a link. Dispose it in dispose().',
+'semanticsLabel|String?|null|What a screen reader reads for this span.',
+'mouseCursor / onEnter / onExit|MouseCursor? and callbacks|null|Hover behaviour on web and desktop.',
+'## WidgetSpan, for inline widgets',
+'child|Widget|required|A widget placed inside the text, such as an icon or a chip.',
+'alignment|PlaceholderAlignment|bottom|How the widget lines up with the text: baseline, middle, top and others.',
+'baseline|TextBaseline?|null|Required when alignment is baseline.',
+'## Measurement and layout',
+'strutStyle|StrutStyle?|null|Minimum line metrics, so mixed font sizes keep an even rhythm.',
+'textWidthBasis|TextWidthBasis|parent|Whether width is the parent width or the longest line.',
+'textHeightBehavior|TextHeightBehavior?|null|Controls the space above the first line and below the last.',
+'locale / textDirection|Locale? / TextDirection?|ambient|Font choice per locale, and reading direction.',
+'## Selection',
+'selectionRegistrar / selectionColor|SelectionRegistrar? / Color?|null|Set by SelectionArea. Wrap a screen in SelectionArea to make rich text selectable.'],
+'key · textScaleFactor (deprecated)','widgets/RichText-class.html · painting/TextSpan-class.html');
+
+setp('image',[
+'## Everyday',
+'image|ImageProvider|required|The source. The named constructors build it for you.',
+'fit|BoxFit?|null|How the image fills its box: cover, contain, fill, fitWidth, fitHeight, scaleDown or none.',
+'width / height|double?|null|The box the image is painted into.',
+'alignment|AlignmentGeometry|Alignment.center|Which part of the image stays visible when it is cropped by cover.',
+'errorBuilder|ImageErrorWidgetBuilder?|null|What to show when loading fails. Always set it for network images.',
+'loadingBuilder|ImageLoadingBuilder?|null|What to show while loading, with access to the number of bytes received.',
+'## Performance',
+'cacheWidth / cacheHeight|int?|null|Decode the image at this pixel size. The single biggest memory win when showing big photos in small boxes.',
+'filterQuality|FilterQuality|medium|Scaling quality. low is cheaper, none gives crisp pixel art.',
+'gaplessPlayback|bool|false|Keep the old image on screen while a new one loads, instead of flashing empty.',
+'isAntiAlias|bool|false|Smooths the edges when the image is rotated or scaled.',
+'## Colour and repetition',
+'color + colorBlendMode|Color? + BlendMode?|null|Tint the image. With BlendMode.srcIn it turns a shape into a solid colour, which is how you colour a monochrome logo.',
+'opacity|Animation<double>?|null|Animated transparency without rebuilding the widget.',
+'repeat|ImageRepeat|noRepeat|Tile the image: repeat, repeatX or repeatY.',
+'centerSlice|Rect?|null|Nine-patch stretching, so corners stay sharp while the middle stretches.',
+'matchTextDirection|bool|false|Flip the image in right-to-left locales.',
+'## Accessibility',
+'semanticLabel|String?|null|What a screen reader says. Give every meaningful image one.',
+'excludeFromSemantics|bool|false|true for purely decorative images.',
+'## Constructors',
+'Image.asset(name, package:, scale:)|constructor|-|From the assets listed in pubspec.yaml. Flutter picks 2.0x and 3.0x folders automatically.',
+'Image.network(src, headers:, scale:)|constructor|-|From a URL. No disk cache: use cached_network_image in production.',
+'Image.file(file)|constructor|-|From a File on the device.',
+'Image.memory(bytes)|constructor|-|From bytes you already hold.',
+'## BoxFit values',
+'cover|BoxFit|-|Fills the box and crops the overflow. The usual choice for photos.',
+'contain|BoxFit|-|Fits the whole image inside, leaving empty space.',
+'fill|BoxFit|-|Stretches to the box and distorts the image.',
+'fitWidth / fitHeight|BoxFit|-|Matches one axis and lets the other overflow or fall short.',
+'scaleDown|BoxFit|-|Like contain, but never enlarges a small image.'],
+'key · frameBuilder · webHtmlElementStrategy','widgets/Image-class.html');
+
+setp('icon-avatar',[
+'## Icon',
+'icon|IconData?|required|The glyph, usually Icons.something. Set uses-material-design: true in pubspec.yaml.',
+'size|double?|24.0 from IconTheme|Width and height in logical pixels.',
+'color|Color?|IconTheme|Icon colour. Inside a button it usually comes from the button style.',
+'semanticLabel|String?|null|What a screen reader says. Required for an icon-only control with no tooltip.',
+'applyTextScaling|bool?|false|Whether the icon grows with the user font-size setting. Turn it on for icons sitting next to text.',
+'shadows|List<Shadow>?|null|Shadows under the glyph, for an icon over a photo.',
+'## Variable-font icons (Material Symbols)',
+'fill|double?|0.0|0 is outlined, 1 is filled. Animate it for a filled-on-select effect.',
+'weight|double?|400|Stroke thickness, 100 to 700.',
+'grade / opticalSize|double?|0 / 48|Fine stroke adjustment, and optical sizing for small or large glyphs.',
+'## CircleAvatar',
+'child|Widget?|null|What is inside, usually a Text with initials or an Icon.',
+'backgroundImage|ImageProvider?|null|Picture filling the circle, cropped to a circle.',
+'foregroundImage|ImageProvider?|null|Tried first; if it fails, backgroundImage shows. Handy as a placeholder pattern.',
+'onBackgroundImageError / onForegroundImageError|ImageErrorListener?|null|Called when the picture fails to load. Must be null when that image is null.',
+'backgroundColor|Color?|theme|Circle colour behind the child.',
+'foregroundColor|Color?|theme|Default text and icon colour inside.',
+'radius|double?|20.0|Half the diameter, so radius 20 is a 40 pixel circle.',
+'minRadius / maxRadius|double?|null|Let the circle size itself between limits. Do not combine with radius.',
+'## Related',
+'IconButton|widget|-|A tappable icon with ripple, tooltip and a 48 pixel tap target.',
+'ImageIcon|widget|-|An icon from an image asset instead of a font.',
+'IconTheme|widget|-|Sets size and colour for every Icon below it.'],
+'key · textDirection · blendMode · fontWeight','widgets/Icon-class.html · material/CircleAvatar-class.html');
+
+setp('chip',[
+'## Everyday',
+'label|Widget|required|The main content, usually a Text.',
+'avatar|Widget?|null|Small leading widget: a CircleAvatar, an Icon or a check mark.',
+'onDeleted|VoidCallback?|null|Shows the delete icon and is called when it is tapped.',
+'deleteIcon|Widget?|close icon|Replace the default delete icon.',
+'backgroundColor|Color?|theme|Fill colour when the chip is unselected and enabled.',
+'padding / labelPadding|EdgeInsetsGeometry?|theme|Space around the whole chip, and around the label alone.',
+'## Shape and elevation',
+'shape|OutlinedBorder?|StadiumBorder|The outline shape. RoundedRectangleBorder gives square-ish chips.',
+'side|BorderSide?|theme|Outline colour and width.',
+'elevation / shadowColor / surfaceTintColor|double? / Color? / Color?|theme|Shadow depth and colours.',
+'color|WidgetStateProperty<Color?>?|null|Fill colour per state (hovered, pressed, disabled, selected). It wins over backgroundColor.',
+'## Text and density',
+'labelStyle|TextStyle?|theme|Style of the label text.',
+'visualDensity|VisualDensity?|theme|How tight the chip is. VisualDensity.compact suits dense lists.',
+'materialTapTargetSize|MaterialTapTargetSize?|padded|padded keeps the 48 pixel target; shrinkWrap removes the extra space.',
+'iconTheme|IconThemeData?|theme|Size and colour for icons inside the chip.',
+'## The chip family',
+'ActionChip(onPressed:)|widget|-|A chip that acts like a button.',
+'FilterChip(selected:, onSelected:)|widget|-|Toggles on and off, with a check mark.',
+'ChoiceChip(selected:, onSelected:)|widget|-|One choice out of a set, like a radio button.',
+'InputChip(onPressed:, onDeleted:, selected:)|widget|-|Represents a piece of input, such as a recipient. Tappable and deletable.',
+'RawChip|widget|-|The base class with every option, when the others do not fit.',
+'## Focus and pointer',
+'focusNode / autofocus|FocusNode? / bool|null / false|Keyboard focus control.',
+'mouseCursor|MouseCursor?|null|Pointer shape on hover.',
+'avatarBoxConstraints / deleteIconBoxConstraints|BoxConstraints?|null|Size limits for the avatar and the delete icon.',
+'chipAnimationStyle|ChipAnimationStyle?|null|Override the enable, select and avatar animation durations.'],
+'key · clipBehavior · deleteIconColor · deleteButtonTooltipMessage','material/Chip-class.html');
+
+setp('buttons',[
+'## Every button takes these',
+'onPressed|VoidCallback?|required|What happens on tap. Passing null disables the button and greys it out: that is how you show a disabled state.',
+'child / label|Widget|required|The content, usually a Text. The .icon constructors take icon: and label:.',
+'style|ButtonStyle?|theme|Everything about the look. Build it with ElevatedButton.styleFrom(...) rather than by hand.',
+'onLongPress|VoidCallback?|null|Long press action. A button with onPressed null but onLongPress set is still enabled.',
+'autofocus|bool|false|Take focus when the screen opens.',
+'focusNode|FocusNode?|null|Control or observe focus, for keyboard and remote navigation.',
+'onHover / onFocusChange|ValueChanged<bool>?|null|Called when the pointer enters or leaves, and when focus changes. Useful on web and desktop.',
+'## styleFrom, the easy way to style',
+'backgroundColor / foregroundColor|Color?|theme|Fill and text or icon colour when enabled.',
+'disabledBackgroundColor / disabledForegroundColor|Color?|theme|The same colours when onPressed is null.',
+'padding|EdgeInsetsGeometry?|theme|Space inside the button.',
+'minimumSize / fixedSize / maximumSize|Size?|theme|Size limits. Size.fromHeight(48) is the usual way to get a full-width button.',
+'shape|OutlinedBorder?|theme|RoundedRectangleBorder(borderRadius: ...) or StadiumBorder() for a pill.',
+'side|BorderSide?|theme|Outline colour and width, mostly for OutlinedButton.',
+'elevation / shadowColor|double? / Color?|theme|Shadow depth and colour.',
+'textStyle|TextStyle?|theme|Font of the label.',
+'iconColor / iconSize / iconAlignment|Color? / double? / IconAlignment?|theme|The icon in an .icon button. iconAlignment: IconAlignment.end puts it after the label.',
+'tapTargetSize|MaterialTapTargetSize?|padded|padded keeps the 48 pixel touch target even for a small button. Keep it for accessibility.',
+'visualDensity|VisualDensity?|theme|Makes the button tighter or looser, for dense desktop layouts.',
+'enableFeedback|bool?|true|Whether a tap makes a click sound and a haptic tick.',
+'splashFactory|InteractiveInkFeatureFactory?|theme|NoSplash.splashFactory removes the ripple.',
+'## ButtonStyle with WidgetStateProperty',
+'WidgetStateProperty.resolveWith|pattern|-|Give a different value per state: pressed, hovered, focused, disabled, selected. This is how one button gets a pressed colour.',
+'overlayColor|WidgetStateProperty<Color?>?|theme|The ripple and hover tint.',
+'backgroundBuilder / foregroundBuilder|ButtonLayerBuilder?|null|Wrap the button content, for example to paint a gradient behind the label.',
+'animationDuration|Duration?|theme|How long shape and elevation changes take.',
+'## The button types',
+'ElevatedButton|widget|-|Raised, with a shadow. For the main action on a surface.',
+'FilledButton / FilledButton.tonal|widget|-|Solid fill, no shadow. The Material 3 primary action.',
+'OutlinedButton|widget|-|Outline only, for a secondary action.',
+'TextButton|widget|-|No fill or outline, for low-emphasis actions and dialogs.',
+'IconButton|widget|-|Icon only. Always give it a tooltip.',
+'FloatingActionButton|widget|-|The round button on a Scaffold.',
+'## IconButton extras',
+'icon|Widget|required|The icon widget, usually Icon(Icons.x).',
+'tooltip|String?|null|Long-press or hover text. Also read by screen readers, so an icon-only button needs it.',
+'isSelected / selectedIcon|bool? / Widget?|null|Turns it into a toggle that swaps the icon when selected.',
+'constraints|BoxConstraints?|48x48|Size limits. Shrink it only when the target stays reachable.',
+'iconSize|double?|24|Size of the glyph.',
+'IconButton.filled / .filledTonal / .outlined|constructor|-|Material 3 variants with a background or an outline.'],
+'key · clipBehavior · statesController · mouseCursor · alignment · splashRadius (IconButton) · focusColor · hoverColor · highlightColor · splashColor · disabledColor · surfaceTintColor','material/ButtonStyle-class.html · material/ElevatedButton-class.html · material/IconButton-class.html');
 
 /* ================= BOOTSTRAP ================= */
 W.sort((a,b)=>(b.first?1:0)-(a.first?1:0));
