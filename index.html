@@ -45,6 +45,7 @@
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
 <title>Flutter Atlas</title>
+<title>Flutter Atlas</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>[hidden]{display:none!important}
@@ -538,6 +539,17 @@ body,#bar{transition:padding-left .32s cubic-bezier(.22,.8,.2,1)}
 .tf.pf.nb input:focus,.tf.pf.nb textarea:focus{padding-left:42px}
 .tf.dis{opacity:.5}
 .tf.err.u input,.tf.err.fi input{border-color:var(--danger)}
+.pgw{position:absolute;left:0;right:0;top:12px;height:200px}
+.pgw .pg{top:0;height:100%}
+.pg.v{flex-direction:column;overflow-x:hidden;overflow-y:auto;left:30px;right:30px}
+.pg.v .pp{padding:6px 0}
+.dots.v{left:auto;right:10px;top:0;bottom:0;flex-direction:column;align-items:center}
+.dot.on{background:var(--accent);width:8px}
+.pgbar{position:absolute;left:8px;right:8px;bottom:36px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.pgbar button{font:600 12px var(--f-mono);padding:6px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.pgbar button:hover{background:var(--accent-soft);color:var(--accent)}
+.pgro{position:absolute;left:10px;right:10px;bottom:8px;display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font:12px var(--f-mono);color:var(--muted)}
+.pgro b{color:var(--fg)}
 </style>
 
 <div class="shell"><nav id="nav" aria-label="Widgets"></nav><main id="main"></main></div>
@@ -880,21 +892,40 @@ render(s,st,g){
  return {code:s.sc?`SingleChildScrollView(\n  child: Column(\n    children: [/* ${n} items */],\n  ),\n)`:`Column(\n  children: [/* ${n} items */],\n)`,hint:s.sc?'The Column keeps its full height and the scroll view moves it.':over>0?'Flutter paints the stripes in debug mode when a Column is taller than its parent.':'Everything fits, so there is nothing to scroll. Add more items to trigger the overflow.'};
 }});
 
-def({cat:'Scrolling',id:'page-view',name:'PageView',tags:'carousel swipe pagecontroller viewportfraction onboarding',
-blurb:'PageView shows one page at a time and lets the user swipe between them. A viewportFraction below 1 makes neighbouring pages peek in, which gives the familiar carousel look.',
-use:'Onboarding screens, image carousels and tabbed content.',
-watch:'Create the PageController once in initState and dispose it. Making a new one inside build resets the page on every rebuild.',
-ctl:[{k:'vf',l:'viewportFraction',t:'sel',o:['1.0','0.85','0.7'],v:'0.85'},{k:'snap',l:'pageSnapping',t:'chk',v:true}],
+def({cat:'Scrolling',id:'page-view',name:'PageView',tags:'carousel swipe pagecontroller viewportfraction onboarding jumptopage animatetopage nextpage previouspage initialpage onpagechanged padends physics scrolldirection vertical',h:360,
+blurb:'PageView shows one page at a time and lets the user swipe between them. Give it a PageController to control it from code: jumpToPage moves instantly, animateToPage glides, nextPage and previousPage step by one. A viewportFraction below 1 makes neighbouring pages peek in.',
+use:'Onboarding screens, image carousels, tabbed content, and any screen where a button or dot also has to change the page.',
+watch:'Create the PageController once in initState and dispose it. Making a new one inside build resets the page on every rebuild. controller.page is null until the first layout, so read it after the first frame or use onPageChanged. Call hasClients before using the controller if the PageView may not be on screen.',
+ctl:[{k:'meth',l:'move with',t:'sel',o:['jumpToPage','animateToPage'],v:'animateToPage'},{k:'dur',l:'duration',t:'sel',o:['200 ms','500 ms','1000 ms'],v:'500 ms'},{k:'cur',l:'curve',t:'sel',o:['linear','easeInOut','bounceOut'],v:'easeInOut'},{k:'ip',l:'initialPage',t:'sel',o:['0','1','2','3','4'],v:'0'},{k:'vf',l:'viewportFraction',t:'sel',o:['1.0','0.85','0.7'],v:'0.85'},{k:'dir',l:'scrollDirection',t:'sel',o:['horizontal','vertical'],v:'horizontal'},{k:'phy',l:'physics',t:'sel',o:['default (swipe)','NeverScrollableScrollPhysics'],v:'default (swipe)'},{k:'snap',l:'pageSnapping',t:'chk',v:true},{k:'pe',l:'padEnds',t:'chk',v:true}],
 render(s,st,g){
- const vf=+s.vf,pad=(1-vf)/2*100;
- g.innerHTML=`<div class="pg" style="scroll-snap-type:${s.snap?'x mandatory':'none'}"><span style="flex:0 0 ${pad}%"></span>${[0,1,2,3,4].map(i=>`<div class="pp" style="flex:0 0 ${vf*100}%"><div class="fb ${'abcd'[i%4]}" style="height:100%;width:100%;font-size:18px">Page ${i+1}</div></div>`).join('')}<span style="flex:0 0 ${pad}%"></span></div><div class="dots">${[0,1,2,3,4].map(()=>'<i class="dot"></i>').join('')}</div>`;
- return {code:`PageView(\n  controller: PageController(viewportFraction: ${vf}),\n  pageSnapping: ${s.snap},\n  children: [/* 5 pages */],\n)`,hint:'Swipe or scroll sideways. The dots follow the current page.'};
-},
-after(g){
- const sc=g.querySelector('.pg'),dots=[...g.querySelectorAll('.dot')],first=sc.querySelector('.pp');
- const upd=()=>{const w=first.getBoundingClientRect().width||1,i=Math.round(sc.scrollLeft/w);dots.forEach((d,k)=>d.classList.toggle('on',k===i))};
- sc.addEventListener('scroll',upd,{passive:true});upd();
-}});
+  const vf=+s.vf,pad=(1-vf)/2*100,vert=s.dir==='vertical',pe=s.pe&&vf<1,ip=+s.ip;
+  const sp=pe?`<span style="flex:0 0 ${pad}%"></span>`:'';
+  g.innerHTML=`<div class="pgw"><div class="pg${vert?' v':''}" style="scroll-snap-type:${s.snap?(vert?'y':'x')+' mandatory':'none'};${s.phy[0]==='N'?(vert?'overflow-y:hidden':'overflow-x:hidden'):''}">${sp}${[0,1,2,3,4].map(i=>`<div class="pp" style="flex:0 0 ${vf*100}%;scroll-snap-align:${pe||vf===1?'center':'start'}"><div class="fb ${'abcd'[i%4]}" style="height:100%;width:100%;font-size:18px">Page ${i+1}</div></div>`).join('')}${sp}</div><div class="dots${vert?' v':''}">${[0,1,2,3,4].map(()=>'<i class="dot"></i>').join('')}</div></div><div class="pgbar"><button type="button" data-p="prev">previousPage</button>${[0,1,2,3,4].map(i=>`<button type="button" data-p="${i}">${i}</button>`).join('')}<button type="button" data-p="next">nextPage</button></div><div class="pgro"><span>controller.page <b class="rp">0.0</b></span><span>onPageChanged <b class="rc">-</b></span><span class="rl">last call <b class="rm">-</b></span></div>`;
+  const D=s.dur.split(' ')[0],C={linear:'Curves.linear',easeInOut:'Curves.easeInOut',bounceOut:'Curves.bounceOut'}[s.cur];
+  const call=n=>s.meth==='jumpToPage'?`controller.jumpToPage(${n});`:`controller.animateToPage(\n  ${n},\n  duration: const Duration(milliseconds: ${D}),\n  curve: ${C},\n);`;
+  const dirs=[];if(vert)dirs.push('  scrollDirection: Axis.vertical,');if(!s.snap)dirs.push('  pageSnapping: false,');if(s.phy[0]==='N')dirs.push('  physics: const NeverScrollableScrollPhysics(),');if(!s.pe)dirs.push('  padEnds: false,');
+  const code=`class _PagerState extends State<Pager> {\n  final controller = PageController(\n    initialPage: ${ip},\n    viewportFraction: ${vf},\n  );\n  int current = ${ip};\n\n  @override\n  void dispose() {\n    controller.dispose();   // always dispose\n    super.dispose();\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return Column(children: [\n      Expanded(\n        child: PageView(\n          controller: controller,\n${dirs.map(x=>'  '+x).join('\n')}${dirs.length?'\n':''}          onPageChanged: (i) => setState(() => current = i),\n          children: [/* 5 pages */],\n        ),\n      ),\n      Row(children: [\n        TextButton(\n          onPressed: () => controller.previousPage(\n            duration: const Duration(milliseconds: ${D}),\n            curve: ${C},\n          ),\n          child: const Text('Back'),\n        ),\n        TextButton(\n          onPressed: () {\n            ${call(3).split('\n').join('\n            ')}\n          },\n          child: const Text('Go to page 3'),\n        ),\n        TextButton(\n          onPressed: () => controller.nextPage(\n            duration: const Duration(milliseconds: ${D}),\n            curve: ${C},\n          ),\n          child: const Text('Next'),\n        ),\n      ]),\n    ]);\n  }\n}`;
+  return {code,hint:'Press a number to call '+s.meth+', or use previousPage and nextPage. Swipe too: controller.page and onPageChanged follow. Change duration and curve to feel the difference.'};
+ },
+after(g,st,s){
+  const sc=g.querySelector('.pg'),dots=[...g.querySelectorAll('.dot')],first=sc.querySelector('.pp'),rp=g.querySelector('.rp'),rc=g.querySelector('.rc'),rm=g.querySelector('.rm');
+  const vert=s.dir==='vertical',vf=+s.vf,K=vert?'scrollTop':'scrollLeft',R=vert?'height':'width';
+  const size=()=>first.getBoundingClientRect()[R]||1;
+  const page=()=>sc[K]/size();
+  let last=-1,raf=0;
+  const upd=()=>{const p=page(),i=Math.max(0,Math.min(4,Math.round(p)));rp.textContent=p.toFixed(1);dots.forEach((d,k)=>d.classList.toggle('on',k===i));if(i!==last){last=i;rc.textContent=i}};
+  sc.addEventListener('scroll',upd,{passive:true});
+  const ease={linear:t=>t,easeInOut:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,bounceOut:t=>{const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+.75;if(t<2.5/d)return n*(t-=2.25/d)*t+.9375;return n*(t-=2.625/d)*t+.984375}}[s.cur];
+  const ms=+s.dur.split(' ')[0];
+  const go=(n,how)=>{n=Math.max(0,Math.min(4,n));cancelAnimationFrame(raf);const to=n*size(),from=sc[K];
+    if(how==='jump'){sc[K]=to;rm.textContent='jumpToPage('+n+')';return}
+    rm.textContent=(how==='next'?'nextPage()':how==='prev'?'previousPage()':'animateToPage('+n+')')+' · '+ms+' ms · '+s.cur;
+    const snapOld=sc.style.scrollSnapType;sc.style.scrollSnapType='none';const t0=performance.now();
+    const step=now=>{const t=Math.min(1,(now-t0)/ms);sc[K]=from+(to-from)*ease(t);if(t<1)raf=requestAnimationFrame(step);else sc.style.scrollSnapType=snapOld};raf=requestAnimationFrame(step)};
+  g.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.p,cur=Math.round(page());
+    if(v==='next')go(cur+1,'next');else if(v==='prev')go(cur-1,'prev');else go(+v,s.meth==='jumpToPage'?'jump':'anim')}));
+  requestAnimationFrame(()=>{sc[K]=(+s.ip)*size();upd()});
+ }});
 
 def({cat:'Scrolling',id:'slivers',name:'CustomScrollView & Slivers',tags:'sliverappbar sliverlist collapsing header pinned floating',
 blurb:'A CustomScrollView lets several scrollable pieces, called slivers, share one scroll position. SliverAppBar is the classic example: a header that collapses as you scroll and can stay pinned at the top.',
@@ -1564,7 +1595,7 @@ const META={
 'list-view':{p:['scrollDirection|Axis|vertical|Scroll axis.','shrinkWrap|bool|false|true sizes the list to its content. Slower on long lists.','padding|EdgeInsetsGeometry?|null|Space around the content, inside the scroll area.','itemCount|int?|null|Number of items for builder and separated.','itemBuilder|IndexedWidgetBuilder|required|Builds one child by index, only when it is about to be visible.','separatorBuilder|IndexedWidgetBuilder|required|ListView.separated only. Builds the divider between items.'],r:['grid-view','scroll-view','slivers','page-view']},
 'grid-view':{p:['gridDelegate|SliverGridDelegate|required|Controls column count or max tile width.','crossAxisCount|int|required|SliverGridDelegateWithFixedCrossAxisCount. Number of columns.','maxCrossAxisExtent|double|required|SliverGridDelegateWithMaxCrossAxisExtent. Widest tile allowed.','mainAxisSpacing, crossAxisSpacing|double|0|Gaps between rows and between columns.','childAspectRatio|double|1.0|Width divided by height of each tile.'],r:['list-view','wrap','slivers']},
 'scroll-view':{p:['scrollDirection|Axis|vertical|Scroll axis.','padding|EdgeInsetsGeometry?|null|Space around the child.','physics|ScrollPhysics?|platform|Scroll feel: bouncing, clamping, never scrollable.','controller|ScrollController?|null|Read or set the scroll position.','child|Widget?|null|A single child, usually a Column.'],r:['list-view','slivers','row-column']},
-'page-view':{p:['controller|PageController|new|Set initialPage and viewportFraction.','scrollDirection|Axis|horizontal|Swipe axis.','pageSnapping|bool|true|Snap to whole pages.','onPageChanged|ValueChanged<int>?|null|Fires when the current page changes.','children / itemBuilder|List / IndexedWidgetBuilder|required|The pages.'],r:['tab-bar','indexed-stack','list-view']},
+'page-view':{p:['PageController: initialPage|int|0|The page shown first.','PageController: viewportFraction|double|1.0|Share of the view each page fills. Below 1 lets neighbours peek in.','PageController: keepPage|bool|true|Remember the page when the PageView is rebuilt or removed and added again.','controller.jumpToPage(n)|void|-|Move to page n at once, with no animation.','controller.animateToPage(n, duration:, curve:)|Future<void>|-|Glide to page n. Await it to run code when the animation ends.','controller.nextPage / previousPage(duration:, curve:)|Future<void>|-|Step one page forward or back with an animation.','controller.page|double?|null|Current position as a decimal, such as 1.4 while swiping. Null before the first layout.','controller.hasClients|bool|false|True once a PageView is attached. Check it before calling page or jumpToPage.','controller.dispose()|void|-|Call it in State.dispose to free resources.','scrollDirection|Axis|horizontal|Axis.vertical gives a vertical pager.','pageSnapping|bool|true|false lets the user stop between pages.','reverse|bool|false|Reverses the order, so page 0 is at the end.','physics|ScrollPhysics?|platform|NeverScrollableScrollPhysics blocks swiping so only code or buttons move pages.','padEnds|bool|true|Add space before the first and after the last page when viewportFraction is below 1.','onPageChanged|ValueChanged<int>?|null|Fires when the page changes. Use it to update dots or a title.','allowImplicitScrolling|bool|false|Keep neighbouring pages built so they are ready when the user swipes.','PageView.builder: itemCount / itemBuilder|int / IndexedWidgetBuilder|-|Build pages on demand. Use it for many pages or pages from a list.','clipBehavior|Clip|hardEdge|Whether pages that peek in are clipped.'],r:['tab-bar','indexed-stack','list-view']},
 'slivers':{p:['slivers|List<Widget>|required|SliverAppBar, SliverList, SliverGrid, SliverToBoxAdapter and others.','SliverAppBar.pinned|bool|false|Keeps the collapsed bar stuck at the top.','SliverAppBar.expandedHeight|double?|null|Height of the bar before it collapses.','SliverList.builder|constructor|-|Lazy list inside a CustomScrollView.','SliverToBoxAdapter|widget|-|Wraps a normal widget so it can be a sliver.'],r:['list-view','grid-view','scaffold']},
 'text':{p:['data|String|required|The text to show.','style|TextStyle?|null|Font, size, weight, colour, height and more.','maxLines|int?|null|Limit on the number of lines.','overflow|TextOverflow|clip|clip, fade, ellipsis or visible when text does not fit.','textAlign|TextAlign?|start|Horizontal alignment inside the Text\'s width.','softWrap|bool|true|false keeps everything on one line.'],r:['container','row-column','fitted-box']},
 'image':{p:['Image.network(url) / .asset(name)|constructor|required|Where the picture comes from.','fit|BoxFit?|null|How the picture fills its box.','width, height|double?|null|Size of the box. Without them the image uses its natural size.','alignment|AlignmentGeometry|center|Which part is kept when fit crops.','errorBuilder|ImageErrorWidgetBuilder?|null|Shown if the image fails to load.'],r:['aspect-ratio','fitted-box','clip','clip-rect']},
