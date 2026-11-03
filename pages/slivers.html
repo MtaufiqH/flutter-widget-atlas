@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CustomScrollView &amp; Slivers in Flutter | Flutter Atlas</title>
+<meta name="description" content="A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/slivers.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CustomScrollView &amp; Slivers in Flutter | Flutter Atlas">
+<meta property="og:description" content="A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/slivers.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CustomScrollView &amp; Slivers in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"CustomScrollView & Slivers in Flutter | Flutter Atlas","description":"A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/slivers.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/slivers.html","about":{"@type":"Thing","name":"CustomScrollView & Slivers"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#scrolling">Scrolling</a> / CustomScrollView &amp; Slivers</p>
+<p class="eyebrow">Scrolling</p>
+<h1>CustomScrollView &amp; Slivers</h1>
+<p class="lead">A CustomScrollView stitches several scrolling pieces into one. Each piece is a sliver: a collapsing app bar, a lazy list, a grid, a single widget. One scroll position covers all of them.</p>
+<section><h2>Use it for</h2><p>A header that collapses over a list, a screen that mixes a grid and a list, anything a Column of scroll views cannot do.</p></section><section><h2>Watch out for</h2><p>Only slivers may go in the slivers list. An ordinary widget needs SliverToBoxAdapter, and padding needs SliverPadding.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">37</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">CustomScrollView</td></tr><tr><td>slivers</td><td>List&lt;Widget&gt;</td><td>required</td><td>The parts of the scroll view. Only sliver widgets belong here, never a plain Container.</td></tr><tr><td>controller</td><td>ScrollController?</td><td>null</td><td>One controller for the whole thing, however many slivers it holds.</td></tr><tr><td>scrollDirection / reverse</td><td>Axis / bool</td><td>vertical / false</td><td>Direction of the scroll.</td></tr><tr><td>physics</td><td>ScrollPhysics?</td><td>platform</td><td>Same options as ListView.</td></tr><tr><td>shrinkWrap</td><td>bool</td><td>false</td><td>Size to content. Avoid it: slivers exist precisely so you do not need this.</td></tr><tr><td>center / anchor</td><td>Key? / double</td><td>null / 0.0</td><td>Start the viewport at a particular sliver, used for chat-style lists that grow in both directions.</td></tr><tr class="pgh"><td colspan="4">The slivers you will use</td></tr><tr><td>SliverList.builder(itemBuilder:, itemCount:)</td><td>widget</td><td>-</td><td>A lazy list, the sliver form of ListView.builder.</td></tr><tr><td>SliverList.separated</td><td>widget</td><td>-</td><td>With separators between items.</td></tr><tr><td>SliverFixedExtentList(itemExtent:)</td><td>widget</td><td>-</td><td>Faster when every row is the same height.</td></tr><tr><td>SliverGrid.builder(gridDelegate:, ...)</td><td>widget</td><td>-</td><td>The grid form.</td></tr><tr><td>SliverToBoxAdapter(child:)</td><td>widget</td><td>-</td><td>Wraps one ordinary widget so it can sit among slivers.</td></tr><tr><td>SliverPadding(padding:, sliver:)</td><td>widget</td><td>-</td><td>Padding around a sliver. Normal Padding does not work here.</td></tr><tr><td>SliverFillRemaining(hasScrollBody:, child:)</td><td>widget</td><td>-</td><td>Fills whatever space is left, for an empty state or a footer.</td></tr><tr><td>SliverAppBar</td><td>widget</td><td>-</td><td>The collapsing header.</td></tr><tr><td>SliverPersistentHeader(delegate:, pinned:, floating:)</td><td>widget</td><td>-</td><td>A custom header that sticks or shrinks.</td></tr><tr><td>SliverMainAxisGroup / SliverCrossAxisGroup</td><td>widget</td><td>-</td><td>Group slivers, for sticky section headers.</td></tr><tr class="pgh"><td colspan="4">SliverAppBar</td></tr><tr><td>expandedHeight</td><td>double?</td><td>null</td><td>Height when fully open.</td></tr><tr><td>collapsedHeight</td><td>double?</td><td>toolbarHeight</td><td>Height once collapsed.</td></tr><tr><td>pinned</td><td>bool</td><td>false</td><td>Keep the toolbar on screen when scrolled.</td></tr><tr><td>floating</td><td>bool</td><td>false</td><td>Reappear as soon as the user scrolls up, without going to the top.</td></tr><tr><td>snap</td><td>bool</td><td>false</td><td>With floating, snap fully open or closed. It needs floating: true.</td></tr><tr><td>stretch / stretchTriggerOffset / onStretchTrigger</td><td>bool / double / AsyncCallback?</td><td>false / 100</td><td>Overscroll stretch, and a callback for pull-to-refresh style actions.</td></tr><tr><td>flexibleSpace</td><td>Widget?</td><td>null</td><td>What fills the expanded area, usually FlexibleSpaceBar(title:, background:, collapseMode:).</td></tr><tr><td>bottom</td><td>PreferredSizeWidget?</td><td>null</td><td>A TabBar or search field under the title.</td></tr><tr><td>title / leading / actions</td><td>Widget?</td><td>null</td><td>The same as a normal AppBar.</td></tr><tr class="pgh"><td colspan="4">Good to know</td></tr><tr><td>Why slivers</td><td>reason</td><td>-</td><td>They let one scroll view mix a header, a grid, a list and a footer while staying lazy. A Column of scroll views cannot do that.</td></tr><tr><td>NestedScrollView</td><td>widget</td><td>-</td><td>Needed when an inner TabBarView has its own scrollables under a shared header.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code><span>·</span><code>dragStartBehavior</code><span>·</span><code>clipBehavior</code><span>·</span><code>restorationId</code><span>·</span><code>keyboardDismissBehavior</code><span>·</span><code>semanticChildCount</code><span>·</span><code>cacheExtent (deprecated)</code><span>·</span><code>scrollCacheExtent</code><span>·</span><code>hitTestBehavior</code><span>·</span><code>primary</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html · material/SliverAppBar-class.html" target="_blank" rel="noopener">SliverAppBar on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">CustomScrollView(
+  slivers: [
+    SliverAppBar(
+      expandedHeight: 150,
+      pinned: true,
+      flexibleSpace: FlexibleSpaceBar(
+        title: const Text('Gallery'),
+        background: Image.network(url, fit: BoxFit.cover),
+        collapseMode: CollapseMode.parallax,
+      ),
+    ),
+    SliverList.builder(
+      itemCount: items.length,
+      itemBuilder: (context, i) =&gt; ListTile(title: Text(items[i])),
+    ),
+  ],
+)</pre></section>
+<a class="cta" href="../index.html#slivers">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="list-view.html">ListView</a></li><li><a href="grid-view.html">GridView</a></li><li><a href="scaffold.html">Scaffold</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html" rel="noopener" target="_blank">CustomScrollView</a></li><li><a href="https://api.flutter.dev/flutter/material/SliverAppBar-class.html" rel="noopener" target="_blank">SliverAppBar</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20CustomScrollView" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

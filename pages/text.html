@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text — Flutter widget guide, properties &amp; example | Flutter Atlas</title>
+<meta name="description" content="Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/text.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Text — Flutter widget guide, properties &amp; example | Flutter Atlas">
+<meta property="og:description" content="Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/text.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Text — Flutter widget guide, properties &amp; example | Flutter Atlas">
+<meta name="twitter:description" content="Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Text \u2014 Flutter widget guide, properties & example | Flutter Atlas","description":"Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/text.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/text.html","about":{"@type":"Thing","name":"Text"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#text">Text</a> / Text</p>
+<p class="eyebrow">Text</p>
+<h1>Text</h1>
+<p class="lead">Text draws a string with a TextStyle. Wrapping, alignment and what happens to text that does not fit (overflow) are all controlled by a handful of properties. Every control below is a real argument of Text or TextStyle.</p>
+<section><h2>Use it for</h2><p>Every label, paragraph and heading.</p></section><section><h2>Watch out for</h2><p>overflow only matters when text cannot wrap: with no maxLines the text just wraps and you will never see an ellipsis. height is a multiple of fontSize, not a pixel value. Setting style replaces nothing you do not name, because it is merged with the DefaultTextStyle.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">31</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">Everyday</td></tr><tr><td>data</td><td>String</td><td>required</td><td>The string to show. Text.rich takes a textSpan instead.</td></tr><tr><td>style</td><td>TextStyle?</td><td>null</td><td>Colour, size, weight and family. It is merged with the nearest DefaultTextStyle, so you only set what differs.</td></tr><tr><td>maxLines</td><td>int?</td><td>null</td><td>Cut off after this many lines. Pair it with overflow.</td></tr><tr><td>overflow</td><td>TextOverflow?</td><td>clip</td><td>What happens to text that does not fit: clip, fade, ellipsis or visible.</td></tr><tr><td>textAlign</td><td>TextAlign?</td><td>start</td><td>left, right, center, justify, start or end.</td></tr><tr><td>softWrap</td><td>bool?</td><td>true</td><td>false keeps everything on one line, so long text overflows instead of wrapping.</td></tr><tr class="pgh"><td colspan="4">TextStyle, the part you set most</td></tr><tr><td>fontSize / fontWeight / fontStyle</td><td>double? / FontWeight? / FontStyle?</td><td>theme</td><td>Size in logical pixels, w100 to w900 or FontWeight.bold, and italic.</td></tr><tr><td>color / backgroundColor</td><td>Color?</td><td>theme</td><td>Text colour and the colour behind it.</td></tr><tr><td>height</td><td>double?</td><td>null</td><td>Line height as a multiple of fontSize. 1.4 is a common body value.</td></tr><tr><td>letterSpacing / wordSpacing</td><td>double?</td><td>null</td><td>Extra space between letters and between words. Negative values tighten.</td></tr><tr><td>fontFamily / fontFamilyFallback / package</td><td>String? / List&lt;String&gt;? / String?</td><td>null</td><td>The font to use, the fonts to try next, and the package a font comes from.</td></tr><tr><td>decoration / decorationColor / decorationStyle / decorationThickness</td><td>TextDecoration? and friends</td><td>null</td><td>underline, lineThrough or overline, and how it is drawn.</td></tr><tr><td>shadows</td><td>List&lt;Shadow&gt;?</td><td>null</td><td>Shadows under the glyphs.</td></tr><tr><td>foreground / background</td><td>Paint?</td><td>null</td><td>Paint the text with a gradient or an outline. Cannot be used together with color or backgroundColor.</td></tr><tr><td>fontFeatures / fontVariations</td><td>List&lt;FontFeature&gt;? / List&lt;FontVariation&gt;?</td><td>null</td><td>OpenType features such as tabular numbers, and variable-font axes such as weight.</td></tr><tr><td>inherit</td><td>bool</td><td>true</td><td>false ignores the surrounding DefaultTextStyle, so every field must be set.</td></tr><tr class="pgh"><td colspan="4">Accessibility and measurement</td></tr><tr><td>semanticsLabel</td><td>String?</td><td>null</td><td>What a screen reader says instead of the visible text. Useful for "4.5" read as "four and a half stars".</td></tr><tr><td>textScaler</td><td>TextScaler?</td><td>system</td><td>How the user font-size setting is applied. Replaces the deprecated textScaleFactor. Do not disable it without a reason.</td></tr><tr><td>textWidthBasis</td><td>TextWidthBasis?</td><td>parent</td><td>Whether the width is the parent width or the longest line.</td></tr><tr><td>strutStyle</td><td>StrutStyle?</td><td>null</td><td>Forces a minimum line height, so rows stay the same height whatever the glyphs are.</td></tr><tr><td>textHeightBehavior</td><td>TextHeightBehavior?</td><td>null</td><td>Whether height applies to the first ascent and last descent.</td></tr><tr class="pgh"><td colspan="4">Related widgets</td></tr><tr><td>SelectableText</td><td>widget</td><td>-</td><td>Same look, but the user can select and copy.</td></tr><tr><td>RichText / Text.rich</td><td>widget</td><td>-</td><td>Several styles in one paragraph.</td></tr><tr><td>DefaultTextStyle</td><td>widget</td><td>-</td><td>Sets the style for every Text below it in the tree.</td></tr><tr><td>AutoSizeText (package)</td><td>widget</td><td>-</td><td>Shrinks the font until the text fits.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code><span>·</span><code>locale</code><span>·</span><code>textDirection</code><span>·</span><code>selectionColor</code><span>·</span><code>semanticsIdentifier</code><span>·</span><code>textScaleFactor (deprecated)</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/widgets/Text-class.html · painting/TextStyle-class.html" target="_blank" rel="noopener">TextStyle on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">Text(
+  'Flutter draws every pixel itself...',
+  maxLines: 2,
+  overflow: TextOverflow.ellipsis,
+  style: TextStyle(
+    fontSize: 18,
+  ),
+)</pre></section>
+<a class="cta" href="../index.html#text">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="container.html">Container</a></li><li><a href="row-column.html">Row &amp; Column</a></li><li><a href="fitted-box.html">FittedBox</a></li><li><a href="text-rich.html">Text.rich &amp; RichText</a></li><li><a href="shader-mask.html">ShaderMask</a></li><li><a href="text-theme.html">TextTheme (typography)</a></li><li><a href="baseline.html">Baseline</a></li><li><a href="l10n-arb.html">Localization: ARB files, placeholders and plurals</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/widgets/Text-class.html" rel="noopener" target="_blank">Text</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20Text" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

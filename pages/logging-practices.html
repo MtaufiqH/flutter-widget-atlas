@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logging: levels, release builds and privacy in Flutter | Flutter Atlas</title>
+<meta name="description" content="Use log levels, so you can keep detail in debug builds and send only warnings and errors from release builds. Never log secrets or personal data, because…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/logging-practices.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Logging: levels, release builds and privacy in Flutter | Flutter Atlas">
+<meta property="og:description" content="Use log levels, so you can keep detail in debug builds and send only warnings and errors from release builds. Never log secrets or personal data, because…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/logging-practices.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Logging: levels, release builds and privacy in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="Use log levels, so you can keep detail in debug builds and send only warnings and errors from release builds. Never log secrets or personal data, because…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Logging: levels, release builds and privacy in Flutter | Flutter Atlas","description":"Use log levels, so you can keep detail in debug builds and send only warnings and errors from release builds. Never log secrets or personal data, because\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/logging-practices.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/logging-practices.html","about":{"@type":"Thing","name":"Logging: levels, release builds and privacy"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#testing-and-quality">Testing and quality</a> / Logging: levels, release builds and privacy</p>
+<p class="eyebrow">Testing and quality</p>
+<h1>Logging: levels, release builds and privacy</h1>
+<p class="lead">Use log levels, so you can keep detail in debug builds and send only warnings and errors from release builds. Never log secrets or personal data, because logs can be read by other tools and ends up on servers.</p>
+<section><h2>Use it for</h2><p>Finding bugs during development, and giving yourself useful context when a crash report arrives from a user.</p></section><section><h2>Watch out for</h2><p>print and debugPrint are only for quick checks. Use a logger package with levels. Never log passwords, tokens, full emails, card numbers or health data. Redact before logging. Keep release logging small, because it costs battery and data.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">6</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td>Logger(name)</td><td>class</td><td>-</td><td>A named logger from package:logging.</td></tr><tr><td>Logger.root.level</td><td>Level</td><td>-</td><td>Minimum level that is recorded.</td></tr><tr><td>Level.FINE / INFO / WARNING / SEVERE</td><td>levels</td><td>-</td><td>From detail to failure.</td></tr><tr><td>kDebugMode / kReleaseMode</td><td>bool</td><td>-</td><td>Tell debug and release builds apart.</td></tr><tr><td>debugPrint</td><td>function</td><td>-</td><td>A throttled print for debug builds.</td></tr><tr><td>redact</td><td>pattern</td><td>-</td><td>Remove personal data before logging.</td></tr></tbody></table></div></details></section>
+<section><h2>Example code</h2><pre class="code">// pubspec: logging (or logger)
+final log = Logger('Checkout');
+
+void setupLogging() {
+  Logger.root.level = kReleaseMode ? Level.WARNING : Level.ALL;
+  Logger.root.onRecord.listen((r) {
+    if (!kReleaseMode) debugPrint('${r.level.name} ${r.loggerName}: ${r.message}');
+    if (r.level &gt;= Level.WARNING) {
+      // add a breadcrumb or a non-fatal error to the crash service
+      FirebaseCrashlytics.instance.log('${r.loggerName}: ${r.message}');
+      if (r.error != null) {
+        FirebaseCrashlytics.instance.recordError(r.error, r.stackTrace);
+      }
+    }
+  });
+}
+
+// use it
+log.fine('cart has ${cart.length} items');          // debug only
+log.info('user tapped Buy');
+log.warning('API returned 500', error, stack);
+log.severe('save failed', error, stack);
+
+// privacy: log ids, not personal data
+log.info('signed in user ${user.id}');                // good
+// log.info('signed in $email $token');                // never</pre></section>
+<a class="cta" href="../index.html#logging-practices">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="error-logging.html">Catch every error: Flutter, async and platform</a></li><li><a href="data-best-practices.html">API &amp; database best practices: do and don't</a></li><li><a href="devtools.html">Find slow code with DevTools</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://pub.dev/packages/logging" rel="noopener" target="_blank">logging</a></li><li><a href="https://pub.dev/packages/logger" rel="noopener" target="_blank">logger</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

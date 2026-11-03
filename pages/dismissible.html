@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dismissible in Flutter | Flutter Atlas</title>
+<meta name="description" content="Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/dismissible.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dismissible in Flutter | Flutter Atlas">
+<meta property="og:description" content="Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/dismissible.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dismissible in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dismissible in Flutter | Flutter Atlas","description":"Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/dismissible.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/dismissible.html","about":{"@type":"Thing","name":"Dismissible"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#interaction-models">Interaction models</a> / Dismissible</p>
+<p class="eyebrow">Interaction models</p>
+<h1>Dismissible</h1>
+<p class="lead">Dismissible lets the user swipe a row away. You give it a unique key, a background that shows while swiping, and a callback that removes the item from your list.</p>
+<section><h2>Use it for</h2><p>Swipe to delete, archive or mark as read.</p></section><section><h2>Watch out for</h2><p>The key must be unique and stable, usually ValueKey(item.id). In onDismissed you must remove the item from your data, or the next build throws.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">17</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">Everyday</td></tr><tr><td>key</td><td>Key</td><td>required</td><td>Must be unique and stable, usually ValueKey(item.id). Without it Flutter dismisses the wrong row. This is the most common bug with Dismissible.</td></tr><tr><td>child</td><td>Widget</td><td>required</td><td>The row that slides away.</td></tr><tr><td>onDismissed</td><td>DismissDirectionCallback?</td><td>null</td><td>Called after the animation ends. Remove the item from your list here, or the next build throws.</td></tr><tr><td>background</td><td>Widget?</td><td>null</td><td>Shown behind while swiping right or down, usually a coloured box with an icon.</td></tr><tr><td>secondaryBackground</td><td>Widget?</td><td>null</td><td>Shown while swiping left or up. Only allowed when background is set too.</td></tr><tr><td>direction</td><td>DismissDirection</td><td>horizontal</td><td>horizontal, endToStart, startToEnd, vertical, up, down or none.</td></tr><tr class="pgh"><td colspan="4">Confirming and feedback</td></tr><tr><td>confirmDismiss</td><td>ConfirmDismissCallback?</td><td>null</td><td>Return a Future&lt;bool&gt;. Show a dialog and return false to snap the row back. The usual pattern for delete.</td></tr><tr><td>dismissThresholds</td><td>Map&lt;DismissDirection, double&gt;</td><td>{}</td><td>How far the user must swipe per direction, as a fraction of the width. The default is 0.4.</td></tr><tr><td>onUpdate</td><td>DismissUpdateCallback?</td><td>null</td><td>Called while dragging, with progress and whether the threshold is reached. Use it to change the background colour as the user swipes.</td></tr><tr><td>onResize</td><td>VoidCallback?</td><td>null</td><td>Called while the row shrinks after being dismissed.</td></tr><tr class="pgh"><td colspan="4">Timing</td></tr><tr><td>movementDuration</td><td>Duration</td><td>200 ms</td><td>How long the slide out or snap back takes.</td></tr><tr><td>resizeDuration</td><td>Duration?</td><td>300 ms</td><td>How long the row takes to collapse. null skips the collapse, which looks better when you also animate your list.</td></tr><tr><td>crossAxisEndOffset</td><td>double</td><td>0.0</td><td>Shifts the row sideways as it leaves, for a diagonal exit.</td></tr><tr class="pgh"><td colspan="4">Behaviour</td></tr><tr><td>behavior</td><td>HitTestBehavior</td><td>opaque</td><td>How the row takes part in hit testing.</td></tr><tr><td>dragStartBehavior</td><td>DragStartBehavior</td><td>start</td><td>Where the drag is measured from.</td></tr><tr class="pgh"><td colspan="4">Related</td></tr><tr><td>SwipeActionCell / flutter_slidable</td><td>package</td><td>-</td><td>Swipe to reveal buttons instead of dismissing.</td></tr><tr><td>AnimatedList / SliverAnimatedList</td><td>widget</td><td>-</td><td>Pair with Dismissible for a proper removal animation.</td></tr></tbody></table></div><div class="papi"><a href="https://api.flutter.dev/flutter/widgets/Dismissible-class.html" target="_blank" rel="noopener">Dismissible on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">Dismissible(
+  key: ValueKey(item.id),
+  background: Container(
+    color: Colors.green,
+    alignment: Alignment.centerLeft,
+    padding: const EdgeInsets.only(left: 18),
+    child: const Icon(Icons.archive, color: Colors.white),
+  ),
+  secondaryBackground: Container(
+    color: Colors.red,
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 18),
+    child: const Icon(Icons.delete, color: Colors.white),
+  ),
+  onDismissed: (direction) {
+    final removed = items[index];
+    setState(() =&gt; items.removeAt(index));   // required
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${removed.title} deleted'),
+        action: SnackBarAction(label: 'UNDO', onPressed: () =&gt; setState(() =&gt; items.insert(index, removed))),
+      ),
+    );
+  },
+  child: ListTile(title: Text(item.title)),
+)</pre></section>
+<a class="cta" href="../index.html#dismissible">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="list-view.html">ListView</a></li><li><a href="gestures.html">GestureDetector</a></li><li><a href="draggable.html">Draggable &amp; DragTarget</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/widgets/Dismissible-class.html" rel="noopener" target="_blank">Dismissible</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20Dismissible" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

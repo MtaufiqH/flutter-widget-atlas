@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>image_picker (photos &amp; camera) in Flutter | Flutter Atlas</title>
+<meta name="description" content="image_picker is the Flutter team's plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/image-picker.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="image_picker (photos &amp; camera) in Flutter | Flutter Atlas">
+<meta property="og:description" content="image_picker is the Flutter team's plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/image-picker.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="image_picker (photos &amp; camera) in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="image_picker is the Flutter team's plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"image_picker (photos & camera) in Flutter | Flutter Atlas","description":"image_picker is the Flutter team's plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/image-picker.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/image-picker.html","about":{"@type":"Thing","name":"image_picker (photos & camera)"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#input">Input</a> / image_picker (photos &amp; camera)</p>
+<p class="eyebrow">Input</p>
+<h1>image_picker (photos &amp; camera)</h1>
+<p class="lead">image_picker is the Flutter team's plugin for choosing a photo or video from the gallery, or taking one with the camera. You call pickImage and get back an XFile (or null if the user cancelled). Then you show it, copy it, or upload it.</p>
+<section><h2>Use it for</h2><p>Profile pictures, attaching photos to a post, scanning a receipt, and any "choose or take a picture" button.</p></section><section><h2>Watch out for</h2><p>Always handle null (the user cancelled) and errors (permission denied). On iOS, add the usage descriptions to Info.plist or the app crashes. Pass maxWidth, maxHeight or imageQuality to avoid uploading 12 MB photos. On web the XFile has no real file path, so read its bytes.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">17</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">pickImage and pickVideo</td></tr><tr><td>source</td><td>ImageSource</td><td>required</td><td>ImageSource.camera or ImageSource.gallery.</td></tr><tr><td>imageQuality</td><td>int?</td><td>null</td><td>1 to 100 for JPEG re-encoding. Around 70 to 85 cuts the file size a lot with little visible loss. Ignored for some formats.</td></tr><tr><td>maxWidth / maxHeight</td><td>double?</td><td>null</td><td>Resize before returning. Do this rather than uploading a 12 megapixel photo.</td></tr><tr><td>preferredCameraDevice</td><td>CameraDevice</td><td>rear</td><td>rear or front.</td></tr><tr><td>requestFullMetadata</td><td>bool</td><td>true</td><td>iOS only. false avoids asking for photo library permission just to read EXIF.</td></tr><tr><td>maxDuration</td><td>Duration?</td><td>null</td><td>On pickVideo, cap the recording length.</td></tr><tr class="pgh"><td colspan="4">Picking several</td></tr><tr><td>pickMultiImage({imageQuality, maxWidth, maxHeight, limit})</td><td>Future&lt;List&lt;XFile&gt;&gt;</td><td>-</td><td>Several photos at once. limit is supported on newer Android and iOS.</td></tr><tr><td>pickMedia / pickMultipleMedia</td><td>Future&lt;XFile?&gt; / Future&lt;List&lt;XFile&gt;&gt;</td><td>-</td><td>Photos and videos together.</td></tr><tr class="pgh"><td colspan="4">What you get back</td></tr><tr><td>XFile?</td><td>class</td><td>-</td><td>null when the user cancelled, which you must handle.</td></tr><tr><td>file.path / readAsBytes() / name / length()</td><td>members</td><td>-</td><td>A path you can wrap in File, the raw bytes (the only option on the web), the file name and its size.</td></tr><tr><td>Web</td><td>note</td><td>-</td><td>There is no File on the web. Use readAsBytes and Image.memory.</td></tr><tr class="pgh"><td colspan="4">Setup that is easy to forget</td></tr><tr><td>iOS Info.plist</td><td>config</td><td>-</td><td>NSCameraUsageDescription and NSPhotoLibraryUsageDescription. Without them the app is rejected, and the picker crashes on launch.</td></tr><tr><td>Android</td><td>config</td><td>-</td><td>Usually nothing for the modern photo picker. Camera capture needs a FileProvider, which the plugin supplies.</td></tr><tr><td>Lost data on Android</td><td>rule</td><td>-</td><td>Android can kill your app while the camera is open. Call retrieveLostData() on startup or you silently lose photos on low-memory devices.</td></tr><tr class="pgh"><td colspan="4">Related packages</td></tr><tr><td>image_cropper</td><td>package</td><td>-</td><td>Crop and rotate after picking.</td></tr><tr><td>flutter_image_compress</td><td>package</td><td>-</td><td>Stronger compression than imageQuality.</td></tr><tr><td>camera</td><td>package</td><td>-</td><td>A live preview inside your own UI, when the system camera screen is not enough.</td></tr></tbody></table></div></details></section>
+<section><h2>Example code</h2><pre class="code">// pubspec: image_picker
+final picker = ImagePicker();
+
+Future&lt;void&gt; choose() async {
+  try {
+    final XFile? file = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      imageQuality: 80,
+    );
+    if (file == null) return;            // cancelled
+    setState(() =&gt; _file = file);
+  } on PlatformException catch (e) {
+    // permission denied or camera not available
+  }
+}
+
+// show it
+Image.file(File(_file!.path))        // mobile
+// web: Image.memory(await _file!.readAsBytes())
+
+// iOS: ios/Runner/Info.plist
+// NSPhotoLibraryUsageDescription  (why you read photos)
+// NSCameraUsageDescription        (why you use the camera)</pre></section>
+<a class="cta" href="../index.html#image-picker">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="file-picker.html">file_picker (documents &amp; other files)</a></li><li><a href="path-provider.html">Files &amp; path_provider</a></li><li><a href="image.html">Image &amp; BoxFit</a></li><li><a href="storage-choice.html">Local storage: which one to use</a></li><li><a href="api-client.html">Calling an API (http &amp; Dio)</a></li><li><a href="release-ios.html">iOS release: signing and TestFlight</a></li><li><a href="permissions-flow.html">Runtime permissions: ask, explain, recover</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://pub.dev/packages/image_picker" rel="noopener" target="_blank">image_picker</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

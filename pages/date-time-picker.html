@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>showDatePicker &amp; showTimePicker in Flutter | Flutter Atlas</title>
+<meta name="description" content="showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/date-time-picker.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="showDatePicker &amp; showTimePicker in Flutter | Flutter Atlas">
+<meta property="og:description" content="showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/date-time-picker.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="showDatePicker &amp; showTimePicker in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"showDatePicker & showTimePicker in Flutter | Flutter Atlas","description":"showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/date-time-picker.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/date-time-picker.html","about":{"@type":"Thing","name":"showDatePicker & showTimePicker"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#input">Input</a> / showDatePicker &amp; showTimePicker</p>
+<p class="eyebrow">Input</p>
+<h1>showDatePicker &amp; showTimePicker</h1>
+<p class="lead">showDatePicker opens a dialog and returns the chosen DateTime, or null if the user cancels. showTimePicker does the same for a TimeOfDay, and showDateRangePicker for a range.</p>
+<section><h2>Use it for</h2><p>Birthdays, booking dates, reminders, filters over a period.</p></section><section><h2>Watch out for</h2><p>initialDate must sit inside firstDate to lastDate and pass selectableDayPredicate, or it throws. Dart has no date formatting of its own: use DateFormat from the intl package.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">30</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">showDatePicker</td></tr><tr><td>context</td><td>BuildContext</td><td>required</td><td>Used to find the Navigator and Theme.</td></tr><tr><td>firstDate / lastDate</td><td>DateTime</td><td>required</td><td>The range the user may pick from.</td></tr><tr><td>initialDate</td><td>DateTime?</td><td>null</td><td>Which date starts selected. It must sit inside the range and pass selectableDayPredicate.</td></tr><tr><td>currentDate</td><td>DateTime?</td><td>today</td><td>Which day is marked as today.</td></tr><tr><td>selectableDayPredicate</td><td>SelectableDayPredicate?</td><td>null</td><td>Return false to grey out a day, for weekends or booked dates.</td></tr><tr><td>initialEntryMode</td><td>DatePickerEntryMode</td><td>calendar</td><td>calendar, input, calendarOnly or inputOnly.</td></tr><tr><td>initialDatePickerMode</td><td>DatePickerMode</td><td>day</td><td>Open on the day grid or the year list.</td></tr><tr class="pgh"><td colspan="4">Text you should translate</td></tr><tr><td>helpText / confirmText / cancelText</td><td>String?</td><td>localised</td><td>The title and the two buttons.</td></tr><tr><td>fieldHintText / fieldLabelText</td><td>String?</td><td>localised</td><td>Hint and label of the typed-input field.</td></tr><tr><td>errorFormatText / errorInvalidText</td><td>String?</td><td>localised</td><td>Messages for a badly formed date and an out-of-range date.</td></tr><tr><td>locale</td><td>Locale?</td><td>ambient</td><td>Force a locale. Add localizationsDelegates and supportedLocales to MaterialApp or the picker stays English.</td></tr><tr class="pgh"><td colspan="4">Dialog behaviour</td></tr><tr><td>builder</td><td>TransitionBuilder?</td><td>null</td><td>Wrap the dialog, usually to apply a Theme or force a TextDirection.</td></tr><tr><td>barrierDismissible / barrierColor / barrierLabel</td><td>bool / Color? / String?</td><td>true</td><td>The dim layer behind.</td></tr><tr><td>useRootNavigator</td><td>bool</td><td>true</td><td>Push on the root navigator.</td></tr><tr><td>routeSettings</td><td>RouteSettings?</td><td>null</td><td>Name the route for observers.</td></tr><tr><td>keyboardType</td><td>TextInputType?</td><td>datetime</td><td>Keyboard for the input mode.</td></tr><tr><td>onDatePickerModeChange</td><td>ValueChanged&lt;DatePickerEntryMode&gt;?</td><td>null</td><td>Told when the user switches between calendar and typing.</td></tr><tr><td>calendarDelegate</td><td>CalendarDelegate</td><td>Gregorian</td><td>Support another calendar system, such as Hijri.</td></tr><tr class="pgh"><td colspan="4">The other pickers</td></tr><tr><td>showTimePicker</td><td>function</td><td>-</td><td>Takes initialTime: TimeOfDay, initialEntryMode: dial or input, and the same help and builder arguments. Wrap in a MediaQuery with alwaysUse24HourFormat to force 24-hour time.</td></tr><tr><td>showDateRangePicker</td><td>function</td><td>-</td><td>Returns a DateTimeRange. Opens full screen on a phone.</td></tr><tr><td>DatePickerDialog / TimePickerDialog</td><td>widget</td><td>-</td><td>The dialogs themselves, if you want to embed one.</td></tr><tr><td>InputDatePickerFormField</td><td>widget</td><td>-</td><td>A typed date field for a Form, with validation.</td></tr><tr><td>CalendarDatePicker</td><td>widget</td><td>-</td><td>The inline calendar with no dialog around it.</td></tr><tr class="pgh"><td colspan="4">Results and formatting</td></tr><tr><td>await showDatePicker(...)</td><td>Future&lt;DateTime?&gt;</td><td>-</td><td>Returns null when the user cancels. Always check for null.</td></tr><tr><td>DateFormat (intl package)</td><td>class</td><td>-</td><td>Formatting for display. DateFormat.yMMMd(locale).format(date). Dart itself has no date formatting.</td></tr><tr><td>showTimePicker result</td><td>TimeOfDay?</td><td>-</td><td>Combine it with a date yourself: DateTime(d.year, d.month, d.day, t.hour, t.minute).</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>anchorPoint</code><span>·</span><code>textDirection</code><span>·</span><code>switchToInputEntryModeIcon</code><span>·</span><code>switchToCalendarEntryModeIcon</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/material/showDatePicker.html" target="_blank" rel="noopener">showDatePicker on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">final date = await showDatePicker(
+  context: context,
+  initialDate: DateTime.now(),
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+  initialEntryMode: DatePickerEntryMode.calendar,
+  initialDatePickerMode: DatePickerMode.day,
+);
+if (date == null) return;   // the user cancelled
+
+// formatting needs the intl package
+final label = DateFormat.yMMMd().format(date);</pre></section>
+<a class="cta" href="../index.html#date-time-picker">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="dialog.html">AlertDialog &amp; showDialog</a></li><li><a href="text-field.html">TextField</a></li><li><a href="form.html">Form &amp; TextFormField validation</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/material/showDatePicker-class.html" rel="noopener" target="_blank">showDatePicker</a></li><li><a href="https://api.flutter.dev/flutter/material/showTimePicker-class.html" rel="noopener" target="_blank">showTimePicker</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20showDatePicker" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

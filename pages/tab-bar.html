@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TabBar &amp; TabBarView in Flutter | Flutter Atlas</title>
+<meta name="description" content="TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/tab-bar.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TabBar &amp; TabBarView in Flutter | Flutter Atlas">
+<meta property="og:description" content="TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/tab-bar.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TabBar &amp; TabBarView in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"TabBar & TabBarView in Flutter | Flutter Atlas","description":"TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/tab-bar.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/tab-bar.html","about":{"@type":"Thing","name":"TabBar & TabBarView"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#material">Material</a> / TabBar &amp; TabBarView</p>
+<p class="eyebrow">Material</p>
+<h1>TabBar &amp; TabBarView</h1>
+<p class="lead">TabBar shows the tabs and TabBarView shows one page per tab. A TabController keeps them in step, and DefaultTabController supplies one without a State class.</p>
+<section><h2>Use it for</h2><p>Switching between a few views of the same screen.</p></section><section><h2>Watch out for</h2><p>The number of tabs, the number of pages and the controller length must all match. Each tab page keeps its scroll position only if you add AutomaticKeepAliveClientMixin or a PageStorageKey.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">36</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">TabBar</td></tr><tr><td>tabs</td><td>List&lt;Widget&gt;</td><td>required</td><td>Usually Tab(text:) or Tab(icon:, text:). The count must match the TabBarView children and the controller length.</td></tr><tr><td>controller</td><td>TabController?</td><td>null</td><td>Needed unless a DefaultTabController sits above. With a controller you can switch tabs from code.</td></tr><tr><td>isScrollable</td><td>bool</td><td>false</td><td>Let the tabs scroll sideways. Use it for more than about four tabs.</td></tr><tr><td>onTap</td><td>ValueChanged&lt;int&gt;?</td><td>null</td><td>Fires on tap, including a tap on the tab already open. Good for scroll-to-top.</td></tr><tr><td>tabAlignment</td><td>TabAlignment?</td><td>platform</td><td>start, startOffset, center or fill. fill only works when isScrollable is false.</td></tr><tr><td>padding</td><td>EdgeInsetsGeometry?</td><td>null</td><td>Space around the whole bar.</td></tr><tr class="pgh"><td colspan="4">The indicator</td></tr><tr><td>indicatorColor</td><td>Color?</td><td>theme</td><td>Colour of the line under the selected tab.</td></tr><tr><td>indicatorWeight</td><td>double</td><td>2.0</td><td>Its thickness.</td></tr><tr><td>indicatorSize</td><td>TabBarIndicatorSize?</td><td>theme</td><td>tab spans the whole tab, label only the text width.</td></tr><tr><td>indicator</td><td>Decoration?</td><td>null</td><td>Replace the line with any decoration, for example a rounded pill behind the selected tab.</td></tr><tr><td>indicatorPadding</td><td>EdgeInsetsGeometry</td><td>zero</td><td>Space around the indicator.</td></tr><tr><td>indicatorAnimation</td><td>TabIndicatorAnimation?</td><td>theme</td><td>linear or elastic movement between tabs.</td></tr><tr><td>automaticIndicatorColorAdjustment</td><td>bool</td><td>true</td><td>Lightens the indicator on a dark app bar.</td></tr><tr class="pgh"><td colspan="4">Labels and divider</td></tr><tr><td>labelColor / unselectedLabelColor</td><td>Color?</td><td>theme</td><td>Text colour selected and not.</td></tr><tr><td>labelStyle / unselectedLabelStyle</td><td>TextStyle?</td><td>theme</td><td>Their text styles.</td></tr><tr><td>labelPadding</td><td>EdgeInsetsGeometry?</td><td>theme</td><td>Space around each label.</td></tr><tr><td>dividerColor / dividerHeight</td><td>Color? / double?</td><td>theme</td><td>The hairline under the bar. Set dividerColor to Colors.transparent to remove it.</td></tr><tr><td>overlayColor / splashFactory / splashBorderRadius</td><td>WidgetStateProperty? / factory / BorderRadius?</td><td>theme</td><td>Ripple colour, style and clipping.</td></tr><tr class="pgh"><td colspan="4">TabBarView</td></tr><tr><td>children</td><td>List&lt;Widget&gt;</td><td>required</td><td>One page per tab, in the same order.</td></tr><tr><td>controller</td><td>TabController?</td><td>null</td><td>The same controller as the TabBar.</td></tr><tr><td>physics</td><td>ScrollPhysics?</td><td>platform</td><td>NeverScrollableScrollPhysics stops swiping between tabs.</td></tr><tr><td>viewportFraction</td><td>double</td><td>1.0</td><td>How much of the view one page fills.</td></tr><tr><td>clipBehavior</td><td>Clip</td><td>Clip.hardEdge</td><td>Clipping of the pages.</td></tr><tr class="pgh"><td colspan="4">Controllers</td></tr><tr><td>DefaultTabController(length:, initialIndex:, child:)</td><td>widget</td><td>-</td><td>The simplest setup: no State class needed. Read it with DefaultTabController.of(context).</td></tr><tr><td>TabController(length:, vsync:, initialIndex:)</td><td>class</td><td>-</td><td>Create it in initState with a SingleTickerProviderStateMixin and dispose it. Needed when you change tabs from code or listen to changes.</td></tr><tr><td>controller.animateTo(i) / index / addListener</td><td>members</td><td>-</td><td>Switch tabs, read the current one, and react to changes. The listener fires twice per swipe unless you check indexIsChanging.</td></tr><tr class="pgh"><td colspan="4">Keeping tab state</td></tr><tr><td>AutomaticKeepAliveClientMixin</td><td>mixin</td><td>-</td><td>Add it to a tab page so it is not rebuilt from scratch when you come back.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code><span>·</span><code>scrollController</code><span>·</span><code>dragStartBehavior</code><span>·</span><code>mouseCursor</code><span>·</span><code>enableFeedback</code><span>·</span><code>onHover</code><span>·</span><code>onFocusChange</code><span>·</span><code>textScaler</code><span>·</span><code>TabBar.secondary</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/material/TabBar-class.html · material/TabBarView-class.html" target="_blank" rel="noopener">TabBarView on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">DefaultTabController(
+  length: 3,
+  child: Scaffold(
+    appBar: AppBar(
+      title: const Text('My app'),
+      bottom: TabBar(
+        tabs: [
+            Tab(text: 'Home'),
+            Tab(text: 'Chats'),
+            Tab(text: 'Calls'),
+          ],
+        indicatorWeight: 3,
+        indicatorSize: TabBarIndicatorSize.tab,
+      ),
+    ),
+    body: TabBarView(
+      children: [
+        HomePage(),
+        ChatsPage(),
+        CallsPage(),
+      ],
+    ),
+  ),
+)</pre></section>
+<a class="cta" href="../index.html#tab-bar">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="page-view.html">PageView</a></li><li><a href="indexed-stack.html">IndexedStack</a></li><li><a href="scaffold.html">Scaffold</a></li><li><a href="navigation-bar.html">NavigationBar</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/material/TabBar-class.html" rel="noopener" target="_blank">TabBar</a></li><li><a href="https://api.flutter.dev/flutter/material/TabBarView-class.html" rel="noopener" target="_blank">TabBarView</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20TabBar" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

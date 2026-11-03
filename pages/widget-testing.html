@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Widget tests: pumpWidget, find, tap, pump in Flutter | Flutter Atlas</title>
+<meta name="description" content="A widget test builds a widget in a fake test environment, finds things on it, taps them, and checks the result. It runs without a phone, so it is fast.…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/widget-testing.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Widget tests: pumpWidget, find, tap, pump in Flutter | Flutter Atlas">
+<meta property="og:description" content="A widget test builds a widget in a fake test environment, finds things on it, taps them, and checks the result. It runs without a phone, so it is fast.…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/widget-testing.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Widget tests: pumpWidget, find, tap, pump in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="A widget test builds a widget in a fake test environment, finds things on it, taps them, and checks the result. It runs without a phone, so it is fast.…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Widget tests: pumpWidget, find, tap, pump in Flutter | Flutter Atlas","description":"A widget test builds a widget in a fake test environment, finds things on it, taps them, and checks the result. It runs without a phone, so it is fast.\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/widget-testing.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/widget-testing.html","about":{"@type":"Thing","name":"Widget tests: pumpWidget, find, tap, pump"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#testing-and-quality">Testing and quality</a> / Widget tests: pumpWidget, find, tap, pump</p>
+<p class="eyebrow">Testing and quality</p>
+<h1>Widget tests: pumpWidget, find, tap, pump</h1>
+<p class="lead">A widget test builds a widget in a fake test environment, finds things on it, taps them, and checks the result. It runs without a phone, so it is fast. You must call pump after an action so the screen redraws.</p>
+<section><h2>Use it for</h2><p>Checking that a button changes the screen, a form shows errors, or a list shows the right items.</p></section><section><h2>Watch out for</h2><p>Wrap the widget in MaterialApp (or the app's providers), because many widgets need them. Call await tester.pump() after tap, and pumpAndSettle() when animations must finish. Prefer find.byKey for important widgets. Pass fakes in, not real services. Finders and matchers can change slightly between versions.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">6</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td>testWidgets(name, (tester) async {})</td><td>function</td><td>-</td><td>A widget test. tester controls the fake environment.</td></tr><tr><td>tester.pumpWidget(widget)</td><td>Future</td><td>-</td><td>Builds the widget.</td></tr><tr><td>tester.pump() / pumpAndSettle()</td><td>Future</td><td>-</td><td>Draws one frame, or waits until animations finish.</td></tr><tr><td>find.text / byType / byKey / byIcon</td><td>Finder</td><td>-</td><td>Locate widgets.</td></tr><tr><td>findsOneWidget / findsNothing / findsNWidgets(n)</td><td>Matcher</td><td>-</td><td>Check how many were found.</td></tr><tr><td>tester.tap / enterText / drag</td><td>Future</td><td>-</td><td>Act like a user.</td></tr></tbody></table></div></details></section>
+<section><h2>Example code</h2><pre class="code">// test/counter_page_test.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('counter increments', (tester) async {
+    // 1. build the widget (it needs MaterialApp around it)
+    await tester.pumpWidget(const MaterialApp(home: CounterPage()));
+
+    // 2. find
+    expect(find.text('0'), findsOneWidget);
+
+    // 3. act
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();            // 4. redraw one frame
+
+    // 5. check
+    expect(find.text('1'), findsOneWidget);
+  });
+}
+
+// animations: await tester.pumpAndSettle();
+// a widget with a provider: wrap it
+//   ChangeNotifierProvider.value(value: FakeVm(), child: ...)
+// run:  flutter test</pre></section>
+<a class="cta" href="../index.html#widget-testing">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="unit-testing.html">Unit tests: a ViewModel with a fake repository</a></li><li><a href="test-types.html">Which test to write: unit, widget, golden, integration</a></li><li><a href="form-flow.html">Login flow: validate, submit, show errors</a></li><li><a href="stateful.html">StatelessWidget vs StatefulWidget</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://docs.flutter.dev/cookbook/testing/widget/introduction" rel="noopener" target="_blank">An introduction to widget testing</a></li><li><a href="https://docs.flutter.dev/cookbook/testing/widget/finders" rel="noopener" target="_blank">Finding widgets</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

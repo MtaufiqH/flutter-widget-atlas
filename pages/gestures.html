@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GestureDetector in Flutter | Flutter Atlas</title>
+<meta name="description" content="GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/gestures.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GestureDetector in Flutter | Flutter Atlas">
+<meta property="og:description" content="GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/gestures.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GestureDetector in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"GestureDetector in Flutter | Flutter Atlas","description":"GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/gestures.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/gestures.html","about":{"@type":"Thing","name":"GestureDetector"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#interaction-models">Interaction models</a> / GestureDetector</p>
+<p class="eyebrow">Interaction models</p>
+<h1>GestureDetector</h1>
+<p class="lead">GestureDetector turns raw pointer events into gestures: taps, long presses, drags and pinches. It draws nothing, so what it covers depends on its child and on behavior.</p>
+<section><h2>Use it for</h2><p>Any custom tap or drag target. For anything inside a Material app that should ripple, use InkWell instead.</p></section><section><h2>Watch out for</h2><p>behavior: deferToChild means empty space in the child is not tappable. Pan and scale callbacks cannot be used together. A horizontal drag inside a vertical list should use onHorizontalDrag, not onPan.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">31</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">Taps</td></tr><tr><td>onTap</td><td>GestureTapCallback?</td><td>null</td><td>A single tap. The one you use most. No ripple: use InkWell when you want Material feedback.</td></tr><tr><td>onTapDown / onTapUp</td><td>GestureTapDownCallback? / GestureTapUpCallback?</td><td>null</td><td>Finger touches and lifts, with the position in the details. Use onTapDown to find where the user pressed.</td></tr><tr><td>onTapCancel</td><td>GestureTapCancelCallback?</td><td>null</td><td>The press was abandoned, usually because the finger moved away or a parent took the gesture.</td></tr><tr><td>onDoubleTap</td><td>GestureTapCallback?</td><td>null</td><td>Two taps in quick succession. Adding it delays onTap slightly while Flutter waits for a second tap.</td></tr><tr class="pgh"><td colspan="4">Long press</td></tr><tr><td>onLongPress</td><td>GestureLongPressCallback?</td><td>null</td><td>Fires after about 500 ms of holding.</td></tr><tr><td>onLongPressStart / onLongPressEnd</td><td>callbacks</td><td>null</td><td>The same with position details at the start and at the end.</td></tr><tr><td>onLongPressMoveUpdate</td><td>GestureLongPressMoveUpdateCallback?</td><td>null</td><td>The finger moves while still holding. Used for drag-to-select.</td></tr><tr><td>onLongPressDown / onLongPressUp / onLongPressCancel</td><td>callbacks</td><td>null</td><td>Touch, release and abandon around a long press.</td></tr><tr class="pgh"><td colspan="4">Drags</td></tr><tr><td>onPanStart / onPanUpdate / onPanEnd</td><td>GestureDrag...Callback?</td><td>null</td><td>Free dragging in any direction. details.delta is the movement since the last call, and details.velocity is the fling speed at the end.</td></tr><tr><td>onHorizontalDragStart / Update / End</td><td>GestureDrag...Callback?</td><td>null</td><td>Dragging left and right only. Use these instead of pan inside a vertical list, so the list keeps its own scroll.</td></tr><tr><td>onVerticalDragStart / Update / End</td><td>GestureDrag...Callback?</td><td>null</td><td>Dragging up and down only.</td></tr><tr><td>onPanDown / onPanCancel</td><td>callbacks</td><td>null</td><td>Touch that may become a drag, and a drag that never started.</td></tr><tr class="pgh"><td colspan="4">Pinch and zoom</td></tr><tr><td>onScaleStart / onScaleUpdate / onScaleEnd</td><td>GestureScale...Callback?</td><td>null</td><td>Two-finger pinch and rotate. details.scale, details.rotation and details.focalPoint. Cannot be combined with pan or drag callbacks.</td></tr><tr class="pgh"><td colspan="4">Behaviour</td></tr><tr><td>child</td><td>Widget?</td><td>null</td><td>What the gestures apply to.</td></tr><tr><td>behavior</td><td>HitTestBehavior?</td><td>deferToChild</td><td>deferToChild only reacts where the child paints. opaque makes the whole box tappable, which is what you want over empty space. translucent lets widgets behind react too.</td></tr><tr><td>excludeFromSemantics</td><td>bool</td><td>false</td><td>Hide these gestures from screen readers. Usually leave it false and add a Semantics label.</td></tr><tr><td>dragStartBehavior</td><td>DragStartBehavior</td><td>start</td><td>start counts the drag from the first touch, down from the moment movement is detected. start feels more responsive.</td></tr><tr><td>supportedDevices</td><td>Set&lt;PointerDeviceKind&gt;?</td><td>all</td><td>Limit the gesture to touch, mouse or stylus.</td></tr><tr class="pgh"><td colspan="4">Related</td></tr><tr><td>InkWell</td><td>widget</td><td>-</td><td>Taps with a Material ripple. Prefer it for anything inside a Material app.</td></tr><tr><td>Listener</td><td>widget</td><td>-</td><td>Raw pointer events, with no gesture recognition or arena.</td></tr><tr><td>AbsorbPointer / IgnorePointer</td><td>widget</td><td>-</td><td>Block taps, or let them pass through to what is behind.</td></tr><tr><td>MouseRegion</td><td>widget</td><td>-</td><td>Hover enter and exit on web and desktop.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code><span>·</span><code>onForcePressStart / Peak / Update / End</code><span>·</span><code>onSecondaryTap and all secondary variants</code><span>·</span><code>onTertiaryTap and all tertiary variants</code><span>·</span><code>onTapMove</code><span>·</span><code>onDoubleTapDown</code><span>·</span><code>onDoubleTapCancel</code><span>·</span><code>trackpadScrollCausesScale</code><span>·</span><code>trackpadScrollToScaleFactor</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/widgets/GestureDetector-class.html" target="_blank" rel="noopener">GestureDetector on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">GestureDetector(
+  behavior: HitTestBehavior.deferToChild,
+  onPanStart: (d) =&gt; setState(() =&gt; dragging = true),
+  onPanUpdate: (d) =&gt; setState(() =&gt; offset += d.delta),
+  onPanEnd: (d) =&gt; setState(() {
+    dragging = false;
+    velocity = d.velocity.pixelsPerSecond;
+  }),
+  child: child,
+)</pre></section>
+<a class="cta" href="../index.html#gestures">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="ink-well.html">InkWell</a></li><li><a href="dismissible.html">Dismissible</a></li><li><a href="draggable.html">Draggable &amp; DragTarget</a></li><li><a href="interactive-viewer.html">InteractiveViewer</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/widgets/GestureDetector-class.html" rel="noopener" target="_blank">GestureDetector</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20GestureDetector" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

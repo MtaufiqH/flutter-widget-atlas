@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AlertDialog &amp; showDialog in Flutter | Flutter Atlas</title>
+<meta name="description" content="showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/dialog.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AlertDialog &amp; showDialog in Flutter | Flutter Atlas">
+<meta property="og:description" content="showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/dialog.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AlertDialog &amp; showDialog in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"AlertDialog & showDialog in Flutter | Flutter Atlas","description":"showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/dialog.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/dialog.html","about":{"@type":"Thing","name":"AlertDialog & showDialog"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#material">Material</a> / AlertDialog &amp; showDialog</p>
+<p class="eyebrow">Material</p>
+<h1>AlertDialog &amp; showDialog</h1>
+<p class="lead">showDialog pushes a route that dims the screen and shows your dialog in the middle. AlertDialog is the standard layout: an optional icon, a title, content and a row of actions.</p>
+<section><h2>Use it for</h2><p>Confirm a destructive action, ask a short question, show a short message that needs an answer.</p></section><section><h2>Watch out for</h2><p>The builder gets its own context, so Navigator.pop(context) inside it closes the dialog, not the screen. Await showDialog to read the result, and check context.mounted before using the outer context afterwards.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">33</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">AlertDialog</td></tr><tr><td>title</td><td>Widget?</td><td>null</td><td>The heading, usually a Text.</td></tr><tr><td>content</td><td>Widget?</td><td>null</td><td>The body. For a long body use scrollable: true or put a SingleChildScrollView here.</td></tr><tr><td>actions</td><td>List&lt;Widget&gt;?</td><td>null</td><td>The buttons at the bottom, usually TextButtons. They are laid out in an OverflowBar, so they stack when they do not fit.</td></tr><tr><td>scrollable</td><td>bool</td><td>false</td><td>Wraps the title and content in a scroll view. Switch it on when the dialog can be taller than the screen with a big font setting.</td></tr><tr><td>icon</td><td>Widget?</td><td>null</td><td>An icon above the title, the Material 3 style.</td></tr><tr class="pgh"><td colspan="4">Spacing and text</td></tr><tr><td>titlePadding / contentPadding / actionsPadding / iconPadding</td><td>EdgeInsetsGeometry?</td><td>theme</td><td>Space around each part.</td></tr><tr><td>titleTextStyle / contentTextStyle</td><td>TextStyle?</td><td>theme</td><td>Styles for the heading and the body.</td></tr><tr><td>buttonPadding</td><td>EdgeInsetsGeometry?</td><td>theme</td><td>Space around each action button.</td></tr><tr><td>iconColor</td><td>Color?</td><td>theme</td><td>Colour of the icon above the title.</td></tr><tr class="pgh"><td colspan="4">Action layout</td></tr><tr><td>actionsAlignment</td><td>MainAxisAlignment?</td><td>end</td><td>Where the buttons sit on the row.</td></tr><tr><td>actionsOverflowDirection</td><td>VerticalDirection?</td><td>down</td><td>Order of the buttons once they stack.</td></tr><tr><td>actionsOverflowAlignment</td><td>OverflowBarAlignment?</td><td>end</td><td>Their alignment once stacked.</td></tr><tr><td>actionsOverflowButtonSpacing</td><td>double?</td><td>null</td><td>Gap between stacked buttons.</td></tr><tr class="pgh"><td colspan="4">Shape and surface</td></tr><tr><td>shape</td><td>ShapeBorder?</td><td>theme</td><td>Corner shape, usually RoundedRectangleBorder.</td></tr><tr><td>backgroundColor / elevation / shadowColor / surfaceTintColor</td><td>Color? / double? / Color? / Color?</td><td>theme</td><td>Surface colours and shadow.</td></tr><tr><td>insetPadding</td><td>EdgeInsets?</td><td>40 h, 24 v</td><td>Smallest gap between the dialog and the screen edge.</td></tr><tr><td>constraints</td><td>BoxConstraints?</td><td>null</td><td>Limit the dialog size, useful on tablets.</td></tr><tr><td>alignment</td><td>AlignmentGeometry?</td><td>center</td><td>Where the dialog sits on screen.</td></tr><tr><td>semanticLabel</td><td>String?</td><td>null</td><td>What a screen reader announces when it opens.</td></tr><tr class="pgh"><td colspan="4">showDialog, which puts it on screen</td></tr><tr><td>context</td><td>BuildContext</td><td>required</td><td>Must be under a Navigator and a MaterialApp.</td></tr><tr><td>builder</td><td>WidgetBuilder</td><td>required</td><td>Builds the dialog. Its context is a new one: it cannot read a Provider the way the caller can unless the provider sits above the Navigator.</td></tr><tr><td>barrierDismissible</td><td>bool</td><td>true</td><td>Whether a tap outside closes it. Set false to force a choice.</td></tr><tr><td>barrierColor / barrierLabel</td><td>Color? / String?</td><td>black54</td><td>The dim layer behind, and its label for screen readers.</td></tr><tr><td>useRootNavigator</td><td>bool</td><td>true</td><td>Push on the root navigator, so the dialog covers a nested navigator such as a tab bar.</td></tr><tr><td>useSafeArea</td><td>bool</td><td>true</td><td>Keep the dialog clear of notches and system bars.</td></tr><tr><td>routeSettings</td><td>RouteSettings?</td><td>null</td><td>Name and arguments, so the dialog shows up in route observers and analytics.</td></tr><tr class="pgh"><td colspan="4">Returning a result</td></tr><tr><td>await showDialog&lt;T&gt;(...)</td><td>Future&lt;T?&gt;</td><td>-</td><td>Returns what you pass to Navigator.pop(context, value), or null if the user dismissed it.</td></tr><tr><td>Dialog / SimpleDialog</td><td>widget</td><td>-</td><td>Dialog is the bare surface for a custom layout. SimpleDialog lists options with SimpleDialogOption.</td></tr><tr><td>showAdaptiveDialog</td><td>function</td><td>-</td><td>Uses a Cupertino dialog on iOS and macOS.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code><span>·</span><code>clipBehavior</code><span>·</span><code>anchorPoint</code><span>·</span><code>traversalEdgeBehavior</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/material/AlertDialog-class.html" target="_blank" rel="noopener">AlertDialog on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">final ok = await showDialog&lt;bool&gt;(
+  context: context,
+  barrierDismissible: true,
+  builder: (context) =&gt; AlertDialog(
+      title: const Text('Delete project?'),
+      content: const Text('Deleting this project removes every file in it.'),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      actions: [
+    TextButton(onPressed: () =&gt; Navigator.pop(context, false), child: const Text('Cancel')),
+    TextButton(onPressed: () =&gt; Navigator.pop(context, true), child: const Text('Delete')),
+  ],
+    ),
+);
+if (!context.mounted) return;
+if (ok == true) deleteProject();</pre></section>
+<a class="cta" href="../index.html#dialog">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="navigator.html">Navigator</a></li><li><a href="snackbar.html">SnackBar</a></li><li><a href="bottom-sheet.html">BottomSheet</a></li><li><a href="date-time-picker.html">showDatePicker &amp; showTimePicker</a></li><li><a href="err-setstate-build.html">setState() called during build</a></li><li><a href="nav-basics.html">Navigator: push, pop and results</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/material/AlertDialog-class.html" rel="noopener" target="_blank">AlertDialog</a></li><li><a href="https://api.flutter.dev/flutter/material/SimpleDialog-class.html" rel="noopener" target="_blank">SimpleDialog</a></li><li><a href="https://api.flutter.dev/flutter/material/Dialog-class.html" rel="noopener" target="_blank">Dialog</a></li><li><a href="https://api.flutter.dev/flutter/material/showDialog-class.html" rel="noopener" target="_blank">showDialog</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20AlertDialog" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

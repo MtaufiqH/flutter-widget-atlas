@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClipRRect, ClipOval &amp; ClipPath in Flutter | Flutter Atlas</title>
+<meta name="description" content="Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/clip.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ClipRRect, ClipOval &amp; ClipPath in Flutter | Flutter Atlas">
+<meta property="og:description" content="Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/clip.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ClipRRect, ClipOval &amp; ClipPath in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"ClipRRect, ClipOval & ClipPath in Flutter | Flutter Atlas","description":"Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/clip.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/clip.html","about":{"@type":"Thing","name":"ClipRRect, ClipOval & ClipPath"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#painting-and-effects">Painting and effects</a> / ClipRRect, ClipOval &amp; ClipPath</p>
+<p class="eyebrow">Painting and effects</p>
+<h1>ClipRRect, ClipOval &amp; ClipPath</h1>
+<p class="lead">Clipping cuts the child to a shape. ClipRRect rounds the corners, ClipOval makes an ellipse, and ClipPath takes any path at all. A border radius on a decoration does not clip the child, which is why these exist.</p>
+<section><h2>Use it for</h2><p>Rounded images and cards, circular avatars, and anything with a custom silhouette.</p></section><section><h2>Watch out for</h2><p>Each clip adds a layer. In a long list prefer a decoration with a radius, or a Container with clipBehavior, over an extra Clip widget.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">14</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">ClipRRect</td></tr><tr><td>borderRadius</td><td>BorderRadiusGeometry</td><td>BorderRadius.zero</td><td>The rounded corners. BorderRadius.circular(12), .only(topLeft:), or .vertical(top:).</td></tr><tr><td>child</td><td>Widget?</td><td>null</td><td>What gets cut.</td></tr><tr><td>clipBehavior</td><td>Clip</td><td>antiAlias</td><td>antiAlias gives smooth edges. hardEdge is cheaper but shows jagged corners. antiAliasWithSaveLayer is the slowest and is rarely needed.</td></tr><tr><td>clipper</td><td>CustomClipper&lt;RRect&gt;?</td><td>null</td><td>Compute the rounded rectangle yourself, for example from the child size.</td></tr><tr class="pgh"><td colspan="4">ClipOval and ClipPath</td></tr><tr><td>ClipOval(child:)</td><td>widget</td><td>-</td><td>Cuts to an ellipse that fills the box. A square child becomes a circle.</td></tr><tr><td>ClipPath(clipper:, child:)</td><td>widget</td><td>-</td><td>Any shape. Write a CustomClipper&lt;Path&gt; and return a Path from getClip(size).</td></tr><tr><td>ClipPath.shape(shape:)</td><td>constructor</td><td>-</td><td>Clip to a ShapeBorder, such as StadiumBorder, without writing a clipper.</td></tr><tr><td>ClipRect(child:, clipper:)</td><td>widget</td><td>-</td><td>A plain rectangle clip. Needed to stop a child painting outside, for example with Align and a size factor.</td></tr><tr class="pgh"><td colspan="4">Picking the right one</td></tr><tr><td>Rounded image</td><td>pattern</td><td>-</td><td>ClipRRect(borderRadius:, child: Image...) is the usual way. A BoxDecoration radius alone does not clip the child.</td></tr><tr><td>Container clipBehavior</td><td>alternative</td><td>-</td><td>Container with a decoration and clipBehavior: Clip.antiAlias does the same in one widget.</td></tr><tr><td>Card</td><td>alternative</td><td>-</td><td>A Card already clips to its shape when you set clipBehavior.</td></tr><tr class="pgh"><td colspan="4">Cost</td></tr><tr><td>Clipping is not free</td><td>performance</td><td>-</td><td>Each clip adds a layer. In a long list, prefer a rounded image produced once, or a decoration with a border radius where you can.</td></tr><tr><td>antiAliasWithSaveLayer</td><td>value</td><td>-</td><td>Only needed when the child paints right up to the edge and you see seams. It is the most expensive option.</td></tr></tbody></table></div><div class="prare"><b>Rarely needed</b><p><code>key</code></p></div><div class="papi"><a href="https://api.flutter.dev/flutter/widgets/ClipRRect-class.html" target="_blank" rel="noopener">ClipRRect on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">ClipRRect(
+  borderRadius: BorderRadius.circular(18),
+  clipBehavior: Clip.antiAlias,
+  child: Image.network(url, width: 200, height: 132, fit: BoxFit.cover),
+)</pre></section>
+<a class="cta" href="../index.html#clip">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="clip-rect.html">ClipRect</a></li><li><a href="decorated-box.html">DecoratedBox &amp; BoxDecoration</a></li><li><a href="image.html">Image &amp; BoxFit</a></li><li><a href="custom-paint.html">CustomPaint</a></li><li><a href="backdrop-filter.html">BackdropFilter</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/widgets/ClipRRect-class.html" rel="noopener" target="_blank">ClipRRect</a></li><li><a href="https://api.flutter.dev/flutter/widgets/ClipOval-class.html" rel="noopener" target="_blank">ClipOval</a></li><li><a href="https://api.flutter.dev/flutter/widgets/ClipPath-class.html" rel="noopener" target="_blank">ClipPath</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20ClipRRect" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>

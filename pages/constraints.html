@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout &amp; constraints in Flutter | Flutter Atlas</title>
+<meta name="description" content="Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that…">
+<link rel="canonical" href="https://mtaufiqh.github.io/flutter-widget-atlas/pages/constraints.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f6bff%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%237ee0e0%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ffd166%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2234%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%224%22%20fill%3D%22%23ff8fab%22/%3E%3C/svg%3E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Layout &amp; constraints in Flutter | Flutter Atlas">
+<meta property="og:description" content="Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that…">
+<meta property="og:url" content="https://mtaufiqh.github.io/flutter-widget-atlas/pages/constraints.html">
+<meta property="og:site_name" content="Flutter Atlas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Layout &amp; constraints in Flutter | Flutter Atlas">
+<meta name="twitter:description" content="Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that…">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Layout & constraints in Flutter | Flutter Atlas","description":"Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that\u2026","url":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/constraints.html","author":{"@type":"Person","name":"M Taufiq Hidayat"},"publisher":{"@type":"Person","name":"M Taufiq Hidayat"},"mainEntityOfPage":"https://mtaufiqh.github.io/flutter-widget-atlas/pages/constraints.html","about":{"@type":"Thing","name":"Layout & constraints"}}</script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f5f6fb;color:#14182b;font:16px/1.65 Inter,system-ui,sans-serif;padding:0 0 60px}
+@media(prefers-color-scheme:dark){body{background:#0d1020;color:#e8ebf7}}
+a{color:#0a64f0}
+@media(prefers-color-scheme:dark){a{color:#6aa2ff}}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.top{padding:16px 0;font:600 13px/1 ui-monospace,monospace}
+.top a{text-decoration:none}
+.bc{font:12px/1 ui-monospace,monospace;color:#444c64;margin:0 0 18px;text-transform:uppercase;letter-spacing:.06em}
+@media(prefers-color-scheme:dark){.bc{color:#b6bdd6}}
+.bc a{color:inherit;text-decoration:none}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#0a64f0;margin:0 0 10px}
+@media(prefers-color-scheme:dark){.eyebrow{color:#6aa2ff}}
+h1{font:800 2.1rem/1.1 system-ui,sans-serif;margin:0 0 14px;letter-spacing:-.02em}
+.lead{font-size:17.5px;color:#444c64;max-width:62ch}
+@media(prefers-color-scheme:dark){.lead{color:#b6bdd6}}
+h2{font:700 1.2rem system-ui,sans-serif;margin:34px 0 8px}
+section p{margin:0;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dde1ee;vertical-align:top}
+@media(prefers-color-scheme:dark){th,td{border-bottom:1px solid #2a3150}}
+th{font:600 12px ui-monospace,monospace;text-transform:uppercase;color:#444c64}
+td code,.pgh code{font:12.5px ui-monospace,monospace;background:#e8ebf6;border-radius:4px;padding:1px 5px}
+@media(prefers-color-scheme:dark){td code,.pgh code{background:#1b2140}}
+tr.pgh td{padding-top:16px;font:700 12px ui-monospace,monospace;text-transform:uppercase;color:#0a64f0;border-bottom:2px solid #0a64f0}
+pre.code{background:#0f1530;color:#dbe3ff;padding:16px;border-radius:10px;overflow:auto;font:13px/1.55 ui-monospace,monospace;white-space:pre}
+.cta{display:inline-block;margin-top:28px;padding:12px 20px;background:#0a64f0;color:#fff;border-radius:10px;text-decoration:none;font-weight:600}
+.rel ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.rel li a{display:inline-block;padding:7px 12px;border:1px solid #dde1ee;border-radius:999px;text-decoration:none;font-size:13.5px}
+@media(prefers-color-scheme:dark){.rel li a{border-color:#2a3150}}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid #dde1ee;font-size:13px;color:#444c64}
+@media(prefers-color-scheme:dark){footer{border-color:#2a3150;color:#b6bdd6}}
+.hint{background:#e2edff;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:8px}
+@media(prefers-color-scheme:dark){.hint{background:#1c2a52}}
+.props details{margin-top:4px}
+.props summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="top"><a href="../index.html">← Flutter Atlas</a></p>
+<p class="bc"><a href="index.html">All pages</a> / <a href="index.html#layout">Layout</a> / Layout &amp; constraints</p>
+<p class="eyebrow">Layout</p>
+<h1>Layout &amp; constraints</h1>
+<p class="lead">Constraints go down, sizes go up, and the parent decides the position. A parent hands its child a minimum and maximum; the child picks a size inside that range; the parent then places it. Almost every layout surprise comes from this one rule.</p>
+<section><h2>Use it for</h2><p>Understanding why a widget is the size it is, and why setting width sometimes does nothing.</p></section><section><h2>Watch out for</h2><p>Tight constraints leave the child no choice, so a width on the child is ignored. Unbounded constraints make Expanded and a fraction of the height meaningless.</p></section>
+<section class="props"><h2>Properties</h2><details class="props" open><summary><span>Properties</span><span class="pn">19</span></summary><div class="pt"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr class="pgh"><td colspan="4">The one rule</td></tr><tr><td>Constraints go down, sizes go up</td><td>rule</td><td>-</td><td>A parent tells its child the minimum and maximum it may be. The child picks a size inside that range. The parent then positions it. A child can never decide where it sits.</td></tr><tr class="pgh"><td colspan="4">BoxConstraints</td></tr><tr><td>minWidth / maxWidth</td><td>double</td><td>0.0 / infinity</td><td>The width range the child must land in.</td></tr><tr><td>minHeight / maxHeight</td><td>double</td><td>0.0 / infinity</td><td>The height range.</td></tr><tr><td>isTight</td><td>bool</td><td>-</td><td>True when min equals max on both axes, so exactly one size is allowed. The child has no choice at all.</td></tr><tr><td>hasBoundedWidth / hasBoundedHeight</td><td>bool</td><td>-</td><td>Whether the maximum is a real number. Unbounded means infinity, which is what a scroll view hands down.</td></tr><tr><td>biggest / smallest</td><td>Size</td><td>-</td><td>The largest and smallest allowed sizes.</td></tr><tr class="pgh"><td colspan="4">Building constraints</td></tr><tr><td>BoxConstraints(minWidth:, maxWidth:, minHeight:, maxHeight:)</td><td>constructor</td><td>-</td><td>The explicit form.</td></tr><tr><td>BoxConstraints.tight(Size)</td><td>constructor</td><td>-</td><td>One exact size.</td></tr><tr><td>BoxConstraints.tightFor(width:, height:)</td><td>constructor</td><td>-</td><td>Exact on the axes you give, free on the others.</td></tr><tr><td>BoxConstraints.loose(Size)</td><td>constructor</td><td>-</td><td>Anything up to that size.</td></tr><tr><td>BoxConstraints.expand(width:, height:)</td><td>constructor</td><td>-</td><td>Fill the space.</td></tr><tr><td>constrain(Size) / enforce(other) / copyWith(...) / deflate(insets)</td><td>method</td><td>-</td><td>Clamp a size, combine two sets of constraints, change a few fields, and shrink by padding.</td></tr><tr class="pgh"><td colspan="4">Where the usual errors come from</td></tr><tr><td>Unbounded height</td><td>error</td><td>-</td><td>A Column inside a SingleChildScrollView gets infinite height, so Expanded has nothing to divide. Use shrinkWrap, a fixed height, or slivers.</td></tr><tr><td>Infinite width in a Row</td><td>error</td><td>-</td><td>A Row inside a horizontal list has no width limit. Give the child a width or wrap it in Flexible.</td></tr><tr><td>Tight constraints ignore your size</td><td>surprise</td><td>-</td><td>Inside a tightly constrained parent, a Container with width: 100 is ignored. Wrap it in Center, Align or UnconstrainedBox to loosen them.</td></tr><tr class="pgh"><td colspan="4">Reading them at run time</td></tr><tr><td>LayoutBuilder</td><td>widget</td><td>-</td><td>builder: (context, constraints) gives you the real numbers for this spot in the tree.</td></tr><tr><td>MediaQuery.sizeOf(context)</td><td>function</td><td>-</td><td>The whole window, not the space your widget was given. The two are often different.</td></tr><tr><td>debugPaintSizeEnabled</td><td>flag</td><td>-</td><td>Draws every box, so you can see who is really constraining whom.</td></tr><tr><td>Flutter Inspector</td><td>tool</td><td>-</td><td>The layout explorer shows the constraints and the chosen size for the selected widget.</td></tr></tbody></table></div><div class="papi"><a href="https://api.flutter.dev/flutter/rendering/BoxConstraints-class.html" target="_blank" rel="noopener">BoxConstraints on api.flutter.dev</a></div></details></section>
+<section><h2>Example code</h2><pre class="code">Center(
+  // loose: min 0, max = what Center was given
+  child: Container(width: 120, height: 60),
+)
+
+// see the real numbers at any point in the tree
+LayoutBuilder(
+  builder: (context, constraints) {
+    debugPrint('$constraints');
+    return child;
+  },
+)</pre></section>
+<a class="cta" href="../index.html#constraints">Open the live interactive demo →</a>
+<section class="rel"><h2>Related</h2><ul><li><a href="sized-box.html">SizedBox &amp; ConstrainedBox</a></li><li><a href="align-center.html">Align &amp; Center</a></li><li><a href="overflow-box.html">OverflowBox &amp; UnconstrainedBox</a></li><li><a href="layout-builder.html">LayoutBuilder &amp; MediaQuery</a></li></ul></section>
+<section><h2>References</h2><ul><li><a href="https://api.flutter.dev/flutter/rendering/BoxConstraints-class.html" rel="noopener" target="_blank">BoxConstraints</a></li><li><a href="https://api.flutter.dev/flutter/widgets/ConstrainedBox-class.html" rel="noopener" target="_blank">ConstrainedBox</a></li><li><a href="https://www.youtube.com/results?search_query=flutter%20widget%20of%20the%20week%20BoxConstraints" rel="noopener" target="_blank">Widget of the Week videos</a></li><li><a href="https://dartpad.dev/" rel="noopener" target="_blank">Try in DartPad</a></li></ul></section>
+<footer><p>Part of <a href="../index.html">Flutter Atlas</a> — an interactive, free reference to Flutter widgets with live demos, property tables and matching code, by M Taufiq Hidayat. <a href="index.html">Browse all 176 pages →</a></p></footer>
+</div>
+</body>
+</html>
